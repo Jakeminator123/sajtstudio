@@ -31,6 +31,14 @@ export default function HeroAnimation() {
     offset: ["start center", "end center"],
   });
 
+  // Special section: When images disappear and video is prominent (scroll 0.7-1.0)
+  // This creates a "Design? vs Functionality?" moment
+  const questionSectionProgress = useTransform(
+    scrollYProgress,
+    [0.7, 0.85, 1.0],
+    [0, 1, 1]
+  );
+
   // Video animation - starts above and slides into center as images separate
   // Combine centering (-50%) with scroll-based movement
   const videoYOffset = useTransform(scrollYProgress, [0, 0.5, 1], [-150, 0, 0]);
@@ -40,12 +48,37 @@ export default function HeroAnimation() {
     [0, 0.2, 0.6, 1],
     [0, 0.3, 0.9, 1]
   );
-  // Much larger scale - 3x bigger at the end to fill the segment
+  
+  // Video scale - normal growth, then extra zoom during question section
+  // Base scale up to 0.7 scroll progress
+  const baseVideoScale = useTransform(
+    scrollYProgress,
+    [0, 0.5, 0.7],
+    [0.7, 1.5, 2.5]
+  );
+  // Extra zoom during question section (0.7-1.0)
+  const questionVideoScale = useTransform(
+    scrollYProgress,
+    [0.7, 0.85, 1.0],
+    [2.5, 3.0, 3.5]
+  );
+  // Use question scale when in that range, otherwise base scale
   const videoScale = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [0.7, 1.5, 3.0]
+    (latest) => {
+      if (latest >= 0.7) {
+        // During question section, use question scale
+        const questionProgress = (latest - 0.7) / 0.3; // Normalize 0.7-1.0 to 0-1
+        return 2.5 + (questionProgress * 1.0); // 2.5 to 3.5
+      }
+      // Before question section, use base scale
+      if (latest <= 0.5) {
+        return 0.7 + (latest / 0.5) * 0.8; // 0.7 to 1.5
+      }
+      return 1.5 + ((latest - 0.5) / 0.2) * 1.0; // 1.5 to 2.5
+    }
   );
+  
   const videoGlowOpacity = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
@@ -57,6 +90,51 @@ export default function HeroAnimation() {
     scrollYProgress,
     [0, 0.5, 1],
     [0, 0.3, 0.5]
+  );
+
+  // Question text animations - slide in from sides with dramatic effect
+  // Design? comes from left
+  const designTextX = useTransform(
+    questionSectionProgress,
+    [0, 0.2, 0.5, 1],
+    [-400, -100, 0, 0]
+  );
+  const designTextOpacity = useTransform(
+    questionSectionProgress,
+    [0, 0.1, 0.25, 0.9, 1],
+    [0, 0, 0.7, 1, 1]
+  );
+  const designTextScale = useTransform(
+    questionSectionProgress,
+    [0, 0.25, 0.5, 1],
+    [0.3, 0.8, 1, 1]
+  );
+  const designTextRotate = useTransform(
+    questionSectionProgress,
+    [0, 0.3, 1],
+    [-15, -5, 0]
+  );
+
+  // Functionality? comes from right
+  const functionalityTextX = useTransform(
+    questionSectionProgress,
+    [0, 0.2, 0.5, 1],
+    [400, 100, 0, 0]
+  );
+  const functionalityTextOpacity = useTransform(
+    questionSectionProgress,
+    [0, 0.1, 0.25, 0.9, 1],
+    [0, 0, 0.7, 1, 1]
+  );
+  const functionalityTextScale = useTransform(
+    questionSectionProgress,
+    [0, 0.25, 0.5, 1],
+    [0.3, 0.8, 1, 1]
+  );
+  const functionalityTextRotate = useTransform(
+    questionSectionProgress,
+    [0, 0.3, 1],
+    [15, 5, 0]
   );
 
   // Check if images are in view for initial animation
@@ -144,7 +222,7 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
+      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-visible"
     >
       {/* Background pattern - alt_background.webp */}
       <div className="absolute inset-0 opacity-10 z-0">
@@ -206,7 +284,7 @@ export default function HeroAnimation() {
         </motion.div>
 
         {/* Container for video and images that can overlap */}
-        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30">
+        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-visible">
           {/* Images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}
@@ -298,9 +376,56 @@ export default function HeroAnimation() {
               top: "50%",
               zIndex: 50,
             }}
-            className="absolute w-full max-w-5xl"
+            className="absolute w-full max-w-5xl overflow-visible"
           >
-            <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative">
+            {/* Question texts - Design? and Functionality? */}
+            {/* Positioned relative to video container but outside it */}
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                x: designTextX,
+                opacity: designTextOpacity,
+                scale: designTextScale,
+                rotate: designTextRotate,
+                left: "calc(-50vw - 2rem)",
+                top: "50%",
+                zIndex: 60,
+              }}
+            >
+              <motion.h3
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+                style={{
+                  textShadow: "0 0 40px rgba(0, 102, 255, 0.7), 0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)",
+                  WebkitTextStroke: "2px rgba(0, 102, 255, 0.4)",
+                }}
+              >
+                Design?
+              </motion.h3>
+            </motion.div>
+
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                x: functionalityTextX,
+                opacity: functionalityTextOpacity,
+                scale: functionalityTextScale,
+                rotate: functionalityTextRotate,
+                right: "calc(-50vw - 2rem)",
+                top: "50%",
+                zIndex: 60,
+              }}
+            >
+              <motion.h3
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+                style={{
+                  textShadow: "0 0 40px rgba(255, 0, 51, 0.7), 0 0 80px rgba(255, 0, 51, 0.5), 0 0 120px rgba(255, 0, 51, 0.3)",
+                  WebkitTextStroke: "2px rgba(255, 0, 51, 0.4)",
+                }}
+              >
+                Functionality?
+              </motion.h3>
+            </motion.div>
+            <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative z-50">
               {/* Red tint overlay that increases with scroll */}
               <motion.div
                 className="absolute inset-0 bg-tertiary pointer-events-none z-10 mix-blend-overlay"
