@@ -21,6 +21,8 @@ const config: Config = {
           light: "#3385FF",
           dark: "#0047B3",
         },
+        // Alias för accent-hover för att stödja hover:bg-accent-hover syntax
+        "accent-hover": "#0052CC",
         // Tredjefärg (röd) - Används sparsamt
         tertiary: {
           DEFAULT: "#FF0033", // Röd - sekundär accentfärg
