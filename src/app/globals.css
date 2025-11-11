@@ -141,6 +141,12 @@
   overflow-y: auto;
 }
 
+/* Scroll snap for smoother section transitions */
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
 /* Prevent overscroll bounce on iOS - only on touch devices */
 @media (hover: none) and (pointer: coarse) {
   body {

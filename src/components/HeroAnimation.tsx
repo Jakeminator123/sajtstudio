@@ -89,56 +89,56 @@ export default function HeroAnimation() {
     [0, 0.3, 0.5]
   );
 
-  // Red tint that increases with scroll - more intense
+  // Red tint that increases with scroll - starts after images disappear (0.65)
   const videoRedTint = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [0, 0.3, 0.5]
+    [0, 0.65, 0.75, 1],
+    [0, 0, 0.3, 0.5]
   );
 
   // Question text animations - slide in from sides with dramatic effect
-  // Design? comes from left
+  // Design? comes from left - mer synlig och tydlig animation
   const designTextX = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.5, 1],
-    [-400, -100, 0, 0]
+    [0, 0.15, 0.4, 0.7, 1],
+    [-500, -150, 0, 0, 0]
   );
   const designTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.9, 1],
-    [0, 0, 0.7, 1, 1]
+    [0, 0.1, 0.2, 0.5, 0.9, 1],
+    [0, 0, 0.5, 1, 1, 1]
   );
   const designTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.25, 0.5, 1],
-    [0.3, 0.8, 1, 1]
+    [0, 0.2, 0.4, 0.7, 1],
+    [0.2, 0.6, 1, 1, 1]
   );
   const designTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.3, 1],
-    [-15, -5, 0]
+    [0, 0.3, 0.6, 1],
+    [-20, -8, 0, 0]
   );
 
-  // Functionality? comes from right
+  // Functionality? comes from right - mer synlig och tydlig animation
   const functionalityTextX = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.5, 1],
-    [400, 100, 0, 0]
+    [0, 0.15, 0.4, 0.7, 1],
+    [500, 150, 0, 0, 0]
   );
   const functionalityTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.9, 1],
-    [0, 0, 0.7, 1, 1]
+    [0, 0.1, 0.2, 0.5, 0.9, 1],
+    [0, 0, 0.5, 1, 1, 1]
   );
   const functionalityTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.25, 0.5, 1],
-    [0.3, 0.8, 1, 1]
+    [0, 0.2, 0.4, 0.7, 1],
+    [0.2, 0.6, 1, 1, 1]
   );
   const functionalityTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.3, 1],
-    [15, 5, 0]
+    [0, 0.3, 0.6, 1],
+    [20, 8, 0, 0]
   );
 
   // Check if images are in view for initial animation
@@ -157,62 +157,63 @@ export default function HeroAnimation() {
 
   // Create unique transforms for each image - asymmetrical, natural movements
   // Image 0 (top-left): "Svävar iväg" - lätt uppåt, diagonalt vänster-uppåt, lite rotation, lätt scale up
-  const image0X = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -40, -100, -180]);
-  const image0Y = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -30, -70, -120]);
-  const image0Rotate = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -8, -18, -30]);
+  // Bilder försvinner helt vid 0.65 för att undvika konflikt med overlay/video
+  const image0X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -40, -100, -180]);
+  const image0Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -30, -70, -120]);
+  const image0Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -8, -18, -30]);
   const image0Opacity = useTransform(
     scrollYProgress,
-    [0, 0.2, 0.6, 1],
-    [1, 1, 0.5, 0.2]
+    [0, 0.2, 0.55, 0.65],
+    [1, 1, 0.3, 0]
   );
   const image0Scale = useTransform(
     scrollYProgress,
-    [0, 0.4, 0.8, 1],
+    [0, 0.4, 0.65, 0.7],
     [1, 1.05, 1.1, 1.15]
   );
 
   // Image 1 (top-right): "Dras åt sidan" - kraftigt åt höger, lite nedåt, minimal rotation
-  const image1X = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 100, 200, 300]);
-  const image1Y = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 15, 35, 60]);
-  const image1Rotate = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 1, 2, 3]);
+  const image1X = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 100, 200, 300]);
+  const image1Y = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 15, 35, 60]);
+  const image1Rotate = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 1, 2, 3]);
   const image1Opacity = useTransform(
     scrollYProgress,
-    [0, 0.2, 0.5, 1],
-    [1, 1, 0.4, 0.1]
+    [0, 0.2, 0.5, 0.65],
+    [1, 1, 0.2, 0]
   );
   const image1Scale = useTransform(
     scrollYProgress,
-    [0, 0.3, 0.6, 1],
+    [0, 0.3, 0.6, 0.65],
     [1, 0.95, 0.85, 0.7]
   );
 
   // Image 2 (bottom-left): "Rullar iväg" - kraftig rotation som en boll, åt vänster-nedåt
-  const image2X = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -80, -180, -300]);
-  const image2Y = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, 50, 110, 180]);
-  const image2Rotate = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, 45, 120, 240]);
+  const image2X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -80, -180, -300]);
+  const image2Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 50, 110, 180]);
+  const image2Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 45, 120, 240]);
   const image2Opacity = useTransform(
     scrollYProgress,
-    [0, 0.25, 0.65, 1],
-    [1, 1, 0.5, 0.2]
+    [0, 0.25, 0.6, 0.65],
+    [1, 1, 0.3, 0]
   );
   const image2Scale = useTransform(
     scrollYProgress,
-    [0, 0.4, 0.7, 1],
+    [0, 0.4, 0.65, 0.7],
     [1, 0.95, 0.85, 0.75]
   );
 
   // Image 3 (bottom-right): "Åker upp ur bild" - kraftigt uppåt, lite åt höger, lite rotation
-  const image3X = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 50, 100, 150]);
-  const image3Y = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, -60, -140, -250]);
-  const image3Rotate = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 5, 12, 20]);
+  const image3X = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 50, 100, 150]);
+  const image3Y = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, -60, -140, -250]);
+  const image3Rotate = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 5, 12, 20]);
   const image3Opacity = useTransform(
     scrollYProgress,
-    [0, 0.2, 0.55, 1],
-    [1, 1, 0.4, 0.1]
+    [0, 0.2, 0.55, 0.65],
+    [1, 1, 0.2, 0]
   );
   const image3Scale = useTransform(
     scrollYProgress,
-    [0, 0.35, 0.65, 1],
+    [0, 0.35, 0.6, 0.65],
     [1, 0.95, 0.85, 0.75]
   );
 
@@ -227,6 +228,7 @@ export default function HeroAnimation() {
     <section
       ref={sectionRef}
       className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
+      style={{ scrollSnapAlign: 'start' }}
     >
       {/* Background pattern - alt_background.webp */}
       <div className="absolute inset-0 opacity-10 z-0">
@@ -381,55 +383,49 @@ export default function HeroAnimation() {
             }}
             className="absolute w-full max-w-5xl"
           >
-            {/* Question texts - Design? and Functionality? */}
-            {/* Positioned relative to video container but clamped to viewport */}
+            {/* Question texts - Design? and Functionality? - positioned at section level for better visibility */}
             <motion.div
-              className="absolute pointer-events-none"
+              className="fixed left-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100] px-4 sm:px-8"
               style={{
                 x: designTextX,
                 opacity: designTextOpacity,
                 scale: designTextScale,
                 rotate: designTextRotate,
-                left: "max(0px, calc(-50% - 6rem))",
-                top: "50%",
-                zIndex: 60,
-                maxWidth: "calc(50vw - 2rem)",
               }}
             >
-              <motion.h3
-                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+              <h3
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap"
                 style={{
-                  textShadow: "0 0 40px rgba(0, 102, 255, 0.7), 0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)",
-                  WebkitTextStroke: "2px rgba(0, 102, 255, 0.4)",
+                  textShadow: "0 0 60px rgba(0, 102, 255, 0.9), 0 0 100px rgba(0, 102, 255, 0.7), 0 0 150px rgba(0, 102, 255, 0.5), 0 0 200px rgba(0, 102, 255, 0.3)",
+                  WebkitTextStroke: "3px rgba(0, 102, 255, 0.6)",
+                  filter: "drop-shadow(0 0 20px rgba(0, 102, 255, 0.8))",
                 }}
               >
                 Design?
-              </motion.h3>
+              </h3>
             </motion.div>
 
             <motion.div
-              className="absolute pointer-events-none"
+              className="fixed right-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100] px-4 sm:px-8"
               style={{
                 x: functionalityTextX,
                 opacity: functionalityTextOpacity,
                 scale: functionalityTextScale,
                 rotate: functionalityTextRotate,
-                right: "max(0px, calc(-50% - 6rem))",
-                top: "50%",
-                zIndex: 60,
-                maxWidth: "calc(50vw - 2rem)",
               }}
             >
-              <motion.h3
-                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+              <h3
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap"
                 style={{
-                  textShadow: "0 0 40px rgba(255, 0, 51, 0.7), 0 0 80px rgba(255, 0, 51, 0.5), 0 0 120px rgba(255, 0, 51, 0.3)",
-                  WebkitTextStroke: "2px rgba(255, 0, 51, 0.4)",
+                  textShadow: "0 0 60px rgba(255, 0, 51, 0.9), 0 0 100px rgba(255, 0, 51, 0.7), 0 0 150px rgba(255, 0, 51, 0.5), 0 0 200px rgba(255, 0, 51, 0.3)",
+                  WebkitTextStroke: "3px rgba(255, 0, 51, 0.6)",
+                  filter: "drop-shadow(0 0 20px rgba(255, 0, 51, 0.8))",
                 }}
               >
                 Functionality?
-              </motion.h3>
+              </h3>
             </motion.div>
+            
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative z-50">
               {/* Red tint overlay that increases with scroll */}
               <motion.div
