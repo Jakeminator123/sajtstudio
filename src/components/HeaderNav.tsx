@@ -101,7 +101,7 @@ export default function HeaderNav() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-10" style={{ touchAction: 'manipulation' }}>
               {[
                 { href: "/", label: "Hem" },
                 { href: "/portfolio", label: "Portfolio" },
@@ -117,8 +117,9 @@ export default function HeaderNav() {
                 >
                   <Link
                     href={link.href}
-                    className="text-sm font-semibold text-white hover:text-tertiary transition-colors duration-300 relative group block z-10"
+                    className="text-sm font-semibold text-white hover:text-tertiary transition-colors duration-300 relative group block z-10 touch-manipulation"
                     prefetch={true}
+                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                   >
                     {link.label}
                     {/* Animated underline */}
@@ -205,10 +206,18 @@ export default function HeaderNav() {
         animate={{
           opacity: isMenuOpen ? 1 : 0,
           pointerEvents: isMenuOpen ? "auto" : "none",
+          display: isMenuOpen ? "block" : "none",
         }}
         transition={{ duration: 0.3 }}
         className="fixed inset-0 bg-black z-40 md:hidden"
         aria-hidden={!isMenuOpen}
+        onClick={(e) => {
+          // Close menu when clicking backdrop
+          if (e.target === e.currentTarget) {
+            setIsMenuOpen(false);
+          }
+        }}
+        style={{ touchAction: 'manipulation' }}
       >
         {/* Background glow */}
         <motion.div
@@ -219,8 +228,9 @@ export default function HeaderNav() {
         />
 
         <nav
-          className="container mx-auto px-6 pt-24 relative z-10"
+          className="container mx-auto px-6 pt-24 relative z-50"
           role="navigation"
+          style={{ touchAction: 'manipulation' }}
         >
           <div className="flex flex-col gap-8">
             {[
@@ -239,9 +249,24 @@ export default function HeaderNav() {
               >
                 <Link
                   href={link.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group z-10"
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    // Ensure navigation happens
+                    e.stopPropagation();
+                  }}
+                  onTouchStart={(e) => {
+                    // Prevent double-tap zoom on iOS
+                    e.currentTarget.style.touchAction = 'manipulation';
+                  }}
+                  className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group z-50 py-4 block touch-manipulation"
                   prefetch={true}
+                  style={{ 
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'rgba(255, 0, 51, 0.2)',
+                    minHeight: '48px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
                 >
                   {link.label}
                   <motion.span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
@@ -260,9 +285,21 @@ export default function HeaderNav() {
             >
               <Link
                 href="/contact"
-                onClick={() => setIsMenuOpen(false)}
-                className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group z-10"
+                onClick={(e) => {
+                  setIsMenuOpen(false);
+                  e.stopPropagation();
+                }}
+                onTouchStart={(e) => {
+                  e.currentTarget.style.touchAction = 'manipulation';
+                }}
+                className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group z-50 touch-manipulation"
                 prefetch={true}
+                style={{ 
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.2)',
+                  minHeight: '48px',
+                  minWidth: '200px'
+                }}
               >
                 <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
