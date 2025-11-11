@@ -233,7 +233,8 @@ export default function RootLayout({
                   const isDIDRequest = urlString && (
                     urlString.includes('d-id.com') || 
                     urlString.includes('agent.d-id.com') ||
-                    urlString.includes('api.d-id.com')
+                    urlString.includes('api.d-id.com') ||
+                    urlString.includes('/agents/')
                   );
                   
                   // Get call stack to check if this fetch is from D-ID scripts
@@ -254,7 +255,18 @@ export default function RootLayout({
                   // Handle errors silently for D-ID requests or requests from D-ID scripts
                   if (isDIDRequest || isFromDIDScript) {
                     return fetchPromise.catch(function(error) {
-                      // Silently handle D-ID fetch errors
+                      // Check if it's a CORS error specifically
+                      const isCORSError = error && (
+                        error.message && (
+                          error.message.includes('CORS') ||
+                          error.message.includes('Access-Control-Allow-Origin') ||
+                          error.message.includes('blocked by CORS policy')
+                        ) ||
+                        error.toString().includes('CORS') ||
+                        error.toString().includes('Access-Control-Allow-Origin')
+                      );
+                      
+                      // Silently handle D-ID fetch errors (including CORS)
                       try { 
                         window.__didStatus = 'error';
                         window.dispatchEvent(new Event('did-status-change'));
@@ -485,7 +497,7 @@ export default function RootLayout({
                           window.__didStatus = 'loaded';
                           window.dispatchEvent(new Event('did-status-change'));
                         } else {
-                          // Agent script loaded but element not found - might be blocked
+                          // Agent script loaded but element not found - might be blocked by CORS
                           window.__didStatus = 'error';
                           window.dispatchEvent(new Event('did-status-change'));
                         }
@@ -493,10 +505,18 @@ export default function RootLayout({
                         window.__didStatus = 'error';
                         window.dispatchEvent(new Event('did-status-change'));
                       }
-                    }, 3000);
+                    }, 2000); // Reduced from 3000 to detect CORS errors faster
                   };
                   
-                  // Also set a timeout - if status is still pending after 5 seconds, mark as error
+                  // Also listen for CORS errors immediately
+                  script.addEventListener('error', function() {
+                    try {
+                      window.__didStatus = 'error';
+                      window.dispatchEvent(new Event('did-status-change'));
+                    } catch(_) {}
+                  });
+                  
+                  // Also set a timeout - if status is still pending after 4 seconds, mark as error (CORS usually fails quickly)
                   setTimeout(function() {
                     try {
                       if (window.__didStatus === 'pending') {
@@ -504,7 +524,7 @@ export default function RootLayout({
                         window.dispatchEvent(new Event('did-status-change'));
                       }
                     } catch(_) {}
-                  }, 5000);
+                  }, 4000);
                   
                   document.body.appendChild(script);
                 } catch (error) {
