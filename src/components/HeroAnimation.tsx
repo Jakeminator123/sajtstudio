@@ -73,62 +73,72 @@ export default function HeroAnimation() {
     "/images/hero/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp",
   ];
 
-  // Create transforms for each image - split effect
-  // Images 0 and 2 (left side) move more to the left
-  // Images 1 and 3 (right side) move more to the right
-  const image0X = useTransform(scrollYProgress, [0, 0.6, 1], [0, -120, -250]);
+  // Create unique transforms for each image - different animations
+  // Image 0 (top-left): Snurrar kraftigt moturs och åker vänster-uppåt
+  const image0X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -80, -200, -320]);
+  const image0Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -20, -50, -90]);
+  const image0Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -20, -35, -60]);
   const image0Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.8, 0.6]
+    [1, 1, 0.7, 0.4]
   );
   const image0Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.95, 0.85]
+    [1, 0.9, 0.75]
   );
 
-  const image1X = useTransform(scrollYProgress, [0, 0.6, 1], [0, 120, 250]);
+  // Image 1 (top-right): Åker rakt höger med minimal rotation
+  const image1X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 100, 220, 350]);
+  const image1Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -10, -20, -30]);
+  const image1Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 3, 6, 8]);
   const image1Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.8, 0.6]
+    [1, 1, 0.7, 0.4]
   );
   const image1Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.95, 0.85]
+    [1, 0.9, 0.75]
   );
 
-  const image2X = useTransform(scrollYProgress, [0, 0.6, 1], [0, -120, -250]);
+  // Image 2 (bottom-left): Åker diagonalt nedåt-vänster med lite rotation
+  const image2X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -100, -220, -350]);
+  const image2Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 40, 80, 120]);
+  const image2Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 8, 15, 25]);
   const image2Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.8, 0.6]
+    [1, 1, 0.7, 0.4]
   );
   const image2Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.95, 0.85]
+    [1, 0.9, 0.75]
   );
 
-  const image3X = useTransform(scrollYProgress, [0, 0.6, 1], [0, 120, 250]);
+  // Image 3 (bottom-right): Snurrar kraftigt medurs och åker höger-nedåt
+  const image3X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 100, 220, 350]);
+  const image3Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 30, 60, 100]);
+  const image3Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 25, 40, 65]);
   const image3Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.8, 0.6]
+    [1, 1, 0.7, 0.4]
   );
   const image3Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.95, 0.85]
+    [1, 0.9, 0.75]
   );
 
   const imageTransforms = [
-    { x: image0X, opacity: image0Opacity, scale: image0Scale },
-    { x: image1X, opacity: image1Opacity, scale: image1Scale },
-    { x: image2X, opacity: image2Opacity, scale: image2Scale },
-    { x: image3X, opacity: image3Opacity, scale: image3Scale },
+    { x: image0X, y: image0Y, rotate: image0Rotate, opacity: image0Opacity, scale: image0Scale },
+    { x: image1X, y: image1Y, rotate: image1Rotate, opacity: image1Opacity, scale: image1Scale },
+    { x: image2X, y: image2Y, rotate: image2Rotate, opacity: image2Opacity, scale: image2Scale },
+    { x: image3X, y: image3Y, rotate: image3Rotate, opacity: image3Opacity, scale: image3Scale },
   ];
 
   return (
@@ -210,18 +220,21 @@ export default function HeroAnimation() {
                   key={src}
                   style={{
                     x: transforms.x,
+                    y: transforms.y,
+                    rotate: transforms.rotate,
                     opacity: transforms.opacity,
                     scale: transforms.scale,
                   }}
-                  initial={{ opacity: 0, scale: 0.8, y: 50 }}
+                  initial={{ opacity: 0, scale: 0.8, y: 50, rotate: 0 }}
                   animate={
                     imagesInView
                       ? {
                           opacity: 1,
                           scale: 1,
                           y: 0,
+                          rotate: 0,
                         }
-                      : { opacity: 0, scale: 0.8, y: 50 }
+                      : { opacity: 0, scale: 0.8, y: 50, rotate: 0 }
                   }
                   transition={{
                     duration: 0.8,
