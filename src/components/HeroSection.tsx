@@ -2,14 +2,18 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useVideoLoader } from "@/hooks/useVideoLoader";
+import { prefersReducedMotion } from "@/lib/performance";
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const { videoRef, videoError, mounted } = useVideoLoader({
     playbackRate: 0.3,
   });
+  
+  // Check for reduced motion preference
+  const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -56,7 +60,7 @@ export default function HeroSection() {
               loop
               muted
               playsInline
-              preload="auto"
+              preload="metadata"
               poster="/images/hero/alt_background.webp"
               className="w-full h-full object-cover hero-video-opacity"
               onError={() => {
@@ -64,8 +68,6 @@ export default function HeroSection() {
               }}
             >
               <source src="/videos/noir_hero.mp4" type="video/mp4" />
-              <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
-              <source src="/videos/background_vid.mp4" type="video/mp4" />
             </video>
           )}
 
@@ -73,15 +75,23 @@ export default function HeroSection() {
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0, scale: 1.05 }}
-            animate={{
-              opacity: [0.15, 0.25, 0.15],
-              scale: [1, 1.01, 1],
-            }}
-            transition={{
-              opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-              scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-              initial: { duration: 2, ease: "easeOut" },
-            }}
+            animate={
+              shouldReduceMotion
+                ? { opacity: 0.2, scale: 1 }
+                : {
+                    opacity: [0.15, 0.25, 0.15],
+                    scale: [1, 1.01, 1],
+                  }
+            }
+            transition={
+              shouldReduceMotion
+                ? {}
+                : {
+                    opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                    scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                    initial: { duration: 2, ease: "easeOut" },
+                  }
+            }
             style={{ y: imageY1 }}
           >
             <Image
@@ -91,7 +101,6 @@ export default function HeroSection() {
               sizes="100vw"
               className="object-cover mix-blend-overlay"
               priority
-              unoptimized
             />
             {/* Subtle glow effect */}
             <motion.div
@@ -131,15 +140,23 @@ export default function HeroSection() {
           {/* Single subtle radial gradient */}
           <motion.div
             className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,102,255,0.15),transparent_70%)]"
-            animate={{
-              scale: [1, 1.05, 1],
-              opacity: [0.1, 0.15, 0.1],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            animate={
+              shouldReduceMotion
+                ? { scale: 1, opacity: 0.125 }
+                : {
+                    scale: [1, 1.05, 1],
+                    opacity: [0.1, 0.15, 0.1],
+                  }
+            }
+            transition={
+              shouldReduceMotion
+                ? {}
+                : {
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
+            }
           />
         </motion.div>
       )}
@@ -155,15 +172,23 @@ export default function HeroSection() {
                 left: `${particle.left}%`,
                 top: `${particle.top}%`,
               }}
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{
-                duration: particle.duration,
-                repeat: Infinity,
-                delay: particle.delay,
-              }}
+              animate={
+                shouldReduceMotion
+                  ? { y: 0, opacity: 0.35 }
+                  : {
+                      y: [0, -30, 0],
+                      opacity: [0.2, 0.5, 0.2],
+                    }
+              }
+              transition={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      duration: particle.duration,
+                      repeat: Infinity,
+                      delay: particle.delay,
+                    }
+              }
             />
           ))}
         </div>

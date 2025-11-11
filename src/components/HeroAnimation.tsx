@@ -2,14 +2,18 @@
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useVideoLoader } from "@/hooks/useVideoLoader";
+import { prefersReducedMotion } from "@/lib/performance";
 
 export default function HeroAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const { videoRef, videoError, mounted } = useVideoLoader();
+  
+  // Check for reduced motion preference
+  const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
   // Scroll-based color animation for heading
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -233,7 +237,7 @@ export default function HeroAnimation() {
           fill
           className="object-cover opacity-15 mix-blend-overlay"
           loading="lazy"
-          unoptimized
+          sizes="100vw"
         />
       </div>
 
@@ -315,8 +319,8 @@ export default function HeroAnimation() {
                       : { opacity: 0, scale: 0.8, y: 50 }
                   }
                   transition={{
-                    duration: 0.6,
-                    delay: index * 0.15,
+                    duration: shouldReduceMotion ? 0 : 0.6,
+                    delay: shouldReduceMotion ? 0 : index * 0.15,
                     ease: [0.16, 1, 0.3, 1],
                   }}
                   whileHover={{
@@ -333,7 +337,6 @@ export default function HeroAnimation() {
                     sizes="(max-width: 768px) 50vw, 25vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
-                    unoptimized
                   />
 
                   {/* Gradient overlay that intensifies on hover */}

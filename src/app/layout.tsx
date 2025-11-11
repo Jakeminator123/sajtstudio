@@ -123,7 +123,7 @@ export default function RootLayout({
           href="/images/hero/alt_background.webp"
           as="image"
         />
-        {/* Preload hero video for faster loading */}
+        {/* Preload hero video metadata only for faster initial load */}
         <link
           rel="preload"
           href="/videos/noir_hero.mp4"
