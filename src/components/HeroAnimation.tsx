@@ -153,63 +153,64 @@ export default function HeroAnimation() {
 
   // Create unique transforms for each image - different animations
   // Image 0 (top-left): Snurrar kraftigt moturs och åker vänster-uppåt
-  const image0X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -80, -200, -320]);
-  const image0Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -20, -50, -90]);
-  const image0Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -20, -35, -60]);
+  // Reduced movement to prevent overflow on mobile
+  const image0X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -60, -150, -200]);
+  const image0Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -15, -35, -50]);
+  const image0Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -15, -25, -40]);
   const image0Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.7, 0.4]
+    [1, 1, 0.6, 0.3]
   );
   const image0Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.9, 0.75]
+    [1, 0.9, 0.7]
   );
 
   // Image 1 (top-right): Åker rakt höger med minimal rotation
-  const image1X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 100, 220, 350]);
-  const image1Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -10, -20, -30]);
-  const image1Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 3, 6, 8]);
+  const image1X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 80, 160, 200]);
+  const image1Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -8, -15, -20]);
+  const image1Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 2, 4, 6]);
   const image1Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.7, 0.4]
+    [1, 1, 0.6, 0.3]
   );
   const image1Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.9, 0.75]
+    [1, 0.9, 0.7]
   );
 
   // Image 2 (bottom-left): Åker diagonalt nedåt-vänster med lite rotation
-  const image2X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -100, -220, -350]);
-  const image2Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 40, 80, 120]);
-  const image2Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 8, 15, 25]);
+  const image2X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -80, -160, -200]);
+  const image2Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 30, 60, 80]);
+  const image2Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 6, 12, 18]);
   const image2Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.7, 0.4]
+    [1, 1, 0.6, 0.3]
   );
   const image2Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.9, 0.75]
+    [1, 0.9, 0.7]
   );
 
   // Image 3 (bottom-right): Snurrar kraftigt medurs och åker höger-nedåt
-  const image3X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 100, 220, 350]);
-  const image3Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 30, 60, 100]);
-  const image3Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 25, 40, 65]);
+  const image3X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 80, 160, 200]);
+  const image3Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 25, 50, 70]);
+  const image3Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 20, 30, 45]);
   const image3Opacity = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
-    [1, 1, 0.7, 0.4]
+    [1, 1, 0.6, 0.3]
   );
   const image3Scale = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    [1, 0.9, 0.75]
+    [1, 0.9, 0.7]
   );
 
   const imageTransforms = [
@@ -302,6 +303,7 @@ export default function HeroAnimation() {
                     rotate: transforms.rotate,
                     opacity: transforms.opacity,
                     scale: transforms.scale,
+                    willChange: "transform, opacity",
                   }}
                   initial={{ opacity: 0, scale: 0.8, y: 50, rotate: 0 }}
                   animate={
@@ -318,6 +320,9 @@ export default function HeroAnimation() {
                     duration: 0.8,
                     delay: index * 0.1,
                     ease: [0.25, 0.1, 0.25, 1],
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
                   }}
                   whileHover={{
                     scale: 1.05,
