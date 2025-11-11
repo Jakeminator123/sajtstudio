@@ -117,7 +117,8 @@ export default function HeaderNav() {
                 >
                   <Link
                     href={link.href}
-                    className="text-sm font-semibold text-white hover:text-tertiary transition-colors duration-300 relative group block"
+                    className="text-sm font-semibold text-white hover:text-tertiary transition-colors duration-300 relative group block z-10"
+                    prefetch={true}
                   >
                     {link.label}
                     {/* Animated underline */}
@@ -239,7 +240,8 @@ export default function HeaderNav() {
                 <Link
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group"
+                  className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group z-10"
+                  prefetch={true}
                 >
                   {link.label}
                   <motion.span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
@@ -259,7 +261,8 @@ export default function HeaderNav() {
               <Link
                 href="/contact"
                 onClick={() => setIsMenuOpen(false)}
-                className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group z-10"
+                prefetch={true}
               >
                 <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"

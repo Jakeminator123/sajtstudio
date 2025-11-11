@@ -27,7 +27,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
             opacity: 1,
             y: 0,
             transition: {
-              duration: 0.4,
+              duration: 0.3,
               ease: [0.25, 0.1, 0.25, 1],
             },
           },
@@ -35,7 +35,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
             opacity: 0,
             y: -20,
             transition: {
-              duration: 0.3,
+              duration: 0.2,
               ease: [0.25, 0.1, 0.25, 1],
             },
           },
@@ -43,11 +43,11 @@ export default function PageTransition({ children }: PageTransitionProps) {
       >
         {/* Page loading indicator */}
         <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-accent z-50 origin-left"
+          className="fixed top-0 left-0 right-0 h-1 bg-accent z-50 origin-left pointer-events-none"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 0 }}
           exit={{ scaleX: 1 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
         />
         
         {children}
