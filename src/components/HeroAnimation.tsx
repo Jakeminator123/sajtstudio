@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function HeroAnimation() {
   return (
@@ -18,7 +18,7 @@ export default function HeroAnimation() {
           unoptimized
         />
       </div>
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -27,7 +27,7 @@ export default function HeroAnimation() {
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center mb-16"
         >
-          <motion.h2 
+          <motion.h2
             className="text-hero md:text-display font-black mb-8 leading-[0.9]"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -36,7 +36,7 @@ export default function HeroAnimation() {
           >
             Våra hemsidor i aktion
           </motion.h2>
-          <motion.p 
+          <motion.p
             className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -54,17 +54,24 @@ export default function HeroAnimation() {
           transition={{ duration: 0.8 }}
           className="max-w-5xl mx-auto rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20"
         >
-          <Image
-            src="/images/hero/gif_of_sites_maybee_hero_pic.gif"
-            alt="Hemsidor i aktion"
-            width={1200}
-            height={675}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
             className="w-full h-auto"
-            loading="lazy"
-            unoptimized
-          />
+            poster="/images/hero/alt_background.webp"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          >
+            <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
+            <source src="/videos/noir_hero.mp4" type="video/mp4" />
+            <source src="/videos/background_vid.mp4" type="video/mp4" />
+          </video>
         </motion.div>
-        
+
         {/* Additional images grid below - lazy loaded */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -74,10 +81,10 @@ export default function HeroAnimation() {
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-6xl mx-auto"
         >
           {[
-            '/images/hero/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp',
-            '/images/hero/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp',
-            '/images/hero/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp',
-            '/images/hero/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp',
+            "/images/hero/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp",
+            "/images/hero/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp",
+            "/images/hero/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp",
+            "/images/hero/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp",
           ].map((src, index) => (
             <motion.div
               key={src}
@@ -104,4 +111,3 @@ export default function HeroAnimation() {
     </section>
   );
 }
-
