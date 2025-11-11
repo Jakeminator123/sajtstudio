@@ -3,28 +3,14 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
-import { useVideoLoader } from "@/hooks/useVideoLoader";
 import { prefersReducedMotion } from "@/lib/performance";
 
 export default function HeroSection() {
-  // Only load video on mobile devices (below md breakpoint)
-  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    setMounted(true);
   }, []);
-  
-  const { videoRef, videoError, mounted } = useVideoLoader({
-    playbackRate: 0.3,
-  });
   
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
@@ -62,29 +48,9 @@ export default function HeroSection() {
     <motion.section
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black"
     >
-      {/* Dynamic video background with image overlays - only render on client */}
-      {/* Video only visible on mobile - desktop uses HeroAnimation instead */}
+      {/* Dynamic background with image overlays - only render on client */}
       {mounted && (
         <motion.div className="absolute inset-0 z-0" style={{ y }}>
-          {/* Primary video - noir_hero.mp4 as main video - only load and show on mobile */}
-          {isMobile && !videoError && (
-            <video
-              ref={videoRef}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              poster="/images/hero/alt_background.webp"
-              className="w-full h-full object-cover hero-video-opacity"
-              onError={() => {
-                // Error handled by hook, this is just a fallback
-              }}
-            >
-              <source src="/videos/noir_hero.mp4" type="video/mp4" />
-            </video>
-          )}
-
           {/* Main background pattern - alt_background.webp */}
           <motion.div
             className="absolute inset-0"

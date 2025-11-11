@@ -129,19 +129,6 @@ export default function Modal({
                 <div className="absolute inset-0 border-2 border-transparent bg-gradient-to-r from-accent/30 via-gray-400/20 to-accent/30 rounded-[inherit]" />
               </motion.div>
 
-              {/* Subtle background video */}
-              <div className="absolute inset-0 opacity-[0.1] pointer-events-none overflow-hidden">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                >
-                  <source src="/videos/noir_hero.mp4" type="video/mp4" />
-                </video>
-              </div>
-
               {/* Blue gradient accent corners */}
               <motion.div
                 className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-accent/10 to-transparent pointer-events-none"
@@ -264,19 +251,6 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
             transition={{ duration: 0.8, delay: 0.2 }}
           />
 
-          {/* Subtle video overlay */}
-          <div className="absolute inset-0 opacity-[0.1] overflow-hidden">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            >
-              <source src="/videos/noir_hero.mp4" type="video/mp4" />
-            </video>
-          </div>
-
           {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -331,19 +305,6 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
 
         {/* Enhanced content section */}
         <div className="p-8 sm:p-12 md:p-16 lg:p-20 bg-white relative">
-          {/* Subtle background video */}
-          <div className="absolute inset-0 opacity-[0.1] pointer-events-none overflow-hidden">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-            >
-              <source src="/videos/noir_hero.mp4" type="video/mp4" />
-            </video>
-          </div>
-
           {/* Blue gradient accent */}
           <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/5 to-transparent opacity-50 pointer-events-none" />
 

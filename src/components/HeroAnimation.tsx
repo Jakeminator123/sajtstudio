@@ -95,14 +95,15 @@ export default function HeroAnimation() {
   );
   
   // Video scale - normal growth, then extra zoom during question section
-  // Use question scale when in that range, otherwise base scale
+  // Enhanced scaling: starts smaller, grows more dramatically, then extra zoom before transition
   const videoScale = useTransform(
     scrollYProgress,
     (latest) => {
       if (latest >= 0.7) {
-        // During question section, use question scale
+        // During question section, use enhanced zoom that continues growing
         const questionProgress = (latest - 0.7) / 0.3; // Normalize 0.7-1.0 to 0-1
-        return 2.5 + (questionProgress * 1.0); // 2.5 to 3.5
+        // More dramatic zoom: 2.5 to 4.5 (was 2.5 to 3.5)
+        return 2.5 + (questionProgress * 2.0);
       }
       // Before question section, use base scale
       if (latest <= 0.5) {
@@ -119,10 +120,11 @@ export default function HeroAnimation() {
   );
 
   // Red tint that increases with scroll - starts after images disappear (0.65)
+  // Enhanced red tint for more dramatic effect
   const videoRedTint = useTransform(
     scrollYProgress,
     [0, 0.65, 0.75, 1],
-    [0, 0, 0.3, 0.5]
+    [0, 0, 0.4, 0.6]
   );
 
   // Question text animations - slide in from sides outside viewport
@@ -185,11 +187,12 @@ export default function HeroAnimation() {
   ];
 
   // Create unique transforms for each image - asymmetrical, natural movements
+  // Enhanced animations: images fly away more dramatically when video scales up
   // Image 0 (top-left): "Svävar iväg" - lätt uppåt, diagonalt vänster-uppåt, lite rotation, lätt scale up
   // Bilder försvinner helt vid 0.65 för att undvika konflikt med overlay/video
-  const image0X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -40, -100, -180]);
-  const image0Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -30, -70, -120]);
-  const image0Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -8, -18, -30]);
+  const image0X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -60, -150, -250]);
+  const image0Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -50, -100, -180]);
+  const image0Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -12, -25, -40]);
   const image0Opacity = useTransform(
     scrollYProgress,
     [0, 0.2, 0.55, 0.65],
@@ -198,13 +201,13 @@ export default function HeroAnimation() {
   const image0Scale = useTransform(
     scrollYProgress,
     [0, 0.4, 0.65, 0.7],
-    [1, 1.05, 1.1, 1.15]
+    [1, 1.1, 1.2, 1.3]
   );
 
   // Image 1 (top-right): "Dras åt sidan" - kraftigt åt höger, lite nedåt, minimal rotation
-  const image1X = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 100, 200, 300]);
-  const image1Y = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 15, 35, 60]);
-  const image1Rotate = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 1, 2, 3]);
+  const image1X = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 150, 300, 450]);
+  const image1Y = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 25, 60, 100]);
+  const image1Rotate = useTransform(scrollYProgress, [0, 0.3, 0.6, 0.65], [0, 2, 5, 8]);
   const image1Opacity = useTransform(
     scrollYProgress,
     [0, 0.2, 0.5, 0.65],
@@ -213,13 +216,13 @@ export default function HeroAnimation() {
   const image1Scale = useTransform(
     scrollYProgress,
     [0, 0.3, 0.6, 0.65],
-    [1, 0.95, 0.85, 0.7]
+    [1, 0.9, 0.75, 0.6]
   );
 
   // Image 2 (bottom-left): "Rullar iväg" - kraftig rotation som en boll, åt vänster-nedåt
-  const image2X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -80, -180, -300]);
-  const image2Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 50, 110, 180]);
-  const image2Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 45, 120, 240]);
+  const image2X = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, -120, -250, -400]);
+  const image2Y = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 80, 160, 250]);
+  const image2Rotate = useTransform(scrollYProgress, [0, 0.4, 0.65, 0.7], [0, 60, 180, 360]);
   const image2Opacity = useTransform(
     scrollYProgress,
     [0, 0.25, 0.6, 0.65],
@@ -228,13 +231,13 @@ export default function HeroAnimation() {
   const image2Scale = useTransform(
     scrollYProgress,
     [0, 0.4, 0.65, 0.7],
-    [1, 0.95, 0.85, 0.75]
+    [1, 0.9, 0.75, 0.6]
   );
 
   // Image 3 (bottom-right): "Åker upp ur bild" - kraftigt uppåt, lite åt höger, lite rotation
-  const image3X = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 50, 100, 150]);
-  const image3Y = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, -60, -140, -250]);
-  const image3Rotate = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 5, 12, 20]);
+  const image3X = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 80, 150, 220]);
+  const image3Y = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, -90, -200, -350]);
+  const image3Rotate = useTransform(scrollYProgress, [0, 0.35, 0.6, 0.65], [0, 8, 18, 30]);
   const image3Opacity = useTransform(
     scrollYProgress,
     [0, 0.2, 0.55, 0.65],
@@ -243,7 +246,7 @@ export default function HeroAnimation() {
   const image3Scale = useTransform(
     scrollYProgress,
     [0, 0.35, 0.6, 0.65],
-    [1, 0.95, 0.85, 0.75]
+    [1, 0.9, 0.75, 0.6]
   );
 
   const imageTransforms = [

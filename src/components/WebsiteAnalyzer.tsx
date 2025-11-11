@@ -148,19 +148,6 @@ export default function WebsiteAnalyzer() {
         transition={{ duration: 0.6 }}
         className="bg-white p-8 md:p-12 border border-gray-200 relative overflow-hidden"
       >
-        {/* Subtle background video */}
-        <div className="absolute inset-0 opacity-[0.1] pointer-events-none overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-          </video>
-        </div>
-
         {/* Blue gradient accent */}
         <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/5 to-transparent opacity-50 pointer-events-none" />
 
