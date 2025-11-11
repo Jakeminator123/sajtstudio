@@ -138,49 +138,49 @@ export default function HeroAnimation() {
     [0, 0, 0.3, 0.5]
   );
 
-  // Question text animations - slide in from sides with dramatic effect
-  // Design? comes from left - mer synlig och tydlig animation
+  // Question text animations - slide in from sides outside viewport
+  // Design? comes from left - starts outside viewport and slides in
   const designTextX = useTransform(
     questionSectionProgress,
-    [0, 0.15, 0.4, 0.7, 1],
-    [-500, -150, 0, 0, 0]
+    [0, 0.2, 0.5, 0.8, 1],
+    [-600, -200, 0, 0, 0]
   );
   const designTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.2, 0.5, 0.9, 1],
-    [0, 0, 0.5, 1, 1, 1]
+    [0, 0.15, 0.3, 0.6, 0.9, 1],
+    [0, 0, 0.6, 1, 1, 1]
   );
   const designTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.7, 1],
-    [0.2, 0.6, 1, 1, 1]
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.3, 0.7, 1, 1, 1]
   );
   const designTextRotate = useTransform(
     questionSectionProgress,
     [0, 0.3, 0.6, 1],
-    [-20, -8, 0, 0]
+    [-15, -5, 0, 0]
   );
 
-  // Functionality? comes from right - mer synlig och tydlig animation
+  // Functionality? comes from right - starts outside viewport and slides in
   const functionalityTextX = useTransform(
     questionSectionProgress,
-    [0, 0.15, 0.4, 0.7, 1],
-    [500, 150, 0, 0, 0]
+    [0, 0.2, 0.5, 0.8, 1],
+    [600, 200, 0, 0, 0]
   );
   const functionalityTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.2, 0.5, 0.9, 1],
-    [0, 0, 0.5, 1, 1, 1]
+    [0, 0.15, 0.3, 0.6, 0.9, 1],
+    [0, 0, 0.6, 1, 1, 1]
   );
   const functionalityTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.7, 1],
-    [0.2, 0.6, 1, 1, 1]
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.3, 0.7, 1, 1, 1]
   );
   const functionalityTextRotate = useTransform(
     questionSectionProgress,
     [0, 0.3, 0.6, 1],
-    [20, 8, 0, 0]
+    [15, 5, 0, 0]
   );
 
   // Check if images are in view for initial animation
@@ -269,7 +269,7 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
+      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-visible"
       style={{ scrollSnapAlign: 'start' }}
     >
       {/* Background pattern - alt_background.webp */}
@@ -332,7 +332,7 @@ export default function HeroAnimation() {
         </motion.div>
 
         {/* Container for video and images that can overlap */}
-        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-hidden px-4">
+        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-visible px-4">
           {/* Images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}
@@ -411,6 +411,51 @@ export default function HeroAnimation() {
             })}
           </motion.div>
 
+          {/* Question texts - Design? and Functionality? - positioned at section level, sliding in from outside viewport */}
+          <motion.div
+            className="fixed left-0 top-1/2 pointer-events-none z-[100]"
+            style={{
+              x: designTextX,
+              opacity: designTextOpacity,
+              scale: designTextScale,
+              rotate: designTextRotate,
+              transform: "translateY(-50%)",
+            }}
+          >
+            <h3
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-4 sm:px-8"
+              style={{
+                textShadow: "0 0 60px rgba(0, 102, 255, 0.9), 0 0 100px rgba(0, 102, 255, 0.7), 0 0 150px rgba(0, 102, 255, 0.5), 0 0 200px rgba(0, 102, 255, 0.3)",
+                WebkitTextStroke: "3px rgba(0, 102, 255, 0.6)",
+                filter: "drop-shadow(0 0 20px rgba(0, 102, 255, 0.8))",
+              }}
+            >
+              Design?
+            </h3>
+          </motion.div>
+
+          <motion.div
+            className="fixed right-0 top-1/2 pointer-events-none z-[100]"
+            style={{
+              x: functionalityTextX,
+              opacity: functionalityTextOpacity,
+              scale: functionalityTextScale,
+              rotate: functionalityTextRotate,
+              transform: "translateY(-50%)",
+            }}
+          >
+            <h3
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-4 sm:px-8"
+              style={{
+                textShadow: "0 0 60px rgba(255, 0, 51, 0.9), 0 0 100px rgba(255, 0, 51, 0.7), 0 0 150px rgba(255, 0, 51, 0.5), 0 0 200px rgba(255, 0, 51, 0.3)",
+                WebkitTextStroke: "3px rgba(255, 0, 51, 0.6)",
+                filter: "drop-shadow(0 0 20px rgba(255, 0, 51, 0.8))",
+              }}
+            >
+              Functionality?
+            </h3>
+          </motion.div>
+
           {/* Video container - slides into center as images separate */}
           <motion.div
             ref={videoContainerRef}
@@ -425,49 +470,6 @@ export default function HeroAnimation() {
             }}
             className="absolute w-full max-w-5xl"
           >
-            {/* Question texts - Design? and Functionality? - positioned at section level for better visibility */}
-            <motion.div
-              className="fixed left-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100] px-4 sm:px-8"
-              style={{
-                x: designTextX,
-                opacity: designTextOpacity,
-                scale: designTextScale,
-                rotate: designTextRotate,
-              }}
-            >
-              <h3
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap"
-                style={{
-                  textShadow: "0 0 60px rgba(0, 102, 255, 0.9), 0 0 100px rgba(0, 102, 255, 0.7), 0 0 150px rgba(0, 102, 255, 0.5), 0 0 200px rgba(0, 102, 255, 0.3)",
-                  WebkitTextStroke: "3px rgba(0, 102, 255, 0.6)",
-                  filter: "drop-shadow(0 0 20px rgba(0, 102, 255, 0.8))",
-                }}
-              >
-                Design?
-              </h3>
-            </motion.div>
-
-            <motion.div
-              className="fixed right-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100] px-4 sm:px-8"
-              style={{
-                x: functionalityTextX,
-                opacity: functionalityTextOpacity,
-                scale: functionalityTextScale,
-                rotate: functionalityTextRotate,
-              }}
-            >
-              <h3
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap"
-                style={{
-                  textShadow: "0 0 60px rgba(255, 0, 51, 0.9), 0 0 100px rgba(255, 0, 51, 0.7), 0 0 150px rgba(255, 0, 51, 0.5), 0 0 200px rgba(255, 0, 51, 0.3)",
-                  WebkitTextStroke: "3px rgba(255, 0, 51, 0.6)",
-                  filter: "drop-shadow(0 0 20px rgba(255, 0, 51, 0.8))",
-                }}
-              >
-                Functionality?
-              </h3>
-            </motion.div>
-            
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative z-50">
               {/* Red tint overlay that increases with scroll */}
               <motion.div
