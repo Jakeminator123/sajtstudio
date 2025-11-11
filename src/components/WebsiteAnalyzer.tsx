@@ -45,7 +45,7 @@ export default function WebsiteAnalyzer() {
         }
       } catch (error) {
         // Ignorera fel vid hämtning av status - använd default värden
-        console.debug("Could not fetch initial status:", error);
+        // Silently handle initial status fetch errors
       }
     };
 

@@ -66,7 +66,7 @@ export const designTokens = {
   typography: {
     // Typsnitt
     fonts: {
-      sans: 'var(--font-inter)', // Inter från Google Fonts
+      sans: 'var(--font-sans)', // Inter från Google Fonts (set in layout.tsx)
       mono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
     },
     

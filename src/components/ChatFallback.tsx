@@ -22,8 +22,7 @@ export default function ChatFallback() {
     let hasWaited = false;
 
     const evaluate = () => {
-      // @ts-ignore - global flag sätts av layout-scriptet
-      const status = (window as any).__didStatus || "pending";
+      const status = window.__didStatus || "pending";
       if (!cancelled) {
         // Show FAB if status is error, or if still pending after initial delay
         setShouldShowFab(status === "error" || (hasWaited && status === "pending"));
@@ -31,7 +30,7 @@ export default function ChatFallback() {
     };
 
     // Check immediately if status is already error
-    const status = (window as any).__didStatus || "pending";
+    const status = window.__didStatus || "pending";
     if (status === "error") {
       evaluate();
     }

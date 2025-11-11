@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     siteName: "Sajtstudio",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/logo.svg",
         width: 1200,
         height: 630,
         alt: "Sajtstudio - Bygger hemsidor som betyder något",
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sajtstudio – Modern webbdesign",
     description: "Skräddarsydda, toppmoderna hemsidor för utvalda företag",
-    images: ["/twitter-image.jpg"],
+    images: ["/logo.svg"],
     creator: "@sajtstudio",
   },
   robots: {

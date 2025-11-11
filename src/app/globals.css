@@ -142,7 +142,7 @@
 }
 
 :root {
-  --font-sans: var(--font-inter);
+  /* --font-sans is set by Inter font loader in layout.tsx */
 }
 
 body {

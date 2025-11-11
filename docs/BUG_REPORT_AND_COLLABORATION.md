@@ -128,7 +128,110 @@ npm run build
 ### Linter Check
 ✅ **Inga fel** - Projektet är linter-rent
 
-## Ytterligare Problem Identifierade och Åtgärdade
+## Ytterligare Problem Identifierade och Åtgärdade (Runda 2)
+
+### 4. Font-problem - Inter-typsnittet laddas inte korrekt
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+`globals.css` hade `--font-sans: var(--font-inter)` men `--font-inter` definierades aldrig. Layout.tsx skapar `--font-sans` direkt från Inter font loader, men CSS:en försökte överskriva den med en odefinierad variabel. `designTokens.ts` refererade också till `var(--font-inter)`.
+
+**Lösning:**
+1. Tog bort felaktig override i `globals.css` - lämnade kommentar istället
+2. Uppdaterade `designTokens.ts` att använda `var(--font-sans)` istället för `var(--font-inter)`
+
+**Filer påverkade:**
+- `src/app/globals.css` (tog bort felaktig override)
+- `src/config/designTokens.ts` (fixade font-referens)
+
+**Resultat:**
+- Inter-typsnittet laddas nu korrekt
+- Ingen font fallback till systemtypsnitt
+
+### 5. OpenGraph och Twitter Metadata - Saknade Bildfiler
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Både OpenGraph och Twitter metadata i `layout.tsx` refererade till `/og-image.jpg` och `/twitter-image.jpg` som inte finns i `public/`. Detta skapade 404-fel vid sociala delningar.
+
+**Lösning:**
+Uppdaterade alla referenser till att använda `/logo.svg` istället (som finns och är lämplig som fallback).
+
+**Filer påverkade:**
+- `src/app/layout.tsx` (uppdaterade OpenGraph och Twitter images)
+- `src/config/siteConfig.ts` (uppdaterade ogImage)
+
+**Resultat:**
+- Inga 404-fel för metadata-bilder
+- Sociala delningar fungerar (med logo som fallback)
+
+### 6. TypeScript Type Safety - @ts-ignore och any Types
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Flera filer använde `@ts-ignore` och `any` types istället för proper TypeScript-typer:
+- `ChatFallback.tsx` - `@ts-ignore` för `window.__didStatus`
+- `useTouchInteraction.ts` - `@ts-ignore` för IE-specific property
+
+**Lösning:**
+1. Skapade `src/types/window.d.ts` med proper type definition för `window.__didStatus`
+2. Uppdaterade `ChatFallback.tsx` att använda proper types
+3. Ändrade `@ts-ignore` till `@ts-expect-error` med förklarande kommentar i `useTouchInteraction.ts`
+4. Uppdaterade `tsconfig.json` att inkludera types-mappen
+
+**Filer påverkade:**
+- `src/types/window.d.ts` (ny fil)
+- `src/components/ChatFallback.tsx` (borttagen @ts-ignore)
+- `src/hooks/useTouchInteraction.ts` (förbättrad kommentar)
+- `tsconfig.json` (inkluderar types-mappen)
+
+**Resultat:**
+- Bättre type safety
+- Inga @ts-ignore utan förklaringar
+- Proper type definitions för globala window properties
+
+### 7. URL Inkonsistens - Mixed www och non-www
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Projektet hade inkonsistent användning av www vs non-www:
+- `sitemap.ts` använde `https://sajtstudio.se` (utan www)
+- `siteConfig.ts` använde `https://sajtstudio.se` (utan www)
+- `layout.tsx` använde `https://www.sajtstudio.se` (med www)
+
+**Lösning:**
+Standardiserade alla URL:er till `https://www.sajtstudio.se` för konsistens.
+
+**Filer påverkade:**
+- `src/app/sitemap.ts` (lagt till www)
+- `src/config/siteConfig.ts` (lagt till www)
+
+**Resultat:**
+- Konsistent URL-användning genom hela projektet
+- Bättre SEO (inga duplicerade URLs)
+
+### 8. Console Debug Statement
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+`WebsiteAnalyzer.tsx` hade `console.debug()` som inte behövs i produktion.
+
+**Lösning:**
+Tog bort console.debug och lämnade kommentar istället.
+
+**Filer påverkade:**
+- `src/components/WebsiteAnalyzer.tsx`
+
+**Resultat:**
+- Renare console output
+- Bättre produktionskod
+
+## Ytterligare Problem Identifierade och Åtgärdade (Runda 1)
 
 ### 2. Duplicerad Kod i Video-hantering
 
@@ -176,8 +279,8 @@ Hero-videon i `HeroSection.tsx` hade `preload="metadata"` vilket innebar att vid
 
 Projektet är välstrukturerat och visar tecken på professionell utveckling. Identifierade buggar och problem har nu åtgärdats. Projektet bygger utan fel och är redo för deployment.
 
-**Totalt antal buggar/problem hittade:** 3  
-**Totalt antal buggar/problem åtgärdade:** 3  
+**Totalt antal buggar/problem hittade:** 8  
+**Totalt antal buggar/problem åtgärdade:** 8  
 **Kritiska buggar:** 0  
 **Varningar:** 0
 
@@ -185,6 +288,11 @@ Projektet är välstrukturerat och visar tecken på professionell utveckling. Id
 - ✅ Borttagen duplicerad kod (DRY-princip)
 - ✅ Förbättrad video-laddningstid
 - ✅ Bättre kodorganisation med shared hooks
+- ✅ Fixat font-laddning (Inter typsnitt)
+- ✅ Fixat metadata-bilder (OpenGraph/Twitter)
+- ✅ Förbättrad TypeScript type safety
+- ✅ Konsistent URL-användning
+- ✅ Renare console output
 
 ## Rekommendationer för Framtida Utveckling
 

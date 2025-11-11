@@ -20,8 +20,8 @@ export const siteConfig = {
   seo: {
     defaultTitle: 'Sajtstudio – Modern webbdesign för framgångsrika företag',
     defaultDescription: 'Skräddarsydda, toppmoderna hemsidor för utvalda företag',
-    siteUrl: 'https://sajtstudio.se',
-    ogImage: '/og-image.jpg',
+    siteUrl: 'https://www.sajtstudio.se',
+    ogImage: '/logo.svg',
   },
   
   // Navigation
