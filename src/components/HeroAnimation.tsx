@@ -269,7 +269,7 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-visible"
+      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
       style={{ scrollSnapAlign: 'start' }}
     >
       {/* Background pattern - alt_background.webp */}
@@ -332,7 +332,7 @@ export default function HeroAnimation() {
         </motion.div>
 
         {/* Container for video and images that can overlap */}
-        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-visible px-4">
+        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 px-4 overflow-visible">
           {/* Images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}
@@ -411,9 +411,9 @@ export default function HeroAnimation() {
             })}
           </motion.div>
 
-          {/* Question texts - Design? and Functionality? - positioned at section level, sliding in from outside viewport */}
+          {/* Question texts - Design? and Functionality? - positioned absolutely within container, sliding in from outside viewport */}
           <motion.div
-            className="fixed left-0 top-1/2 pointer-events-none z-[100]"
+            className="absolute left-0 top-1/2 pointer-events-none z-[100]"
             style={{
               x: designTextX,
               opacity: designTextOpacity,
@@ -435,7 +435,7 @@ export default function HeroAnimation() {
           </motion.div>
 
           <motion.div
-            className="fixed right-0 top-1/2 pointer-events-none z-[100]"
+            className="absolute right-0 top-1/2 pointer-events-none z-[100]"
             style={{
               x: functionalityTextX,
               opacity: functionalityTextOpacity,
@@ -468,7 +468,7 @@ export default function HeroAnimation() {
               top: "50%",
               zIndex: 50,
             }}
-            className="absolute w-full max-w-5xl"
+            className="absolute w-full max-w-5xl overflow-visible"
           >
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative z-50">
               {/* Red tint overlay that increases with scroll */}
@@ -499,9 +499,7 @@ export default function HeroAnimation() {
                     });
                   }}
                 >
-                  <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
                   <source src="/videos/noir_hero.mp4" type="video/mp4" />
-                  <source src="/videos/background_vid.mp4" type="video/mp4" />
                 </video>
               )}
               {(!mounted || videoError) && (
@@ -512,7 +510,7 @@ export default function HeroAnimation() {
                     fill
                     className="object-cover"
                     loading="lazy"
-                    unoptimized
+                    sizes="100vw"
                   />
                 </div>
               )}

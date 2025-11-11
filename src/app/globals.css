@@ -141,10 +141,16 @@
   overflow-y: auto;
 }
 
-/* Scroll snap for smoother section transitions */
+/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
+}
+
+/* Scroll snap only on desktop to avoid mobile issues */
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
 }
 
 /* Prevent overscroll bounce on iOS - only on touch devices */
