@@ -94,7 +94,7 @@ export default function HeaderNav() {
               >
                 Sajtstudio
                 {/* Underline effect */}
-                <motion.span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300" />
+                <motion.span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300 pointer-events-none" />
               </motion.span>
             </Link>
 
@@ -119,10 +119,10 @@ export default function HeaderNav() {
                   >
                     {link.label}
                     {/* Animated underline */}
-                    <motion.span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300" />
+                    <motion.span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
                     {/* Glow effect */}
                     <motion.span
-                      className="absolute inset-0 blur-sm opacity-0 group-hover:opacity-50 bg-tertiary"
+                      className="absolute inset-0 blur-sm opacity-0 group-hover:opacity-50 bg-tertiary pointer-events-none"
                       transition={{ duration: 0.3 }}
                     />
                   </Link>
@@ -140,7 +140,7 @@ export default function HeaderNav() {
               >
                 {/* Glow background */}
                 <motion.div
-                  className="absolute inset-0 bg-tertiary blur-xl opacity-0 group-hover:opacity-50"
+                  className="absolute inset-0 bg-tertiary blur-xl opacity-0 group-hover:opacity-50 pointer-events-none"
                   transition={{ duration: 0.3 }}
                 />
                 <Link
@@ -149,7 +149,7 @@ export default function HeaderNav() {
                 >
                   {/* Shimmer effect */}
                   <motion.span
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
                     initial={{ x: "-100%" }}
                     whileHover={{ x: "100%" }}
                     transition={{ duration: 0.6 }}
@@ -240,7 +240,7 @@ export default function HeaderNav() {
                   className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group"
                 >
                   {link.label}
-                  <motion.span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300" />
+                  <motion.span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
                 </Link>
               </motion.div>
             ))}
@@ -260,7 +260,7 @@ export default function HeaderNav() {
                 className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
               >
                 <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
                   initial={{ x: "-100%" }}
                   whileHover={{ x: "100%" }}
                   transition={{ duration: 0.6 }}
