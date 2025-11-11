@@ -9,6 +9,7 @@ import ChatFallback from "@/components/ChatFallback";
 import {
   getOrganizationSchema,
   getWebSiteSchema,
+  getServiceSchema,
   generateSchemaScript,
 } from "@/lib/structuredData";
 
@@ -134,6 +135,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={generateSchemaScript([
             getOrganizationSchema(),
             getWebSiteSchema(),
+            getServiceSchema(),
           ])}
         />
       </head>

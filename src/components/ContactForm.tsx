@@ -139,6 +139,8 @@ export default function ContactForm() {
         type="submit"
         disabled={formState.status === "sending"}
         className="w-full px-8 py-4 bg-black text-white font-semibold hover:bg-tertiary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-busy={formState.status === "sending"}
+        aria-live="polite"
       >
         {formState.status === "sending" ? "Skickar..." : "Skicka"}
       </button>

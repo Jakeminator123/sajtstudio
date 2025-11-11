@@ -88,6 +88,7 @@ export default function HeroSection() {
               src="/images/hero/alt_background.webp"
               alt=""
               fill
+              sizes="100vw"
               className="object-cover mix-blend-overlay"
               priority
               unoptimized

@@ -84,7 +84,9 @@ export default function HeaderNav() {
                   alt="Sajtstudio logotyp"
                   width={36}
                   height={36}
+                  priority
                   className="relative z-10 transition-transform duration-300"
+                  aria-hidden="false"
                 />
               </motion.div>
               <motion.span

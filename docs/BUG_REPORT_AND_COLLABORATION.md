@@ -284,6 +284,97 @@ Projektet är välstrukturerat och visar tecken på professionell utveckling. Id
 **Kritiska buggar:** 0  
 **Varningar:** 0
 
+## Ytterligare Förbättringar (Runda 3 - Performance & Accessibility)
+
+### 9. Bildoptimering - Priority och Sizes Attributes
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Många bilder saknade `priority` eller `sizes` attributes, vilket påverkade performance och LCP (Largest Contentful Paint).
+
+**Lösning:**
+1. Lade till `priority` för logo i HeaderNav (kritisk ovanför fold)
+2. Lade till `sizes="100vw"` för hero-bakgrundsbild
+3. Lade till `sizes` attributes för portfolio-bilder med responsiva breakpoints
+4. Skapade `ImageOptimizer` komponent för framtida användning
+
+**Filer påverkade:**
+- `src/components/HeaderNav.tsx` (priority för logo)
+- `src/components/HeroSection.tsx` (sizes för hero-bild)
+- `src/components/HeroAnimation.tsx` (sizes för portfolio-bilder)
+- `src/components/PortfolioSection.tsx` (sizes för portfolio-bilder)
+- `src/components/ImageOptimizer.tsx` (ny komponent)
+
+**Resultat:**
+- Bättre LCP scores
+- Optimal bildladdning baserat på viewport
+- Snabbare visuell feedback
+
+### 10. SEO-förbättringar - Mer Structured Data
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Projektet hade bara Organization och WebSite schema, saknade Service schema för bättre SEO.
+
+**Lösning:**
+Lade till `getServiceSchema()` i structured data och inkluderade den i layout.tsx.
+
+**Filer påverkade:**
+- `src/app/layout.tsx` (inkluderar Service schema)
+- `src/lib/structuredData.ts` (redan hade getServiceSchema, nu används den)
+
+**Resultat:**
+- Bättre SEO-ranking för tjänster
+- Rikare rich snippets i sökresultat
+- Bättre förståelse för sökmotorer
+
+### 11. Accessibility-förbättringar
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Flera komponenter saknade proper ARIA attributes för bättre accessibility.
+
+**Lösning:**
+1. Lade till `role="alert"`, `aria-live`, `aria-atomic` i ErrorBoundary
+2. Lade till `aria-busy` och `aria-live` i ContactForm submit button
+3. Lade till `aria-hidden` för dekorativa element
+4. Förbättrade `ariaLabel` i ErrorBoundary button
+
+**Filer påverkade:**
+- `src/components/ErrorBoundary.tsx` (ARIA attributes)
+- `src/components/ContactForm.tsx` (ARIA attributes)
+- `src/components/HeaderNav.tsx` (aria-hidden för dekorativa element)
+
+**Resultat:**
+- Bättre screen reader support
+- Bättre keyboard navigation
+- WCAG 2.1 compliance förbättrad
+
+### 12. Performance-optimeringar - Prefetch och Utilities
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Projektet saknade prefetch-funktionalitet för snabbare navigation och performance utilities.
+
+**Lösning:**
+1. Skapade `usePrefetch` hook för att prefetcha länkar på hover
+2. Skapade `performance.ts` med utilities (debounce, throttle, connection speed detection)
+3. Implementerade prefetch i Home page
+
+**Filer påverkade:**
+- `src/hooks/usePrefetch.ts` (ny hook)
+- `src/lib/performance.ts` (ny utility fil)
+- `src/app/page.tsx` (använder usePrefetch)
+
+**Resultat:**
+- Snabbare navigation mellan sidor
+- Bättre användarupplevelse
+- Reusable performance utilities
+
 **Förbättringar:**
 - ✅ Borttagen duplicerad kod (DRY-princip)
 - ✅ Förbättrad video-laddningstid
@@ -293,6 +384,10 @@ Projektet är välstrukturerat och visar tecken på professionell utveckling. Id
 - ✅ Förbättrad TypeScript type safety
 - ✅ Konsistent URL-användning
 - ✅ Renare console output
+- ✅ Bildoptimering med priority och sizes
+- ✅ Mer structured data för SEO
+- ✅ Förbättrad accessibility (ARIA attributes)
+- ✅ Performance-optimeringar (prefetch, utilities)
 
 ## Rekommendationer för Framtida Utveckling
 

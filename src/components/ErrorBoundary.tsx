@@ -35,14 +35,20 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
+        <div 
+          className="min-h-screen flex items-center justify-center bg-gray-50 px-6"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
           <div className="text-center max-w-md mx-auto">
-            <div className="mb-8">
+            <div className="mb-8" aria-hidden="true">
               <svg
                 className="w-24 h-24 mx-auto text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -62,6 +68,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               onClick={() => window.location.reload()}
               variant="primary"
               size="md"
+              ariaLabel="Ladda om sidan för att försöka igen"
             >
               Ladda om sidan
             </Button>

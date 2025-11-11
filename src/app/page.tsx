@@ -1,3 +1,5 @@
+"use client";
+
 import HeaderNav from "@/components/HeaderNav";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
@@ -8,6 +10,7 @@ import HeroAnimation from "@/components/HeroAnimation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
 import { SectionSkeleton } from "@/components/Skeleton";
+import { usePrefetch } from "@/hooks/usePrefetch";
 
 // Lazy load non-critical sections for better performance
 const USPSection = dynamic(() => import("@/components/USPSection"), {
@@ -37,6 +40,9 @@ const TestimonialsSection = dynamic(
 );
 
 export default function Home() {
+  // Prefetch links on hover for faster navigation
+  usePrefetch();
+
   return (
     <>
       <AnimatedBackground />
