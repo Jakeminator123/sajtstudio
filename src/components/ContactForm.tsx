@@ -1,40 +1,62 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import { motion } from 'framer-motion';
+import { useState, FormEvent, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
 interface FormState {
   name: string;
   email: string;
   message: string;
-  status: 'idle' | 'sending' | 'success' | 'error';
+  status: "idle" | "sending" | "success" | "error";
 }
 
 export default function ContactForm() {
   const [formState, setFormState] = useState<FormState>({
-    name: '',
-    email: '',
-    message: '',
-    status: 'idle',
+    name: "",
+    email: "",
+    message: "",
+    status: "idle",
   });
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFormState({ ...formState, status: 'sending' });
+    // Clear any existing timeouts
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current);
+    }
+
+    setFormState((prev) => ({ ...prev, status: "sending" }));
 
     // Här kan du koppla till en backend-tjänst
     // För nu simulerar vi en lyckad submission
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setFormState({
-        name: '',
-        email: '',
-        message: '',
-        status: 'success',
+        name: "",
+        email: "",
+        message: "",
+        status: "success",
       });
-      
+
       // Återställ success-meddelandet efter 5 sekunder
-      setTimeout(() => {
-        setFormState(prev => ({ ...prev, status: 'idle' }));
+      successTimeoutRef.current = setTimeout(() => {
+        setFormState((prev) => ({ ...prev, status: "idle" }));
       }, 5000);
     }, 1000);
   };
@@ -50,10 +72,12 @@ export default function ContactForm() {
           id="name"
           name="name"
           value={formState.name}
-          onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, name: e.target.value }))
+          }
           className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none transition-colors"
           required
-          disabled={formState.status === 'sending'}
+          disabled={formState.status === "sending"}
         />
       </div>
       <div>
@@ -65,10 +89,12 @@ export default function ContactForm() {
           id="email"
           name="email"
           value={formState.email}
-          onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, email: e.target.value }))
+          }
           className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none transition-colors"
           required
-          disabled={formState.status === 'sending'}
+          disabled={formState.status === "sending"}
         />
       </div>
       <div>
@@ -80,14 +106,16 @@ export default function ContactForm() {
           name="message"
           rows={6}
           value={formState.message}
-          onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, message: e.target.value }))
+          }
           className="w-full px-4 py-3 border border-gray-300 focus:border-black focus:outline-none transition-colors resize-none"
           required
-          disabled={formState.status === 'sending'}
+          disabled={formState.status === "sending"}
         />
       </div>
-      
-      {formState.status === 'success' && (
+
+      {formState.status === "success" && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -96,8 +124,8 @@ export default function ContactForm() {
           Tack för ditt meddelande! Vi återkommer så snart som möjligt.
         </motion.div>
       )}
-      
-      {formState.status === 'error' && (
+
+      {formState.status === "error" && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,12 +137,11 @@ export default function ContactForm() {
 
       <button
         type="submit"
-        disabled={formState.status === 'sending'}
+        disabled={formState.status === "sending"}
         className="w-full px-8 py-4 bg-black text-white font-semibold hover:bg-tertiary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {formState.status === 'sending' ? 'Skickar...' : 'Skicka'}
+        {formState.status === "sending" ? "Skickar..." : "Skicka"}
       </button>
     </form>
   );
 }
-

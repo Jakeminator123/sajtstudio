@@ -224,3 +224,13 @@ html {
   width: var(--skeleton-width, auto);
   height: var(--skeleton-height, auto);
 }
+
+/* Video filter for background videos */
+.video-filter {
+  filter: grayscale(100%) contrast(120%);
+}
+
+/* Hero video opacity */
+.hero-video-opacity {
+  opacity: 0.25;
+}

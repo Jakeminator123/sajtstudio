@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function HeroAnimation() {
+  const [videoError, setVideoError] = useState(false);
   return (
     <section className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden">
       {/* Background with multiple images */}
@@ -54,22 +56,24 @@ export default function HeroAnimation() {
           transition={{ duration: 0.8 }}
           className="max-w-5xl mx-auto rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20"
         >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-auto"
-            poster="/images/hero/alt_background.webp"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          >
-            <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-            <source src="/videos/background_vid.mp4" type="video/mp4" />
-          </video>
+          {!videoError && (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full h-auto"
+              poster="/images/hero/alt_background.webp"
+              onError={() => {
+                setVideoError(true);
+              }}
+            >
+              <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
+              <source src="/videos/noir_hero.mp4" type="video/mp4" />
+              <source src="/videos/background_vid.mp4" type="video/mp4" />
+            </video>
+          )}
         </motion.div>
 
         {/* Additional images grid below - lazy loaded */}

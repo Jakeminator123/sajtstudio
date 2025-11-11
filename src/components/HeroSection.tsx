@@ -8,6 +8,7 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -28,11 +29,11 @@ export default function HeroSection() {
   // Set video playback rate for cinematic effect
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
+    if (video && !videoError) {
       // Handle video errors gracefully
       const handleError = () => {
         console.warn("Video failed to load, using fallback background");
-        video.style.display = 'none';
+        setVideoError(true);
       };
 
       // Wait for video to be loaded before setting playback rate
@@ -58,7 +59,7 @@ export default function HeroSection() {
         video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       };
     }
-  }, []);
+  }, [videoError]);
 
   // Generate stable particle positions (only on client)
   const particles = mounted
@@ -66,8 +67,8 @@ export default function HeroSection() {
         // Use index as seed for consistent positioning
         const seed = i * 0.618033988749895; // Golden ratio for better distribution
         return {
-          left: ((seed * 100) % 100),
-          top: (((seed * 1.618) * 100) % 100),
+          left: (seed * 100) % 100,
+          top: (seed * 1.618 * 100) % 100,
           duration: 3 + (seed % 2),
           delay: seed % 2,
         };
@@ -83,38 +84,39 @@ export default function HeroSection() {
       {mounted && (
         <motion.div className="absolute inset-0 z-0" style={{ y }}>
           {/* Primary video - telephone_ringin.mp4 (telefon som blir superdator) */}
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            poster="/images/hero/alt_background.webp"
-            className="w-full h-full object-cover"
-            style={{ opacity: 0.25 }}
-            onError={(e) => {
-              // Silently handle video errors - fallback to poster image
-              e.currentTarget.style.display = 'none';
-            }}
-          >
-            <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-            <source src="/videos/background_vid.mp4" type="video/mp4" />
-          </video>
-          
+          {!videoError && (
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              poster="/images/hero/alt_background.webp"
+              className="w-full h-full object-cover hero-video-opacity"
+              onError={() => {
+                // Silently handle video errors - fallback to poster image
+                setVideoError(true);
+              }}
+            >
+              <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
+              <source src="/videos/noir_hero.mp4" type="video/mp4" />
+              <source src="/videos/background_vid.mp4" type="video/mp4" />
+            </video>
+          )}
+
           {/* Main background image - alt_background.webp with beautiful animation */}
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0, scale: 1.15 }}
-            animate={{ 
+            animate={{
               opacity: [0.3, 0.5, 0.3],
-              scale: [1, 1.02, 1]
+              scale: [1, 1.02, 1],
             }}
-            transition={{ 
+            transition={{
               opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-              initial: { duration: 3, ease: "easeOut" }
+              initial: { duration: 3, ease: "easeOut" },
             }}
             style={{ y: imageY1 }}
           >
@@ -130,16 +132,16 @@ export default function HeroSection() {
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-tertiary/10"
               animate={{
-                opacity: [0.3, 0.5, 0.3]
+                opacity: [0.3, 0.5, 0.3],
               }}
               transition={{
                 duration: 6,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
           </motion.div>
-          
+
           {/* Secondary background images with parallax effect */}
           <motion.div
             className="absolute inset-0"
@@ -156,7 +158,7 @@ export default function HeroSection() {
               unoptimized
             />
           </motion.div>
-          
+
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
@@ -172,15 +174,15 @@ export default function HeroSection() {
               unoptimized
             />
           </motion.div>
-          
+
           {/* Elegant dark overlay with gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-black/80" />
-          
+
           {/* Subtle color accents */}
           <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-tertiary/20" />
         </motion.div>
       )}
-      
+
       {/* Static fallback for SSR */}
       {!mounted && (
         <div className="absolute inset-0 z-0 bg-black">
@@ -191,23 +193,23 @@ export default function HeroSection() {
 
       {/* Animated background patterns - Subtle and elegant - only on client */}
       {mounted && (
-        <motion.div 
+        <motion.div
           className="absolute inset-0 z-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 2 }}
         >
           {/* Single subtle radial gradient */}
-          <motion.div 
+          <motion.div
             className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,102,255,0.15),transparent_70%)]"
-            animate={{ 
+            animate={{
               scale: [1, 1.05, 1],
-              opacity: [0.1, 0.15, 0.1]
+              opacity: [0.1, 0.15, 0.1],
             }}
-            transition={{ 
-              duration: 6, 
+            transition={{
+              duration: 6,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
           />
         </motion.div>
@@ -248,7 +250,7 @@ export default function HeroSection() {
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center"
           >
-            <motion.span 
+            <motion.span
               className="block"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -256,7 +258,7 @@ export default function HeroSection() {
             >
               Bygger
             </motion.span>
-            <motion.span 
+            <motion.span
               className="block text-accent"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -264,7 +266,7 @@ export default function HeroSection() {
             >
               hemsidor
             </motion.span>
-            <motion.span 
+            <motion.span
               className="block"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -272,7 +274,7 @@ export default function HeroSection() {
             >
               som betyder
             </motion.span>
-            <motion.span 
+            <motion.span
               className="block"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -306,9 +308,9 @@ export default function HeroSection() {
           >
             <motion.a
               href="/contact"
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
-                boxShadow: "0 0 30px rgba(0, 102, 255, 0.5)"
+                boxShadow: "0 0 30px rgba(0, 102, 255, 0.5)",
               }}
               whileTap={{ scale: 0.95 }}
               className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
@@ -323,10 +325,10 @@ export default function HeroSection() {
             </motion.a>
             <motion.a
               href="/portfolio"
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
                 backgroundColor: "white",
-                color: "black"
+                color: "black",
               }}
               whileTap={{ scale: 0.95 }}
               className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
@@ -387,7 +389,6 @@ export default function HeroSection() {
           </svg>
         </motion.div>
       </motion.div>
-
     </motion.section>
   );
 }

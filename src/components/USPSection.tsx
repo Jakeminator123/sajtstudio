@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { uspContent } from "@/config/content/usps";
 
@@ -131,6 +131,7 @@ function USPFeature({
 export default function USPSection() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const [videoError, setVideoError] = useState(false);
 
   return (
     <section
@@ -138,7 +139,7 @@ export default function USPSection() {
       className="py-32 md:py-48 bg-white overflow-hidden relative"
     >
       {/* Subtle background video pattern - only load when in view */}
-      {isInView && (
+      {isInView && !videoError && (
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none overflow-hidden">
           <video
             autoPlay
@@ -146,10 +147,9 @@ export default function USPSection() {
             muted
             playsInline
             preload="metadata"
-            className="w-full h-full object-cover scale-150"
-            style={{ filter: "grayscale(100%) contrast(120%)" }}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
+            className="w-full h-full object-cover scale-150 video-filter"
+            onError={() => {
+              setVideoError(true);
             }}
           >
             <source src="/videos/noir_hero.mp4" type="video/mp4" />

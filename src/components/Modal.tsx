@@ -1,51 +1,53 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { designTokens } from '@/config/designTokens';
-import { trapFocus } from '@/lib/focusUtils';
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { designTokens } from "@/config/designTokens";
+import { trapFocus } from "@/lib/focusUtils";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
 }
 
-export default function Modal({ 
-  isOpen, 
-  onClose, 
-  children, 
-  maxWidth = 'lg' 
+export default function Modal({
+  isOpen,
+  onClose,
+  children,
+  maxWidth = "lg",
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Handle escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   // Lock body scroll and trap focus when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Lock body scroll
-      const originalOverflow = document.body.style.overflow;
-      const originalPaddingRight = document.body.style.paddingRight;
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      
-      document.body.style.overflow = 'hidden';
+      // Lock body scroll - use getComputedStyle to get actual values
+      const computedStyle = window.getComputedStyle(document.body);
+      const originalOverflow = computedStyle.overflow;
+      const originalPaddingRight = computedStyle.paddingRight;
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      document.body.style.overflow = "hidden";
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`;
       }
-      
+
       // Trap focus after a small delay to ensure modal is rendered
       let cleanupFocusTrap: (() => void) | undefined;
       const focusTrapTimeout = setTimeout(() => {
@@ -66,11 +68,11 @@ export default function Modal({
   }, [isOpen]);
 
   const maxWidthClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-2xl',
-    lg: 'max-w-4xl',
-    xl: 'max-w-6xl',
-    full: 'max-w-full mx-4',
+    sm: "max-w-md",
+    md: "max-w-2xl",
+    lg: "max-w-4xl",
+    xl: "max-w-6xl",
+    full: "max-w-full mx-4",
   };
 
   return (
@@ -79,9 +81,9 @@ export default function Modal({
         <>
           {/* Backdrop with blur animation */}
           <motion.div
-            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             onClick={onClose}
             className="fixed inset-0 bg-black/80 z-50"
@@ -94,12 +96,12 @@ export default function Modal({
               initial={{ opacity: 0, scale: 0.9, y: 50, rotateX: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 50, rotateX: 10 }}
-              transition={{ 
-                duration: 0.4, 
+              transition={{
+                duration: 0.4,
                 ease: [0.34, 1.56, 0.64, 1],
                 type: "spring",
                 stiffness: 300,
-                damping: 30
+                damping: 30,
               }}
               className={`relative bg-white w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl`}
               onClick={(e) => e.stopPropagation()}
@@ -111,13 +113,13 @@ export default function Modal({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
               />
-              
+
               {/* Close button with enhanced hover */}
               <motion.button
-                whileHover={{ 
+                whileHover={{
                   scale: 1.15,
                   rotate: 90,
-                  backgroundColor: "#f3f4f6"
+                  backgroundColor: "#f3f4f6",
                 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
@@ -176,7 +178,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="xl">
       <div className="relative">
         {/* Hero section with image support */}
-        <motion.div 
+        <motion.div
           className={`${project.color} h-80 relative flex items-center justify-center overflow-hidden`}
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
@@ -199,7 +201,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
               />
             </motion.div>
           )}
-          
+
           {/* Animated gradient overlay */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"
@@ -207,15 +209,19 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
           />
-          
+
           {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{
+              delay: 0.2,
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
             className="text-center text-white px-8 relative z-10"
           >
-            <motion.h1 
+            <motion.h1
               className="text-display font-black mb-4"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -223,7 +229,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
             >
               {project.title}
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-h3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -232,13 +238,17 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
               {project.category}
             </motion.p>
           </motion.div>
-          
+
           {/* Animated corner accents */}
           <motion.div
             className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-accent/40 to-transparent"
             initial={{ scale: 0, rotate: -45 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.5, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+            transition={{
+              delay: 0.5,
+              duration: 0.6,
+              ease: [0.34, 1.56, 0.64, 1],
+            }}
           />
         </motion.div>
 
@@ -247,7 +257,11 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{
+              delay: 0.3,
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
             className="max-w-3xl mx-auto"
           >
             {/* Description */}
