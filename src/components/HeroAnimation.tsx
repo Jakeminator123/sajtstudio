@@ -151,66 +151,65 @@ export default function HeroAnimation() {
     "/images/hero/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp",
   ];
 
-  // Create unique transforms for each image - different animations
-  // Image 0 (top-left): Snurrar kraftigt moturs och åker vänster-uppåt
-  // Reduced movement to prevent overflow on mobile
-  const image0X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -60, -150, -200]);
-  const image0Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -15, -35, -50]);
-  const image0Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -15, -25, -40]);
+  // Create unique transforms for each image - asymmetrical, natural movements
+  // Image 0 (top-left): "Svävar iväg" - lätt uppåt, diagonalt vänster-uppåt, lite rotation, lätt scale up
+  const image0X = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -40, -100, -180]);
+  const image0Y = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -30, -70, -120]);
+  const image0Rotate = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -8, -18, -30]);
   const image0Opacity = useTransform(
     scrollYProgress,
-    [0, 0.3, 0.7, 1],
-    [1, 1, 0.6, 0.3]
+    [0, 0.2, 0.6, 1],
+    [1, 1, 0.5, 0.2]
   );
   const image0Scale = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [1, 0.9, 0.7]
+    [0, 0.4, 0.8, 1],
+    [1, 1.05, 1.1, 1.15]
   );
 
-  // Image 1 (top-right): Åker rakt höger med minimal rotation
-  const image1X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 80, 160, 200]);
-  const image1Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -8, -15, -20]);
-  const image1Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 2, 4, 6]);
+  // Image 1 (top-right): "Dras åt sidan" - kraftigt åt höger, lite nedåt, minimal rotation
+  const image1X = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 100, 200, 300]);
+  const image1Y = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 15, 35, 60]);
+  const image1Rotate = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 1, 2, 3]);
   const image1Opacity = useTransform(
     scrollYProgress,
-    [0, 0.3, 0.7, 1],
-    [1, 1, 0.6, 0.3]
+    [0, 0.2, 0.5, 1],
+    [1, 1, 0.4, 0.1]
   );
   const image1Scale = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [1, 0.9, 0.7]
+    [0, 0.3, 0.6, 1],
+    [1, 0.95, 0.85, 0.7]
   );
 
-  // Image 2 (bottom-left): Åker diagonalt nedåt-vänster med lite rotation
-  const image2X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, -80, -160, -200]);
-  const image2Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 30, 60, 80]);
-  const image2Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 6, 12, 18]);
+  // Image 2 (bottom-left): "Rullar iväg" - kraftig rotation som en boll, åt vänster-nedåt
+  const image2X = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, -80, -180, -300]);
+  const image2Y = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, 50, 110, 180]);
+  const image2Rotate = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0, 45, 120, 240]);
   const image2Opacity = useTransform(
     scrollYProgress,
-    [0, 0.3, 0.7, 1],
-    [1, 1, 0.6, 0.3]
+    [0, 0.25, 0.65, 1],
+    [1, 1, 0.5, 0.2]
   );
   const image2Scale = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [1, 0.9, 0.7]
+    [0, 0.4, 0.7, 1],
+    [1, 0.95, 0.85, 0.75]
   );
 
-  // Image 3 (bottom-right): Snurrar kraftigt medurs och åker höger-nedåt
-  const image3X = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 80, 160, 200]);
-  const image3Y = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 25, 50, 70]);
-  const image3Rotate = useTransform(scrollYProgress, [0, 0.5, 0.8, 1], [0, 20, 30, 45]);
+  // Image 3 (bottom-right): "Åker upp ur bild" - kraftigt uppåt, lite åt höger, lite rotation
+  const image3X = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 50, 100, 150]);
+  const image3Y = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, -60, -140, -250]);
+  const image3Rotate = useTransform(scrollYProgress, [0, 0.35, 0.65, 1], [0, 5, 12, 20]);
   const image3Opacity = useTransform(
     scrollYProgress,
-    [0, 0.3, 0.7, 1],
-    [1, 1, 0.6, 0.3]
+    [0, 0.2, 0.55, 1],
+    [1, 1, 0.4, 0.1]
   );
   const image3Scale = useTransform(
     scrollYProgress,
-    [0, 0.5, 1],
-    [1, 0.9, 0.7]
+    [0, 0.35, 0.65, 1],
+    [1, 0.95, 0.85, 0.75]
   );
 
   const imageTransforms = [
@@ -285,7 +284,7 @@ export default function HeroAnimation() {
         </motion.div>
 
         {/* Container for video and images that can overlap */}
-        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-hidden">
+        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-hidden px-4">
           {/* Images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}
@@ -305,24 +304,20 @@ export default function HeroAnimation() {
                     scale: transforms.scale,
                     willChange: "transform, opacity",
                   }}
-                  initial={{ opacity: 0, scale: 0.8, y: 50, rotate: 0 }}
+                  initial={{ opacity: 0, scale: 0.8, y: 50 }}
                   animate={
                     imagesInView
                       ? {
                           opacity: 1,
                           scale: 1,
                           y: 0,
-                          rotate: 0,
                         }
-                      : { opacity: 0, scale: 0.8, y: 50, rotate: 0 }
+                      : { opacity: 0, scale: 0.8, y: 50 }
                   }
                   transition={{
-                    duration: 0.8,
-                    delay: index * 0.1,
-                    ease: [0.25, 0.1, 0.25, 1],
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15,
+                    duration: 0.6,
+                    delay: index * 0.15,
+                    ease: [0.16, 1, 0.3, 1],
                   }}
                   whileHover={{
                     scale: 1.05,
