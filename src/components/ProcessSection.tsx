@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import { processSteps } from "@/config/content/process";
 
@@ -11,8 +10,23 @@ interface ProcessStepProps {
 }
 
 function ProcessStep({ step, index }: ProcessStepProps) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [isHovered, setIsHovered] = useState(false);
+  const [rotation, setRotation] = useState(0);
+
+  // Scroll-based color animation for title
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  const titleColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   return (
     <motion.div
@@ -25,12 +39,29 @@ function ProcessStep({ step, index }: ProcessStepProps) {
         ease: [0.25, 0.1, 0.25, 1],
       }}
       className="group relative"
-      whileHover={{ x: 4 }}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        setRotation(Math.random() * 10 - 5); // Random rotation between -5 and 5 degrees
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setRotation(0);
+      }}
+      whileHover={{ x: 10, scale: 1.02 }}
+      style={{
+        transform: isHovered ? `rotate(${rotation}deg)` : undefined,
+        transition: "transform 0.3s ease-out",
+      }}
     >
-      <div className="border-t border-black pt-8 pb-12 relative">
-        {/* Hover background effect */}
+      <div className="border-t border-gray-800 pt-8 pb-12 relative">
+        {/* Enhanced hover background effect with blue/gray */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100"
+          className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500
+            ${
+              parseInt(step.number) % 2 === 0
+                ? "from-accent/8 via-accent/4 to-transparent"
+                : "from-gray-900/8 via-gray-800/4 to-transparent"
+            }`}
           initial={{ x: "-100%" }}
           whileHover={{ x: 0 }}
           transition={{ duration: 0.5 }}
@@ -44,23 +75,40 @@ function ProcessStep({ step, index }: ProcessStepProps) {
                   ? "text-gray-200 group-hover:text-accent"
                   : "text-gray-200 group-hover:text-tertiary"
               }`}
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.2 }}
+            animate={{
+              rotate: isHovered ? [0, -15, 15, -15, 0] : 0,
+              y: isHovered ? [0, -20, 0] : 0,
+            }}
+            transition={{ duration: 0.6 }}
+            whileHover={{ scale: 1.2 }}
           >
             {step.number}
             {/* Glow effect */}
             <motion.span
-              className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-50
+              className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-50 scale-[0.8]
                 ${
                   parseInt(step.number) % 2 === 0
                     ? "text-accent"
                     : "text-tertiary"
                 }`}
-              initial={{ scale: 0.8 }}
-              whileHover={{ scale: 1.2 }}
+              animate={{ scale: isHovered ? 1.4 : 0.8 }}
+              transition={{ duration: 0.3 }}
             >
               {step.number}
             </motion.span>
+            {/* Orbiting dots */}
+            {isHovered && (
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <span className="absolute -top-2 left-1/2 w-2 h-2 bg-accent rounded-full -translate-x-1/2" />
+                <span className="absolute -right-2 top-1/2 w-2 h-2 bg-tertiary rounded-full -translate-y-1/2" />
+                <span className="absolute -bottom-2 left-1/2 w-2 h-2 bg-accent rounded-full -translate-x-1/2" />
+                <span className="absolute -left-2 top-1/2 w-2 h-2 bg-tertiary rounded-full -translate-y-1/2" />
+              </motion.div>
+            )}
           </motion.span>
           <motion.div
             className="flex-1"
@@ -68,6 +116,8 @@ function ProcessStep({ step, index }: ProcessStepProps) {
             whileHover={{ opacity: 1 }}
           >
             <motion.h3
+              ref={titleRef}
+              style={{ color: titleColor }}
               className="text-3xl md:text-4xl font-bold mb-4"
               whileHover={{ x: 4 }}
               transition={{ duration: 0.2 }}
@@ -86,52 +136,57 @@ function ProcessStep({ step, index }: ProcessStepProps) {
 
 export default function ProcessSection() {
   const sectionRef = useRef(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const [videoError, setVideoError] = useState(false);
+
+  // Scroll-based color animation for heading
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  // Interpolate color from white to red (tertiary) as it comes into center
+  const headingColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   return (
     <section
       ref={sectionRef}
-      className="py-24 md:py-32 bg-white relative overflow-hidden"
+      className="py-24 md:py-32 bg-black relative overflow-hidden"
     >
-      {/* Subtle background video pattern - only load when in view */}
-      {isInView && !videoError && (
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover scale-150 video-filter"
-            onError={() => {
-              setVideoError(true);
-            }}
-          >
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-          </video>
-        </div>
-      )}
+      {/* Dynamic background with multiple gradients */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-black pointer-events-none z-0" />
 
-      {/* Subtle image texture overlay */}
-      <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/images/hero/city-background.webp')] bg-cover bg-center bg-no-repeat" />
-      </div>
-
-      {/* Background accent */}
+      {/* Animated blue glow */}
       <motion.div
-        className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-gray-50/80 to-transparent opacity-50 z-0"
-        initial={{ x: "-100%" }}
-        animate={isInView ? { x: 0 } : { x: "-100%" }}
-        transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+        className="absolute top-1/4 -right-1/4 w-full h-full bg-accent/8 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 1.15, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
       />
 
-      {/* Animated gradient overlay */}
+      {/* Animated red glow accent */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-tertiary/5 pointer-events-none z-0"
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 2 }}
+        className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-tertiary/7 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 0.85, 1],
+          opacity: [0.2, 0.35, 0.2],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
       />
 
       <div className="container mx-auto px-6 relative z-10">
@@ -142,6 +197,8 @@ export default function ProcessSection() {
           className="max-w-4xl mx-auto mb-16"
         >
           <motion.h2
+            ref={headingRef}
+            style={{ color: headingColor }}
             className="text-hero md:text-display font-black mb-6 text-center leading-[0.9]"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}

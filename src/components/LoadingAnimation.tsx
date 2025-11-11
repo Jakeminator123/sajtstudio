@@ -51,43 +51,36 @@ export default function LoadingAnimation() {
             }}
           >
             {/* Phone base morphing */}
-            <motion.path
-              d="M0 16 Q0 14 2 14 L10 14 Q12 14 12 16 L12 18 Q12 20 10 20 L2 20 Q0 20 0 18 Z"
-              fill="#000000"
-              animate={{
-                d: [
-                  "M0 16 Q0 14 2 14 L10 14 Q12 14 12 16 L12 18 Q12 20 10 20 L2 20 Q0 20 0 18 Z",
-                  "M0 12 Q0 11 1 11 L11 11 Q12 11 12 12 L12 20 Q12 21 11 21 L1 21 Q0 21 0 20 Z",
-                  "M0 16 Q0 14 2 14 L10 14 Q12 14 12 16 L12 18 Q12 20 10 20 L2 20 Q0 20 0 18 Z"
-                ],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+            <motion.g
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+            >
+              <path
+                d="M0 16 Q0 14 2 14 L10 14 Q12 14 12 16 L12 18 Q12 20 10 20 L2 20 Q0 20 0 18 Z"
+                fill="#000000"
+              />
+            </motion.g>
           </motion.g>
           
           {/* Transformation arrow */}
-          <motion.path
-            d="M18 20 L22 20 M22 20 L20 18 M22 20 L20 22"
-            stroke="#0066FF"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ opacity: 0, pathLength: 0 }}
-            animate={{
-              opacity: [0, 1, 1, 0],
-              pathLength: [0, 1, 1, 0],
-            }}
+          <motion.g
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 1, 0] }}
             transition={{
               duration: 3,
               repeat: Infinity,
               ease: "easeInOut",
               times: [0, 0.3, 0.7, 1],
             }}
-          />
+          >
+            <path
+              d="M18 20 L22 20 M22 20 L20 18 M22 20 L20 22"
+              stroke="#0066FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </motion.g>
           
           {/* LED lights blinking */}
           <motion.circle

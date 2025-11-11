@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import { designTokens } from "@/config/designTokens";
 
@@ -18,8 +17,33 @@ function ServiceItem({
   description,
   delay = 0,
 }: ServiceItemProps) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // Mouse move handler for magnetic effect
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (rect) {
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+      setMousePos({ x, y });
+    }
+  };
+
+  // Scroll-based color animation for service titles
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  const titleColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   return (
     <motion.div
@@ -28,9 +52,19 @@ function ServiceItem({
       animate={isInView ? { opacity: 1 } : { opacity: 0 }}
       transition={{ duration: 0.8, delay, ease: [0.25, 0.1, 0.25, 1] }}
       className="group relative"
-      whileHover={{ x: 4 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={handleMouseMove}
+      style={{
+        transform: isHovered
+          ? `translate3d(${mousePos.x}px, ${mousePos.y}px, 0) rotateX(${
+              -mousePos.y * 0.5
+            }deg) rotateY(${mousePos.x * 0.5}deg)`
+          : undefined,
+      }}
+      whileHover={{ scale: 1.02 }}
     >
-      {/* Animated border line with gradient */}
+      {/* Animated border line with gradient - enhanced with blue/gray */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
@@ -39,12 +73,21 @@ function ServiceItem({
           delay: delay + 0.2,
           ease: [0.25, 0.1, 0.25, 1],
         }}
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent origin-left"
+        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-400 to-transparent origin-left"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, transparent, rgba(0, 102, 255, 0.3), rgba(156, 163, 175, 1), transparent)",
+        }}
       />
 
-      {/* Hover background effect */}
+      {/* Enhanced hover background effect with blue/gray */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100"
+        className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500
+          ${
+            parseInt(number) % 2 === 0
+              ? "from-accent/8 via-accent/4 to-transparent"
+              : "from-gray-900/8 via-gray-800/4 to-transparent"
+          }`}
         initial={{ x: "-100%" }}
         whileHover={{ x: 0 }}
         transition={{ duration: 0.5 }}
@@ -65,26 +108,76 @@ function ServiceItem({
               delay: delay + 0.3,
               ease: [0.34, 1.56, 0.64, 1],
             }}
-            whileHover={{ scale: 1.15, rotate: 5 }}
+            whileHover={{
+              scale: 1.15,
+              rotate: isHovered ? [0, -10, 10, -10, 0] : 0,
+              y: isHovered ? [0, -10, 0] : 0,
+            }}
+            transition={{ duration: 0.5 }}
             className={`text-8xl md:text-9xl font-black transition-all duration-500 leading-none relative
               ${
                 parseInt(number) % 2 === 0
                   ? "text-gray-100 group-hover:text-accent"
                   : "text-gray-100 group-hover:text-tertiary"
               }`}
+            style={{
+              transform: isHovered
+                ? `perspective(1000px) rotateY(${
+                    mousePos.x * 0.5
+                  }deg) rotateX(${-mousePos.y * 0.5}deg)`
+                : undefined,
+            }}
           >
             {number}
             {/* Glow effect */}
             <motion.span
-              className={`absolute inset-0 blur-2xl opacity-0 group-hover:opacity-60
+              className={`absolute inset-0 blur-2xl opacity-0 group-hover:opacity-60 scale-[0.8]
                 ${
                   parseInt(number) % 2 === 0 ? "text-accent" : "text-tertiary"
                 }`}
-              initial={{ scale: 0.8 }}
-              whileHover={{ scale: 1.3 }}
+              animate={{ scale: isHovered ? 1.5 : 0.8 }}
+              transition={{ duration: 0.3 }}
             >
               {number}
             </motion.span>
+            {/* Fantasy-style floating particles */}
+            {isHovered && (
+              <>
+                <motion.span
+                  className="absolute -top-4 -right-4 w-3 h-3 bg-tertiary rounded-full"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0],
+                    y: [-10, -30, -50],
+                    x: [0, 20, 40],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+                <motion.span
+                  className="absolute -bottom-4 -left-4 w-3 h-3 bg-accent rounded-full"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0],
+                    y: [10, 30, 50],
+                    x: [0, -20, -40],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.7 }}
+                />
+                <motion.span
+                  className="absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: [0, 0.7, 0],
+                    scale: [0.5, 1.5, 0.5],
+                    x: [-10, 10, -10],
+                    y: [-10, 10, -10],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                />
+              </>
+            )}
           </motion.span>
 
           {/* Content with staggered animation */}
@@ -99,6 +192,8 @@ function ServiceItem({
             }}
           >
             <motion.h3
+              ref={titleRef}
+              style={{ color: titleColor }}
               className="text-h2 font-bold mb-6 leading-tight"
               whileHover={{ x: 4 }}
               transition={{ duration: 0.2 }}
@@ -129,9 +224,22 @@ function ServiceItem({
 }
 
 export default function ServicesSection() {
-  const sectionRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const [videoError, setVideoError] = useState(false);
+
+  // Scroll-based color animation for heading
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  // Interpolate color from white to red (tertiary) as it comes into center
+  const headingColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   const services = [
     {
@@ -157,86 +265,82 @@ export default function ServicesSection() {
   return (
     <section
       ref={sectionRef}
-      className="py-16 sm:py-24 md:py-32 lg:py-48 bg-white relative overflow-hidden"
+      className="py-16 sm:py-24 md:py-32 lg:py-48 bg-black relative overflow-hidden"
     >
-      {/* Subtle background video pattern - only load when in view */}
-      {isInView && !videoError && (
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover scale-150 video-filter"
-            onError={() => {
-              setVideoError(true);
-            }}
-          >
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-          </video>
+      {/* Dynamic background with multiple gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black pointer-events-none z-0" />
+
+      {/* Animated large blue glow */}
+      <motion.div
+        className="absolute top-0 left-0 w-full h-full bg-accent/7 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.25, 0.4, 0.25],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Animated red glow accent */}
+      <motion.div
+        className="absolute -bottom-1/2 right-1/4 w-full h-full bg-tertiary/8 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 0.95, 1],
+          opacity: [0.2, 0.35, 0.2],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 3,
+        }}
+      />
+
+      <motion.div className="max-w-4xl mx-auto">
+        {/* Animated heading with scroll-based color */}
+        <motion.h2
+          ref={headingRef}
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          style={{ color: headingColor }}
+          className="text-hero md:text-display font-black mb-24 text-center leading-[0.9]"
+        >
+          Vad vi erbjuder
+        </motion.h2>
+
+        {/* Services list */}
+        <div className="space-y-0">
+          {services.map((service, index) => (
+            <ServiceItem
+              key={service.number}
+              number={service.number}
+              title={service.title}
+              description={service.description}
+              delay={index * 0.15}
+            />
+          ))}
         </div>
-      )}
 
-      {/* Subtle image texture overlay */}
-      <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/images/hero/future_whoman.webp')] bg-cover bg-center bg-no-repeat" />
-      </div>
-
-      {/* Background accent */}
-      <motion.div
-        className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gray-50/80 to-transparent opacity-50 z-0"
-        initial={{ x: "100%" }}
-        animate={isInView ? { x: 0 } : { x: "100%" }}
-        transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-      />
-
-      {/* Animated gradient overlay */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-tertiary/5 pointer-events-none z-0"
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 2 }}
-      />
-
-      <div className="container mx-auto px-6 relative">
-        <motion.div className="max-w-4xl mx-auto">
-          {/* Animated heading */}
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-            className="text-hero md:text-display font-black mb-24 text-center leading-[0.9]"
-          >
-            Vad vi erbjuder
-          </motion.h2>
-
-          {/* Services list */}
-          <div className="space-y-0">
-            {services.map((service, index) => (
-              <ServiceItem
-                key={service.number}
-                number={service.number}
-                title={service.title}
-                description={service.description}
-                delay={index * 0.15}
-              />
-            ))}
-          </div>
-
-          {/* Bottom accent line */}
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
-            transition={{
-              duration: 1.2,
-              delay: 0.6,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-            className="h-px bg-gradient-to-r from-transparent via-accent to-transparent mt-20 origin-center"
-          />
-        </motion.div>
-      </div>
+        {/* Bottom accent line - enhanced with blue/gray gradient */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
+          transition={{
+            duration: 1.2,
+            delay: 0.6,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
+          className="h-px mt-20 origin-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, transparent, rgba(0, 102, 255, 0.6), rgba(75, 85, 99, 1), rgba(0, 102, 255, 0.6), transparent)",
+          }}
+        />
+      </motion.div>
     </section>
   );
 }

@@ -17,9 +17,13 @@ export default function HeroSection() {
 
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
   const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
-  const imageY2 = useTransform(scrollYProgress, [0, 0.5], [0, 30]);
-  const imageY3 = useTransform(scrollYProgress, [0, 0.5], [0, -20]);
+  const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -30]);
+  
+  // Text animations
+  const headingX = useTransform(scrollYProgress, [0, 0.4], [0, -200]);
+  const headingOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const subtitleX = useTransform(scrollYProgress, [0, 0.4], [0, 200]);
+  const subtitleOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -83,7 +87,7 @@ export default function HeroSection() {
       {/* Dynamic video background with image overlays - only render on client */}
       {mounted && (
         <motion.div className="absolute inset-0 z-0" style={{ y }}>
-          {/* Primary video - telephone_ringin.mp4 (telefon som blir superdator) */}
+          {/* Primary video - noir_hero.mp4 as main video */}
           {!videoError && (
             <video
               ref={videoRef}
@@ -99,24 +103,24 @@ export default function HeroSection() {
                 setVideoError(true);
               }}
             >
-              <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
               <source src="/videos/noir_hero.mp4" type="video/mp4" />
+              <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
               <source src="/videos/background_vid.mp4" type="video/mp4" />
             </video>
           )}
 
-          {/* Main background image - alt_background.webp with beautiful animation */}
+          {/* Main background pattern - alt_background.webp */}
           <motion.div
             className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.15 }}
+            initial={{ opacity: 0, scale: 1.05 }}
             animate={{
-              opacity: [0.3, 0.5, 0.3],
-              scale: [1, 1.02, 1],
+              opacity: [0.15, 0.25, 0.15],
+              scale: [1, 1.01, 1],
             }}
             transition={{
               opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
               scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-              initial: { duration: 3, ease: "easeOut" },
+              initial: { duration: 2, ease: "easeOut" },
             }}
             style={{ y: imageY1 }}
           >
@@ -130,9 +134,9 @@ export default function HeroSection() {
             />
             {/* Subtle glow effect */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-tertiary/10"
+              className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
               animate={{
-                opacity: [0.3, 0.5, 0.3],
+                opacity: [0.2, 0.3, 0.2],
               }}
               transition={{
                 duration: 6,
@@ -142,44 +146,8 @@ export default function HeroSection() {
             />
           </motion.div>
 
-          {/* Secondary background images with parallax effect */}
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.2 }}
-            transition={{ duration: 2, delay: 0.5 }}
-            style={{ y: imageY2 }}
-          >
-            <Image
-              src="/images/hero/future_whoman.webp"
-              alt=""
-              fill
-              className="object-cover opacity-20 mix-blend-overlay"
-              unoptimized
-            />
-          </motion.div>
-
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.15 }}
-            transition={{ duration: 2, delay: 1 }}
-            style={{ y: imageY3 }}
-          >
-            <Image
-              src="/images/hero/city-background.webp"
-              alt=""
-              fill
-              className="object-cover opacity-15 mix-blend-overlay"
-              unoptimized
-            />
-          </motion.div>
-
           {/* Elegant dark overlay with gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-black/80" />
-
-          {/* Subtle color accents */}
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-tertiary/20" />
         </motion.div>
       )}
 
@@ -248,6 +216,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ opacity: headingOpacity, x: headingX }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center"
           >
             <motion.span
@@ -289,6 +258,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{ opacity: subtitleOpacity, x: subtitleX }}
             className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed"
           >
             Vi skapar skräddarsydda, toppmoderna webbplatser för företag som

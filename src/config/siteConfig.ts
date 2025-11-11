@@ -31,6 +31,12 @@ export const siteConfig = {
       { href: '/portfolio', label: 'Portfolio' },
       { href: '/contact', label: 'Kontakt' },
     ],
+    // Ankarlänkar för startsidan
+    homeAnchors: [
+      { href: '#tjanster', label: 'Tjänster' },
+      { href: '#process', label: 'Process' },
+      { href: '#omdomen', label: 'Omdömen' },
+    ],
   },
   
   // Sociala länkar (lägg till när de finns)

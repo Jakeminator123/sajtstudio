@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { uspContent } from "@/config/content/usps";
@@ -20,7 +19,20 @@ function USPFeature({
   delay = 0,
 }: USPFeatureProps) {
   const ref = useRef(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  // Scroll-based color animation for title
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  const titleColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   return (
     <motion.div
@@ -40,12 +52,21 @@ function USPFeature({
           delay: delay + 0.2,
           ease: [0.25, 0.1, 0.25, 1],
         }}
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent origin-left"
+        className="absolute top-0 left-0 right-0 h-px origin-left"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, transparent, rgba(0, 102, 255, 0.3), rgba(156, 163, 175, 1), transparent)",
+        }}
       />
 
-      {/* Hover background effect */}
+      {/* Enhanced hover background effect with blue/gray */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100"
+        className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500
+          ${
+            parseInt(number) % 2 === 0
+              ? "from-accent/8 via-accent/4 to-transparent"
+              : "from-gray-900/8 via-gray-800/4 to-transparent"
+          }`}
         initial={{ x: "-100%" }}
         whileHover={{ x: 0 }}
         transition={{ duration: 0.5 }}
@@ -99,6 +120,8 @@ function USPFeature({
             }}
           >
             <motion.h3
+              ref={titleRef}
+              style={{ color: titleColor }}
               className="text-h2 font-bold mb-6 leading-tight"
               whileHover={{ x: 4 }}
               transition={{ duration: 0.2 }}
@@ -130,44 +153,57 @@ function USPFeature({
 
 export default function USPSection() {
   const sectionRef = useRef(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const [videoError, setVideoError] = useState(false);
+
+  // Scroll-based color animation for title
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "center center", "end center"],
+  });
+
+  // Interpolate color from white to red (tertiary) as it comes into center
+  const titleColor = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
+  );
 
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-white overflow-hidden relative"
+      className="py-32 md:py-48 bg-black overflow-hidden relative"
     >
-      {/* Subtle background video pattern - only load when in view */}
-      {isInView && !videoError && (
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover scale-150 video-filter"
-            onError={() => {
-              setVideoError(true);
-            }}
-          >
-            <source src="/videos/noir_hero.mp4" type="video/mp4" />
-          </video>
-        </div>
-      )}
+      {/* Dynamic background with multiple gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black pointer-events-none z-0" />
 
-      {/* Subtle image texture overlay */}
-      <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/images/hero/alt_background.webp')] bg-cover bg-center bg-no-repeat" />
-      </div>
-
-      {/* Animated gradient overlay */}
+      {/* Animated large blue glow */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-tertiary/5 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 2 }}
+        className="absolute -top-1/2 -left-1/4 w-full h-full bg-accent/8 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Animated red glow accent */}
+      <motion.div
+        className="absolute bottom-0 right-0 w-96 h-96 bg-tertiary/8 rounded-full blur-3xl pointer-events-none z-0"
+        animate={{
+          scale: [1, 0.9, 1],
+          opacity: [0.2, 0.4, 0.2],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2,
+        }}
       />
 
       <div className="container mx-auto px-6 relative z-10">
@@ -179,6 +215,7 @@ export default function USPSection() {
         >
           <div className="text-center">
             <motion.h2
+              ref={titleRef}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{
@@ -186,7 +223,8 @@ export default function USPSection() {
                 delay: 0.1,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
-              className="text-hero md:text-display font-black mb-8 leading-[0.9]"
+              style={{ color: titleColor }}
+              className="text-hero md:text-display font-black mb-8 leading-[0.9] text-center"
             >
               {uspContent.title}
             </motion.h2>
