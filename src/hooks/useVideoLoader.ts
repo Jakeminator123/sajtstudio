@@ -31,35 +31,37 @@ export function useVideoLoader(
   // Set video playback rate for cinematic effect
   useEffect(() => {
     const video = videoRef.current;
-    if (video && !videoError && playbackRate !== undefined) {
-      // Handle video errors gracefully
-      const handleError = () => {
-        setVideoError(true);
-      };
+    if (!video || videoError || playbackRate === undefined) return;
 
-      // Wait for video to be loaded before setting playback rate
-      const handleLoadedMetadata = () => {
-        try {
+    // Handle video errors gracefully
+    const handleError = () => {
+      setVideoError(true);
+    };
+
+    // Wait for video to be loaded before setting playback rate
+    const handleLoadedMetadata = () => {
+      try {
+        if (video && !videoError) {
           video.playbackRate = playbackRate;
-        } catch (error) {
-          // Silently fail if playback rate can't be set
         }
-      };
-
-      video.addEventListener("error", handleError);
-
-      if (video.readyState >= 1) {
-        // Video metadata already loaded
-        handleLoadedMetadata();
-      } else {
-        video.addEventListener("loadedmetadata", handleLoadedMetadata);
+      } catch (error) {
+        // Silently fail if playback rate can't be set
       }
+    };
 
-      return () => {
-        video.removeEventListener("error", handleError);
-        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      };
+    video.addEventListener("error", handleError);
+
+    if (video.readyState >= 1) {
+      // Video metadata already loaded
+      handleLoadedMetadata();
+    } else {
+      video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
     }
+
+    return () => {
+      video.removeEventListener("error", handleError);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
   }, [videoError, playbackRate]);
 
   return { videoRef, videoError, mounted };

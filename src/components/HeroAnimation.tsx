@@ -8,7 +8,6 @@ import { prefersReducedMotion } from "@/lib/performance";
 
 export default function HeroAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const { videoRef, videoError, mounted } = useVideoLoader();
   
@@ -96,18 +95,6 @@ export default function HeroAnimation() {
   );
   
   // Video scale - normal growth, then extra zoom during question section
-  // Base scale up to 0.7 scroll progress
-  const baseVideoScale = useTransform(
-    scrollYProgress,
-    [0, 0.5, 0.7],
-    [0.7, 1.5, 2.5]
-  );
-  // Extra zoom during question section (0.7-1.0)
-  const questionVideoScale = useTransform(
-    scrollYProgress,
-    [0.7, 0.85, 1.0],
-    [2.5, 3.0, 3.5]
-  );
   // Use question scale when in that range, otherwise base scale
   const videoScale = useTransform(
     scrollYProgress,
@@ -413,13 +400,12 @@ export default function HeroAnimation() {
 
           {/* Question texts - Design? and Functionality? - positioned absolutely within container, sliding in from outside viewport */}
           <motion.div
-            className="absolute left-0 top-1/2 pointer-events-none z-[100]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100]"
             style={{
               x: designTextX,
               opacity: designTextOpacity,
               scale: designTextScale,
               rotate: designTextRotate,
-              transform: "translateY(-50%)",
             }}
           >
             <h3
@@ -435,13 +421,12 @@ export default function HeroAnimation() {
           </motion.div>
 
           <motion.div
-            className="absolute right-0 top-1/2 pointer-events-none z-[100]"
+            className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none z-[100]"
             style={{
               x: functionalityTextX,
               opacity: functionalityTextOpacity,
               scale: functionalityTextScale,
               rotate: functionalityTextRotate,
-              transform: "translateY(-50%)",
             }}
           >
             <h3
@@ -458,7 +443,6 @@ export default function HeroAnimation() {
 
           {/* Video container - slides into center as images separate */}
           <motion.div
-            ref={videoContainerRef}
             style={{
               x: "-50%",
               y: videoY,

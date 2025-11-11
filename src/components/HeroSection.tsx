@@ -2,12 +2,26 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useRef, useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useVideoLoader } from "@/hooks/useVideoLoader";
 import { prefersReducedMotion } from "@/lib/performance";
 
 export default function HeroSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  // Only load video on mobile devices (below md breakpoint)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
   const { videoRef, videoError, mounted } = useVideoLoader({
     playbackRate: 0.3,
   });
@@ -46,15 +60,14 @@ export default function HeroSection() {
 
   return (
     <motion.section
-      ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black"
     >
       {/* Dynamic video background with image overlays - only render on client */}
       {/* Video only visible on mobile - desktop uses HeroAnimation instead */}
       {mounted && (
         <motion.div className="absolute inset-0 z-0" style={{ y }}>
-          {/* Primary video - noir_hero.mp4 as main video - hidden on desktop (md and up) */}
-          {!videoError && (
+          {/* Primary video - noir_hero.mp4 as main video - only load and show on mobile */}
+          {isMobile && !videoError && (
             <video
               ref={videoRef}
               autoPlay
@@ -63,7 +76,7 @@ export default function HeroSection() {
               playsInline
               preload="metadata"
               poster="/images/hero/alt_background.webp"
-              className="w-full h-full object-cover hero-video-opacity md:hidden"
+              className="w-full h-full object-cover hero-video-opacity"
               onError={() => {
                 // Error handled by hook, this is just a fallback
               }}
