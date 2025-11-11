@@ -486,7 +486,7 @@ export default function HeroAnimation() {
                     });
                   }}
                 >
-                  <source src="/videos/noir_hero.mp4" type="video/mp4" />
+                  <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
                 </video>
               )}
               {(!mounted || videoError) && (

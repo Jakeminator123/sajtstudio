@@ -126,7 +126,7 @@ export default function RootLayout({
         {/* Preload hero video metadata only for faster initial load */}
         <link
           rel="preload"
-          href="/videos/noir_hero.mp4"
+          href="/videos/telephone_ringin.mp4"
           as="video"
           type="video/mp4"
         />
