@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useVideoLoader } from "@/hooks/useVideoLoader";
 import { prefersReducedMotion } from "@/lib/performance";
 
@@ -14,6 +14,48 @@ export default function HeroAnimation() {
   
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+  
+  // Ensure video plays when it becomes visible
+  useEffect(() => {
+    if (!mounted || videoError || !videoRef.current) return;
+    
+    const video = videoRef.current;
+    
+    // Try to play video when it's loaded
+    const tryPlay = async () => {
+      try {
+        await video.play();
+      } catch (error) {
+        // Autoplay blocked - that's okay, user can interact
+      }
+    };
+    
+    // If video is already loaded, try to play
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener('loadeddata', tryPlay, { once: true });
+    }
+    
+    // Also try when video enters viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            tryPlay();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    
+    observer.observe(video);
+    
+    return () => {
+      observer.disconnect();
+      video.removeEventListener('loadeddata', tryPlay);
+    };
+  }, [mounted, videoError, videoRef]);
 
   // Scroll-based color animation for heading
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -442,11 +484,17 @@ export default function HeroAnimation() {
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   className="w-full h-auto relative z-0"
-                  poster="/images/hero/alt_background.webp"
                   onError={() => {
                     // Error handled by hook, this is just a fallback
+                  }}
+                  onLoadedData={(e) => {
+                    // Force play when video is loaded
+                    const video = e.currentTarget;
+                    video.play().catch(() => {
+                      // Autoplay blocked, but that's okay
+                    });
                   }}
                 >
                   <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
