@@ -128,14 +128,63 @@ npm run build
 ### Linter Check
 ✅ **Inga fel** - Projektet är linter-rent
 
+## Ytterligare Problem Identifierade och Åtgärdade
+
+### 2. Duplicerad Kod i Video-hantering
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Både `HeroSection.tsx` och `HeroAnimation.tsx` hade identisk kod för:
+- `mounted` state management
+- `videoError` state management  
+- Video error handling
+- Video playback rate setting
+
+Detta skapade onödig duplicering och svårigheter vid underhåll.
+
+**Lösning:**
+Skapade en shared hook `useVideoLoader` i `src/hooks/useVideoLoader.ts` som centraliserar all video-hantering. Båda komponenterna använder nu denna hook.
+
+**Filer påverkade:**
+- `src/components/HeroSection.tsx` (refaktorerad)
+- `src/components/HeroAnimation.tsx` (refaktorerad)
+- `src/hooks/useVideoLoader.ts` (ny fil)
+
+### 3. Bakgrundsvideo Laddas För Sent
+
+**Status:** ✅ ÅTGÄRDAD
+
+**Beskrivning:**
+Hero-videon i `HeroSection.tsx` hade `preload="metadata"` vilket innebar att videon laddades för sent. Detta skapade en dålig användarupplevelse där bakgrundsvideon inte var redo när användaren kom till sidan.
+
+**Lösning:**
+1. Lade till `<link rel="preload">` för hero-videon i `layout.tsx` för tidigare laddning
+2. Ändrade `preload="metadata"` till `preload="auto"` för hero-videon i `HeroSection.tsx`
+3. HeroAnimation behåller `preload="metadata"` eftersom den är längre ner på sidan
+
+**Filer påverkade:**
+- `src/app/layout.tsx` (preload länk tillagd)
+- `src/components/HeroSection.tsx` (preload ändrad till "auto")
+
+**Resultat:**
+- Hero-videon börjar ladda tidigare via preload i layout
+- Hero-videon laddas automatiskt när komponenten renderas
+- Bättre användarupplevelse med snabbare visuell feedback
+
 ## Slutsats
 
-Projektet är välstrukturerat och visar tecken på professionell utveckling. Den identifierade buggen var relativt liten (en saknad Tailwind-färgdefinition) och har nu åtgärdats. Projektet bygger utan fel och är redo för deployment.
+Projektet är välstrukturerat och visar tecken på professionell utveckling. Identifierade buggar och problem har nu åtgärdats. Projektet bygger utan fel och är redo för deployment.
 
-**Totalt antal buggar hittade:** 1  
-**Totalt antal buggar åtgärdade:** 1  
+**Totalt antal buggar/problem hittade:** 3  
+**Totalt antal buggar/problem åtgärdade:** 3  
 **Kritiska buggar:** 0  
 **Varningar:** 0
+
+**Förbättringar:**
+- ✅ Borttagen duplicerad kod (DRY-princip)
+- ✅ Förbättrad video-laddningstid
+- ✅ Bättre kodorganisation med shared hooks
 
 ## Rekommendationer för Framtida Utveckling
 

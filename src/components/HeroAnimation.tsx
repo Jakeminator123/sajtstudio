@@ -2,14 +2,14 @@
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useVideoLoader } from "@/hooks/useVideoLoader";
 
 export default function HeroAnimation() {
-  const [videoError, setVideoError] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
+  const { videoRef, videoError, mounted } = useVideoLoader();
 
   // Scroll-based color animation for heading
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -24,11 +24,6 @@ export default function HeroAnimation() {
     [0, 0.5, 1],
     ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
   );
-
-  // Set mounted state to prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -302,6 +297,7 @@ export default function HeroAnimation() {
 
               {mounted && !videoError && (
                 <video
+                  ref={videoRef}
                   autoPlay
                   loop
                   muted
@@ -310,7 +306,7 @@ export default function HeroAnimation() {
                   className="w-full h-auto relative z-0"
                   poster="/images/hero/alt_background.webp"
                   onError={() => {
-                    setVideoError(true);
+                    // Error handled by hook, this is just a fallback
                   }}
                 >
                   <source src="/videos/telephone_ringin.mp4" type="video/mp4" />

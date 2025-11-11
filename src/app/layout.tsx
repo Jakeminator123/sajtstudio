@@ -122,6 +122,13 @@ export default function RootLayout({
           href="/images/hero/alt_background.webp"
           as="image"
         />
+        {/* Preload hero video for faster loading */}
+        <link
+          rel="preload"
+          href="/videos/noir_hero.mp4"
+          as="video"
+          type="video/mp4"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([

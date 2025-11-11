@@ -2,13 +2,14 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { useVideoLoader } from "@/hooks/useVideoLoader";
 
 export default function HeroSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const [videoError, setVideoError] = useState(false);
+  const { videoRef, videoError, mounted } = useVideoLoader({
+    playbackRate: 0.3,
+  });
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -24,46 +25,6 @@ export default function HeroSection() {
   const headingOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const subtitleX = useTransform(scrollYProgress, [0, 0.4], [0, 200]);
   const subtitleOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-
-  // Set mounted state to prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Set video playback rate for cinematic effect
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video && !videoError) {
-      // Handle video errors gracefully
-      const handleError = () => {
-        console.warn("Video failed to load, using fallback background");
-        setVideoError(true);
-      };
-
-      // Wait for video to be loaded before setting playback rate
-      const handleLoadedMetadata = () => {
-        try {
-          video.playbackRate = 0.3;
-        } catch (error) {
-          console.warn("Failed to set video playback rate:", error);
-        }
-      };
-
-      video.addEventListener("error", handleError);
-
-      if (video.readyState >= 1) {
-        // Video metadata already loaded
-        handleLoadedMetadata();
-      } else {
-        video.addEventListener("loadedmetadata", handleLoadedMetadata);
-      }
-
-      return () => {
-        video.removeEventListener("error", handleError);
-        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      };
-    }
-  }, [videoError]);
 
   // Generate stable particle positions (only on client)
   const particles = mounted
@@ -95,12 +56,11 @@ export default function HeroSection() {
               loop
               muted
               playsInline
-              preload="metadata"
+              preload="auto"
               poster="/images/hero/alt_background.webp"
               className="w-full h-full object-cover hero-video-opacity"
               onError={() => {
-                // Silently handle video errors - fallback to poster image
-                setVideoError(true);
+                // Error handled by hook, this is just a fallback
               }}
             >
               <source src="/videos/noir_hero.mp4" type="video/mp4" />
