@@ -50,9 +50,10 @@ export default function HeroSection() {
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black"
     >
       {/* Dynamic video background with image overlays - only render on client */}
+      {/* Video only visible on mobile - desktop uses HeroAnimation instead */}
       {mounted && (
         <motion.div className="absolute inset-0 z-0" style={{ y }}>
-          {/* Primary video - noir_hero.mp4 as main video */}
+          {/* Primary video - noir_hero.mp4 as main video - hidden on desktop (md and up) */}
           {!videoError && (
             <video
               ref={videoRef}
@@ -62,7 +63,7 @@ export default function HeroSection() {
               playsInline
               preload="metadata"
               poster="/images/hero/alt_background.webp"
-              className="w-full h-full object-cover hero-video-opacity"
+              className="w-full h-full object-cover hero-video-opacity md:hidden"
               onError={() => {
                 // Error handled by hook, this is just a fallback
               }}
