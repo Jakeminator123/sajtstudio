@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sajtstudio.se
 
-## Getting Started
+Modern företagswebbplats inspirerad av Fantasy's design, byggd med Next.js 16, React 19, TypeScript, Tailwind CSS och Framer Motion.
 
-First, run the development server:
+## 🚀 Snabbstart
 
 ```bash
+# Installera beroenden
+npm install
+
+# Starta utvecklingsserver
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Bygg för produktion
+npm run build
+
+# Starta produktionsserver
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Projektstruktur
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+sajtstudio/
+├── src/
+│   ├── app/                    # Next.js App Router sidor
+│   ├── components/             # React-komponenter
+│   ├── config/                 # Konfiguration och design tokens
+│   │   ├── designTokens.ts    # 🎨 Ändra färger/typsnitt här
+│   │   └── siteConfig.ts       # Site metadata
+│   └── lib/                    # Utility functions
+├── public/                     # Statiska filer
+├── PROJECT_DOCUMENTATION.md   # 📚 Fullständig dokumentation
+├── DESIGN_SYSTEM.md            # 🎨 Designsystem guide
+└── sajtstudio_roadmap.txt     # Detaljerad projektplan
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎨 Ändra Design
 
-## Learn More
+### Färger
+Redigera `src/config/designTokens.ts`:
+```typescript
+accent: {
+  DEFAULT: '#0000FF', // Ändra till önskad färg
+  hover: '#0000CC',
+  light: '#3333FF',
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+**Viktigt**: Uppdatera också `tailwind.config.ts` med samma värden för konsistens.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Typsnitt
+Ändra i `src/config/designTokens.ts` → `typography.fonts.sans`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Och uppdatera `src/app/layout.tsx` för att importera nytt typsnitt från Google Fonts.
 
-## Deploy on Vercel
+### Spacing
+Ändra i `src/config/designTokens.ts` → `spacing`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📚 Dokumentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **PROJECT_DOCUMENTATION.md** - Fullständig projektdokumentation
+- **DESIGN_SYSTEM.md** - Detaljerad designsystem guide
+- **.cursorrules** - AI-assistent kontext
+- **sajtstudio_roadmap.txt** - Projektplan och designvision
+
+## 🛠 Teknisk Stack
+
+- **Next.js 16** - React-ramverk med App Router
+- **React 19** - UI-bibliotek
+- **TypeScript** - Typad JavaScript
+- **Tailwind CSS** - Utility-first CSS
+- **Framer Motion** - Animationer
+
+## 🚢 Deployment
+
+Projektet är konfigurerat för Render via `render.yaml`.
+
+### Steg:
+1. Pusha till GitHub/GitLab
+2. Koppla repo i Render Dashboard
+3. Render hittar automatiskt `render.yaml`
+4. Konfigurera custom domain `sajtstudio.se`
+
+## 🎯 Designprinciper
+
+- ✅ Monokrom minimalism med accentfärg
+- ✅ Stora typografiska element
+- ✅ Segmenterad layout
+- ✅ Interaktiva inslag (hover, scroll)
+- ✅ Lekfull detalj (t.ex. klocka på kontaktsidan)
+
+## 📝 Best Practices
+
+1. **Använd Design Tokens**: Importera från `@/config/designTokens.ts`
+2. **Path Aliases**: Använd `@/` för imports från `src/`
+3. **Responsiv Design**: Bygg mobil-först
+4. **TypeScript**: Använd strikt typing
+5. **Komponenter**: Varje komponent i egen fil
+
+## 🔗 Viktiga länkar
+
+- Health check: `/api/health`
+- Startsida: `/`
+- Portfolio: `/portfolio`
+- Kontakt: `/contact`
+
+---
+
+**Version**: 1.0.0  
+**Senast uppdaterad**: 2025-11-11
