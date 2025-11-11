@@ -112,8 +112,8 @@ function ServiceItem({
               scale: 1.15,
               rotate: isHovered ? [0, -10, 10, -10, 0] : 0,
               y: isHovered ? [0, -10, 0] : 0,
+              transition: { duration: 0.5 },
             }}
-            transition={{ duration: 0.5 }}
             className={`text-8xl md:text-9xl font-black transition-all duration-500 leading-none relative
               ${
                 parseInt(number) % 2 === 0
