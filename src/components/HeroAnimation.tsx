@@ -222,7 +222,7 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-visible"
+      className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
     >
       {/* Background pattern - alt_background.webp */}
       <div className="absolute inset-0 opacity-10 z-0">
@@ -284,7 +284,7 @@ export default function HeroAnimation() {
         </motion.div>
 
         {/* Container for video and images that can overlap */}
-        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-visible">
+        <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] z-30 overflow-hidden">
           {/* Images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}
@@ -376,10 +376,10 @@ export default function HeroAnimation() {
               top: "50%",
               zIndex: 50,
             }}
-            className="absolute w-full max-w-5xl overflow-visible"
+            className="absolute w-full max-w-5xl"
           >
             {/* Question texts - Design? and Functionality? */}
-            {/* Positioned relative to video container but outside it */}
+            {/* Positioned relative to video container but clamped to viewport */}
             <motion.div
               className="absolute pointer-events-none"
               style={{
@@ -387,13 +387,14 @@ export default function HeroAnimation() {
                 opacity: designTextOpacity,
                 scale: designTextScale,
                 rotate: designTextRotate,
-                left: "calc(-50vw - 2rem)",
+                left: "max(0px, calc(-50% - 6rem))",
                 top: "50%",
                 zIndex: 60,
+                maxWidth: "calc(50vw - 2rem)",
               }}
             >
               <motion.h3
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-2 sm:px-4"
                 style={{
                   textShadow: "0 0 40px rgba(0, 102, 255, 0.7), 0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)",
                   WebkitTextStroke: "2px rgba(0, 102, 255, 0.4)",
@@ -410,13 +411,14 @@ export default function HeroAnimation() {
                 opacity: functionalityTextOpacity,
                 scale: functionalityTextScale,
                 rotate: functionalityTextRotate,
-                right: "calc(-50vw - 2rem)",
+                right: "max(0px, calc(-50% - 6rem))",
                 top: "50%",
                 zIndex: 60,
+                maxWidth: "calc(50vw - 2rem)",
               }}
             >
               <motion.h3
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-2 sm:px-4"
+                className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-2 sm:px-4"
                 style={{
                   textShadow: "0 0 40px rgba(255, 0, 51, 0.7), 0 0 80px rgba(255, 0, 51, 0.5), 0 0 120px rgba(255, 0, 51, 0.3)",
                   WebkitTextStroke: "2px rgba(255, 0, 51, 0.4)",

@@ -107,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className={inter.variable} data-scroll-behavior="smooth">
+    <html lang="sv" className={inter.variable} data-scroll-behavior="smooth" style={{ overflowX: 'hidden', width: '100%' }}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -139,7 +139,7 @@ export default function RootLayout({
           ])}
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" style={{ overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
         <SkipLink />
         <ErrorBoundary>
           <PageTransition>{children}</PageTransition>
