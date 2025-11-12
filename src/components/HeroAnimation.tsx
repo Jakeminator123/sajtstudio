@@ -162,12 +162,12 @@ export default function HeroAnimation() {
     return () => unsubscribe();
   }, [scrollYProgress, explosionTriggered, imagesInView, textsShouldStick]);
 
-  // Special section: When images disappear and video is prominent (scroll 0.7-1.0)
-  // This creates a "Design? vs Functionality?" moment
+  // Special section: When images disappear and video is prominent (scroll 0.5-1.0)
+  // This creates a "Design? vs Functionality?" moment - starts earlier for better visibility
   const questionSectionProgress = useTransform(
     scrollYProgress,
-    [0.7, 0.85, 1.0],
-    [0, 1, 1]
+    [0.5, 0.65, 0.85, 1.0],
+    [0, 0.3, 1, 1]
   );
 
   // Video animation - starts above and slides into center, then stays centered during zoom
@@ -182,8 +182,8 @@ export default function HeroAnimation() {
   // Video opacity - smooth fade-in, fully visible during zoom for immersive effect
   const videoOpacity = useTransform(
     scrollYProgress,
-    [0, 0.35, 0.5, 0.58, 0.65, 0.75, 0.85, 0.9, 1],
-    [0, 0.05, 0.15, 0.35, 0.65, 0.92, 1, 1, 1] // Fully visible during zoom phase
+    [0, 0.3, 0.45, 0.55, 0.65, 0.75, 0.85, 0.9, 1],
+    [0, 0.1, 0.3, 0.6, 0.85, 1, 1, 1, 1] // More visible earlier, fully visible during zoom phase
   );
 
   // Video scale - smooth, continuous zoom that creates immersive effect
@@ -593,6 +593,16 @@ export default function HeroAnimation() {
         {/* MEDIA CONTAINER - Video and images */}
         {/* ============================================ */}
         <div className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 overflow-visible">
+          {/* Red background glow behind images when they explode */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-15"
+            style={{
+              opacity: useTransform(scrollYProgress, [0.5, 0.65, 0.8], [0, 0.4, 0.2]),
+              background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.6) 0%, rgba(255, 0, 51, 0.3) 40%, transparent 70%)',
+              filter: 'blur(80px)',
+            }}
+          />
+          
           {/* Portfolio images grid - splits apart as you scroll */}
           <motion.div
             ref={imagesContainerRef}

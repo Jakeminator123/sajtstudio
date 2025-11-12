@@ -50,7 +50,7 @@ export default function ProcessSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="section-spacing-md bg-white text-gray-900 relative overflow-hidden"
+      className="section-spacing-md bg-black text-white relative overflow-hidden"
       style={{
         opacity,
         scale,
@@ -58,7 +58,7 @@ export default function ProcessSection() {
         rotateY
       }}
     >
-      {/* Background layers */}
+      {/* Background layers - much darker */}
       <div className="absolute inset-0 z-0">
         {/* Main background image */}
         <Image
@@ -66,7 +66,7 @@ export default function ProcessSection() {
           alt=""
           fill
           className="object-cover"
-          style={{ opacity: 0.5 }}
+          style={{ opacity: 0.15 }}
           sizes="100vw"
           priority={false}
         />
@@ -76,12 +76,12 @@ export default function ProcessSection() {
           src="/images/hero/hero-animation.gif"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.3, mixBlendMode: 'screen' }}
+          style={{ opacity: 0.1, mixBlendMode: 'screen' }}
           loading="lazy"
         />
 
-        {/* White overlay for readability */}
-        <div className="absolute inset-0 bg-white/70" />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/85" />
       </div>
 
       {/* Smoke effect */}
@@ -99,18 +99,18 @@ export default function ProcessSection() {
             ease: designTokens.animation.framerEasing.smooth
           }}
         >
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-none">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vår Process"
-              className="bg-gradient-to-r from-gray-900 via-accent to-gray-900 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
             />
           </h2>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-2xl md:text-3xl text-white/80 max-w-3xl mx-auto font-medium">
             <WordReveal
               text="Från idé till lansering - så jobbar vi"
               delay={0.3}
               staggerDelay={0.05}
-              className="text-gray-600"
+              className="text-white/80"
             />
           </p>
         </motion.div>
@@ -128,7 +128,7 @@ export default function ProcessSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/50 backdrop-blur-sm p-6 rounded-sm hover:bg-white/90 transition-all duration-500 border border-gray-100"
+              className="group relative bg-white/5 backdrop-blur-md p-8 rounded-lg hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
               {/* Number indicator */}
               <motion.div
@@ -136,7 +136,7 @@ export default function ProcessSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-accent to-accent-dark text-white font-mono text-2xl font-bold mb-6 group-hover:scale-110 transition-all duration-300 rounded-sm shadow-lg"
+                className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-accent via-tertiary to-accent-dark text-white font-mono text-3xl font-black mb-6 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-[0_0_30px_rgba(0,102,255,0.5)]"
               >
                 {step.number}
               </motion.div>
@@ -147,7 +147,7 @@ export default function ProcessSection() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.3 }}
-                className="text-3xl md:text-4xl font-black mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-accent group-hover:to-accent-dark transition-all duration-300"
+                className="text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-white via-accent to-tertiary bg-clip-text text-transparent group-hover:from-accent group-hover:via-tertiary group-hover:to-accent transition-all duration-300"
               >
                 {step.title}
               </motion.h3>
@@ -158,7 +158,7 @@ export default function ProcessSection() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.4 }}
-                className="text-gray-700 text-lg leading-relaxed"
+                className="text-white/70 text-lg md:text-xl leading-relaxed"
               >
                 {step.description}
               </motion.p>
@@ -169,7 +169,7 @@ export default function ProcessSection() {
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.5, duration: 0.8 }}
-                className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-transparent origin-left"
+                className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-accent via-tertiary to-transparent origin-left"
                 style={{ width: "80%" }}
               />
             </motion.div>

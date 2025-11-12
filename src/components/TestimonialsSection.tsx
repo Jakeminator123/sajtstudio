@@ -46,25 +46,25 @@ export default function TestimonialsSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="section-spacing-md bg-white text-gray-900 relative overflow-hidden"
+      className="section-spacing-md bg-black text-white relative overflow-hidden"
       style={{ 
         opacity, 
         scale 
       }}
     >
-      {/* Background layers */}
+      {/* Background layers - much darker */}
       <div className="absolute inset-0">
         {/* GIF background only */}
         <img
           src="/images/hero/hero-animation.gif"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.6 }}
+          style={{ opacity: 0.15 }}
           loading="eager"
         />
 
-        {/* White overlay for readability */}
-        <div className="absolute inset-0 bg-white/40" />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/85" />
       </div>
 
       {/* Smoke effect */}
@@ -83,14 +83,14 @@ export default function TestimonialsSection() {
             ease: designTokens.animation.framerEasing.smooth
           }}
         >
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-none">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vad Våra Kunder Säger"
-              className="bg-gradient-to-r from-gray-900 via-accent to-gray-900 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
             />
           </h2>
           <motion.p
-            className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto"
+            className="text-2xl md:text-3xl text-white/80 max-w-3xl mx-auto font-medium"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -113,7 +113,7 @@ export default function TestimonialsSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/90 backdrop-blur-sm p-8 hover:shadow-2xl hover:bg-white transition-all duration-500 border border-gray-100"
+              className="group relative bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
               {/* Quote icon */}
               <motion.div
@@ -121,10 +121,10 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="w-12 h-12 bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-6 rounded-sm"
+                className="w-14 h-14 bg-gradient-to-br from-accent/30 via-tertiary/20 to-accent/10 flex items-center justify-center mb-6 rounded-lg shadow-[0_0_20px_rgba(0,102,255,0.3)]"
               >
                 <svg
-                  className="w-6 h-6 text-accent"
+                  className="w-7 h-7 text-accent"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -138,7 +138,7 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.3 }}
-                className="text-gray-700 text-lg leading-relaxed mb-6 italic"
+                className="text-white/80 text-lg md:text-xl leading-relaxed mb-6 italic"
               >
                 "{testimonial.quote}"
               </motion.p>
@@ -149,16 +149,16 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.4 }}
-                className="border-t border-gray-200 pt-6"
+                className="border-t border-white/20 pt-6"
               >
-                <div className="font-bold text-gray-900">{testimonial.author}</div>
-                <div className="text-sm text-gray-600">
+                <div className="font-bold text-white text-lg">{testimonial.author}</div>
+                <div className="text-sm text-white/60">
                   {testimonial.role}, {testimonial.company}
                 </div>
               </motion.div>
 
               {/* Accent line */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent via-accent-light to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent via-tertiary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </motion.div>
           ))}
         </div>
