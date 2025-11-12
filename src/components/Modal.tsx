@@ -23,6 +23,8 @@ export default function Modal({
 
   // Handle escape key
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
         onClose();
@@ -35,36 +37,38 @@ export default function Modal({
 
   // Lock body scroll and trap focus when modal is open
   useEffect(() => {
-    if (isOpen) {
-      // Lock body scroll - use getComputedStyle to get actual values
-      const computedStyle = window.getComputedStyle(document.body);
-      const originalOverflow = computedStyle.overflow;
-      const originalPaddingRight = computedStyle.paddingRight;
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
+    if (!isOpen || typeof window === 'undefined' || typeof document === 'undefined') return;
+    
+    // Lock body scroll - use getComputedStyle to get actual values
+    const computedStyle = window.getComputedStyle(document.body);
+    const originalOverflow = computedStyle.overflow;
+    const originalPaddingRight = computedStyle.paddingRight;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
 
-      document.body.style.overflow = "hidden";
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    // Trap focus after a small delay to ensure modal is rendered
+    let cleanupFocusTrap: (() => void) | undefined;
+    const focusTrapTimeout = setTimeout(() => {
+      if (modalRef.current) {
+        cleanupFocusTrap = trapFocus(modalRef.current);
       }
+    }, 100);
 
-      // Trap focus after a small delay to ensure modal is rendered
-      let cleanupFocusTrap: (() => void) | undefined;
-      const focusTrapTimeout = setTimeout(() => {
-        if (modalRef.current) {
-          cleanupFocusTrap = trapFocus(modalRef.current);
-        }
-      }, 100);
-
-      return () => {
+    return () => {
+      if (typeof document !== 'undefined') {
         document.body.style.overflow = originalOverflow;
         document.body.style.paddingRight = originalPaddingRight;
-        clearTimeout(focusTrapTimeout);
-        if (cleanupFocusTrap) {
-          cleanupFocusTrap();
-        }
-      };
-    }
+      }
+      clearTimeout(focusTrapTimeout);
+      if (cleanupFocusTrap) {
+        cleanupFocusTrap();
+      }
+    };
   }, [isOpen]);
 
   const maxWidthClasses = {

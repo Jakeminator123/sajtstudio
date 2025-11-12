@@ -26,6 +26,8 @@ export default function TransitionBridge() {
 
     // Trigger button animation when words reach it
     useEffect(() => {
+        if (typeof document === 'undefined') return;
+        
         const unsubscribe = wordsFlyUp.onChange(value => {
             if (value > 0.9 && !buttonShake) {
                 setButtonShake(true);

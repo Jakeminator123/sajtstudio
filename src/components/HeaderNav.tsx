@@ -28,10 +28,10 @@ export default function HeaderNav() {
 
   // Track current hash
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const updateHash = () => {
-      if (typeof window !== 'undefined') {
-        setCurrentHash(window.location.hash);
-      }
+      setCurrentHash(window.location.hash);
     };
 
     updateHash();
@@ -42,13 +42,17 @@ export default function HeaderNav() {
 
   // Lock body scroll when menu is open
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     if (menuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "";
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = "";
+      }
     };
   }, [menuOpen]);
 
