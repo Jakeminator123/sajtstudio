@@ -55,11 +55,11 @@ export default function Button({
     ${className}
   `.trim();
 
-  const motionProps: HTMLMotionProps<any> = {
+  const motionProps = {
     whileHover: disabled || loading ? {} : { scale: 1.05 },
     whileTap: disabled || loading ? {} : { scale: 0.95 },
     transition: { duration: 0.2 },
-  };
+  } as const;
 
   const content = (
     <>

@@ -14,7 +14,9 @@ export function getColor(path: string): string {
   for (const part of parts) {
     value = value[part];
     if (value === undefined) {
-      console.warn(`Color path "${path}" not found in design tokens`);
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn(`Color path "${path}" not found in design tokens`);
+      }
       return '#000000';
     }
   }

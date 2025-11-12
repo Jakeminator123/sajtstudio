@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/performance";
@@ -188,7 +188,7 @@ function AnimatedText({
 }: {
   text: string;
   className?: string;
-  scrollProgress: any;
+  scrollProgress: MotionValue<number>;
   shouldReduceMotion: boolean;
   mounted: boolean;
 }) {
@@ -346,9 +346,10 @@ export default function HeroSection() {
   const subtitleX = useTransform(scrollYProgress, [0, 0.4], [0, 200]);
   const subtitleOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
-  // Generate stable particle positions (only on client)
-  const particles = mounted
-    ? Array.from({ length: 20 }, (_, i) => {
+  // Generate stable particle positions (only on client) - memoized for performance
+  const particles = useMemo(() => {
+    if (!mounted) return [];
+    return Array.from({ length: 20 }, (_, i) => {
       // Use index as seed for consistent positioning
       const seed = i * 0.618033988749895; // Golden ratio for better distribution
       return {
@@ -357,8 +358,8 @@ export default function HeroSection() {
         duration: 3 + (seed % 2),
         delay: seed % 2,
       };
-    })
-    : [];
+    });
+  }, [mounted]);
 
   // Generate stable rain drops positions (deterministic for hydration)
   const rainDrops = useMemo(() => {
@@ -490,7 +491,7 @@ export default function HeroSection() {
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 poster="/images/hero/alt_background.webp"
                 className="w-full h-full object-cover"
                 style={{ filter: 'brightness(0.8) contrast(0.9)' }}

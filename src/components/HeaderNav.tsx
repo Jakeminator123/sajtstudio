@@ -65,6 +65,8 @@ export default function HeaderNav() {
 
   // Random shimmer effect on nav links - only after mount to avoid hydration mismatch
   useEffect(() => {
+    if (navLinks.length === 0) return;
+    
     // Small delay to ensure hydration is complete
     const timeout = setTimeout(() => {
       shimmerIntervalRef.current = setInterval(() => {
@@ -82,6 +84,7 @@ export default function HeaderNav() {
       clearTimeout(timeout);
       if (shimmerIntervalRef.current) {
         clearInterval(shimmerIntervalRef.current);
+        shimmerIntervalRef.current = null;
       }
     };
   }, [navLinks.length]);

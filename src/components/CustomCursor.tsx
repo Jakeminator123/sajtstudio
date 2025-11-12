@@ -10,9 +10,10 @@ export default function CustomCursor() {
 
   useEffect(() => {
     // Check for touch device
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setIsTouchDevice(touchDevice);
     
-    if (isTouchDevice) return;
+    if (touchDevice) return;
 
     const updateMousePosition = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -24,14 +25,14 @@ export default function CustomCursor() {
       setIsHovering(isInteractive);
     };
 
-    window.addEventListener('mousemove', updateMousePosition);
-    window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mousemove', updateMousePosition, { passive: true });
+    window.addEventListener('mouseover', handleMouseOver, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, [isTouchDevice]);
+  }, []);
 
   if (isTouchDevice) return null;
 

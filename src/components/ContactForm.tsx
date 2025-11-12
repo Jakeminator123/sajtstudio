@@ -44,9 +44,26 @@ export default function ContactForm() {
 
     setFormState((prev) => ({ ...prev, status: "sending" }));
 
-    // Här kan du koppla till en backend-tjänst
-    // För nu simulerar vi en lyckad submission
-    timeoutRef.current = setTimeout(() => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          message: formState.message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Något gick fel');
+      }
+
+      // Success - reset form and show success message
       setFormState({
         name: "",
         email: "",
@@ -54,11 +71,21 @@ export default function ContactForm() {
         status: "success",
       });
 
-      // Återställ success-meddelandet efter 5 sekunder
+      // Reset success message after 5 seconds
       successTimeoutRef.current = setTimeout(() => {
         setFormState((prev) => ({ ...prev, status: "idle" }));
       }, 5000);
-    }, 1000);
+    } catch (error) {
+      setFormState((prev) => ({
+        ...prev,
+        status: "error",
+      }));
+
+      // Reset error message after 5 seconds
+      successTimeoutRef.current = setTimeout(() => {
+        setFormState((prev) => ({ ...prev, status: "idle" }));
+      }, 5000);
+    }
   };
 
   return (
