@@ -9,6 +9,7 @@ import WordReveal from "./WordReveal";
 import SmokeEffect from "./SmokeEffect";
 import { services } from "@/data/services";
 import type { Service } from "@/data/services";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export default function ServicesSection() {
   const { isOpen, modalId, data, openModal, closeModal } = useModalManager();
@@ -16,6 +17,7 @@ export default function ServicesSection() {
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { isDesktop, isMobile } = useBreakpoint();
 
   // Scroll-based parallax effects
   const { scrollYProgress } = useScroll({
@@ -26,6 +28,7 @@ export default function ServicesSection() {
   const videoOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.4, 0.6, 0.5, 0.3]);
   const videoScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05]);
   const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
+  const gridOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.05, 0.15, 0.05]);
 
   useEffect(() => {
     setMounted(true);
@@ -53,11 +56,12 @@ export default function ServicesSection() {
   return (
     <section 
       ref={sectionRef}
+      data-viewport={isDesktop ? "desktop" : isMobile ? "mobile" : "tablet"}
       className="section-spacing-md bg-black text-white relative overflow-hidden min-h-screen flex items-center"
     >
       {/* Video background */}
       <div className="absolute inset-0 z-0">
-        {mounted && (
+        {mounted && isDesktop && (
           <motion.video
             ref={videoRef}
             autoPlay
@@ -87,41 +91,41 @@ export default function ServicesSection() {
         />
         
         {/* Animated grid pattern overlay */}
-        <motion.div
-          className="absolute inset-0 opacity-10 z-10"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-            opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.05, 0.15, 0.05]),
-          }}
-        />
+          <motion.div
+            className={`absolute inset-0 z-10 ${isDesktop ? "opacity-10" : "hidden"}`}
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: "50px 50px",
+              opacity: isDesktop ? gridOpacity : 0,
+            }}
+          />
       </div>
 
       {/* Smoke effect - adjusted for dark background */}
-      <SmokeEffect count={6} speed={20} opacity={0.15} />
+        {isDesktop && <SmokeEffect count={6} speed={20} opacity={0.15} />}
 
       {/* Floating particles effect */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-accent/30 rounded-full"
-            style={{
-              left: `${(i * 5) % 100}%`,
-              top: `${(i * 7) % 100}%`,
-              opacity: useTransform(
-                scrollYProgress,
-                [0, 0.3 + i * 0.02, 0.7 + i * 0.02, 1],
-                [0, 1, 1, 0]
-              ),
-              scale: useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0]),
-            }}
-          />
-        ))}
-      </div>
+        <div className={`absolute inset-0 pointer-events-none ${isDesktop ? "z-10" : "hidden"}`}>
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-accent/30 rounded-full"
+              style={{
+                left: `${(i * 5) % 100}%`,
+                top: `${(i * 7) % 100}%`,
+                opacity: useTransform(
+                  scrollYProgress,
+                  [0, 0.3 + i * 0.02, 0.7 + i * 0.02, 1],
+                  [0, 1, 1, 0]
+                ),
+                scale: useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0]),
+              }}
+            />
+          ))}
+        </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-20">
         {/* Section header with enhanced styling */}

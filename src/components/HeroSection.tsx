@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/performance";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 // Magnetic button component that follows mouse
 function MagneticButton({
@@ -13,6 +14,7 @@ function MagneticButton({
   shouldReduceMotion,
   mousePosition,
   onHoverChange,
+  isInteractive = true,
 }: {
   href: string;
   children: React.ReactNode;
@@ -20,13 +22,14 @@ function MagneticButton({
   shouldReduceMotion: boolean;
   mousePosition: { x: number; y: number };
   onHoverChange?: (hovering: boolean) => void;
+  isInteractive?: boolean;
 }) {
   const buttonRef = useRef<HTMLAnchorElement>(null);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    if (shouldReduceMotion || !isHovered) {
+    if (shouldReduceMotion || !isInteractive || !isHovered) {
       setButtonPosition({ x: 0, y: 0 });
       return;
     }
@@ -57,7 +60,7 @@ function MagneticButton({
       }
     };
 
-    let rafId: number;
+    let rafId: number | null = null;
     const animatePosition = () => {
       updatePosition();
       rafId = requestAnimationFrame(animatePosition);
@@ -67,13 +70,14 @@ function MagneticButton({
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [mousePosition, isHovered, shouldReduceMotion]);
+  }, [mousePosition, isHovered, shouldReduceMotion, isInteractive]);
 
   return (
     <motion.a
       ref={buttonRef}
       href={href}
       onMouseEnter={() => {
+        if (!isInteractive) return;
         setIsHovered(true);
         onHoverChange?.(true);
       }}
@@ -82,17 +86,25 @@ function MagneticButton({
         onHoverChange?.(false);
         setButtonPosition({ x: 0, y: 0 });
       }}
-      whileHover={{
-        scale: 1.05,
-        boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)",
-      }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={
+        isInteractive
+          ? {
+            scale: 1.05,
+            boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)",
+          }
+          : undefined
+      }
+      whileTap={isInteractive ? { scale: 0.95 } : undefined}
       className={className}
       style={{
-        x: shouldReduceMotion ? 0 : buttonPosition.x,
-        y: shouldReduceMotion ? 0 : buttonPosition.y,
+        x: shouldReduceMotion || !isInteractive ? 0 : buttonPosition.x,
+        y: shouldReduceMotion || !isInteractive ? 0 : buttonPosition.y,
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      transition={
+        isInteractive
+          ? { type: "spring", stiffness: 300, damping: 20 }
+          : undefined
+      }
     >
       {children}
     </motion.a>
@@ -281,9 +293,12 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
+  const { isDesktop, isMobile } = useBreakpoint();
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+  const enableDesktopMotion = isDesktop && !shouldReduceMotion;
+  const viewportVariant = isDesktop ? "desktop" : isMobile ? "mobile" : "tablet";
 
   useEffect(() => {
     setMounted(true);
@@ -291,9 +306,12 @@ export default function HeroSection() {
 
   // Track mouse position for 3D tilt and cursor effects with throttling
   useEffect(() => {
-    if (shouldReduceMotion) return;
+    if (!enableDesktopMotion) {
+      setMousePosition({ x: 0, y: 0 });
+      return;
+    }
 
-    let rafId: number;
+    let rafId: number | null = null;
     let lastX = 0;
     let lastY = 0;
 
@@ -320,7 +338,7 @@ export default function HeroSection() {
       window.removeEventListener('mousemove', handleMouseMove);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [shouldReduceMotion]);
+  }, [enableDesktopMotion]);
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -411,16 +429,19 @@ export default function HeroSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
-      style={{
-        transform: shouldReduceMotion
-          ? undefined
-          : `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-        transformStyle: 'preserve-3d',
-      }}
+      data-viewport={viewportVariant}
+      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10 pt-28 pb-20 sm:pt-32"
+      style={
+        enableDesktopMotion
+          ? {
+            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+            transformStyle: 'preserve-3d',
+          }
+          : undefined
+      }
     >
       {/* Floating geometric shapes */}
-      {mounted && !shouldReduceMotion && (
+      {mounted && enableDesktopMotion && (
         <div className="absolute inset-0 pointer-events-none z-[2]">
           {Array.from({ length: 6 }).map((_, i) => {
             const size = 100 + (i % 3) * 50;
@@ -458,7 +479,7 @@ export default function HeroSection() {
       )}
 
       {/* Animated mesh gradient background */}
-      {mounted && !shouldReduceMotion && (
+      {mounted && enableDesktopMotion && (
         <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
           <div
             className="w-full h-full"
@@ -474,15 +495,15 @@ export default function HeroSection() {
       )}
 
       {/* Cursor trail particles - optimized version */}
-      {mounted && !shouldReduceMotion && !isHoveringButton && (
+      {mounted && enableDesktopMotion && !isHoveringButton && (
         <CursorTrail mousePosition={mousePosition} />
       )}
       {/* Dynamic background with image overlays - only render on client */}
       {/* Fixed positioning with z-[1] - video at bottom, image on top */}
       {mounted && (
-        <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
+          <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
           {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
-          {!shouldReduceMotion && (
+            {enableDesktopMotion && (
             <div className="absolute inset-0 opacity-50 z-0">
               <video
                 ref={videoRef}
@@ -507,42 +528,46 @@ export default function HeroSection() {
             className="absolute inset-0 z-[1]"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={
-              shouldReduceMotion
-                ? { opacity: 1, scale: 1 }
-                : {
+                enableDesktopMotion
+                  ? {
                   opacity: [0.9, 1, 0.9],
                   scale: [1, 1.01, 1],
                 }
+                  : { opacity: 1, scale: 1 }
             }
             transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                  opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-                  initial: { duration: 2, ease: "easeOut" },
-                }
+                enableDesktopMotion
+                  ? {
+                    opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                    scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                    initial: { duration: 2, ease: "easeOut" },
+                  }
+                  : undefined
             }
             style={{ y: imageY1 }}
           >
             <motion.div
               className="relative w-full h-full"
               animate={
-                shouldReduceMotion
-                  ? {}
-                  : {
+                  enableDesktopMotion
+                    ? {
                     filter: [
                       'brightness(0.9) contrast(1)',
                       'brightness(1) contrast(1.05)',
                       'brightness(0.9) contrast(1)',
                     ],
                   }
+                    : {}
               }
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+                transition={
+                  enableDesktopMotion
+                    ? {
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }
+                    : undefined
+                }
             >
               <Image
                 src="/images/hero/alt_background.webp"
@@ -558,16 +583,16 @@ export default function HeroSection() {
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
               animate={{
-                opacity: [0.2, 0.3, 0.2],
+                  opacity: enableDesktopMotion ? [0.2, 0.3, 0.2] : 0.25,
               }}
               transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
+                  duration: enableDesktopMotion ? 6 : 0,
+                  repeat: enableDesktopMotion ? Infinity : 0,
+                  ease: "easeInOut",
               }}
             />
             {/* Lightning flash effect - random intervals */}
-            {!shouldReduceMotion && (
+              {enableDesktopMotion && (
               <LightningFlash />
             )}
           </motion.div>
@@ -576,7 +601,7 @@ export default function HeroSection() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
 
           {/* Rain effect - only render when mounted to avoid hydration mismatch */}
-          {mounted && !shouldReduceMotion && (
+            {mounted && enableDesktopMotion && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
               {rainDrops.map((drop, i) => (
                 <div
@@ -615,28 +640,28 @@ export default function HeroSection() {
           <motion.div
             className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,102,255,0.15),transparent_70%)]"
             animate={
-              shouldReduceMotion
-                ? { scale: 1, opacity: 0.125 }
-                : {
+                enableDesktopMotion
+                  ? {
                   scale: [1, 1.05, 1],
                   opacity: [0.1, 0.15, 0.1],
                 }
+                  : { scale: 1, opacity: 0.125 }
             }
             transition={
-              shouldReduceMotion
-                ? {}
-                : {
+                enableDesktopMotion
+                  ? {
                   duration: 6,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }
+                  : undefined
             }
           />
         </motion.div>
       )}
 
       {/* Floating particles effect */}
-      {mounted && (
+      {mounted && enableDesktopMotion && (
         <div className="absolute inset-0 z-0 overflow-hidden">
           {particles.map((particle, i) => (
             <motion.div
@@ -678,10 +703,10 @@ export default function HeroSection() {
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ opacity: headingOpacity, x: headingX }}
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
-          >
-            {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
-            {mounted && !shouldReduceMotion && (
-              <motion.div
+            >
+              {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
+              {mounted && enableDesktopMotion && (
+                <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none z-30"
                 animate={{
                   x: ["-100%", "100%"],
@@ -736,9 +761,9 @@ export default function HeroSection() {
                   shouldReduceMotion={shouldReduceMotion}
                   mounted={mounted}
                 />
-              </span>
-              {!shouldReduceMotion && (
-                <motion.span
+                </span>
+                {enableDesktopMotion && (
+                  <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent-light/30 to-accent/20 blur-xl -z-10"
                   animate={{
                     opacity: [0.3, 0.6, 0.3],
@@ -850,86 +875,88 @@ export default function HeroSection() {
             </motion.span>
           </motion.p>
 
-          {/* CTA buttons with magnetic effect */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 1.2,
-              duration: 0.8,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
-            <MagneticButton
-              href="/contact"
-              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
-              shouldReduceMotion={shouldReduceMotion}
-              mousePosition={mousePosition}
-              onHoverChange={setIsHoveringButton}
+            {/* CTA buttons with magnetic effect */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 1.2,
+                duration: 0.8,
+                ease: [0.25, 0.1, 0.25, 1],
+              }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              {!shouldReduceMotion && (
+              <MagneticButton
+                href="/contact"
+                className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+                shouldReduceMotion={shouldReduceMotion}
+                mousePosition={mousePosition}
+                onHoverChange={setIsHoveringButton}
+                isInteractive={enableDesktopMotion}
+              >
+                {enableDesktopMotion && (
+                  <motion.span
+                    className="absolute inset-0 bg-white/20"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.5, 0, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
                 <motion.span
-                  className="absolute inset-0 bg-white/20"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.5, 0, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
+                  className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.6 }}
                 />
-              )}
-              <motion.span
-                className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10 flex items-center gap-2">
-                Starta ditt projekt
+                <span className="relative z-10 flex items-center gap-2">
+                  Starta ditt projekt
+                  <motion.span
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    →
+                  </motion.span>
+                </span>
+              </MagneticButton>
+              <MagneticButton
+                href="/portfolio"
+                className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+                shouldReduceMotion={shouldReduceMotion}
+                mousePosition={mousePosition}
+                onHoverChange={setIsHoveringButton}
+                isInteractive={enableDesktopMotion}
+              >
                 <motion.span
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  →
-                </motion.span>
-              </span>
-            </MagneticButton>
-            <MagneticButton
-              href="/portfolio"
-              className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
-              shouldReduceMotion={shouldReduceMotion}
-              mousePosition={mousePosition}
-              onHoverChange={setIsHoveringButton}
-            >
-              <motion.span
-                className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10 flex items-center gap-2">
-                Se våra arbeten
-                <motion.span
-                  animate={{ rotate: [0, 15, 0] }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  ↗
-                </motion.span>
-              </span>
-            </MagneticButton>
-          </motion.div>
+                  className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.6 }}
+                />
+                <span className="relative z-10 flex items-center gap-2">
+                  Se våra arbeten
+                  <motion.span
+                    animate={{ rotate: [0, 15, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    ↗
+                  </motion.span>
+                </span>
+              </MagneticButton>
+            </motion.div>
 
           {/* Animated accent line */}
           <motion.div
