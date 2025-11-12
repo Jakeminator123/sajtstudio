@@ -78,7 +78,7 @@ export default function ChatFallback() {
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.42, 0, 0.58, 1] }}
             className="fixed bottom-6 right-6 z-50 rounded-full px-5 py-4 bg-gradient-to-r from-accent via-blue-600 to-tertiary text-white font-semibold shadow-2xl hover:shadow-accent/50 focus:outline-none"
           >
             Chatta med oss

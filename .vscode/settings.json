@@ -1,40 +1,10 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+  "css.validate": false,
+  "tailwindCSS.emmetCompletions": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
   },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "webhint.enable": false,
-  "webhint.enableTelemetry": false,
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "next.serverCommand": "npm run dev",
-  "next.devCommand": "npm run dev",
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "terminal.integrated.profiles.windows": {
-    "PowerShell": {
-      "source": "PowerShell",
-      "icon": "terminal-powershell",
-      "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
-    },
-    "Command Prompt": {
-      "path": [
-        "${env:windir}\\Sysnative\\cmd.exe",
-        "${env:windir}\\System32\\cmd.exe"
-      ],
-      "args": [],
-      "icon": "terminal-cmd"
-    }
-  },
-  "terminal.integrated.automationProfile.windows": {
-    "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+  "editor.quickSuggestions": {
+    "strings": true
   }
 }

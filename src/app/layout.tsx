@@ -130,17 +130,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         {/* Preload critical resources */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
-        <link
-          rel="preload"
-          href="/images/hero/alt_background.webp"
-          as="image"
-          type="image/webp"
-        />
-        {/* Preload hero video metadata only for faster initial load */}
+        {/* Note: alt_background.webp removed from preload as it's lazy loaded */}
+        {/* Preload hero video for faster initial load */}
         <link
           rel="preload"
           href="/videos/telephone_ringin.mp4"
-          as="video"
+          as="fetch"
           type="video/mp4"
         />
         <script

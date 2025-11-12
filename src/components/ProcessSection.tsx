@@ -1,245 +1,181 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
-import { processSteps } from "@/config/content/process";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import WordReveal from "./WordReveal";
+import SmokeEffect from "./SmokeEffect";
+import { designTokens } from "@/config/designTokens";
 
-interface ProcessStepProps {
-  step: (typeof processSteps)[0];
-  index: number;
-}
-
-function ProcessStep({ step, index }: ProcessStepProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [isHovered, setIsHovered] = useState(false);
-  const [rotation, setRotation] = useState(0);
-
-  // Scroll-based color animation for title
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start center", "center center", "end center"],
-  });
-
-  const titleColor = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
-  );
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{
-        duration: 0.6,
-        delay: index * 0.15,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-      className="group relative"
-      onMouseEnter={() => {
-        setIsHovered(true);
-        setRotation(Math.random() * 10 - 5); // Random rotation between -5 and 5 degrees
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setRotation(0);
-      }}
-      whileHover={{ x: 10, scale: 1.02 }}
-      style={{
-        transform: isHovered ? `rotate(${rotation}deg)` : undefined,
-        transition: "transform 0.3s ease-out",
-      }}
-    >
-      <div className="border-t border-gray-800 pt-8 pb-12 relative">
-        {/* Enhanced hover background effect with blue/gray */}
-        <motion.div
-          className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500
-            ${
-              parseInt(step.number) % 2 === 0
-                ? "from-accent/8 via-accent/4 to-transparent"
-                : "from-gray-900/8 via-gray-800/4 to-transparent"
-            }`}
-          initial={{ x: "-100%" }}
-          whileHover={{ x: 0 }}
-          transition={{ duration: 0.5 }}
-        />
-
-        <div className="flex items-start gap-6 relative z-10">
-          <motion.span
-            className={`text-6xl md:text-8xl font-black transition-all duration-500 relative
-              ${
-                parseInt(step.number) % 2 === 0
-                  ? "text-gray-200 group-hover:text-accent"
-                  : "text-gray-200 group-hover:text-tertiary"
-              }`}
-            animate={{
-              rotate: isHovered ? [0, -15, 15, -15, 0] : 0,
-              y: isHovered ? [0, -20, 0] : 0,
-            }}
-            transition={{ duration: 0.6 }}
-            whileHover={{ scale: 1.2 }}
-          >
-            {step.number}
-            {/* Glow effect */}
-            <motion.span
-              className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-50 scale-[0.8]
-                ${
-                  parseInt(step.number) % 2 === 0
-                    ? "text-accent"
-                    : "text-tertiary"
-                }`}
-              animate={{ scale: isHovered ? 1.4 : 0.8 }}
-              transition={{ duration: 0.3 }}
-            >
-              {step.number}
-            </motion.span>
-            {/* Orbiting dots */}
-            {isHovered && (
-              <motion.div
-                className="absolute inset-0 pointer-events-none"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              >
-                <span className="absolute -top-2 left-1/2 w-2 h-2 bg-accent rounded-full -translate-x-1/2" />
-                <span className="absolute -right-2 top-1/2 w-2 h-2 bg-tertiary rounded-full -translate-y-1/2" />
-                <span className="absolute -bottom-2 left-1/2 w-2 h-2 bg-accent rounded-full -translate-x-1/2" />
-                <span className="absolute -left-2 top-1/2 w-2 h-2 bg-tertiary rounded-full -translate-y-1/2" />
-              </motion.div>
-            )}
-          </motion.span>
-          <motion.div
-            className="flex-1"
-            initial={{ opacity: 0.8 }}
-            whileHover={{ opacity: 1 }}
-          >
-            <motion.h3
-              ref={titleRef}
-              style={{ color: titleColor }}
-              className="text-3xl md:text-4xl font-bold mb-4"
-              whileHover={{ x: 4 }}
-              transition={{ duration: 0.2 }}
-            >
-              {step.title}
-            </motion.h3>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              {step.description}
-            </p>
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+const processSteps = [
+  {
+    number: "01",
+    title: "Upptäckt",
+    description:
+      "Vi börjar med att förstå ditt företag, dina mål och din målgrupp. Genom research och workshops identifierar vi möjligheter och utmaningar.",
+  },
+  {
+    number: "02",
+    title: "Design",
+    description:
+      "Vi skapar wireframes och prototyper som visualiserar din framtida hemsida. Varje pixel är genomtänkt för att maximera användarupplevelsen.",
+  },
+  {
+    number: "03",
+    title: "Utveckling",
+    description:
+      "Vi bygger din hemsida med modern teknologi som Next.js och React. Resultatet är snabbt, säkert och skalbart.",
+  },
+  {
+    number: "04",
+    title: "Lansering",
+    description:
+      "Vi testar noggrant, optimerar för SEO och prestanda, och lanserar din nya hemsida. Men det slutar inte där - vi fortsätter att stötta dig.",
+  },
+];
 
 export default function ProcessSection() {
-  const sectionRef = useRef(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // Scroll-based animations for heading
+  // Scroll-based animations
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "center center", "end start"],
+    offset: ["start end", "end start"]
   });
 
-  // Interpolate color from white to red (tertiary) as it comes into center
-  const headingColor = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
-  );
-
-  // Slide out to right when scrolling past
-  const headingX = useTransform(scrollYProgress, [0.7, 1], [0, 200]);
-  const headingOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
+  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-5, 0, 5]);
 
   return (
-    <section
+    <motion.section
       ref={sectionRef}
-      className="py-24 md:py-32 bg-black relative overflow-hidden"
+      className="section-spacing-md bg-white text-gray-900 relative overflow-hidden"
+      style={{
+        opacity,
+        scale,
+        perspective: 1000,
+        rotateY
+      }}
     >
-      {/* Dynamic background with multiple gradients */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-black pointer-events-none z-0" />
+      {/* Background layers */}
+      <div className="absolute inset-0 z-0">
+        {/* Main background image */}
+        <Image
+          src="/images/hero/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp"
+          alt=""
+          fill
+          className="object-cover"
+          style={{ opacity: 0.5 }}
+          sizes="100vw"
+          priority={false}
+        />
 
-      {/* Animated blue glow */}
-      <motion.div
-        className="absolute top-1/4 -right-1/4 w-full h-full bg-accent/8 rounded-full blur-3xl pointer-events-none z-0"
-        animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 9,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
+        {/* GIF overlay for subtle animation */}
+        <img
+          src="/images/hero/hero-animation.gif"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.3, mixBlendMode: 'screen' }}
+          loading="lazy"
+        />
 
-      {/* Animated red glow accent */}
-      <motion.div
-        className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-tertiary/7 rounded-full blur-3xl pointer-events-none z-0"
-        animate={{
-          scale: [1, 0.85, 1],
-          opacity: [0.2, 0.35, 0.2],
-        }}
-        transition={{
-          duration: 11,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1,
-        }}
-      />
+        {/* White overlay for readability */}
+        <div className="absolute inset-0 bg-white/70" />
+      </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      {/* Smoke effect */}
+      <SmokeEffect count={3} speed={30} opacity={0.08} />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+        {/* Section header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-          className="max-w-4xl mx-auto mb-16"
+          className="mb-16 md:mb-24 text-center"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{
+            duration: Number(designTokens.animation.duration.slow.replace('s', '')),
+            ease: designTokens.animation.framerEasing.smooth
+          }}
         >
-          <motion.h2
-            ref={headingRef}
-            style={{ 
-              color: headingColor,
-              x: headingX,
-              opacity: headingOpacity,
-            }}
-            className="text-hero md:text-display font-black mb-6 text-center leading-[0.9]"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.1,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-          >
-            Så här arbetar vi
-          </motion.h2>
-          <motion.p
-            className="text-xl text-gray-600 text-center max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.2,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-          >
-            En strukturerad process som säkerställer resultat
-          </motion.p>
+          <h2 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-none">
+            <WordReveal
+              text="Vår Process"
+              className="bg-gradient-to-r from-gray-900 via-accent to-gray-900 bg-clip-text text-transparent"
+            />
+          </h2>
+          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+            <WordReveal
+              text="Från idé till lansering - så jobbar vi"
+              delay={0.3}
+              staggerDelay={0.05}
+              className="text-gray-600"
+            />
+          </p>
         </motion.div>
 
-        <div className="max-w-5xl mx-auto">
-          <div className="space-y-0">
-            {processSteps.map((step, index) => (
-              <ProcessStep key={step.number} step={step} index={index} />
-            ))}
-          </div>
+        {/* Process steps */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+          {processSteps.map((step, index) => (
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{
+                delay: index * 0.15,
+                duration: Number(designTokens.animation.duration.slow.replace('s', '')),
+                ease: designTokens.animation.framerEasing.smooth,
+              }}
+              className="group relative bg-white/50 backdrop-blur-sm p-6 rounded-sm hover:bg-white/90 transition-all duration-500 border border-gray-100"
+            >
+              {/* Number indicator */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 + 0.2 }}
+                className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-accent to-accent-dark text-white font-mono text-2xl font-bold mb-6 group-hover:scale-110 transition-all duration-300 rounded-sm shadow-lg"
+              >
+                {step.number}
+              </motion.div>
+
+              {/* Title */}
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 + 0.3 }}
+                className="text-3xl md:text-4xl font-black mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-accent group-hover:to-accent-dark transition-all duration-300"
+              >
+                {step.title}
+              </motion.h3>
+
+              {/* Description */}
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 + 0.4 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                {step.description}
+              </motion.p>
+
+              {/* Decorative line */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 + 0.5, duration: 0.8 }}
+                className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-transparent origin-left"
+                style={{ width: "80%" }}
+              />
+            </motion.div>
+          ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, AnimatePresence, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import { useRef, useMemo, useEffect, useState } from "react";
 import { useVideoLoader } from "@/hooks/useVideoLoader";
@@ -11,38 +11,50 @@ export default function HeroAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const { videoRef, videoError, mounted } = useVideoLoader();
-  
+
   // Modal state
   const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
   const [isFunctionalityModalOpen, setIsFunctionalityModalOpen] = useState(false);
   const [explosionTriggered, setExplosionTriggered] = useState(false);
   const [textsShouldStick, setTextsShouldStick] = useState(false);
   const [textsDisappearing, setTextsDisappearing] = useState(false);
-  
+  const [modalShake, setModalShake] = useState(false);
+  const [designTextFlyingToModal, setDesignTextFlyingToModal] = useState(false);
+  const [functionalityTextFlyingToModal, setFunctionalityTextFlyingToModal] = useState(false);
+  const timeoutRefs = useRef<{ design1?: NodeJS.Timeout; design2?: NodeJS.Timeout; func1?: NodeJS.Timeout; func2?: NodeJS.Timeout }>({});
+
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
   // Clean up timeout on unmount
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    
+
     if (textsShouldStick && !textsDisappearing) {
       timeoutId = setTimeout(() => {
         setTextsDisappearing(true);
       }, 3000);
     }
-    
+
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
+      // Cleanup modal timeouts on unmount
+      if (timeoutRefs.current.design1) clearTimeout(timeoutRefs.current.design1);
+      if (timeoutRefs.current.design2) clearTimeout(timeoutRefs.current.design2);
+      if (timeoutRefs.current.func1) clearTimeout(timeoutRefs.current.func1);
+      if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
     };
   }, [textsShouldStick, textsDisappearing]);
-  
+
   // Ensure video plays when it becomes visible
   useEffect(() => {
     if (!mounted || videoError || !videoRef.current) return;
-    
+
     const video = videoRef.current;
-    
+
+    // Ensure loop is set programmatically
+    video.loop = true;
+
     // Try to play video when it's loaded
     const tryPlay = async () => {
       try {
@@ -51,14 +63,14 @@ export default function HeroAnimation() {
         // Autoplay blocked - that's okay, user can interact
       }
     };
-    
+
     // If video is already loaded, try to play
     if (video.readyState >= 2) {
       tryPlay();
     } else {
       video.addEventListener('loadeddata', tryPlay, { once: true });
     }
-    
+
     // Also try when video enters viewport
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,12 +82,22 @@ export default function HeroAnimation() {
       },
       { threshold: 0.1 }
     );
-    
+
     observer.observe(video);
-    
+
+    // Ensure video loops even if loop attribute fails
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {
+        // Play failed, but loop should handle it
+      });
+    };
+    video.addEventListener('ended', handleEnded);
+
     return () => {
       observer.disconnect();
       video.removeEventListener('loadeddata', tryPlay);
+      video.removeEventListener('ended', handleEnded);
     };
   }, [mounted, videoError, videoRef]);
 
@@ -125,15 +147,18 @@ export default function HeroAnimation() {
       if (crossedThreshold && !explosionTriggered) {
         setExplosionTriggered(true);
       }
-      
-      // Make texts stick when scrolling past 0.8
+
+      // Make texts stick when scrolling past 0.8 and trigger modal shake
       if (latest > 0.8 && !textsShouldStick) {
         setTextsShouldStick(true);
+        // Trigger modal shake animation
+        setModalShake(true);
+        setTimeout(() => setModalShake(false), 1000);
       }
 
       previousProgressRef.current = latest;
     });
-    
+
     return () => unsubscribe();
   }, [scrollYProgress, explosionTriggered, imagesInView, textsShouldStick]);
 
@@ -145,103 +170,149 @@ export default function HeroAnimation() {
     [0, 1, 1]
   );
 
-  // Video animation - starts above and slides into center as images separate
+  // Video animation - starts above and slides into center, then stays centered during zoom
   // Smooth, fluid movement with better easing
   const videoYOffset = useTransform(
     scrollYProgress,
-    [0, 0.45, 0.55, 0.65, 1],
-    [-150, -120, -60, 0, 0]
+    [0, 0.45, 0.55, 0.65, 0.85, 1],
+    [-150, -120, -60, 0, 0, 0] // Stays centered during zoom phase
   );
   const videoY = useTransform(videoYOffset, (val) => `calc(-50% + ${val}px)`);
-  
-  // Video opacity - smooth, gradual fade-in
-  // More keyframes for smoother transitions
+
+  // Video opacity - smooth fade-in, fully visible during zoom for immersive effect
   const videoOpacity = useTransform(
     scrollYProgress,
-    [0, 0.35, 0.5, 0.58, 0.65, 0.75, 1],
-    [0, 0.05, 0.15, 0.35, 0.65, 0.92, 1]
+    [0, 0.35, 0.5, 0.58, 0.65, 0.75, 0.85, 0.9, 1],
+    [0, 0.05, 0.15, 0.35, 0.65, 0.92, 1, 1, 1] // Fully visible during zoom phase
   );
-  
-  // Video scale - keep it smaller to give more distance from images
+
+  // Video scale - smooth, continuous zoom that creates immersive effect
+  // Uses smooth easing for natural feel
   const videoScale = useTransform(
     scrollYProgress,
     (latest) => {
-      // Before images start disappearing - keep video very small
+      // Smooth easing function for natural deceleration
+      const smoothEaseOut = (t: number) => 1 - Math.pow(1 - t, 3);
+      const smoothEaseInOut = (t: number) => t < 0.5 
+        ? 2 * t * t 
+        : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      
+      // Phase 1: Initial small size (0-0.35)
       if (latest <= 0.35) {
-        // Very small initially - 0.2 to 0.25
         const t = latest / 0.35;
-        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        return 0.2 + (eased * 0.05);
+        const eased = smoothEaseInOut(t);
+        return 0.2 + (eased * 0.1); // 0.2 to 0.3
       }
-      // When images start exploding (0.35-0.65), video grows slowly
+      
+      // Phase 2: Images start moving (0.35-0.5)
+      if (latest <= 0.5) {
+        const t = (latest - 0.35) / 0.15;
+        const eased = smoothEaseOut(t);
+        return 0.3 + (eased * 0.4); // 0.3 to 0.7
+      }
+      
+      // Phase 3: Images explode away (0.5-0.65)
       if (latest <= 0.65) {
-        const pushProgress = (latest - 0.35) / 0.3;
-        // Slower growth for more dramatic effect
-        const eased = 1 - Math.pow(1 - pushProgress, 3);
-        return 0.25 + (eased * 0.55);
+        const t = (latest - 0.5) / 0.15;
+        const eased = smoothEaseOut(t);
+        return 0.7 + (eased * 0.5); // 0.7 to 1.2
       }
-      // After images are gone - video reaches normal size
-      return 0.8;
+      
+      // Phase 4: Dramatic zoom begins (0.65-0.8)
+      if (latest <= 0.8) {
+        const t = (latest - 0.65) / 0.15;
+        const eased = smoothEaseOut(t);
+        return 1.2 + (eased * 0.8); // 1.2 to 2.0
+      }
+      
+      // Phase 5: Final immersive zoom (0.8-1.0)
+      const t = (latest - 0.8) / 0.2;
+      const eased = smoothEaseOut(t);
+      return 2.0 + (eased * 1.0); // 2.0 to 3.0 - fills most of screen
     }
   );
-  
-  // Video glow - smooth, gradual increase
+
+  // Video glow - increases with zoom, creating immersive atmosphere
   const videoGlowOpacity = useTransform(
     scrollYProgress,
-    [0, 0.45, 0.6, 0.7, 1],
-    [0, 0.05, 0.2, 0.35, 0.5]
+    [0, 0.45, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 1],
+    [0, 0.05, 0.2, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85] // Stronger glow as video zooms
   );
 
-  // Red tint that increases with scroll - smooth, gradual increase
+  // Red tint/smoke that increases with scroll - follows video scale
+  // Creates atmospheric effect that grows with the zoom
+  // Smoke appears gradually and intensifies during zoom phase
   const videoRedTint = useTransform(
     scrollYProgress,
-    [0, 0.65, 0.72, 0.8, 1],
-    [0, 0, 0.2, 0.45, 0.6]
+    [0, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+    [0, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75] // Gradually intensifies during zoom
   );
+  
 
-  // Question text animations - smooth, fluid slide-in from sides
-  // Design? comes from left - smooth entrance
+  // Question text animations - start at video, go down, then up to modal
+  // Design? - starts at video center, goes down, then up to left side of screen
+  // Combine videoY offset with text movement
+  const designTextYOffset = useTransform(
+    questionSectionProgress,
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 300, 300, -600, -600] // Start at video, go down, then up further
+  );
+  // Combine video Y position with text offset
+  const designTextY = useTransform(
+    [videoYOffset, designTextYOffset],
+    ([videoY, offset]) => (videoY as number) + (offset as number)
+  );
   const designTextX = useTransform(
     questionSectionProgress,
-    [0, 0.15, 0.35, 0.6, 1],
-    [-600, -300, -100, 0, 0]
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 0, 0, -400, -400] // Move to left side when going up
   );
   const designTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.45, 0.7, 1],
-    [0, 0, 0.4, 0.8, 1, 1]
+    [0, 0.1, 0.25, 0.45, 0.7, 0.9, 1],
+    [0, 0, 0.4, 0.8, 1, 1, 1]
   );
   const designTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.6, 1],
-    [0.3, 0.6, 0.85, 1, 1]
+    [0, 0.2, 0.4, 0.6, 0.85, 1],
+    [0.5, 0.7, 0.9, 1, 1.1, 1] // Scale up when reaching top
   );
   const designTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.25, 0.5, 0.75, 1],
-    [-15, -8, -3, 0, 0]
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 0, 0, -20, -20] // Rotate when going up
   );
 
-  // Functionality? comes from right - smooth entrance
+  // Functionality? - starts at video center, goes down, then up to right side of screen
+  const functionalityTextYOffset = useTransform(
+    questionSectionProgress,
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 300, 300, -600, -600] // Start at video, go down, then up further
+  );
+  // Combine video Y position with text offset
+  const functionalityTextY = useTransform(
+    [videoYOffset, functionalityTextYOffset],
+    ([videoY, offset]) => (videoY as number) + (offset as number)
+  );
   const functionalityTextX = useTransform(
     questionSectionProgress,
-    [0, 0.15, 0.35, 0.6, 1],
-    [600, 300, 100, 0, 0]
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 0, 0, 400, 400] // Move to right side when going up
   );
   const functionalityTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.45, 0.7, 1],
-    [0, 0, 0.4, 0.8, 1, 1]
+    [0, 0.1, 0.25, 0.45, 0.7, 0.9, 1],
+    [0, 0, 0.4, 0.8, 1, 1, 1]
   );
   const functionalityTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.6, 1],
-    [0.3, 0.6, 0.85, 1, 1]
+    [0, 0.2, 0.4, 0.6, 0.85, 1],
+    [0.5, 0.7, 0.9, 1, 1.1, 1] // Scale up when reaching top
   );
   const functionalityTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.25, 0.5, 0.75, 1],
-    [15, 8, 3, 0, 0]
+    [0, 0.3, 0.6, 0.85, 1],
+    [0, 0, 0, 20, 20] // Rotate when going up
   );
 
   const portfolioImages = [
@@ -399,7 +470,11 @@ export default function HeroAnimation() {
     <section
       ref={sectionRef}
       className="py-32 md:py-48 bg-gradient-to-b from-black via-gray-900 to-black text-white relative overflow-hidden"
-      style={{ scrollSnapAlign: 'start' }}
+      style={{ 
+        position: 'relative',
+        scrollSnapAlign: 'start' as any,
+        minHeight: '350vh', // Extended section for immersive zoom effect - allows smooth zoom experience
+      }}
     >
       {/* ============================================ */}
       {/* BACKGROUND LAYER - All decorative elements */}
@@ -484,10 +559,10 @@ export default function HeroAnimation() {
                 <motion.div
                   key={src}
                   style={{
-                    x: explosionTriggered 
+                    x: explosionTriggered
                       ? (index === 0 ? -1200 : index === 1 ? 1200 : index === 2 ? -1200 : 1200)
                       : transforms.x,
-                    y: explosionTriggered 
+                    y: explosionTriggered
                       ? (index < 2 ? -800 : 800)
                       : transforms.y,
                     rotate: explosionTriggered
@@ -505,19 +580,19 @@ export default function HeroAnimation() {
                   animate={
                     explosionTriggered
                       ? {
-                          opacity: 0,
-                          scale: 1.5,
-                          x: index === 0 ? -1200 : index === 1 ? 1200 : index === 2 ? -1200 : 1200,
-                          y: index < 2 ? -800 : 800,
-                          rotate: (index % 2 === 0 ? 1 : -1) * 360,
-                        }
+                        opacity: 0,
+                        scale: 1.5,
+                        x: index === 0 ? -1200 : index === 1 ? 1200 : index === 2 ? -1200 : 1200,
+                        y: index < 2 ? -800 : 800,
+                        rotate: (index % 2 === 0 ? 1 : -1) * 360,
+                      }
                       : imagesInView
-                      ? {
+                        ? {
                           opacity: 1,
                           scale: 1,
                           y: 0,
                         }
-                      : { opacity: 0, scale: 0.8, y: 50 }
+                        : { opacity: 0, scale: 0.8, y: 50 }
                   }
                   transition={{
                     duration: explosionTriggered ? 2.5 : (shouldReduceMotion ? 0 : 0.7),
@@ -570,29 +645,60 @@ export default function HeroAnimation() {
 
           {/* ============================================ */}
           {/* TEXT OVERLAY - Design? and Functionality? */}
+          {/* Start at video, go down, then up to modals */}
+          {/* Positioned relative to video container */}
           {/* ============================================ */}
           <motion.div
-            className={`${textsShouldStick ? 'fixed' : 'absolute'} left-0 top-1/2 -translate-y-1/2 z-50 cursor-pointer`}
+            className={`${textsShouldStick ? 'fixed' : 'absolute'} z-50 cursor-pointer`}
             style={{
-              x: textsDisappearing 
-                ? -800 
-                : (textsShouldStick ? 0 : designTextX),
-              opacity: textsDisappearing 
-                ? 0 
+              left: "50%",
+              top: "50%",
+              x: designTextFlyingToModal
+                ? 0 // Fly to center (modal position)
+                : textsDisappearing
+                ? -800
+                : (textsShouldStick ? -300 : designTextX),
+              y: designTextFlyingToModal
+                ? 0 // Fly to center (modal position)
+                : textsDisappearing
+                ? -400
+                : (textsShouldStick ? -400 : designTextY),
+              opacity: designTextFlyingToModal
+                ? 0 // Fade out as it flies into modal
+                : textsDisappearing
+                ? 0
                 : (textsShouldStick ? 1 : designTextOpacity),
-              scale: textsDisappearing
+              scale: designTextFlyingToModal
+                ? 0.3 // Shrink as it flies into modal
+                : textsDisappearing
                 ? 0
                 : (textsShouldStick ? 1 : designTextScale),
-              rotate: textsDisappearing
+              rotate: designTextFlyingToModal
+                ? 0 // Straighten out
+                : textsDisappearing
                 ? -90
-                : (textsShouldStick ? 0 : designTextRotate),
+                : (textsShouldStick ? -20 : designTextRotate),
             }}
-            onClick={() => setIsDesignModalOpen(true)}
-            whileHover={{ scale: textsShouldStick ? 1.1 : 1.1 }}
-            transition={{ duration: textsDisappearing ? 1 : 0.2 }}
+            onClick={() => {
+              // Clear any existing timeouts
+              if (timeoutRefs.current.design1) clearTimeout(timeoutRefs.current.design1);
+              if (timeoutRefs.current.design2) clearTimeout(timeoutRefs.current.design2);
+              
+              setDesignTextFlyingToModal(true);
+              timeoutRefs.current.design1 = setTimeout(() => {
+                setIsDesignModalOpen(true);
+                setModalShake(true);
+                timeoutRefs.current.design2 = setTimeout(() => setModalShake(false), 1000);
+              }, 600); // Delay to allow text to fly into modal
+            }}
+            whileHover={{ scale: (designTextFlyingToModal || textsDisappearing) ? 1 : (textsShouldStick ? 1.1 : 1.1) }}
+            transition={{ 
+              duration: designTextFlyingToModal ? 0.6 : (textsDisappearing ? 1 : 0.2),
+              ease: designTextFlyingToModal ? [0.34, 1.56, 0.64, 1] : "easeOut"
+            }}
           >
             <h3
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-4 sm:px-8"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-4 sm:px-8"
               style={{
                 textShadow: "0 0 60px rgba(0, 102, 255, 0.9), 0 0 100px rgba(0, 102, 255, 0.7), 0 0 150px rgba(0, 102, 255, 0.5), 0 0 200px rgba(0, 102, 255, 0.3)",
                 WebkitTextStroke: "3px rgba(0, 102, 255, 0.6)",
@@ -604,27 +710,56 @@ export default function HeroAnimation() {
           </motion.div>
 
           <motion.div
-            className={`${textsShouldStick ? 'fixed' : 'absolute'} right-0 top-1/2 -translate-y-1/2 z-50 cursor-pointer`}
+            className={`${textsShouldStick ? 'fixed' : 'absolute'} z-50 cursor-pointer`}
             style={{
-              x: textsDisappearing 
-                ? 800 
-                : (textsShouldStick ? 0 : functionalityTextX),
-              opacity: textsDisappearing 
-                ? 0 
+              left: "50%",
+              top: "50%",
+              x: functionalityTextFlyingToModal
+                ? 0 // Fly to center (modal position)
+                : textsDisappearing
+                ? 800
+                : (textsShouldStick ? 300 : functionalityTextX),
+              y: functionalityTextFlyingToModal
+                ? 0 // Fly to center (modal position)
+                : textsDisappearing
+                ? -400
+                : (textsShouldStick ? -400 : functionalityTextY),
+              opacity: functionalityTextFlyingToModal
+                ? 0 // Fade out as it flies into modal
+                : textsDisappearing
+                ? 0
                 : (textsShouldStick ? 1 : functionalityTextOpacity),
-              scale: textsDisappearing
+              scale: functionalityTextFlyingToModal
+                ? 0.3 // Shrink as it flies into modal
+                : textsDisappearing
                 ? 0
                 : (textsShouldStick ? 1 : functionalityTextScale),
-              rotate: textsDisappearing
+              rotate: functionalityTextFlyingToModal
+                ? 0 // Straighten out
+                : textsDisappearing
                 ? 90
-                : (textsShouldStick ? 0 : functionalityTextRotate),
+                : (textsShouldStick ? 20 : functionalityTextRotate),
             }}
-            onClick={() => setIsFunctionalityModalOpen(true)}
-            whileHover={{ scale: textsShouldStick ? 1.1 : 1.1 }}
-            transition={{ duration: textsDisappearing ? 1 : 0.2 }}
+            onClick={() => {
+              // Clear any existing timeouts
+              if (timeoutRefs.current.func1) clearTimeout(timeoutRefs.current.func1);
+              if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
+              
+              setFunctionalityTextFlyingToModal(true);
+              timeoutRefs.current.func1 = setTimeout(() => {
+                setIsFunctionalityModalOpen(true);
+                setModalShake(true);
+                timeoutRefs.current.func2 = setTimeout(() => setModalShake(false), 1000);
+              }, 600); // Delay to allow text to fly into modal
+            }}
+            whileHover={{ scale: (functionalityTextFlyingToModal || textsDisappearing) ? 1 : (textsShouldStick ? 1.1 : 1.1) }}
+            transition={{ 
+              duration: functionalityTextFlyingToModal ? 0.6 : (textsDisappearing ? 1 : 0.2),
+              ease: functionalityTextFlyingToModal ? [0.34, 1.56, 0.64, 1] : "easeOut"
+            }}
           >
             <h3
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white whitespace-nowrap px-4 sm:px-8"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white whitespace-nowrap px-4 sm:px-8"
               style={{
                 textShadow: "0 0 60px rgba(255, 0, 51, 0.9), 0 0 100px rgba(255, 0, 51, 0.7), 0 0 150px rgba(255, 0, 51, 0.5), 0 0 200px rgba(255, 0, 51, 0.3)",
                 WebkitTextStroke: "3px rgba(255, 0, 51, 0.6)",
@@ -681,6 +816,14 @@ export default function HeroAnimation() {
                       // Autoplay blocked, but that's okay
                     });
                   }}
+                  onEnded={(e) => {
+                    // Ensure video loops even if loop attribute fails
+                    const video = e.currentTarget;
+                    video.currentTime = 0;
+                    video.play().catch(() => {
+                      // Play failed, but loop should handle it
+                    });
+                  }}
                 >
                   <source src="/videos/telephone_ringin.mp4" type="video/mp4" />
                 </video>
@@ -707,12 +850,34 @@ export default function HeroAnimation() {
                 }}
               />
 
-              {/* Red glow effect */}
+              {/* Red glow/smoke effect - grows with video zoom, automatically follows video scale */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-b from-tertiary/30 via-tertiary/10 to-transparent pointer-events-none"
                 style={{
                   opacity: videoRedTint,
                   zIndex: 2,
+                }}
+              />
+              
+              {/* Additional atmospheric smoke layer - more wispy, follows video automatically */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  opacity: useTransform(videoRedTint, (val) => val * 0.7),
+                  zIndex: 3,
+                  background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.5) 0%, rgba(255, 0, 51, 0.25) 35%, rgba(255, 0, 51, 0.1) 60%, transparent 80%)',
+                  filter: useTransform(scrollYProgress, [0.65, 1], ['blur(40px)', 'blur(80px)']),
+                }}
+              />
+              
+              {/* Extra wispy smoke trails - creates depth */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  opacity: useTransform(videoRedTint, (val) => val * 0.4),
+                  zIndex: 4,
+                  background: 'radial-gradient(ellipse at 30% 40%, rgba(255, 0, 51, 0.3) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(255, 0, 51, 0.2) 0%, transparent 50%)',
+                  filter: 'blur(100px)',
                 }}
               />
             </div>
@@ -729,13 +894,21 @@ export default function HeroAnimation() {
               animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
               exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
               transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={() => setIsDesignModalOpen(false)}
+              onClick={() => {
+                setIsDesignModalOpen(false);
+                setDesignTextFlyingToModal(false);
+              }}
               className="fixed inset-0 z-[60] bg-gradient-to-br from-black/90 via-black/85 to-gray-900/90"
             />
             <div className="fixed inset-0 flex items-center justify-center z-[60] p-4 sm:p-6">
               <motion.div
                 initial={{ opacity: 0, x: -500, scale: 0.8 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  rotate: modalShake ? [0, -5, 5, -5, 5, 0] : 0,
+                }}
                 exit={{ opacity: 0, x: -500, scale: 0.8 }}
                 transition={{
                   duration: 0.6,
@@ -743,6 +916,10 @@ export default function HeroAnimation() {
                   type: "spring",
                   stiffness: 300,
                   damping: 30,
+                  rotate: {
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }
                 }}
                 className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
@@ -750,7 +927,10 @@ export default function HeroAnimation() {
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsDesignModalOpen(false)}
+                  onClick={() => {
+                    setIsDesignModalOpen(false);
+                    setDesignTextFlyingToModal(false);
+                  }}
                   className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-black/10 hover:bg-black/20 rounded-full transition-colors"
                   aria-label="Stäng modal"
                 >
@@ -809,13 +989,21 @@ export default function HeroAnimation() {
               animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
               exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
               transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={() => setIsFunctionalityModalOpen(false)}
+              onClick={() => {
+                setIsFunctionalityModalOpen(false);
+                setFunctionalityTextFlyingToModal(false);
+              }}
               className="fixed inset-0 z-[60] bg-gradient-to-br from-black/90 via-black/85 to-gray-900/90"
             />
             <div className="fixed inset-0 flex items-center justify-center z-[60] p-4 sm:p-6">
               <motion.div
                 initial={{ opacity: 0, x: 500, scale: 0.8 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  rotate: modalShake ? [0, 5, -5, 5, -5, 0] : 0,
+                }}
                 exit={{ opacity: 0, x: 500, scale: 0.8 }}
                 transition={{
                   duration: 0.6,
@@ -823,6 +1011,10 @@ export default function HeroAnimation() {
                   type: "spring",
                   stiffness: 300,
                   damping: 30,
+                  rotate: {
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }
                 }}
                 className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
@@ -830,7 +1022,10 @@ export default function HeroAnimation() {
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsFunctionalityModalOpen(false)}
+                  onClick={() => {
+                    setIsFunctionalityModalOpen(false);
+                    setFunctionalityTextFlyingToModal(false);
+                  }}
                   className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-black/10 hover:bg-black/20 rounded-full transition-colors"
                   aria-label="Stäng modal"
                 >
@@ -853,7 +1048,7 @@ export default function HeroAnimation() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
                     className="text-4xl md:text-6xl font-bold mb-8 text-center"
-                    style={{ 
+                    style={{
                       fontFamily: "var(--font-pixel)",
                       imageRendering: "pixelated",
                       textShadow: "4px 4px 0px rgba(0,0,0,0.2)",

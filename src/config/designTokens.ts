@@ -148,6 +148,15 @@ export const designTokens = {
       spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Bounce effect
       smooth: 'cubic-bezier(0.4, 0, 0.2, 1)', // Extra smooth
     },
+    // Framer Motion easing (arrays for Framer Motion, strings above for CSS)
+    framerEasing: {
+      default: [0.25, 0.1, 0.25, 1] as const,
+      easeIn: [0.42, 0, 1, 1] as const,
+      easeOut: [0, 0, 0.58, 1] as const,
+      easeInOut: [0.42, 0, 0.58, 1] as const,
+      spring: [0.34, 1.56, 0.64, 1] as const,
+      smooth: [0.4, 0, 0.2, 1] as const,
+    },
     // Framer Motion presets
     framerPresets: {
       fadeIn: {

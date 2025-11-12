@@ -20,7 +20,11 @@ export default function Footer() {
   return (
     <motion.footer
       ref={footerRef}
-      style={{ opacity: footerOpacity, y: footerY }}
+      initial={{ opacity: 0, y: 50 }}
+      style={{ 
+        opacity: footerOpacity, 
+        y: footerY 
+      }}
       className="bg-black text-white py-12 relative overflow-hidden"
     >
       {/* Subtle background glow */}
@@ -48,7 +52,7 @@ export default function Footer() {
             </motion.h3>
             <p className="text-gray-400">Modern webbdesign för framgångsrika företag</p>
           </div>
-          
+
           <nav className="flex flex-col md:flex-row gap-6 md:gap-8">
             {[
               { href: "/", label: "Hem" },
@@ -74,7 +78,7 @@ export default function Footer() {
             ))}
           </nav>
         </motion.div>
-        
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}

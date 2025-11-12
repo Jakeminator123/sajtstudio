@@ -4,5 +4,8 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"typescript.tsdk": "node_modules\\typescript\\lib",
+		"json.schemaDownload.enable": true
+	}
 }

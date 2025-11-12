@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   AnimatePresence,
   motion,
@@ -18,6 +18,8 @@ export default function HeaderNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [currentHash, setCurrentHash] = useState("");
+  const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
+  const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -31,11 +33,12 @@ export default function HeaderNav() {
         setCurrentHash(window.location.hash);
       }
     };
-    
+
     updateHash();
     window.addEventListener('hashchange', updateHash);
     return () => window.removeEventListener('hashchange', updateHash);
   }, []);
+
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -49,16 +52,39 @@ export default function HeaderNav() {
     };
   }, [menuOpen]);
 
-  const navLinks = pathname === "/" 
+  const navLinks = pathname === "/"
     ? [
-        { href: "/", label: "Hem" },
-        { href: "#tjanster", label: "Tjänster" },
-        { href: "#process", label: "Process" },
-        { href: "#omdomen", label: "Omdömen" },
-        { href: "/portfolio", label: "Portfolio" },
-        { href: "/contact", label: "Kontakt" },
-      ]
+      { href: "/", label: "Hem" },
+      { href: "#tjanster", label: "Tjänster" },
+      { href: "#process", label: "Process" },
+      { href: "#omdomen", label: "Omdömen" },
+      { href: "/portfolio", label: "Portfolio" },
+      { href: "/contact", label: "Kontakt" },
+    ]
     : siteConfig.nav.links;
+
+  // Random shimmer effect on nav links - only after mount to avoid hydration mismatch
+  useEffect(() => {
+    // Small delay to ensure hydration is complete
+    const timeout = setTimeout(() => {
+      shimmerIntervalRef.current = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * navLinks.length);
+        setShimmeringIndex(randomIndex);
+
+        // Clear shimmer after animation
+        setTimeout(() => {
+          setShimmeringIndex(null);
+        }, 3000);
+      }, 8000); // Trigger every 8 seconds
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+      if (shimmerIntervalRef.current) {
+        clearInterval(shimmerIntervalRef.current);
+      }
+    };
+  }, [navLinks.length]);
 
   return (
     <>
@@ -67,14 +93,13 @@ export default function HeaderNav() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50" 
-            : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+          ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
+          : "bg-transparent"
+          }`}
       >
         {/* Animated gradient line at top */}
-        <motion.div 
+        <motion.div
           className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent"
           animate={{
             backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
@@ -139,7 +164,7 @@ export default function HeaderNav() {
                   <span className="text-xl font-black text-white">
                     Sajtstudio
                   </span>
-                  <motion.span 
+                  <motion.span
                     className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-accent to-tertiary"
                     initial={{ width: "0%" }}
                     whileHover={{ width: "100%" }}
@@ -153,9 +178,9 @@ export default function HeaderNav() {
             <div className="hidden lg:flex items-center gap-8">
               <div className="flex items-center gap-1 relative">
                 {navLinks.map((link, index) => {
-                  const isActive = pathname === link.href || 
+                  const isActive = pathname === link.href ||
                     (link.href.startsWith('#') && pathname === '/' && currentHash === link.href);
-                  
+
                   return (
                     <motion.div
                       key={link.href}
@@ -165,14 +190,14 @@ export default function HeaderNav() {
                     >
                       <Link
                         href={link.href}
-                        className={`px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
-                          isActive 
-                            ? "text-white" 
-                            : "text-gray-400 hover:text-white"
-                        }`}
+                        className={`nav-link-shimmer px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${isActive
+                          ? "text-white"
+                          : "text-gray-400 hover:text-white"
+                          } ${shimmeringIndex === index ? 'shimmer-active' : ''}`}
+                        suppressHydrationWarning
                       >
                         {link.label}
-                        
+
                         {/* Active indicator */}
                         {isActive && (
                           <motion.div
@@ -202,7 +227,7 @@ export default function HeaderNav() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative group"
+                className="relative group cta-button-header"
               >
                 {/* Button glow */}
                 <motion.div
@@ -294,7 +319,7 @@ export default function HeaderNav() {
             >
               {/* Gradient background */}
               <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90" />
-              
+
               {/* Content */}
               <div className="relative p-8 pt-20">
                 {/* Close button */}

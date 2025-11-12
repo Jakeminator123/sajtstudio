@@ -1,8 +1,8 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useMotionValueEvent } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import { designTokens } from '@/config/designTokens';
+import { useState, useEffect } from 'react';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -10,6 +10,38 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const progressScale = useMotionValue(0);
+  const progressOpacity = useMotionValue(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, [pathname, mounted]);
+
+  // Update progress bar animation after mount to avoid hydration mismatch
+  useEffect(() => {
+    if (!mounted) return;
+    if (isLoading) {
+      progressScale.set(0.7);
+      progressOpacity.set(1);
+    } else {
+      progressScale.set(1);
+      progressOpacity.set(0);
+    }
+  }, [mounted, isLoading, progressScale, progressOpacity]);
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -21,33 +53,40 @@ export default function PageTransition({ children }: PageTransitionProps) {
         variants={{
           initial: {
             opacity: 0,
-            y: 20,
+            scale: 0.96,
+            y: 40,
           },
           animate: {
             opacity: 1,
+            scale: 1,
             y: 0,
             transition: {
-              duration: 0.3,
+              duration: 0.6,
               ease: [0.25, 0.1, 0.25, 1],
             },
           },
           exit: {
             opacity: 0,
-            y: -20,
+            scale: 1.04,
+            y: -40,
             transition: {
-              duration: 0.2,
+              duration: 0.4,
               ease: [0.25, 0.1, 0.25, 1],
             },
           },
         }}
       >
-        {/* Page loading indicator */}
+        {/* Progress bar - only render after mount to avoid hydration mismatch */}
         <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-accent z-50 origin-left pointer-events-none"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 0 }}
-          exit={{ scaleX: 1 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
+          className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-accent-light to-accent z-[200] origin-left pointer-events-none"
+          style={{
+            scaleX: progressScale,
+            opacity: progressOpacity,
+          }}
+          transition={{ 
+            duration: isLoading ? 0.3 : 0.2, 
+            ease: isLoading ? [0, 0.58, 1, 1] : [0.42, 0, 1, 1] // Use arrays instead of strings
+          }}
         />
         
         {children}

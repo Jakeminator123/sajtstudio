@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useMotionValue } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/performance";
@@ -33,18 +33,18 @@ function MagneticButton({
 
     const updatePosition = () => {
       if (!buttonRef.current || typeof window === 'undefined') return;
-      
+
       const rect = buttonRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      
+
       const mouseX = mousePosition.x * (window.innerWidth / 2) + (window.innerWidth / 2);
       const mouseY = mousePosition.y * (window.innerHeight / 2) + (window.innerHeight / 2);
-      
+
       const distanceX = mouseX - centerX;
       const distanceY = mouseY - centerY;
       const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-      
+
       // Magnetic effect only works within certain distance
       if (distance < 150) {
         const strength = (150 - distance) / 150;
@@ -62,7 +62,7 @@ function MagneticButton({
       updatePosition();
       rafId = requestAnimationFrame(animatePosition);
     };
-    
+
     rafId = requestAnimationFrame(animatePosition);
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
@@ -110,23 +110,23 @@ function LightningFlash() {
 
     const flashInterval = () => {
       if (!isMounted) return;
-      
+
       // Random delay between 4-10 seconds
       const delay = 4000 + Math.random() * 6000;
       timeoutId = setTimeout(() => {
         if (!isMounted) return;
-        
+
         // Sometimes double flash, sometimes single
         const flashes = Math.random() > 0.7 ? 2 : 1;
         let flashCount = 0;
-        
+
         const doFlash = () => {
           if (!isMounted) return;
-          
+
           setFlash(1);
           flashTimeoutId = setTimeout(() => {
             if (!isMounted) return;
-            
+
             setFlash(0);
             flashCount++;
             if (flashCount < flashes) {
@@ -136,7 +136,7 @@ function LightningFlash() {
             }
           }, 80 + Math.random() * 120);
         };
-        
+
         doFlash();
       }, delay);
     };
@@ -178,92 +178,102 @@ function LightningFlash() {
 }
 
 // Component for individual animated letter
-function AnimatedLetter({ 
-  letter, 
-  index, 
-  scrollProgress, 
-  shouldReduceMotion 
-}: { 
+function AnimatedLetter({
+  letter,
+  index,
+  scrollProgress,
+  shouldReduceMotion,
+  mounted
+}: {
   letter: string;
   index: number;
   scrollProgress: any;
   shouldReduceMotion: boolean;
+  mounted: boolean;
 }) {
-  // Letters fall in same direction as rain - from above, slightly from the side
-  const baseAngle = 8; // Same as rain drizzle
-  const distance = 500 + (index % 7) * 160; // Varying fall distances
-  const horizontalDrift = -20 + (index % 6) * 12; // Gentle sideways drift
-  const letterDelay = Math.min(index * 0.01, 0.18); // Stagger start slightly
-  
-  const startProgress = 0.35 + letterDelay;
-  const endProgress = 0.85;
+  // Letters fall diagonally like rain, matching the background perspective
+  const rainAngle = 75 + (index % 3) * 5; // 75-85 degrees (mostly down, slightly right)
+  const distance = 400 + (index % 5) * 150; // Varying fall distances
+  const horizontalDrift = 50 + (index % 4) * 30; // Slight horizontal movement like rain
+  const letterDelay = Math.min(index * 0.01, 0.2); // Limit max delay to prevent issues
 
-  const progress = useTransform(
+  const x = useTransform(
     scrollProgress,
-    [0, startProgress, endProgress],
-    [0, 0, 1],
-    { clamp: true }
+    [0, 0.25, 0.5 + letterDelay, 1],
+    [0, 0, 0, horizontalDrift + Math.cos((rainAngle * Math.PI) / 180) * distance * 0.3]
+  );
+  const y = useTransform(
+    scrollProgress,
+    [0, 0.25, 0.5 + letterDelay, 1],
+    [0, 0, 0, Math.sin((rainAngle * Math.PI) / 180) * distance]
+  );
+  const rotate = useTransform(
+    scrollProgress,
+    [0, 0.25, 0.5 + letterDelay, 1],
+    [0, 0, 0, (index % 2 === 0 ? 1 : -1) * (180 + (index % 3) * 60)]
+  );
+  const opacity = useTransform(
+    scrollProgress,
+    [0, 0.25, 0.5 + letterDelay, 0.9],
+    [1, 1, 1, 0]
+  );
+  const scale = useTransform(
+    scrollProgress,
+    [0, 0.25, 0.5 + letterDelay, 0.95],
+    [1, 1, 1, 0.5]
   );
 
-  const targetX = horizontalDrift + distance * 0.18;
-  const targetY = distance * 1.1;
-  const rotateDirection = index % 2 === 0 ? 1 : -1;
-  const targetRotate = rotateDirection * (baseAngle + (index % 4) * 3);
+  // Only apply animations when mounted to prevent hydration mismatch
+  if (!mounted || shouldReduceMotion) {
+    return (
+      <span className="inline-block">
+        {letter === " " ? "\u00A0" : letter}
+      </span>
+    );
+  }
 
-  const x = useTransform(progress, [0, 1], [0, targetX]);
-  const y = useTransform(progress, [0, 1], [0, targetY]);
-  const rotate = useTransform(progress, [0, 1], [0, targetRotate]);
-  const opacity = useTransform(progress, [0, 0.7, 1], [1, 0.6, 0]);
-  const scale = useTransform(progress, [0, 0.6, 1], [1, 0.9, 0.25]);
-  
   return (
     <motion.span
       className="inline-block"
       style={{
-        margin: 0,
-        padding: 0,
-        x: shouldReduceMotion ? 0 : x ?? 0,
-        y: shouldReduceMotion ? 0 : y ?? 0,
-        rotate: shouldReduceMotion ? 0 : rotate ?? 0,
-        opacity: shouldReduceMotion ? 1 : opacity ?? 1,
-        scale: shouldReduceMotion ? 1 : scale ?? 1,
+        x: x ?? 0,
+        y: y ?? 0,
+        rotate: rotate ?? 0,
+        opacity: opacity ?? 1,
+        scale: scale ?? 1,
       }}
     >
-      {letter === ' ' ? '\u00A0' : letter}
+      {letter === " " ? "\u00A0" : letter}
     </motion.span>
   );
 }
 
 // Component to split text into letters and animate them on scroll
-function AnimatedText({ 
-  text, 
-  className, 
-  scrollProgress, 
-  shouldReduceMotion 
-}: { 
-  text: string; 
+function AnimatedText({
+  text,
+  className,
+  scrollProgress,
+  shouldReduceMotion,
+  mounted
+}: {
+  text: string;
   className?: string;
   scrollProgress: any;
   shouldReduceMotion: boolean;
+  mounted: boolean;
 }) {
-  const letters = useMemo(() => text.split(''), [text]);
-  
+  const letters = useMemo(() => text.split(""), [text]);
+
   return (
-    <span 
-      className={className} 
-      style={{ 
-        letterSpacing: 0,
-        wordSpacing: 0,
-        whiteSpace: 'pre',
-      }}
-    >
+    <span className={className}>
       {letters.map((letter, index) => (
         <AnimatedLetter
-          key={index}
+          key={`${letter}-${index}`}
           letter={letter}
           index={index}
           scrollProgress={scrollProgress}
           shouldReduceMotion={shouldReduceMotion}
+          mounted={mounted}
         />
       ))}
     </span>
@@ -273,21 +283,21 @@ function AnimatedText({
 // Optimized cursor trail component
 function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number } }) {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  
+
   useEffect(() => {
     const updateSize = () => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     };
-    
+
     updateSize();
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, []);
-  
+
   const particles = useMemo(() => Array.from({ length: 15 }), []);
   const baseX = useMemo(() => mousePosition.x * (windowSize.width / 2) + (windowSize.width / 2), [mousePosition.x, windowSize.width]);
   const baseY = useMemo(() => mousePosition.y * (windowSize.height / 2) + (windowSize.height / 2), [mousePosition.y, windowSize.height]);
-  
+
   return (
     <div className="fixed inset-0 pointer-events-none z-[30]">
       {particles.map((_, i) => (
@@ -321,10 +331,10 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
-  
+
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -332,20 +342,20 @@ export default function HeroSection() {
   // Track mouse position for 3D tilt and cursor effects with throttling
   useEffect(() => {
     if (shouldReduceMotion) return;
-    
+
     let rafId: number;
     let lastX = 0;
     let lastY = 0;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       // Cancel previous animation frame
       if (rafId) cancelAnimationFrame(rafId);
-      
+
       // Throttle updates using requestAnimationFrame
       rafId = requestAnimationFrame(() => {
         const x = (e.clientX / window.innerWidth - 0.5) * 2;
         const y = (e.clientY / window.innerHeight - 0.5) * 2;
-        
+
         // Only update if values have changed significantly
         if (Math.abs(x - lastX) > 0.01 || Math.abs(y - lastY) > 0.01) {
           lastX = x;
@@ -379,7 +389,7 @@ export default function HeroSection() {
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
   const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -30]);
-  
+
   // Text animations
   const headingX = useTransform(scrollYProgress, [0, 0.4], [0, -200]);
   const headingOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
@@ -389,28 +399,26 @@ export default function HeroSection() {
   // Generate stable particle positions (only on client)
   const particles = mounted
     ? Array.from({ length: 20 }, (_, i) => {
-        // Use index as seed for consistent positioning
-        const seed = i * 0.618033988749895; // Golden ratio for better distribution
-        return {
-          left: (seed * 100) % 100,
-          top: (seed * 1.618 * 100) % 100,
-          duration: 3 + (seed % 2),
-          delay: seed % 2,
-        };
-      })
-    : [];
-
-  // Generate stable rain drops positions (deterministic for hydration)
-  // More drops for drizzle effect, smaller and lighter
-  const rainDrops = useMemo(() => {
-    return Array.from({ length: 200 }, (_, i) => {
       // Use index as seed for consistent positioning
       const seed = i * 0.618033988749895; // Golden ratio for better distribution
       return {
         left: (seed * 100) % 100,
-        delay: (seed * 0.1) % 3,
-        duration: 2.5 + ((seed * 100) % 5) * 0.4, // Slower for drizzle effect
-        length: 8 + ((seed * 100) % 4) * 3, // Much smaller drops (8-20px)
+        top: (seed * 1.618 * 100) % 100,
+        duration: 3 + (seed % 2),
+        delay: seed % 2,
+      };
+    })
+    : [];
+
+  // Generate stable rain drops positions (deterministic for hydration)
+  const rainDrops = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => {
+      // Use index as seed for consistent positioning
+      const seed = i * 0.618033988749895; // Golden ratio for better distribution
+      return {
+        left: (seed * 100) % 100,
+        delay: (seed * 0.1) % 2,
+        duration: 1.5 + ((seed * 100) % 3) * 0.5,
       };
     });
   }, []);
@@ -424,7 +432,7 @@ export default function HeroSection() {
     if (!videoRef.current || shouldReduceMotion) return;
 
     const video = videoRef.current;
-    
+
     const handleLoadedMetadata = () => {
       try {
         video.playbackRate = 0.2; // 20% of normal speed
@@ -455,9 +463,8 @@ export default function HeroSection() {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
       style={{
-        position: 'relative', // Explicit non-static position for scroll calculations
-        transform: shouldReduceMotion 
-          ? undefined 
+        transform: shouldReduceMotion
+          ? undefined
           : `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
         transformStyle: 'preserve-3d',
       }}
@@ -471,7 +478,7 @@ export default function HeroSection() {
             const top = ((i * 1.618) * 100) % 100;
             const delay = i * 0.5;
             const duration = 8 + (i % 3) * 2;
-            
+
             return (
               <motion.div
                 key={i}
@@ -503,7 +510,7 @@ export default function HeroSection() {
       {/* Animated mesh gradient background */}
       {mounted && !shouldReduceMotion && (
         <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
-          <div 
+          <div
             className="w-full h-full"
             style={{
               background: `
@@ -524,119 +531,116 @@ export default function HeroSection() {
       {/* Fixed positioning with z-[1] - video at bottom, image on top */}
       {mounted && (
         <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
-            {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
-            {!shouldReduceMotion && (
-              <div className="absolute inset-0 opacity-50 z-0">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'brightness(0.8) contrast(0.9)' }}
-                >
-                  <source src="/videos/background.mp4" type="video/mp4" />
-                </video>
-                {/* Fade overlay for smoother blend */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
-              </div>
-            )}
+          {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
+          {!shouldReduceMotion && (
+            <div className="absolute inset-0 opacity-50 z-0">
+              <video
+                ref={videoRef}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover"
+                style={{ filter: 'brightness(0.8) contrast(0.9)' }}
+              >
+                <source src="/videos/background.mp4" type="video/mp4" />
+              </video>
+              {/* Fade overlay for smoother blend */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
+            </div>
+          )}
 
-            {/* Main background pattern - alt_background.webp - ABOVE VIDEO */}
+          {/* Main background pattern - alt_background.webp - ABOVE VIDEO */}
+          <motion.div
+            className="absolute inset-0 z-[1]"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={
+              shouldReduceMotion
+                ? { opacity: 1, scale: 1 }
+                : {
+                  opacity: [0.9, 1, 0.9],
+                  scale: [1, 1.01, 1],
+                }
+            }
+            transition={
+              shouldReduceMotion
+                ? {}
+                : {
+                  opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                  scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                  initial: { duration: 2, ease: "easeOut" },
+                }
+            }
+            style={{ y: imageY1 }}
+          >
             <motion.div
-              className="absolute inset-0 z-[1]"
-              initial={{ opacity: 0, scale: 1.05 }}
+              className="relative w-full h-full"
               animate={
-                shouldReduceMotion
-                  ? { opacity: 1, scale: 1 }
-                  : {
-                      opacity: [0.9, 1, 0.9],
-                      scale: [1, 1.01, 1],
-                    }
-              }
-              transition={
                 shouldReduceMotion
                   ? {}
                   : {
-                      opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                      scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-                      initial: { duration: 2, ease: "easeOut" },
-                    }
+                    filter: [
+                      'brightness(0.9) contrast(1)',
+                      'brightness(1) contrast(1.05)',
+                      'brightness(0.9) contrast(1)',
+                    ],
+                  }
               }
-              style={{ y: imageY1 }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
-              <motion.div
-                className="relative w-full h-full"
-                animate={
-                  shouldReduceMotion
-                    ? {}
-                    : {
-                        filter: [
-                          'brightness(0.9) contrast(1)',
-                          'brightness(1) contrast(1.05)',
-                          'brightness(0.9) contrast(1)',
-                        ],
-                      }
-                }
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <Image
-                  src="/images/hero/alt_background.webp"
-                  alt=""
-                  fill
-                  sizes="100vw"
-                  className="object-cover"
-                  priority
-                />
-              </motion.div>
-              {/* Subtle glow effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
-                animate={{
-                  opacity: [0.2, 0.3, 0.2],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
+              <Image
+                src="/images/hero/alt_background.webp"
+                alt=""
+                fill
+                sizes="100vw"
+                className="object-cover"
+                priority
               />
-              {/* Lightning flash effect - random intervals */}
-              {!shouldReduceMotion && (
-                <LightningFlash />
-              )}
             </motion.div>
-
-            {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
-
-            {/* Rain effect - drizzle style, falling from above but slightly from the side */}
-            {mounted && !shouldReduceMotion && (
-              <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
-                {rainDrops.map((drop, i) => (
-                  <div
-                    key={i}
-                    className="absolute bg-white/40"
-                    style={{
-                      left: `${drop.left}%`,
-                      top: `-${drop.length}px`,
-                      width: '1px',
-                      height: `${drop.length}px`,
-                      animation: `rain ${drop.duration}s linear infinite`,
-                      animationDelay: `${drop.delay}s`,
-                      boxShadow: '0 0 1px rgba(255, 255, 255, 0.3)',
-                    }}
-                  />
-                ))}
-              </div>
+            {/* Subtle glow effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
+              animate={{
+                opacity: [0.2, 0.3, 0.2],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            {/* Lightning flash effect - random intervals */}
+            {!shouldReduceMotion && (
+              <LightningFlash />
             )}
           </motion.div>
+
+          {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
+
+          {/* Rain effect - only render when mounted to avoid hydration mismatch */}
+          {mounted && !shouldReduceMotion && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
+              {rainDrops.map((drop, i) => (
+                <div
+                  key={i}
+                  className="absolute w-[1px] h-[20px] bg-white/40"
+                  style={{
+                    left: `${drop.left}%`,
+                    top: '-20px',
+                    animation: `rain ${drop.duration}s linear infinite`,
+                    animationDelay: `${drop.delay}s`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
       )}
 
       {/* Static fallback for SSR */}
@@ -662,18 +666,18 @@ export default function HeroSection() {
               shouldReduceMotion
                 ? { scale: 1, opacity: 0.125 }
                 : {
-                    scale: [1, 1.05, 1],
-                    opacity: [0.1, 0.15, 0.1],
-                  }
+                  scale: [1, 1.05, 1],
+                  opacity: [0.1, 0.15, 0.1],
+                }
             }
             transition={
               shouldReduceMotion
                 ? {}
                 : {
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }
             }
           />
         </motion.div>
@@ -694,18 +698,18 @@ export default function HeroSection() {
                 shouldReduceMotion
                   ? { y: 0, opacity: 0.35 }
                   : {
-                      y: [0, -30, 0],
-                      opacity: [0.2, 0.5, 0.2],
-                    }
+                    y: [0, -30, 0],
+                    opacity: [0.2, 0.5, 0.2],
+                  }
               }
               transition={
                 shouldReduceMotion
                   ? {}
                   : {
-                      duration: particle.duration,
-                      repeat: Infinity,
-                      delay: particle.delay,
-                    }
+                    duration: particle.duration,
+                    repeat: Infinity,
+                    delay: particle.delay,
+                  }
               }
             />
           ))}
@@ -752,6 +756,7 @@ export default function HeroSection() {
                 text="Bygger"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
               <motion.span
                 className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-accent via-tertiary to-accent"
@@ -767,7 +772,7 @@ export default function HeroSection() {
               transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
               whileHover={{ scale: 1.05 }}
             >
-              <span 
+              <span
                 className="relative z-10 bg-clip-text text-transparent animate-gradient"
                 style={{
                   backgroundImage: 'linear-gradient(90deg, #0066FF, #3385FF, #0066FF)',
@@ -777,6 +782,7 @@ export default function HeroSection() {
                   text="hemsidor"
                   scrollProgress={sectionScrollProgress}
                   shouldReduceMotion={shouldReduceMotion}
+                  mounted={mounted}
                 />
               </span>
               {!shouldReduceMotion && (
@@ -805,6 +811,7 @@ export default function HeroSection() {
                 text="som betyder"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
             </motion.span>
             <motion.span
@@ -818,6 +825,7 @@ export default function HeroSection() {
                 text="något"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
               <motion.span
                 className="inline-block ml-0"
@@ -859,6 +867,7 @@ export default function HeroSection() {
                 text="Vi skapar skräddarsydda, toppmoderna webbplatser"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
             </motion.span>
             {" "}
@@ -871,6 +880,7 @@ export default function HeroSection() {
                 text="för företag som vill sticka ut"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
             </motion.span>
             {" "}
@@ -883,6 +893,7 @@ export default function HeroSection() {
                 text="och leda inom sin bransch."
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
+                mounted={mounted}
               />
             </motion.span>
           </motion.p>

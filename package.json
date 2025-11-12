@@ -7,7 +7,7 @@
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "echo 'Linting is handled by Next.js during build. Run: npm run build'",
     "process-input-docs": "tsx scripts/processInputDocs.ts",
     "clean": "node scripts/clean.js",
     "clean:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/quick-clean.ps1",
@@ -29,6 +29,7 @@
     "critters": "^0.0.23",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4",
     "typescript": "^5"
   }
 }
