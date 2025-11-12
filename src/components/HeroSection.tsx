@@ -31,8 +31,22 @@ function MagneticButton({
       return;
     }
 
-    const updatePosition = () => {
-      if (!buttonRef.current || typeof window === 'undefined') return;
+    let rafId: number;
+    let lastUpdateTime = 0;
+    const throttleMs = 16; // ~60fps
+
+    const updatePosition = (currentTime: number) => {
+      // Throttle updates to ~60fps
+      if (currentTime - lastUpdateTime < throttleMs) {
+        rafId = requestAnimationFrame(updatePosition);
+        return;
+      }
+      lastUpdateTime = currentTime;
+
+      if (!buttonRef.current || typeof window === 'undefined') {
+        rafId = requestAnimationFrame(updatePosition);
+        return;
+      }
 
       const rect = buttonRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -55,15 +69,11 @@ function MagneticButton({
       } else {
         setButtonPosition({ x: 0, y: 0 });
       }
+
+      rafId = requestAnimationFrame(updatePosition);
     };
 
-    let rafId: number;
-    const animatePosition = () => {
-      updatePosition();
-      rafId = requestAnimationFrame(animatePosition);
-    };
-
-    rafId = requestAnimationFrame(animatePosition);
+    rafId = requestAnimationFrame(updatePosition);
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
     };
@@ -222,7 +232,8 @@ function AnimatedText({
         opacity: opacity ?? 1,
         scale: scale ?? 1,
         display: 'inline-block',
-        willChange: 'transform, opacity', // Hint to browser for optimization
+        // Only use will-change when animating to avoid unnecessary repaints
+        willChange: shouldReduceMotion ? 'auto' : 'transform, opacity',
       }}
     >
       {text}
@@ -240,13 +251,19 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize);
+    window.addEventListener('resize', updateSize, { passive: true });
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
   const particles = useMemo(() => Array.from({ length: 15 }), []);
-  const baseX = useMemo(() => mousePosition.x * (windowSize.width / 2) + (windowSize.width / 2), [mousePosition.x, windowSize.width]);
-  const baseY = useMemo(() => mousePosition.y * (windowSize.height / 2) + (windowSize.height / 2), [mousePosition.y, windowSize.height]);
+  const baseX = useMemo(() => {
+    if (windowSize.width === 0) return 0;
+    return mousePosition.x * (windowSize.width / 2) + (windowSize.width / 2);
+  }, [mousePosition.x, windowSize.width]);
+  const baseY = useMemo(() => {
+    if (windowSize.height === 0) return 0;
+    return mousePosition.y * (windowSize.height / 2) + (windowSize.height / 2);
+  }, [mousePosition.y, windowSize.height]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[30]">
@@ -293,20 +310,28 @@ export default function HeroSection() {
   useEffect(() => {
     if (shouldReduceMotion) return;
 
-    let rafId: number;
+    let rafId: number | null = null;
     let lastX = 0;
     let lastY = 0;
+    let isScheduled = false;
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Only schedule one update per frame
+      if (isScheduled) return;
+      isScheduled = true;
+
       // Cancel previous animation frame
-      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
 
       // Throttle updates using requestAnimationFrame
       rafId = requestAnimationFrame(() => {
+        isScheduled = false;
         const x = (e.clientX / window.innerWidth - 0.5) * 2;
         const y = (e.clientY / window.innerHeight - 0.5) * 2;
 
-        // Only update if values have changed significantly
+        // Only update if values have changed significantly (reduces unnecessary re-renders)
         if (Math.abs(x - lastX) > 0.01 || Math.abs(y - lastY) > 0.01) {
           lastX = x;
           lastY = y;
@@ -318,7 +343,9 @@ export default function HeroSection() {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
     };
   }, [shouldReduceMotion]);
 
@@ -346,9 +373,10 @@ export default function HeroSection() {
   const subtitleX = useTransform(scrollYProgress, [0, 0.4], [0, 200]);
   const subtitleOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
-  // Generate stable particle positions (only on client)
-  const particles = mounted
-    ? Array.from({ length: 20 }, (_, i) => {
+  // Generate stable particle positions (only on client) - memoized for performance
+  const particles = useMemo(() => {
+    if (!mounted) return [];
+    return Array.from({ length: 20 }, (_, i) => {
       // Use index as seed for consistent positioning
       const seed = i * 0.618033988749895; // Golden ratio for better distribution
       return {
@@ -357,8 +385,8 @@ export default function HeroSection() {
         duration: 3 + (seed % 2),
         delay: seed % 2,
       };
-    })
-    : [];
+    });
+  }, [mounted]);
 
   // Generate stable rain drops positions (deterministic for hydration)
   const rainDrops = useMemo(() => {
@@ -490,7 +518,7 @@ export default function HeroSection() {
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 poster="/images/hero/alt_background.webp"
                 className="w-full h-full object-cover"
                 style={{ filter: 'brightness(0.8) contrast(0.9)' }}

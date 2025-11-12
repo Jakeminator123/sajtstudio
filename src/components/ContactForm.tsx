@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FormState {
   name: string;
@@ -42,11 +42,38 @@ export default function ContactForm() {
       clearTimeout(successTimeoutRef.current);
     }
 
+    // Basic validation
+    if (!formState.name.trim() || !formState.email.trim() || !formState.message.trim()) {
+      setFormState((prev) => ({ ...prev, status: "error" }));
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formState.email)) {
+      setFormState((prev) => ({ ...prev, status: "error" }));
+      return;
+    }
+
     setFormState((prev) => ({ ...prev, status: "sending" }));
 
-    // Här kan du koppla till en backend-tjänst
-    // För nu simulerar vi en lyckad submission
-    timeoutRef.current = setTimeout(() => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formState.name.trim(),
+          email: formState.email.trim(),
+          message: formState.message.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
       setFormState({
         name: "",
         email: "",
@@ -54,11 +81,13 @@ export default function ContactForm() {
         status: "success",
       });
 
-      // Återställ success-meddelandet efter 5 sekunder
+      // Reset success message after 5 seconds
       successTimeoutRef.current = setTimeout(() => {
         setFormState((prev) => ({ ...prev, status: "idle" }));
       }, 5000);
-    }, 1000);
+    } catch (error) {
+      setFormState((prev) => ({ ...prev, status: "error" }));
+    }
   };
 
   return (
@@ -115,25 +144,35 @@ export default function ContactForm() {
         />
       </div>
 
-      {formState.status === "success" && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-green-50 border border-green-200 text-green-800 rounded"
-        >
-          Tack för ditt meddelande! Vi återkommer så snart som möjligt.
-        </motion.div>
-      )}
+      <AnimatePresence mode="wait">
+        {formState.status === "success" && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-green-50 border border-green-200 text-green-800 rounded"
+            role="alert"
+            aria-live="polite"
+          >
+            Tack för ditt meddelande! Vi återkommer så snart som möjligt.
+          </motion.div>
+        )}
 
-      {formState.status === "error" && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-red-50 border border-red-200 text-red-800 rounded"
-        >
-          Något gick fel. Försök igen senare.
-        </motion.div>
-      )}
+        {formState.status === "error" && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-red-50 border border-red-200 text-red-800 rounded"
+            role="alert"
+            aria-live="assertive"
+          >
+            Något gick fel. Kontrollera att alla fält är ifyllda korrekt och försök igen.
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <button
         type="submit"
