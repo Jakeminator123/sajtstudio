@@ -28,21 +28,33 @@ export default function TransitionBridge() {
     useEffect(() => {
         if (typeof document === 'undefined') return;
         
+        let shakeTimeout: NodeJS.Timeout | null = null;
+        
         const unsubscribe = wordsFlyUp.onChange(value => {
             if (value > 0.9 && !buttonShake) {
                 setButtonShake(true);
                 // Trigger button shake in header
                 const button = document.querySelector('.cta-button-header');
                 if (button) {
+                    // Clear any existing timeout
+                    if (shakeTimeout) {
+                        clearTimeout(shakeTimeout);
+                    }
                     button.classList.add('shake-animation');
-                    setTimeout(() => {
+                    shakeTimeout = setTimeout(() => {
                         button.classList.remove('shake-animation');
                         setButtonShake(false);
+                        shakeTimeout = null;
                     }, 1000);
                 }
             }
         });
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            if (shakeTimeout) {
+                clearTimeout(shakeTimeout);
+            }
+        };
     }, [wordsFlyUp, buttonShake]);
 
     return (

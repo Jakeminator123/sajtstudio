@@ -37,12 +37,26 @@ export default function HeroAnimation() {
     }
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       // Cleanup modal timeouts on unmount
-      if (timeoutRefs.current.design1) clearTimeout(timeoutRefs.current.design1);
-      if (timeoutRefs.current.design2) clearTimeout(timeoutRefs.current.design2);
-      if (timeoutRefs.current.func1) clearTimeout(timeoutRefs.current.func1);
-      if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
+      if (timeoutRefs.current.design1) {
+        clearTimeout(timeoutRefs.current.design1);
+        timeoutRefs.current.design1 = undefined;
+      }
+      if (timeoutRefs.current.design2) {
+        clearTimeout(timeoutRefs.current.design2);
+        timeoutRefs.current.design2 = undefined;
+      }
+      if (timeoutRefs.current.func1) {
+        clearTimeout(timeoutRefs.current.func1);
+        timeoutRefs.current.func1 = undefined;
+      }
+      if (timeoutRefs.current.func2) {
+        clearTimeout(timeoutRefs.current.func2);
+        timeoutRefs.current.func2 = undefined;
+      }
     };
   }, [textsShouldStick, textsDisappearing]);
 

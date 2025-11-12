@@ -18,11 +18,13 @@ export default function ChatFallback() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     let cancelled = false;
     let hasWaited = false;
 
     const evaluate = () => {
-      const status = window.__didStatus || "pending";
+      const status = (window as any).__didStatus || "pending";
       if (!cancelled) {
         // Hide FAB if D-ID is loaded, show if error or still pending after initial delay
         setShouldShowFab(status !== "loaded" && (status === "error" || (hasWaited && status === "pending")));
@@ -30,7 +32,7 @@ export default function ChatFallback() {
     };
 
     // Check immediately if status is already error
-    const status = window.__didStatus || "pending";
+    const status = (window as any).__didStatus || "pending";
     if (status === "error") {
       evaluate();
     }

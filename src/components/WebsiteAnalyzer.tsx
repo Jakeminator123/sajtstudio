@@ -23,12 +23,16 @@ export default function WebsiteAnalyzer() {
   const [url, setUrl] = useState("");
   const [state, setState] = useState<AnalysisState>({ status: "idle" });
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   // Cleanup timeout on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       if (resetTimeoutRef.current) {
         clearTimeout(resetTimeoutRef.current);
+        resetTimeoutRef.current = null;
       }
     };
   }, []);
@@ -123,11 +127,14 @@ export default function WebsiteAnalyzer() {
         clearTimeout(resetTimeoutRef.current);
       }
       resetTimeoutRef.current = setTimeout(() => {
-        setUrl("");
-        setState((prev) => ({
-          ...prev,
-          status: "idle",
-        }));
+        if (isMountedRef.current) {
+          setUrl("");
+          setState((prev) => ({
+            ...prev,
+            status: "idle",
+          }));
+        }
+        resetTimeoutRef.current = null;
       }, 5000);
     } catch (error) {
       // Only log errors in development, and only if it's not a network error

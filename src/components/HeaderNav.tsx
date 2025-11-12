@@ -20,6 +20,7 @@ export default function HeaderNav() {
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
   const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const shimmerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -75,9 +76,13 @@ export default function HeaderNav() {
         const randomIndex = Math.floor(Math.random() * navLinks.length);
         setShimmeringIndex(randomIndex);
 
-        // Clear shimmer after animation
-        setTimeout(() => {
+        // Clear shimmer after animation - store timeout ID to clean up
+        if (shimmerTimeoutRef.current) {
+          clearTimeout(shimmerTimeoutRef.current);
+        }
+        shimmerTimeoutRef.current = setTimeout(() => {
           setShimmeringIndex(null);
+          shimmerTimeoutRef.current = null;
         }, 3000);
       }, 8000); // Trigger every 8 seconds
     }, 100);
@@ -86,6 +91,11 @@ export default function HeaderNav() {
       clearTimeout(timeout);
       if (shimmerIntervalRef.current) {
         clearInterval(shimmerIntervalRef.current);
+        shimmerIntervalRef.current = null;
+      }
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current);
+        shimmerTimeoutRef.current = null;
       }
     };
   }, [navLinks.length]);

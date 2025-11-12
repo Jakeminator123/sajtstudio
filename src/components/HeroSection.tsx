@@ -104,8 +104,8 @@ function LightningFlash() {
   const [flash, setFlash] = useState(0);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    let flashTimeoutId: NodeJS.Timeout | null = null;
+    const timeoutRef = { current: null as NodeJS.Timeout | null };
+    const flashTimeoutRef = { current: null as NodeJS.Timeout | null };
     let isMounted = true;
 
     const flashInterval = () => {
@@ -113,7 +113,7 @@ function LightningFlash() {
 
       // Random delay between 4-10 seconds
       const delay = 4000 + Math.random() * 6000;
-      timeoutId = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (!isMounted) return;
 
         // Sometimes double flash, sometimes single
@@ -124,13 +124,13 @@ function LightningFlash() {
           if (!isMounted) return;
 
           setFlash(1);
-          flashTimeoutId = setTimeout(() => {
+          flashTimeoutRef.current = setTimeout(() => {
             if (!isMounted) return;
 
             setFlash(0);
             flashCount++;
             if (flashCount < flashes) {
-              flashTimeoutId = setTimeout(() => doFlash(), 50 + Math.random() * 100);
+              flashTimeoutRef.current = setTimeout(() => doFlash(), 50 + Math.random() * 100);
             } else {
               flashInterval();
             }
@@ -145,8 +145,14 @@ function LightningFlash() {
 
     return () => {
       isMounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-      if (flashTimeoutId) clearTimeout(flashTimeoutId);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = null;
+      }
     };
   }, []);
 
