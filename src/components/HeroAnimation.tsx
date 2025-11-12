@@ -297,7 +297,7 @@ export default function HeroAnimation() {
   // Question text animations - start at video, go down, then up to modal
   // Design? - starts at video center, goes down, then up to left side of screen
   // Combine videoY offset with text movement
-  const textKeyframes = [0, 0.18, 0.35, 0.52, 0.7, 0.88, 1] as const;
+  const textKeyframes = [0, 0.18, 0.35, 0.52, 0.7, 0.88, 1];
 
   const designTextYOffset = useTransform(
     questionSectionProgress,
