@@ -45,6 +45,7 @@ export default function Section({
         ${backgroundClasses[background]} 
         ${paddingClasses[padding]} 
         relative overflow-hidden
+        content-visibility-auto
         ${className}
       `}
     >

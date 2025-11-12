@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Content visibility optimization - skip layout/paint for offscreen sections */
+@layer utilities {
+  .content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+  
+  .content-visibility-hidden {
+    content-visibility: hidden;
+  }
+}
+
 /* Custom scrollbar for modal */
 @layer utilities {
   .custom-scrollbar {

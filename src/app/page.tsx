@@ -55,33 +55,39 @@ export default function Home() {
         <ScrollIndicator />
 
         {/* About section with word reveal */}
-        <div id="om-oss">
+        <div id="om-oss" className="content-visibility-auto">
           <AboutSection />
         </div>
 
         {/* USP Section - Numrerade punkter som beskriver företaget */}
-        <USPSection />
+        <div className="content-visibility-auto">
+          <USPSection />
+        </div>
 
         {/* Services with modals */}
-        <div id="tjanster">
+        <div id="tjanster" className="content-visibility-auto">
           <ServicesSection />
         </div>
 
         {/* Portfolio animation - behåll nuvarande explosion */}
-        <HeroAnimation />
+        <div className="content-visibility-auto">
+          <HeroAnimation />
+        </div>
 
         {/* Process steps */}
-        <div id="process">
+        <div id="process" className="content-visibility-auto">
           <ProcessSection />
         </div>
 
         {/* Testimonials */}
-        <div id="omdomen">
+        <div id="omdomen" className="content-visibility-auto">
           <TestimonialsSection />
         </div>
 
         {/* Big CTA - Fantasy style */}
-        <BigCTA />
+        <div className="content-visibility-auto">
+          <BigCTA />
+        </div>
       </main>
       <Footer />
     </>
