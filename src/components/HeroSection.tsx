@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import Image from "next/image";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/performance";
+import NattenWords from "@/components/NattenWords";
 
 // Magnetic button component that follows mouse
 function MagneticButton({
@@ -774,8 +775,7 @@ export default function HeroSection() {
               transition={{ delay: 0.8, duration: 0.8 }}
               whileHover={{ scale: 1.02 }}
             >
-              <AnimatedText
-                text="något"
+              <NattenWords
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
