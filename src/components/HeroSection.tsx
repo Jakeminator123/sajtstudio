@@ -177,78 +177,8 @@ function LightningFlash() {
   );
 }
 
-// Component for individual animated letter
-function AnimatedLetter({
-  letter,
-  index,
-  scrollProgress,
-  shouldReduceMotion,
-  mounted
-}: {
-  letter: string;
-  index: number;
-  scrollProgress: any;
-  shouldReduceMotion: boolean;
-  mounted: boolean;
-}) {
-  // Letters fall diagonally like rain, matching the background perspective
-  const rainAngle = 75 + (index % 3) * 5; // 75-85 degrees (mostly down, slightly right)
-  const distance = 400 + (index % 5) * 150; // Varying fall distances
-  const horizontalDrift = 50 + (index % 4) * 30; // Slight horizontal movement like rain
-  const letterDelay = Math.min(index * 0.01, 0.2); // Limit max delay to prevent issues
-
-  const x = useTransform(
-    scrollProgress,
-    [0, 0.25, 0.5 + letterDelay, 1],
-    [0, 0, 0, horizontalDrift + Math.cos((rainAngle * Math.PI) / 180) * distance * 0.3]
-  );
-  const y = useTransform(
-    scrollProgress,
-    [0, 0.25, 0.5 + letterDelay, 1],
-    [0, 0, 0, Math.sin((rainAngle * Math.PI) / 180) * distance]
-  );
-  const rotate = useTransform(
-    scrollProgress,
-    [0, 0.25, 0.5 + letterDelay, 1],
-    [0, 0, 0, (index % 2 === 0 ? 1 : -1) * (180 + (index % 3) * 60)]
-  );
-  const opacity = useTransform(
-    scrollProgress,
-    [0, 0.25, 0.5 + letterDelay, 0.9],
-    [1, 1, 1, 0]
-  );
-  const scale = useTransform(
-    scrollProgress,
-    [0, 0.25, 0.5 + letterDelay, 0.95],
-    [1, 1, 1, 0.5]
-  );
-
-  // Only apply animations when mounted to prevent hydration mismatch
-  if (!mounted || shouldReduceMotion) {
-    return (
-      <span className="inline-block">
-        {letter === " " ? "\u00A0" : letter}
-      </span>
-    );
-  }
-
-  return (
-    <motion.span
-      className="inline-block"
-      style={{
-        x: x ?? 0,
-        y: y ?? 0,
-        rotate: rotate ?? 0,
-        opacity: opacity ?? 1,
-        scale: scale ?? 1,
-      }}
-    >
-      {letter === " " ? "\u00A0" : letter}
-    </motion.span>
-  );
-}
-
-// Component to split text into letters and animate them on scroll
+// Optimized text animation - animates whole block instead of individual letters
+// Uses transform/opacity for GPU-accelerated animations without layout thrashing
 function AnimatedText({
   text,
   className,
@@ -262,21 +192,41 @@ function AnimatedText({
   shouldReduceMotion: boolean;
   mounted: boolean;
 }) {
-  const letters = useMemo(() => text.split(""), [text]);
+  // Use transform and opacity only - GPU-composited, no layout work
+  const y = useTransform(
+    scrollProgress,
+    [0, 0.5, 1],
+    [0, -50, -100]
+  );
+  const opacity = useTransform(
+    scrollProgress,
+    [0, 0.5, 0.9],
+    [1, 1, 0]
+  );
+  const scale = useTransform(
+    scrollProgress,
+    [0, 0.5, 0.95],
+    [1, 1, 0.8]
+  );
+
+  // Only apply animations when mounted to prevent hydration mismatch
+  if (!mounted || shouldReduceMotion) {
+    return <span className={className}>{text}</span>;
+  }
 
   return (
-    <span className={className}>
-      {letters.map((letter, index) => (
-        <AnimatedLetter
-          key={`${letter}-${index}`}
-          letter={letter}
-          index={index}
-          scrollProgress={scrollProgress}
-          shouldReduceMotion={shouldReduceMotion}
-          mounted={mounted}
-        />
-      ))}
-    </span>
+    <motion.span
+      className={className}
+      style={{
+        y: y ?? 0,
+        opacity: opacity ?? 1,
+        scale: scale ?? 1,
+        display: 'inline-block',
+        willChange: 'transform, opacity', // Hint to browser for optimization
+      }}
+    >
+      {text}
+    </motion.span>
   );
 }
 

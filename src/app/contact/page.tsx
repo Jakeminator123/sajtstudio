@@ -10,11 +10,25 @@ function Clock() {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
+    // Use requestAnimationFrame for smoother updates and less DOM work
+    let rafId: number;
+    let lastUpdate = Date.now();
+    
+    const updateTime = () => {
+      const now = Date.now();
+      // Only update DOM if a full second has passed
+      if (now - lastUpdate >= 1000) {
+        setTime(new Date());
+        lastUpdate = now;
+      }
+      rafId = requestAnimationFrame(updateTime);
+    };
+    
+    rafId = requestAnimationFrame(updateTime);
+    
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const hours = time.getHours().toString().padStart(2, '0');

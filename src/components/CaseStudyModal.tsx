@@ -48,7 +48,7 @@ export default function CaseStudyModal({
     };
 
     const modalContent = document.getElementById('case-study-content');
-    modalContent?.addEventListener('scroll', handleScroll);
+    modalContent?.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => modalContent?.removeEventListener('scroll', handleScroll);
   }, [isOpen]);
