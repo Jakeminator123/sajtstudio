@@ -248,6 +248,51 @@ export default function HeroAnimation() {
     [0, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75] // Gradually intensifies during zoom
   );
   
+  // Red "landing pad" - transforms from flying square into a glowing floor
+  const redPadKeyframes = [0, 0.35, 0.55, 0.75, 1];
+  const redPadX = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [-420, -240, -140, -80, -60]
+  );
+  const redPadY = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [-320, -140, 20, 190, 250]
+  );
+  const redPadScaleX = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [0.75, 0.9, 1.25, 1.65, 1.85]
+  );
+  const redPadScaleY = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [1.1, 1.0, 0.75, 0.38, 0.28]
+  );
+  const redPadRotate = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [32, 24, 16, 9, 4]
+  );
+  const redPadSkewX = useTransform(
+    scrollYProgress,
+    redPadKeyframes,
+    [10, 8, 6, 4, 3]
+  );
+  const redPadOpacity = useTransform(
+    scrollYProgress,
+    [0.18, 0.3, 0.65, 1],
+    [0, 0.55, 0.85, 0.75]
+  );
+  const redPadShadow = useTransform(scrollYProgress, (latest) => {
+    const clamped = Math.max(0, Math.min(1, latest));
+    const spread = 220 + clamped * 140;
+    const blur = 420 + clamped * 180;
+    const alpha = 0.18 + clamped * 0.22;
+    return `0 ${spread}px ${blur}px rgba(255, 0, 51, ${alpha})`;
+  });
+
 
   // Question text animations - start at video, go down, then up to modal
   // Design? - starts at video center, goes down, then up to left side of screen
@@ -771,6 +816,31 @@ export default function HeroAnimation() {
           </motion.div>
 
           {/* ============================================ */}
+          {/* RED LANDING PAD - Transforms into glowing floor */}
+          {/* ============================================ */}
+          <motion.div
+            className="absolute left-1/2 top-1/2 pointer-events-none"
+            style={{
+              x: redPadX,
+              y: redPadY,
+              scaleX: redPadScaleX,
+              scaleY: redPadScaleY,
+              rotate: redPadRotate,
+              skewX: redPadSkewX,
+              opacity: redPadOpacity,
+              zIndex: 20,
+              boxShadow: redPadShadow,
+            }}
+          >
+            <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
+              <div className="absolute inset-0 rounded-[38%] bg-gradient-to-br from-tertiary via-tertiary/70 to-tertiary/40 opacity-90" />
+              <div className="absolute inset-0 rounded-[40%] blur-3xl bg-tertiary/35" />
+              <div className="absolute -inset-x-[25%] bottom-[-45%] h-[60%] bg-gradient-to-b from-tertiary/28 via-tertiary/12 to-transparent blur-3xl opacity-80" />
+              <div className="absolute inset-x-[-30%] bottom-[-15%] h-[40%] rounded-full bg-tertiary/20 blur-[50px]" />
+            </div>
+          </motion.div>
+
+          {/* ============================================ */}
           {/* VIDEO CONTAINER - Main video element */}
           {/* ============================================ */}
           <motion.div
@@ -829,15 +899,12 @@ export default function HeroAnimation() {
                 </video>
               )}
               {(!mounted || videoError) && (
-                <div className="relative w-full aspect-video bg-black">
-                  <Image
-                    src="/images/hero/alt_background.webp"
-                    alt="Portfolio preview"
-                    fill
-                    className="object-cover"
-                    loading="lazy"
-                    sizes="100vw"
-                  />
+                <div className="relative w-full aspect-video overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,0,51,0.25),transparent_55%)] opacity-80" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(0,102,255,0.3),transparent_60%)] opacity-70" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80" />
+                  <div className="absolute inset-x-[-20%] bottom-[-30%] h-[60%] bg-gradient-to-b from-tertiary/20 via-tertiary/10 to-transparent blur-3xl opacity-60" />
+                  <div className="absolute inset-x-1/4 bottom-[-10%] h-[35%] rounded-full bg-tertiary/15 blur-[60px]" />
                 </div>
               )}
 

@@ -28,41 +28,50 @@ export function useVideoLoader(
     setMounted(true);
   }, []);
 
-  // Set video playback rate for cinematic effect
+  // Apply preload preference and listen for load/error events
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || videoError || playbackRate === undefined) return;
+    if (!video) return;
 
-    // Handle video errors gracefully
-    const handleError = () => {
-      setVideoError(true);
-    };
+    if (preload) {
+      video.preload = preload;
+    }
 
-    // Wait for video to be loaded before setting playback rate
-    const handleLoadedMetadata = () => {
-      try {
-        if (video && !videoError) {
-          video.playbackRate = playbackRate;
-        }
-      } catch (error) {
-        // Silently fail if playback rate can't be set
-      }
-    };
+    const handleError = () => setVideoError(true);
+    const handleLoadedData = () => setVideoError(false);
 
     video.addEventListener("error", handleError);
-
-    if (video.readyState >= 1) {
-      // Video metadata already loaded
-      handleLoadedMetadata();
-    } else {
-      video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
-    }
+    video.addEventListener("loadeddata", handleLoadedData);
 
     return () => {
       video.removeEventListener("error", handleError);
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("loadeddata", handleLoadedData);
     };
-  }, [videoError, playbackRate]);
+  }, [preload]);
+
+  // Set video playback rate for cinematic effect
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || playbackRate === undefined) return;
+
+    const applyPlaybackRate = () => {
+      try {
+        video.playbackRate = playbackRate;
+      } catch {
+        // Ignore playback rate errors
+      }
+    };
+
+    if (video.readyState >= 1) {
+      applyPlaybackRate();
+    } else {
+      video.addEventListener("loadedmetadata", applyPlaybackRate, { once: true });
+    }
+
+    return () => {
+      video.removeEventListener("loadedmetadata", applyPlaybackRate);
+    };
+  }, [playbackRate]);
 
   return { videoRef, videoError, mounted };
 }

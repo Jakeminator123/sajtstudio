@@ -131,13 +131,6 @@ export default function RootLayout({
         {/* Preload critical resources */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
         {/* Note: alt_background.webp removed from preload as it's lazy loaded */}
-        {/* Preload hero video for faster initial load */}
-        <link
-          rel="preload"
-          href="/videos/telephone_ringin.mp4"
-          as="fetch"
-          type="video/mp4"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
