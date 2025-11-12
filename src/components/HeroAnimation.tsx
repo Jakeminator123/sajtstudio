@@ -297,42 +297,43 @@ export default function HeroAnimation() {
   // Question text animations - start at video, go down, then up to modal
   // Design? - starts at video center, goes down, then up to left side of screen
   // Combine videoY offset with text movement
+  const textKeyframes = [0, 0.18, 0.35, 0.52, 0.7, 0.88, 1] as const;
+
   const designTextYOffset = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 300, 300, -600, -600] // Start at video, go down, then up further
+    textKeyframes,
+    [0, 160, 280, 160, -120, -320, -520]
   );
-  // Combine video Y position with text offset
   const designTextY = useTransform(
     [videoYOffset, designTextYOffset],
     ([videoY, offset]) => (videoY as number) + (offset as number)
   );
   const designTextX = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 0, 0, -400, -400] // Move to left side when going up
+    textKeyframes,
+    [0, -20, -40, -120, -220, -320, -360]
   );
   const designTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.45, 0.7, 0.9, 1],
-    [0, 0, 0.4, 0.8, 1, 1, 1]
+    [0, 0.12, 0.3, 0.5, 0.72, 0.88, 1],
+    [0, 0.2, 1, 1, 0.9, 0.4, 0]
   );
   const designTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.6, 0.85, 1],
-    [0.5, 0.7, 0.9, 1, 1.1, 1] // Scale up when reaching top
+    textKeyframes,
+    [0.7, 0.85, 1, 1.08, 1.15, 1.05, 0.85]
   );
   const designTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 0, 0, -20, -20] // Rotate when going up
+    textKeyframes,
+    [-4, -2, 0, -6, -12, -16, -18]
   );
 
   // Functionality? - starts at video center, goes down, then up to right side of screen
   const functionalityTextYOffset = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 300, 300, -600, -600] // Start at video, go down, then up further
+    textKeyframes,
+    [0, 180, 320, 180, -140, -340, -540]
   );
   // Combine video Y position with text offset
   const functionalityTextY = useTransform(
@@ -341,23 +342,23 @@ export default function HeroAnimation() {
   );
   const functionalityTextX = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 0, 0, 400, 400] // Move to right side when going up
+    textKeyframes,
+    [0, 10, 0, 140, 260, 360, 420]
   );
   const functionalityTextOpacity = useTransform(
     questionSectionProgress,
-    [0, 0.1, 0.25, 0.45, 0.7, 0.9, 1],
-    [0, 0, 0.4, 0.8, 1, 1, 1]
+    [0, 0.15, 0.32, 0.55, 0.75, 0.9, 1],
+    [0, 0.25, 1, 1, 0.85, 0.45, 0]
   );
   const functionalityTextScale = useTransform(
     questionSectionProgress,
-    [0, 0.2, 0.4, 0.6, 0.85, 1],
-    [0.5, 0.7, 0.9, 1, 1.1, 1] // Scale up when reaching top
+    textKeyframes,
+    [0.75, 0.88, 1, 1.12, 1.2, 1.05, 0.9]
   );
   const functionalityTextRotate = useTransform(
     questionSectionProgress,
-    [0, 0.3, 0.6, 0.85, 1],
-    [0, 0, 0, 20, 20] // Rotate when going up
+    textKeyframes,
+    [6, 3, 0, 8, 16, 18, 20]
   );
 
   const portfolioImages = [
