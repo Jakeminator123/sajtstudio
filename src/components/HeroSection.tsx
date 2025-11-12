@@ -490,7 +490,8 @@ export default function HeroSection() {
                 loop
                 muted
                 playsInline
-                preload="auto"
+                preload="metadata"
+                poster="/images/hero/alt_background.webp"
                 className="w-full h-full object-cover"
                 style={{ filter: 'brightness(0.8) contrast(0.9)' }}
               >
@@ -550,6 +551,7 @@ export default function HeroSection() {
                 sizes="100vw"
                 className="object-cover"
                 priority
+                fetchPriority="high"
               />
             </motion.div>
             {/* Subtle glow effect */}

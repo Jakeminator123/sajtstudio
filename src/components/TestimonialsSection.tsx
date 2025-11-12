@@ -60,7 +60,7 @@ export default function TestimonialsSection() {
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.15 }}
-          loading="eager"
+          loading="lazy"
         />
 
         {/* Dark overlay for readability */}

@@ -128,9 +128,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        {/* Preload critical resources */}
+        {/* Preload critical resources for above-the-fold content */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
-        {/* Note: alt_background.webp removed from preload as it's lazy loaded */}
+        <link rel="preload" href="/images/hero/alt_background.webp" as="image" type="image/webp" fetchPriority="high" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
