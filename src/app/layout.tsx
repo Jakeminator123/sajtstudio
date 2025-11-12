@@ -131,6 +131,7 @@ export default function RootLayout({
         {/* Preload critical resources for above-the-fold content */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
         <link rel="preload" href="/images/hero/alt_background.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/videos/background.mp4" as="video" type="video/mp4" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
