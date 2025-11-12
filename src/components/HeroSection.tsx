@@ -284,6 +284,8 @@ export default function HeroSection() {
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+  const showDynamicBackground = mounted && !shouldReduceMotion;
+  const showInteractiveEffects = showDynamicBackground;
 
   useEffect(() => {
     setMounted(true);
@@ -419,10 +421,10 @@ export default function HeroSection() {
         transformStyle: 'preserve-3d',
       }}
     >
-      {/* Floating geometric shapes */}
-      {mounted && !shouldReduceMotion && (
-        <div className="absolute inset-0 pointer-events-none z-[2]">
-          {Array.from({ length: 6 }).map((_, i) => {
+        {/* Floating geometric shapes */}
+        {showInteractiveEffects && (
+          <div className="absolute inset-0 pointer-events-none z-[2]">
+            {Array.from({ length: 6 }).map((_, i) => {
             const size = 100 + (i % 3) * 50;
             const left = (i * 137.5) % 100;
             const top = ((i * 1.618) * 100) % 100;
@@ -453,147 +455,125 @@ export default function HeroSection() {
                 }}
               />
             );
-          })}
-        </div>
-      )}
+            })}
+          </div>
+        )}
 
-      {/* Animated mesh gradient background */}
-      {mounted && !shouldReduceMotion && (
-        <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
-          <div
-            className="w-full h-full"
-            style={{
-              background: `
+        {/* Animated mesh gradient background */}
+        {showInteractiveEffects && (
+          <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
+            <div
+              className="w-full h-full"
+              style={{
+                background: `
                 radial-gradient(at 20% 30%, rgba(0, 102, 255, 0.1) 0px, transparent 50%),
                 radial-gradient(at 80% 70%, rgba(255, 0, 51, 0.1) 0px, transparent 50%),
                 radial-gradient(at 50% 50%, rgba(0, 102, 255, 0.05) 0px, transparent 50%)
               `,
             }}
-          />
-        </div>
-      )}
+            />
+          </div>
+        )}
 
-      {/* Cursor trail particles - optimized version */}
-      {mounted && !shouldReduceMotion && !isHoveringButton && (
-        <CursorTrail mousePosition={mousePosition} />
-      )}
+        {/* Cursor trail particles - optimized version */}
+        {showInteractiveEffects && !isHoveringButton && (
+          <CursorTrail mousePosition={mousePosition} />
+        )}
       {/* Dynamic background with image overlays - only render on client */}
       {/* Fixed positioning with z-[1] - video at bottom, image on top */}
-      {mounted && (
-        <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
-          {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
-          {!shouldReduceMotion && (
-            <div className="absolute inset-0 opacity-50 z-0">
-              <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                poster="/images/hero/alt_background.webp"
-                className="w-full h-full object-cover"
-                style={{ filter: 'brightness(0.8) contrast(0.9)' }}
-              >
-                <source src="/videos/background.mp4" type="video/mp4" />
-              </video>
-              {/* Fade overlay for smoother blend */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
-            </div>
-          )}
+        {mounted && (
+          <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
+            <div className="absolute inset-0">
+              {showDynamicBackground && (
+                <div className="absolute inset-0">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    poster="/images/hero/alt_background.webp"
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'brightness(0.85) contrast(0.95)' }}
+                  >
+                    <source src="/videos/background.mp4" type="video/mp4" />
+                  </video>
+                </div>
+              )}
 
-          {/* Main background pattern - alt_background.webp - ABOVE VIDEO */}
-          <motion.div
-            className="absolute inset-0 z-[1]"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={
-              shouldReduceMotion
-                ? { opacity: 1, scale: 1 }
-                : {
-                  opacity: [0.9, 1, 0.9],
-                  scale: [1, 1.01, 1],
+              <motion.div
+                className="absolute inset-0"
+                initial={{ opacity: 0.85, scale: 1.02 }}
+                animate={
+                  showDynamicBackground
+                    ? {
+                        opacity: [0.75, 0.9, 0.75],
+                        scale: [1, 1.015, 1],
+                        filter: [
+                          'brightness(0.95) contrast(1.02)',
+                          'brightness(1) contrast(1.05)',
+                          'brightness(0.95) contrast(1.02)',
+                        ],
+                      }
+                    : { opacity: 0.85, scale: 1, filter: 'brightness(0.95) contrast(1.02)' }
                 }
-            }
-            transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                  opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-                  initial: { duration: 2, ease: "easeOut" },
+                transition={
+                  showDynamicBackground
+                    ? {
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }
+                    : { duration: 0.6, ease: "easeOut" }
                 }
-            }
-            style={{ y: imageY1 }}
-          >
-            <motion.div
-              className="relative w-full h-full"
-              animate={
-                shouldReduceMotion
-                  ? {}
-                  : {
-                    filter: [
-                      'brightness(0.9) contrast(1)',
-                      'brightness(1) contrast(1.05)',
-                      'brightness(0.9) contrast(1)',
-                    ],
-                  }
-              }
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <Image
-                src="/images/hero/alt_background.webp"
-                alt=""
-                fill
-                sizes="100vw"
-                className="object-cover"
-                priority
-                fetchPriority="high"
-              />
-            </motion.div>
-            {/* Subtle glow effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
-              animate={{
-                opacity: [0.2, 0.3, 0.2],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
+                style={{ y: imageY1 }}
+              >
+                <Image
+                  src="/images/hero/alt_background.webp"
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  className={`object-cover ${showDynamicBackground ? 'opacity-75 mix-blend-soft-light' : 'opacity-90'}`}
+                  priority
+                  fetchPriority="high"
+                />
+              </motion.div>
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/60" />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `
+                  radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.16), transparent 70%),
+                  radial-gradient(circle at 20% 30%, rgba(255, 0, 51, 0.12), transparent 65%),
+                  radial-gradient(circle at 80% 70%, rgba(0, 102, 255, 0.12), transparent 65%)
+                `,
+                opacity: showDynamicBackground ? 0.7 : 0.6,
               }}
             />
-            {/* Lightning flash effect - random intervals */}
-            {!shouldReduceMotion && (
-              <LightningFlash />
+
+            {showInteractiveEffects && <LightningFlash />}
+
+            {showInteractiveEffects && (
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {rainDrops.map((drop, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-[1px] h-[20px] bg-white/35"
+                    style={{
+                      left: `${drop.left}%`,
+                      top: '-20px',
+                      animation: `rain ${drop.duration}s linear infinite`,
+                      animationDelay: `${drop.delay}s`,
+                    }}
+                  />
+                ))}
+              </div>
             )}
           </motion.div>
-
-          {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
-
-          {/* Rain effect - only render when mounted to avoid hydration mismatch */}
-          {mounted && !shouldReduceMotion && (
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
-              {rainDrops.map((drop, i) => (
-                <div
-                  key={i}
-                  className="absolute w-[1px] h-[20px] bg-white/40"
-                  style={{
-                    left: `${drop.left}%`,
-                    top: '-20px',
-                    animation: `rain ${drop.duration}s linear infinite`,
-                    animationDelay: `${drop.delay}s`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
+        )}
 
       {/* Static fallback for SSR */}
       {!mounted && (
@@ -604,40 +584,9 @@ export default function HeroSection() {
       )}
 
       {/* Animated background patterns - Subtle and elegant - only on client */}
-      {mounted && (
-        <motion.div
-          className="absolute inset-0 z-[1]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-        >
-          {/* Single subtle radial gradient */}
-          <motion.div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,102,255,0.15),transparent_70%)]"
-            animate={
-              shouldReduceMotion
-                ? { scale: 1, opacity: 0.125 }
-                : {
-                  scale: [1, 1.05, 1],
-                  opacity: [0.1, 0.15, 0.1],
-                }
-            }
-            transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }
-            }
-          />
-        </motion.div>
-      )}
-
-      {/* Floating particles effect */}
-      {mounted && (
-        <div className="absolute inset-0 z-0 overflow-hidden">
+        {/* Floating particles effect */}
+        {mounted && (
+          <div className="absolute inset-0 z-0 overflow-hidden">
           {particles.map((particle, i) => (
             <motion.div
               key={i}
