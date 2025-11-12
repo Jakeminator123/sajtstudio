@@ -10,32 +10,54 @@ export function usePrefetch() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    const getLinkFromEventTarget = (eventTarget: EventTarget | null): HTMLAnchorElement | null => {
+      if (!eventTarget) return null;
+
+      let node: Node | null = eventTarget as Node | null;
+
+      while (node) {
+        if (node instanceof HTMLAnchorElement && node.href) {
+          return node;
+        }
+
+        // Handle shadow DOM hosts
+        if (typeof ShadowRoot !== 'undefined' && node instanceof ShadowRoot) {
+          node = node.host;
+          continue;
+        }
+
+        if (node instanceof HTMLElement) {
+          node = node.parentElement;
+          continue;
+        }
+
+        node = node.parentNode;
+      }
+
+      return null;
+    };
+
     const handleMouseEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest('a[href]') as HTMLAnchorElement;
-      
+      const link = getLinkFromEventTarget(e.target);
+
       if (link && link.href && link.href.startsWith(window.location.origin)) {
         const href = link.getAttribute('href');
         if (href && !href.startsWith('#')) {
-          // Prefetch the page
-          const linkElement = document.createElement('link');
-          linkElement.rel = 'prefetch';
-          linkElement.href = href;
-          document.head.appendChild(linkElement);
+          const existingPrefetch = document.querySelector(`link[rel="prefetch"][href="${href}"]`);
+          if (!existingPrefetch) {
+            const linkElement = document.createElement('link');
+            linkElement.rel = 'prefetch';
+            linkElement.href = href;
+            document.head.appendChild(linkElement);
+          }
         }
       }
     };
 
-    // Add event listeners to all links
-    const links = document.querySelectorAll('a[href]');
-    links.forEach((link) => {
-      link.addEventListener('mouseenter', handleMouseEnter as EventListener);
-    });
+    document.addEventListener('mouseenter', handleMouseEnter as EventListener, true);
 
     return () => {
-      links.forEach((link) => {
-        link.removeEventListener('mouseenter', handleMouseEnter as EventListener);
-      });
+      document.removeEventListener('mouseenter', handleMouseEnter as EventListener, true);
     };
   }, [pathname]);
 }

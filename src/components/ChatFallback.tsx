@@ -24,8 +24,8 @@ export default function ChatFallback() {
     const evaluate = () => {
       const status = window.__didStatus || "pending";
       if (!cancelled) {
-        // Show FAB if status is error, or if still pending after initial delay
-        setShouldShowFab(status === "error" || (hasWaited && status === "pending"));
+        // Hide FAB if D-ID is loaded, show if error or still pending after initial delay
+        setShouldShowFab(status !== "loaded" && (status === "error" || (hasWaited && status === "pending")));
       }
     };
 

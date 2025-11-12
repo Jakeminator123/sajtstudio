@@ -1,318 +1,398 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import {
-  motion,
-  useScroll,
-  useMotionValueEvent,
-  useTransform,
-} from "framer-motion";
 import Image from "next/image";
-import { designTokens } from "@/config/designTokens";
+import { useEffect, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
+import { usePathname } from "next/navigation";
+import { siteConfig } from "@/config/siteConfig";
 
 export default function HeaderNav() {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [currentHash, setCurrentHash] = useState("");
   const { scrollY } = useScroll();
 
-  // More nuanced scroll detection
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 20);
+    setIsScrolled(latest > 50);
   });
 
-  // Smooth background opacity based on scroll - black with blur
-  const headerBg = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.95)"]
-  );
+  // Track current hash
+  useEffect(() => {
+    const updateHash = () => {
+      if (typeof window !== 'undefined') {
+        setCurrentHash(window.location.hash);
+      }
+    };
+    
+    updateHash();
+    window.addEventListener('hashchange', updateHash);
+    return () => window.removeEventListener('hashchange', updateHash);
+  }, []);
 
-  const headerShadow = useTransform(
-    scrollY,
-    [0, 100],
-    ["0 0 0 rgba(0,0,0,0)", "0 4px 20px rgba(0,0,0,0.5)"]
-  );
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
-  // Red glow that increases with scroll
-  const headerRedGlow = useTransform(scrollY, [0, 200], [0, 0.3]);
+  const navLinks = pathname === "/" 
+    ? [
+        { href: "/", label: "Hem" },
+        { href: "#tjanster", label: "Tjänster" },
+        { href: "#process", label: "Process" },
+        { href: "#omdomen", label: "Omdömen" },
+        { href: "/portfolio", label: "Portfolio" },
+        { href: "/contact", label: "Kontakt" },
+      ]
+    : siteConfig.nav.links;
 
   return (
     <>
+      {/* Main Header */}
       <motion.header
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        style={{
-          backgroundColor: headerBg,
-          boxShadow: headerShadow,
-        }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-colors duration-500 border-b border-white/10"
-        role="banner"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled 
+            ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50" 
+            : "bg-transparent"
+        }`}
       >
-        {/* Red glow accent that increases with scroll */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-tertiary/20 to-transparent pointer-events-none z-0"
-          style={{ opacity: headerRedGlow }}
+        {/* Animated gradient line at top */}
+        <motion.div 
+          className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent"
+          animate={{
+            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{
+            backgroundSize: "200% 100%",
+          }}
         />
 
-        <nav
-          className="container mx-auto px-6 py-5 relative z-20"
-          role="navigation"
-          aria-label="Huvudnavigation"
-        >
+        {/* Red accent glow on scroll */}
+        {isScrolled && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-gradient-to-b from-tertiary/5 to-transparent pointer-events-none"
+          />
+        )}
+
+        <nav className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo with enhanced animations */}
-            <Link
-              href="/"
-              className="flex items-center gap-3 group"
-              aria-label="Sajtstudio - Startsida"
-            >
+            {/* Logo */}
+            <Link href="/" className="group relative">
               <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.3, type: "spring" }}
-                className="relative"
-              >
-                {/* Glow effect on hover */}
-                <motion.div
-                  className="absolute inset-0 bg-accent blur-xl opacity-0 group-hover:opacity-50"
-                  transition={{ duration: 0.3 }}
-                />
-                <Image
-                  src="/logo.svg"
-                  alt="Sajtstudio logotyp"
-                  width={36}
-                  height={36}
-                  priority
-                  className="relative z-10 transition-transform duration-300"
-                  aria-hidden="false"
-                />
-              </motion.div>
-              <motion.span
-                className="text-xl font-black tracking-tight text-white group-hover:text-accent transition-colors duration-300 relative"
                 whileHover={{ scale: 1.05 }}
-                aria-hidden="true"
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-3"
               >
-                Sajtstudio
-                {/* Underline effect */}
-                <motion.span className="absolute bottom-0 left-0 w-0 h-0.5 bg-accent group-hover:w-full transition-all duration-300 pointer-events-none" />
-              </motion.span>
+                {/* Logo glow effect */}
+                <div className="relative">
+                  <motion.div
+                    className="absolute inset-0 bg-accent/50 blur-xl"
+                    animate={{
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-accent to-tertiary p-0.5">
+                    <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
+                      <Image
+                        src="/logo.svg"
+                        alt="Sajtstudio"
+                        width={24}
+                        height={24}
+                        className="brightness-0 invert"
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text logo */}
+                <div className="relative">
+                  <span className="text-xl font-black text-white">
+                    Sajtstudio
+                  </span>
+                  <motion.span 
+                    className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-accent to-tertiary"
+                    initial={{ width: "0%" }}
+                    whileHover={{ width: "100%" }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              </motion.div>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-10" style={{ touchAction: 'manipulation' }}>
-              {[
-                { href: "/", label: "Hem" },
-                { href: "/portfolio", label: "Portfolio" },
-                { href: "/contact", label: "Kontakt" },
-              ].map((link, index) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                  whileHover={{ y: -2 }}
-                  className="relative z-20"
-                >
-                  <Link
-                    href={link.href}
-                    className="text-sm font-semibold text-white hover:text-tertiary transition-colors duration-300 relative group block z-10 touch-manipulation"
-                    prefetch={true}
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
-                  >
-                    {link.label}
-                    {/* Animated underline */}
-                    <motion.span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
-                    {/* Glow effect */}
-                    <motion.span
-                      className="absolute inset-0 blur-sm opacity-0 group-hover:opacity-50 bg-tertiary pointer-events-none"
-                      transition={{ duration: 0.3 }}
-                    />
-                  </Link>
-                </motion.div>
-              ))}
+            <div className="hidden lg:flex items-center gap-8">
+              <div className="flex items-center gap-1 relative">
+                {navLinks.map((link, index) => {
+                  const isActive = pathname === link.href || 
+                    (link.href.startsWith('#') && pathname === '/' && currentHash === link.href);
+                  
+                  return (
+                    <motion.div
+                      key={link.href}
+                      onHoverStart={() => setHoveredIndex(index)}
+                      onHoverEnd={() => setHoveredIndex(null)}
+                      className="relative"
+                    >
+                      <Link
+                        href={link.href}
+                        className={`px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
+                          isActive 
+                            ? "text-white" 
+                            : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        {link.label}
+                        
+                        {/* Active indicator */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 bg-gradient-to-r from-accent/20 to-tertiary/20 rounded-lg border border-accent/30"
+                            transition={{ type: "spring", duration: 0.5 }}
+                          />
+                        )}
 
-              {/* CTA Button - Enhanced with red accent */}
+                        {/* Hover effect */}
+                        {hoveredIndex === index && !isActive && (
+                          <motion.div
+                            layoutId="hoverTab"
+                            className="absolute inset-0 bg-white/5 rounded-lg"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          />
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* CTA Button */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                whileHover={{ scale: 1.05, y: -2 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative group"
               >
-                {/* Glow background */}
+                {/* Button glow */}
                 <motion.div
-                  className="absolute inset-0 bg-tertiary blur-xl opacity-0 group-hover:opacity-50 pointer-events-none"
-                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 bg-tertiary/50 blur-xl rounded-full"
+                  animate={{
+                    opacity: [0.5, 0.8, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
                 <Link
                   href="/contact"
-                  className="relative px-6 py-2.5 bg-gradient-to-r from-accent to-tertiary text-white text-sm font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 overflow-hidden"
+                  className="relative px-6 py-2.5 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full overflow-hidden block"
                 >
                   {/* Shimmer effect */}
                   <motion.span
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                    animate={{
+                      x: ["-100%", "100%"],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
                   />
-                  <span className="relative z-10">Starta projekt</span>
+                  <span className="relative">Starta projekt</span>
                 </Link>
               </motion.div>
             </div>
 
-            {/* Mobile Menu Button - Enhanced */}
+            {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden relative w-8 h-8 flex items-center justify-center group"
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="lg:hidden relative w-10 h-10 flex items-center justify-center"
             >
-              <span className="sr-only">
-                {isMenuOpen ? "Stäng meny" : "Öppna meny"}
-              </span>
-              <motion.span
-                animate={{
-                  rotate: isMenuOpen ? 45 : 0,
-                  y: isMenuOpen ? 0 : -8,
-                }}
-                className="absolute w-6 h-0.5 bg-white group-hover:bg-tertiary transition-colors"
-              />
-              <motion.span
-                animate={{
-                  opacity: isMenuOpen ? 0 : 1,
-                }}
-                className="absolute w-6 h-0.5 bg-white group-hover:bg-tertiary transition-colors"
-              />
-              <motion.span
-                animate={{
-                  rotate: isMenuOpen ? -45 : 0,
-                  y: isMenuOpen ? 0 : 8,
-                }}
-                className="absolute w-6 h-0.5 bg-white group-hover:bg-tertiary transition-colors"
-              />
+              <div className="relative w-6 h-5 flex flex-col justify-between">
+                <motion.span
+                  animate={{
+                    rotate: menuOpen ? 45 : 0,
+                    y: menuOpen ? 8 : 0,
+                  }}
+                  className="w-full h-0.5 bg-white origin-left"
+                />
+                <motion.span
+                  animate={{
+                    opacity: menuOpen ? 0 : 1,
+                    scaleX: menuOpen ? 0 : 1,
+                  }}
+                  className="w-full h-0.5 bg-white"
+                />
+                <motion.span
+                  animate={{
+                    rotate: menuOpen ? -45 : 0,
+                    y: menuOpen ? -8 : 0,
+                  }}
+                  className="w-full h-0.5 bg-white origin-left"
+                />
+              </div>
             </motion.button>
           </div>
         </nav>
       </motion.header>
 
-      {/* Mobile Menu Overlay - Enhanced with black background */}
-      <motion.div
-        id="mobile-menu"
-        initial={false}
-        animate={{
-          opacity: isMenuOpen ? 1 : 0,
-          pointerEvents: isMenuOpen ? "auto" : "none",
-          display: isMenuOpen ? "block" : "none",
-        }}
-        transition={{ duration: 0.3 }}
-        className="fixed inset-0 bg-black z-40 md:hidden"
-        aria-hidden={!isMenuOpen}
-        onClick={(e) => {
-          // Close menu when clicking backdrop
-          if (e.target === e.currentTarget) {
-            setIsMenuOpen(false);
-          }
-        }}
-        style={{ touchAction: 'manipulation' }}
-      >
-        {/* Background glow */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-accent/10 via-tertiary/10 to-transparent"
-          animate={{
-            opacity: isMenuOpen ? 1 : 0,
-          }}
-        />
-
-        <nav
-          className="container mx-auto px-6 pt-24 relative z-50"
-          role="navigation"
-          style={{ touchAction: 'manipulation' }}
-        >
-          <div className="flex flex-col gap-8">
-            {[
-              { href: "/", label: "Hem" },
-              { href: "/portfolio", label: "Portfolio" },
-              { href: "/contact", label: "Kontakt" },
-            ].map((link, index) => (
-              <motion.div
-                key={link.href}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{
-                  opacity: isMenuOpen ? 1 : 0,
-                  x: isMenuOpen ? 0 : -20,
-                }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link
-                  href={link.href}
-                  onClick={(e) => {
-                    setIsMenuOpen(false);
-                    // Ensure navigation happens
-                    e.stopPropagation();
-                  }}
-                  onTouchStart={(e) => {
-                    // Prevent double-tap zoom on iOS
-                    e.currentTarget.style.touchAction = 'manipulation';
-                  }}
-                  className="text-3xl font-black text-white hover:text-tertiary transition-colors relative group z-50 py-4 block touch-manipulation"
-                  prefetch={true}
-                  style={{ 
-                    touchAction: 'manipulation',
-                    WebkitTapHighlightColor: 'rgba(255, 0, 51, 0.2)',
-                    minHeight: '48px',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                >
-                  {link.label}
-                  <motion.span className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-accent to-tertiary group-hover:w-full transition-all duration-300 pointer-events-none" />
-                </Link>
-              </motion.div>
-            ))}
-
+      {/* Mobile Menu Modal */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{
-                opacity: isMenuOpen ? 1 : 0,
-                y: isMenuOpen ? 0 : 20,
-              }}
-              transition={{ delay: 0.3 }}
-              className="mt-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+            />
+
+            {/* Menu Content */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 20 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto"
             >
-              <Link
-                href="/contact"
-                onClick={(e) => {
-                  setIsMenuOpen(false);
-                  e.stopPropagation();
-                }}
-                onTouchStart={(e) => {
-                  e.currentTarget.style.touchAction = 'manipulation';
-                }}
-                className="inline-block px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold hover:from-tertiary hover:to-accent transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group z-50 touch-manipulation"
-                prefetch={true}
-                style={{ 
-                  touchAction: 'manipulation',
-                  WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.2)',
-                  minHeight: '48px',
-                  minWidth: '200px'
-                }}
-              >
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.6 }}
+              {/* Gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90" />
+              
+              {/* Content */}
+              <div className="relative p-8 pt-20">
+                {/* Close button */}
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setMenuOpen(false)}
+                  className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+
+                {/* Menu items */}
+                <div className="space-y-2">
+                  {navLinks.map((link, index) => (
+                    <motion.div
+                      key={link.href}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="block py-3 px-4 text-lg font-semibold text-white hover:text-accent transition-colors relative group overflow-hidden rounded-lg"
+                      >
+                        {/* Hover background */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-accent/10 to-tertiary/10"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: 0 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                        <span className="relative">{link.label}</span>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* CTA Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-8"
+                >
+                  <Link
+                    href="/contact"
+                    onClick={() => setMenuOpen(false)}
+                    className="block w-full text-center px-6 py-3 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full relative overflow-hidden"
+                  >
+                    <motion.span
+                      className="absolute inset-0 bg-white/20"
+                      animate={{
+                        y: ["100%", "-100%"],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        repeatDelay: 1,
+                      }}
+                    />
+                    <span className="relative">Starta projekt</span>
+                  </Link>
+                </motion.div>
+
+                {/* Decorative elements */}
+                <motion.div
+                  className="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.5, 0.3],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
-                <span className="relative z-10">Starta projekt</span>
-              </Link>
+                <motion.div
+                  className="absolute -top-20 -left-20 w-40 h-40 bg-tertiary/20 rounded-full blur-3xl"
+                  animate={{
+                    scale: [1.2, 1, 1.2],
+                    opacity: [0.3, 0.5, 0.3],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 2,
+                  }}
+                />
+              </div>
             </motion.div>
-          </div>
-        </nav>
-      </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

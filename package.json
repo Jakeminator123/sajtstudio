@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "process-input-docs": "tsx scripts/processInputDocs.ts",
-    "clean": "powershell -ExecutionPolicy Bypass -File scripts/quick-clean.ps1",
-    "clean:full": "powershell -ExecutionPolicy Bypass -File scripts/clean-rebuild.ps1",
+    "clean": "node scripts/clean.js",
+    "clean:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/quick-clean.ps1",
+    "clean:full": "node scripts/clean-full.js",
     "rebuild": "npm run clean:full"
   },
   "dependencies": {

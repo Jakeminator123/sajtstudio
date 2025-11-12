@@ -59,6 +59,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
+        handwriting: ["var(--font-handwriting)", "cursive"],
+        pixel: ["var(--font-pixel)", "monospace"],
         mono: [
           "ui-monospace",
           "SFMono-Regular",

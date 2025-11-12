@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   
+  // Add empty turbopack config to silence build errors
+  turbopack: {},
+  
+  // Disable Turbopack (use webpack instead) - fixes TurbopackInternalError
+  // Turbopack is enabled by default in Next.js 16, but has bugs in 16.0.1
+  webpack: (config, { isServer }) => {
+    return config;
+  },
+  
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],

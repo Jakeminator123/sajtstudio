@@ -156,10 +156,10 @@ export default function USPSection() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  // Scroll-based color animation for title
+  // Scroll-based animations for title
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "center center", "end center"],
+    offset: ["start end", "center center", "end start"],
   });
 
   // Interpolate color from white to red (tertiary) as it comes into center
@@ -168,6 +168,10 @@ export default function USPSection() {
     [0, 0.5, 1],
     ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
   );
+
+  // Slide out to sides when scrolling past
+  const titleX = useTransform(scrollYProgress, [0.7, 1], [0, -200]);
+  const titleOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
 
   return (
     <section
@@ -223,7 +227,11 @@ export default function USPSection() {
                 delay: 0.1,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
-              style={{ color: titleColor }}
+              style={{ 
+                color: titleColor,
+                x: titleX,
+                opacity: titleOpacity,
+              }}
               className="text-hero md:text-display font-black mb-8 leading-[0.9] text-center"
             >
               {uspContent.title}

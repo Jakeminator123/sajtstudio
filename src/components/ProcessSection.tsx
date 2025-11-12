@@ -139,10 +139,10 @@ export default function ProcessSection() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  // Scroll-based color animation for heading
+  // Scroll-based animations for heading
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "center center", "end center"],
+    offset: ["start end", "center center", "end start"],
   });
 
   // Interpolate color from white to red (tertiary) as it comes into center
@@ -151,6 +151,10 @@ export default function ProcessSection() {
     [0, 0.5, 1],
     ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
   );
+
+  // Slide out to right when scrolling past
+  const headingX = useTransform(scrollYProgress, [0.7, 1], [0, 200]);
+  const headingOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
 
   return (
     <section
@@ -198,7 +202,11 @@ export default function ProcessSection() {
         >
           <motion.h2
             ref={headingRef}
-            style={{ color: headingColor }}
+            style={{ 
+              color: headingColor,
+              x: headingX,
+              opacity: headingOpacity,
+            }}
             className="text-hero md:text-display font-black mb-6 text-center leading-[0.9]"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}

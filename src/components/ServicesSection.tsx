@@ -228,10 +228,10 @@ export default function ServicesSection() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
-  // Scroll-based color animation for heading
+  // Scroll-based animations for heading
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "center center", "end center"],
+    offset: ["start end", "center center", "end start"],
   });
 
   // Interpolate color from white to red (tertiary) as it comes into center
@@ -240,6 +240,10 @@ export default function ServicesSection() {
     [0, 0.5, 1],
     ["rgb(255, 255, 255)", "rgb(255, 0, 51)", "rgb(255, 0, 51)"]
   );
+
+  // Slide out to left when scrolling past
+  const headingX = useTransform(scrollYProgress, [0.7, 1], [0, -200]);
+  const headingOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
 
   const services = [
     {
@@ -306,7 +310,11 @@ export default function ServicesSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          style={{ color: headingColor }}
+          style={{ 
+            color: headingColor,
+            x: headingX,
+            opacity: headingOpacity,
+          }}
           className="text-hero md:text-display font-black mb-24 text-center leading-[0.9]"
         >
           Vad vi erbjuder

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MAX_SEARCHES_PER_DAY = 3;
@@ -22,6 +22,16 @@ interface AnalysisState {
 export default function WebsiteAnalyzer() {
   const [url, setUrl] = useState("");
   const [state, setState] = useState<AnalysisState>({ status: "idle" });
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Hämta nuvarande status vid mount
   useEffect(() => {
@@ -109,7 +119,10 @@ export default function WebsiteAnalyzer() {
       });
 
       // Återställ URL efter lyckad analys
-      setTimeout(() => {
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+      resetTimeoutRef.current = setTimeout(() => {
         setUrl("");
         setState((prev) => ({
           ...prev,

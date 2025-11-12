@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 
 // Critical components loaded immediately
 import HeroAnimation from "@/components/HeroAnimation";
-import AnimatedBackground from "@/components/AnimatedBackground";
 
 import { SectionSkeleton } from "@/components/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
@@ -45,7 +44,6 @@ export default function Home() {
 
   return (
     <>
-      <AnimatedBackground />
       <HeaderNav />
       <main id="main-content" tabIndex={-1} className="relative z-10">
         <HeroSection />

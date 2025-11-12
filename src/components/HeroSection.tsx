@@ -1,22 +1,378 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue } from "framer-motion";
 import Image from "next/image";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/performance";
+
+// Magnetic button component that follows mouse
+function MagneticButton({
+  href,
+  children,
+  className,
+  shouldReduceMotion,
+  mousePosition,
+  onHoverChange,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  shouldReduceMotion: boolean;
+  mousePosition: { x: number; y: number };
+  onHoverChange?: (hovering: boolean) => void;
+}) {
+  const buttonRef = useRef<HTMLAnchorElement>(null);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion || !isHovered) {
+      setButtonPosition({ x: 0, y: 0 });
+      return;
+    }
+
+    const updatePosition = () => {
+      if (!buttonRef.current || typeof window === 'undefined') return;
+      
+      const rect = buttonRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const mouseX = mousePosition.x * (window.innerWidth / 2) + (window.innerWidth / 2);
+      const mouseY = mousePosition.y * (window.innerHeight / 2) + (window.innerHeight / 2);
+      
+      const distanceX = mouseX - centerX;
+      const distanceY = mouseY - centerY;
+      const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+      
+      // Magnetic effect only works within certain distance
+      if (distance < 150) {
+        const strength = (150 - distance) / 150;
+        setButtonPosition({
+          x: distanceX * strength * 0.3,
+          y: distanceY * strength * 0.3,
+        });
+      } else {
+        setButtonPosition({ x: 0, y: 0 });
+      }
+    };
+
+    let rafId: number;
+    const animatePosition = () => {
+      updatePosition();
+      rafId = requestAnimationFrame(animatePosition);
+    };
+    
+    rafId = requestAnimationFrame(animatePosition);
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [mousePosition, isHovered, shouldReduceMotion]);
+
+  return (
+    <motion.a
+      ref={buttonRef}
+      href={href}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        onHoverChange?.(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        onHoverChange?.(false);
+        setButtonPosition({ x: 0, y: 0 });
+      }}
+      whileHover={{
+        scale: 1.05,
+        boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)",
+      }}
+      whileTap={{ scale: 0.95 }}
+      className={className}
+      style={{
+        x: shouldReduceMotion ? 0 : buttonPosition.x,
+        y: shouldReduceMotion ? 0 : buttonPosition.y,
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      {children}
+    </motion.a>
+  );
+}
+
+// Lightning flash component - flashes randomly with multiple flashes
+function LightningFlash() {
+  const [flash, setFlash] = useState(0);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    let flashTimeoutId: NodeJS.Timeout | null = null;
+    let isMounted = true;
+
+    const flashInterval = () => {
+      if (!isMounted) return;
+      
+      // Random delay between 4-10 seconds
+      const delay = 4000 + Math.random() * 6000;
+      timeoutId = setTimeout(() => {
+        if (!isMounted) return;
+        
+        // Sometimes double flash, sometimes single
+        const flashes = Math.random() > 0.7 ? 2 : 1;
+        let flashCount = 0;
+        
+        const doFlash = () => {
+          if (!isMounted) return;
+          
+          setFlash(1);
+          flashTimeoutId = setTimeout(() => {
+            if (!isMounted) return;
+            
+            setFlash(0);
+            flashCount++;
+            if (flashCount < flashes) {
+              flashTimeoutId = setTimeout(() => doFlash(), 50 + Math.random() * 100);
+            } else {
+              flashInterval();
+            }
+          }, 80 + Math.random() * 120);
+        };
+        
+        doFlash();
+      }, delay);
+    };
+
+    flashInterval();
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+      if (flashTimeoutId) clearTimeout(flashTimeoutId);
+    };
+  }, []);
+
+  return (
+    <>
+      <motion.div
+        className="absolute inset-0 bg-white pointer-events-none z-10"
+        animate={{
+          opacity: flash === 1 ? [0, 0.5, 0.2, 0] : 0,
+        }}
+        transition={{
+          duration: 0.15,
+          ease: "easeOut",
+        }}
+      />
+      {/* Subtle blue tint during lightning */}
+      <motion.div
+        className="absolute inset-0 bg-blue-400/20 pointer-events-none z-10"
+        animate={{
+          opacity: flash === 1 ? [0, 0.3, 0] : 0,
+        }}
+        transition={{
+          duration: 0.2,
+          ease: "easeOut",
+        }}
+      />
+    </>
+  );
+}
+
+// Component for individual animated letter
+function AnimatedLetter({ 
+  letter, 
+  index, 
+  scrollProgress, 
+  shouldReduceMotion 
+}: { 
+  letter: string;
+  index: number;
+  scrollProgress: any;
+  shouldReduceMotion: boolean;
+}) {
+  // Letters fall in same direction as rain - from above, slightly from the side
+  const baseAngle = 8; // Same as rain drizzle
+  const distance = 500 + (index % 7) * 160; // Varying fall distances
+  const horizontalDrift = -20 + (index % 6) * 12; // Gentle sideways drift
+  const letterDelay = Math.min(index * 0.01, 0.18); // Stagger start slightly
+  
+  const startProgress = 0.35 + letterDelay;
+  const endProgress = 0.85;
+
+  const progress = useTransform(
+    scrollProgress,
+    [0, startProgress, endProgress],
+    [0, 0, 1],
+    { clamp: true }
+  );
+
+  const targetX = horizontalDrift + distance * 0.18;
+  const targetY = distance * 1.1;
+  const rotateDirection = index % 2 === 0 ? 1 : -1;
+  const targetRotate = rotateDirection * (baseAngle + (index % 4) * 3);
+
+  const x = useTransform(progress, [0, 1], [0, targetX]);
+  const y = useTransform(progress, [0, 1], [0, targetY]);
+  const rotate = useTransform(progress, [0, 1], [0, targetRotate]);
+  const opacity = useTransform(progress, [0, 0.7, 1], [1, 0.6, 0]);
+  const scale = useTransform(progress, [0, 0.6, 1], [1, 0.9, 0.25]);
+  
+  return (
+    <motion.span
+      className="inline-block"
+      style={{
+        margin: 0,
+        padding: 0,
+        x: shouldReduceMotion ? 0 : x ?? 0,
+        y: shouldReduceMotion ? 0 : y ?? 0,
+        rotate: shouldReduceMotion ? 0 : rotate ?? 0,
+        opacity: shouldReduceMotion ? 1 : opacity ?? 1,
+        scale: shouldReduceMotion ? 1 : scale ?? 1,
+      }}
+    >
+      {letter === ' ' ? '\u00A0' : letter}
+    </motion.span>
+  );
+}
+
+// Component to split text into letters and animate them on scroll
+function AnimatedText({ 
+  text, 
+  className, 
+  scrollProgress, 
+  shouldReduceMotion 
+}: { 
+  text: string; 
+  className?: string;
+  scrollProgress: any;
+  shouldReduceMotion: boolean;
+}) {
+  const letters = useMemo(() => text.split(''), [text]);
+  
+  return (
+    <span 
+      className={className} 
+      style={{ 
+        letterSpacing: 0,
+        wordSpacing: 0,
+        whiteSpace: 'pre',
+      }}
+    >
+      {letters.map((letter, index) => (
+        <AnimatedLetter
+          key={index}
+          letter={letter}
+          index={index}
+          scrollProgress={scrollProgress}
+          shouldReduceMotion={shouldReduceMotion}
+        />
+      ))}
+    </span>
+  );
+}
+
+// Optimized cursor trail component
+function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number } }) {
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  
+  useEffect(() => {
+    const updateSize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+  
+  const particles = useMemo(() => Array.from({ length: 15 }), []);
+  const baseX = useMemo(() => mousePosition.x * (windowSize.width / 2) + (windowSize.width / 2), [mousePosition.x, windowSize.width]);
+  const baseY = useMemo(() => mousePosition.y * (windowSize.height / 2) + (windowSize.height / 2), [mousePosition.y, windowSize.height]);
+  
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[30]">
+      {particles.map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-accent rounded-full blur-sm"
+          style={{
+            left: baseX,
+            top: baseY,
+          }}
+          animate={{
+            x: mousePosition.x * (i * 8),
+            y: mousePosition.y * (i * 8),
+            opacity: [0, 0.6 - i * 0.03, 0],
+            scale: [0, 1.5 - i * 0.05, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            ease: "easeOut",
+            delay: i * 0.02,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHoveringButton, setIsHoveringButton] = useState(false);
+  
+  // Check for reduced motion preference
+  const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
   
   useEffect(() => {
     setMounted(true);
   }, []);
-  
-  // Check for reduced motion preference
-  const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+
+  // Track mouse position for 3D tilt and cursor effects with throttling
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    
+    let rafId: number;
+    let lastX = 0;
+    let lastY = 0;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      // Cancel previous animation frame
+      if (rafId) cancelAnimationFrame(rafId);
+      
+      // Throttle updates using requestAnimationFrame
+      rafId = requestAnimationFrame(() => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 2;
+        const y = (e.clientY / window.innerHeight - 0.5) * 2;
+        
+        // Only update if values have changed significantly
+        if (Math.abs(x - lastX) > 0.01 || Math.abs(y - lastY) > 0.01) {
+          lastX = x;
+          lastY = y;
+          setMousePosition({ x, y });
+        }
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [shouldReduceMotion]);
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
+    layoutEffect: false,
+  });
+
+  // Scroll progress for hero section specifically - triggers when scrolling down past hero
+  // When hero is in view: progress = 0, when scrolled past: progress = 1
+  // Adjusted offset to trigger earlier when header approaches text
+  const { scrollYProgress: sectionScrollProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "end start"], // Trigger when section center passes viewport top
     layoutEffect: false,
   });
 
@@ -44,67 +400,249 @@ export default function HeroSection() {
       })
     : [];
 
+  // Generate stable rain drops positions (deterministic for hydration)
+  // More drops for drizzle effect, smaller and lighter
+  const rainDrops = useMemo(() => {
+    return Array.from({ length: 200 }, (_, i) => {
+      // Use index as seed for consistent positioning
+      const seed = i * 0.618033988749895; // Golden ratio for better distribution
+      return {
+        left: (seed * 100) % 100,
+        delay: (seed * 0.1) % 3,
+        duration: 2.5 + ((seed * 100) % 5) * 0.4, // Slower for drizzle effect
+        length: 8 + ((seed * 100) % 4) * 3, // Much smaller drops (8-20px)
+      };
+    });
+  }, []);
+
+  // 3D tilt transform based on mouse position - using direct values
+  const rotateX = useMemo(() => mousePosition.y * 5, [mousePosition.y]);
+  const rotateY = useMemo(() => mousePosition.x * 5, [mousePosition.x]);
+
+  // Setup background video playback rate
+  useEffect(() => {
+    if (!videoRef.current || shouldReduceMotion) return;
+
+    const video = videoRef.current;
+    
+    const handleLoadedMetadata = () => {
+      try {
+        video.playbackRate = 0.2; // 20% of normal speed
+      } catch (error) {
+        // Silently handle playback rate errors
+      }
+    };
+
+    if (video.readyState >= 1) {
+      // Video metadata already loaded
+      handleLoadedMetadata();
+    } else {
+      video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+    }
+
+    // Try to play video
+    video.play().catch(() => {
+      // Silently handle autoplay errors
+    });
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [shouldReduceMotion]);
+
   return (
     <motion.section
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black"
+      ref={sectionRef}
+      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
+      style={{
+        position: 'relative', // Explicit non-static position for scroll calculations
+        transform: shouldReduceMotion 
+          ? undefined 
+          : `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+        transformStyle: 'preserve-3d',
+      }}
     >
-      {/* Dynamic background with image overlays - only render on client */}
-      {mounted && (
-        <motion.div className="absolute inset-0 z-0" style={{ y }}>
-          {/* Main background pattern - alt_background.webp */}
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={
-              shouldReduceMotion
-                ? { opacity: 0.2, scale: 1 }
-                : {
-                    opacity: [0.15, 0.25, 0.15],
-                    scale: [1, 1.01, 1],
-                  }
-            }
-            transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                    opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                    scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-                    initial: { duration: 2, ease: "easeOut" },
-                  }
-            }
-            style={{ y: imageY1 }}
-          >
-            <Image
-              src="/images/hero/alt_background.webp"
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-cover mix-blend-overlay"
-              priority
-            />
-            {/* Subtle glow effect */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
-              animate={{
-                opacity: [0.2, 0.3, 0.2],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </motion.div>
+      {/* Floating geometric shapes */}
+      {mounted && !shouldReduceMotion && (
+        <div className="absolute inset-0 pointer-events-none z-[2]">
+          {Array.from({ length: 6 }).map((_, i) => {
+            const size = 100 + (i % 3) * 50;
+            const left = (i * 137.5) % 100;
+            const top = ((i * 1.618) * 100) % 100;
+            const delay = i * 0.5;
+            const duration = 8 + (i % 3) * 2;
+            
+            return (
+              <motion.div
+                key={i}
+                className="absolute border border-white/10"
+                style={{
+                  width: size,
+                  height: size,
+                  left: `${left}%`,
+                  top: `${top}%`,
+                }}
+                animate={{
+                  y: [0, -30, 0],
+                  x: [0, 20, 0],
+                  rotate: [0, 90, 0],
+                  opacity: [0.1, 0.2, 0.1],
+                }}
+                transition={{
+                  duration,
+                  repeat: Infinity,
+                  delay,
+                  ease: "easeInOut",
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
 
-          {/* Elegant dark overlay with gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/65 to-black/80" />
-        </motion.div>
+      {/* Animated mesh gradient background */}
+      {mounted && !shouldReduceMotion && (
+        <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
+          <div 
+            className="w-full h-full"
+            style={{
+              background: `
+                radial-gradient(at 20% 30%, rgba(0, 102, 255, 0.1) 0px, transparent 50%),
+                radial-gradient(at 80% 70%, rgba(255, 0, 51, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(0, 102, 255, 0.05) 0px, transparent 50%)
+              `,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Cursor trail particles - optimized version */}
+      {mounted && !shouldReduceMotion && !isHoveringButton && (
+        <CursorTrail mousePosition={mousePosition} />
+      )}
+      {/* Dynamic background with image overlays - only render on client */}
+      {/* Fixed positioning with z-[1] - video at bottom, image on top */}
+      {mounted && (
+        <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
+            {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
+            {!shouldReduceMotion && (
+              <div className="absolute inset-0 opacity-50 z-0">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'brightness(0.8) contrast(0.9)' }}
+                >
+                  <source src="/videos/background.mp4" type="video/mp4" />
+                </video>
+                {/* Fade overlay for smoother blend */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
+              </div>
+            )}
+
+            {/* Main background pattern - alt_background.webp - ABOVE VIDEO */}
+            <motion.div
+              className="absolute inset-0 z-[1]"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={
+                shouldReduceMotion
+                  ? { opacity: 1, scale: 1 }
+                  : {
+                      opacity: [0.9, 1, 0.9],
+                      scale: [1, 1.01, 1],
+                    }
+              }
+              transition={
+                shouldReduceMotion
+                  ? {}
+                  : {
+                      opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+                      scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                      initial: { duration: 2, ease: "easeOut" },
+                    }
+              }
+              style={{ y: imageY1 }}
+            >
+              <motion.div
+                className="relative w-full h-full"
+                animate={
+                  shouldReduceMotion
+                    ? {}
+                    : {
+                        filter: [
+                          'brightness(0.9) contrast(1)',
+                          'brightness(1) contrast(1.05)',
+                          'brightness(0.9) contrast(1)',
+                        ],
+                      }
+                }
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <Image
+                  src="/images/hero/alt_background.webp"
+                  alt=""
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority
+                />
+              </motion.div>
+              {/* Subtle glow effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
+                animate={{
+                  opacity: [0.2, 0.3, 0.2],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              {/* Lightning flash effect - random intervals */}
+              {!shouldReduceMotion && (
+                <LightningFlash />
+              )}
+            </motion.div>
+
+            {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
+
+            {/* Rain effect - drizzle style, falling from above but slightly from the side */}
+            {mounted && !shouldReduceMotion && (
+              <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
+                {rainDrops.map((drop, i) => (
+                  <div
+                    key={i}
+                    className="absolute bg-white/40"
+                    style={{
+                      left: `${drop.left}%`,
+                      top: `-${drop.length}px`,
+                      width: '1px',
+                      height: `${drop.length}px`,
+                      animation: `rain ${drop.duration}s linear infinite`,
+                      animationDelay: `${drop.delay}s`,
+                      boxShadow: '0 0 1px rgba(255, 255, 255, 0.3)',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
       )}
 
       {/* Static fallback for SSR */}
       {!mounted && (
-        <div className="absolute inset-0 z-0 bg-black">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/85" />
+        <div className="absolute inset-0 z-[1] bg-black">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
           <div className="absolute inset-0 bg-gradient-to-br from-accent/15 via-transparent to-tertiary/15" />
         </div>
       )}
@@ -112,7 +650,7 @@ export default function HeroSection() {
       {/* Animated background patterns - Subtle and elegant - only on client */}
       {mounted && (
         <motion.div
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-[1]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 2 }}
@@ -175,47 +713,132 @@ export default function HeroSection() {
       )}
 
       {/* Main content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 max-w-6xl">
-        <motion.div style={{ opacity }}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 max-w-6xl overflow-visible">
+        <motion.div style={{ opacity }} className="overflow-visible">
           {/* Main heading with massive impact */}
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ opacity: headingOpacity, x: headingX }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
           >
+            {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
+            {mounted && !shouldReduceMotion && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none z-30"
+                animate={{
+                  x: ["-100%", "100%"],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 2,
+                  ease: "linear",
+                }}
+                style={{
+                  backgroundSize: "50% 100%",
+                }}
+              />
+            )}
             <motion.span
-              className="block"
+              className="block relative group"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
+              whileHover={{ scale: 1.02, x: 5 }}
             >
-              Bygger
+              <AnimatedText
+                text="Bygger"
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
+              <motion.span
+                className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-accent via-tertiary to-accent"
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ delay: 1, duration: 0.6 }}
+              />
             </motion.span>
             <motion.span
-              className="block text-accent"
+              className="block relative group"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
+              whileHover={{ scale: 1.05 }}
             >
-              hemsidor
+              <span 
+                className="relative z-10 bg-clip-text text-transparent animate-gradient"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #0066FF, #3385FF, #0066FF)',
+                }}
+              >
+                <AnimatedText
+                  text="hemsidor"
+                  scrollProgress={sectionScrollProgress}
+                  shouldReduceMotion={shouldReduceMotion}
+                />
+              </span>
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-accent/20 via-accent-light/30 to-accent/20 blur-xl -z-10"
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
             </motion.span>
             <motion.span
-              className="block"
+              className="block relative group"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
+              whileHover={{ scale: 1.02, x: -5 }}
             >
-              som betyder
+              <AnimatedText
+                text="som betyder"
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
             </motion.span>
             <motion.span
-              className="block"
+              className="block relative group"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.8 }}
+              whileHover={{ scale: 1.02 }}
             >
-              något.
+              <AnimatedText
+                text="något"
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
+              <motion.span
+                className="inline-block ml-0"
+                animate={{
+                  color: ["#ffffff", "#ffffff", "#ff0033", "#ff0033", "#ffffff"],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  times: [0, 0.4, 0.5, 0.9, 1],
+                }}
+              >
+                .
+              </motion.span>
+              <motion.span
+                className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+              />
             </motion.span>
           </motion.h1>
 
@@ -225,13 +848,46 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ opacity: subtitleOpacity, x: subtitleX }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed"
+            className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group"
           >
-            Vi skapar skräddarsydda, toppmoderna webbplatser för företag som
-            vill sticka ut och leda inom sin bransch.
+            <motion.span
+              className="inline-block"
+              whileHover={{ scale: 1.05, color: "#FFFFFF" }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatedText
+                text="Vi skapar skräddarsydda, toppmoderna webbplatser"
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
+            </motion.span>
+            {" "}
+            <motion.span
+              className="inline-block text-accent font-semibold"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatedText
+                text="för företag som vill sticka ut"
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
+            </motion.span>
+            {" "}
+            <motion.span
+              className="inline-block"
+              whileHover={{ scale: 1.05, color: "#FFFFFF" }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatedText
+                text="och leda inom sin bransch."
+                scrollProgress={sectionScrollProgress}
+                shouldReduceMotion={shouldReduceMotion}
+              />
+            </motion.span>
           </motion.p>
 
-          {/* CTA buttons */}
+          {/* CTA buttons with magnetic effect */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -242,32 +898,53 @@ export default function HeroSection() {
             }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <motion.a
+            <MagneticButton
               href="/contact"
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0 0 30px rgba(0, 102, 255, 0.5)",
-              }}
-              whileTap={{ scale: 0.95 }}
               className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+              shouldReduceMotion={shouldReduceMotion}
+              mousePosition={mousePosition}
+              onHoverChange={setIsHoveringButton}
             >
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 bg-white/20"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
               <motion.span
                 className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10"
                 initial={{ x: "-100%" }}
                 whileHover={{ x: "100%" }}
                 transition={{ duration: 0.6 }}
               />
-              <span className="relative z-10">Starta ditt projekt</span>
-            </motion.a>
-            <motion.a
+              <span className="relative z-10 flex items-center gap-2">
+                Starta ditt projekt
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  →
+                </motion.span>
+              </span>
+            </MagneticButton>
+            <MagneticButton
               href="/portfolio"
-              whileHover={{
-                scale: 1.05,
-                backgroundColor: "white",
-                color: "black",
-              }}
-              whileTap={{ scale: 0.95 }}
               className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+              shouldReduceMotion={shouldReduceMotion}
+              mousePosition={mousePosition}
+              onHoverChange={setIsHoveringButton}
             >
               <motion.span
                 className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10"
@@ -275,8 +952,20 @@ export default function HeroSection() {
                 whileHover={{ x: "100%" }}
                 transition={{ duration: 0.6 }}
               />
-              <span className="relative z-10">Se våra arbeten</span>
-            </motion.a>
+              <span className="relative z-10 flex items-center gap-2">
+                Se våra arbeten
+                <motion.span
+                  animate={{ rotate: [0, 15, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  ↗
+                </motion.span>
+              </span>
+            </MagneticButton>
           </motion.div>
 
           {/* Animated accent line */}

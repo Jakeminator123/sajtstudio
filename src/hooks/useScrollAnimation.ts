@@ -1,6 +1,6 @@
 "use client";
 
-import { useInView } from "framer-motion";
+import { useInView, type MarginType } from "framer-motion";
 import { useRef, useEffect } from "react";
 
 interface ScrollAnimationOptions {
@@ -19,7 +19,7 @@ export function useScrollAnimation({
   const ref = useRef(null);
   const isInView = useInView(ref, {
     once,
-    margin: rootMargin as any,
+    margin: rootMargin as MarginType,
     amount: threshold,
   });
 

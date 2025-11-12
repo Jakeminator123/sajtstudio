@@ -183,6 +183,34 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Hide scrollbars but keep scrolling functionality */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Hide any resize handles or drag tabs */
+* {
+  resize: none;
+}
+
+*::-webkit-resizer {
+  display: none;
+}
+
 * {
   @apply scroll-smooth;
 }
@@ -222,20 +250,20 @@ html {
   }
 }
 
-/* Rain animation */
+/* Rain animation - drizzle style, falling from above but slightly from the side */
 @keyframes rain {
   0% {
-    transform: translateY(-100%);
+    transform: translateY(-100%) translateX(-20px) rotate(8deg);
     opacity: 0;
   }
-  10% {
-    opacity: 1;
+  5% {
+    opacity: 0.6;
   }
-  90% {
-    opacity: 1;
+  95% {
+    opacity: 0.6;
   }
   100% {
-    transform: translateY(100vh);
+    transform: translateY(calc(100vh + 50px)) translateX(20px) rotate(8deg);
     opacity: 0;
   }
 }
@@ -266,6 +294,21 @@ html {
 /* Hero video opacity */
 .hero-video-opacity {
   opacity: 0.25;
+}
+
+/* Animated gradient text */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
 }
 
 /* Animated GIF background - slow and subtle */

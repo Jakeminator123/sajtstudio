@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Dancing_Script, Press_Start_2P } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import PageTransition from "@/components/PageTransition";
@@ -16,6 +16,18 @@ import {
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-handwriting",
+  weight: ["400", "500", "600", "700"],
+});
+
+const pressStart2P = Press_Start_2P({
+  subsets: ["latin"],
+  variable: "--font-pixel",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -107,7 +119,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className={inter.variable} data-scroll-behavior="smooth" style={{ overflowX: 'hidden', width: '100%' }}>
+    <html lang="sv" className={`${inter.variable} ${dancingScript.variable} ${pressStart2P.variable}`} data-scroll-behavior="smooth" style={{ overflowX: 'hidden', width: '100%' }}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -122,6 +134,7 @@ export default function RootLayout({
           rel="preload"
           href="/images/hero/alt_background.webp"
           as="image"
+          type="image/webp"
         />
         {/* Preload hero video metadata only for faster initial load */}
         <link

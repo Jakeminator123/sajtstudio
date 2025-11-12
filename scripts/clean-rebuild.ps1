@@ -5,7 +5,7 @@ Write-Host "🧹 Rensar projektet..." -ForegroundColor Cyan
 
 # 1. Stoppa alla Node-processer
 Write-Host "`n1. Stoppar alla Node-processer..." -ForegroundColor Yellow
-Get-Process | Where-Object {$_.ProcessName -like "*node*"} | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process | Where-Object {$_.ProcessName -like "*node*"} | Stop-Process -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 2
 
 # 2. Ta bort .next mapp (build cache)
