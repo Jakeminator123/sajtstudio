@@ -17,17 +17,17 @@ export default function ContactForm() {
     message: "",
     status: "idle",
   });
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
       if (successTimeoutRef.current) {
         clearTimeout(successTimeoutRef.current);
+      }
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
       }
     };
   }, []);
@@ -35,11 +35,13 @@ export default function ContactForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Clear any existing timeouts
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
     if (successTimeoutRef.current) {
       clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = null;
+    }
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
     }
 
     // Basic validation with trim
@@ -95,7 +97,7 @@ export default function ContactForm() {
       }));
 
       // Reset error message after 5 seconds
-      successTimeoutRef.current = setTimeout(() => {
+      errorTimeoutRef.current = setTimeout(() => {
         setFormState((prev) => ({ ...prev, status: "idle" }));
       }, 5000);
     }

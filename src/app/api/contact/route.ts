@@ -5,8 +5,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, message } = body;
 
-    // Validate required fields
-    if (!name || !email || !message) {
+    // Trim and validate required fields
+    const trimmedName = typeof name === 'string' ? name.trim() : '';
+    const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+    const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
       return NextResponse.json(
         { error: "Alla fält är obligatoriska" },
         { status: 400 }
@@ -15,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       return NextResponse.json(
         { error: "Ogiltig e-postadress" },
         { status: 400 }
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Here you would typically send an email or save to a database
     // For now, we'll just log it and return success
     if (process.env.NODE_ENV === 'development') {
-      console.log('Contact form submission:', { name, email, message });
+      console.log('Contact form submission:', { name: trimmedName, email: trimmedEmail, message: trimmedMessage });
     }
 
     // Simulate processing delay
