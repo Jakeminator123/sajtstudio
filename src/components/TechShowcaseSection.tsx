@@ -126,7 +126,7 @@ export default function TechShowcaseSection() {
 
     return () => {
       // Always restore scroll when effect cleans up
-      document.body.style.overflow = originalOverflow || '';
+      document.body.style.overflow = '';
       window.removeEventListener('keydown', preventScroll, { capture: true });
       window.removeEventListener('wheel', preventWheelScroll, { capture: true });
       window.removeEventListener('touchmove', preventTouchMove, { capture: true });
