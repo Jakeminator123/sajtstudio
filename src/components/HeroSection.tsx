@@ -486,8 +486,10 @@ export default function HeroSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
+      className="flex items-center justify-center relative overflow-hidden bg-black z-10"
       style={{
+        minHeight: 'calc(100vh - var(--header-height))',
+        paddingTop: 'var(--header-height)',
         position: 'relative',
         transform: shouldReduceMotion
           ? undefined
@@ -754,7 +756,7 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ opacity: headingOpacity, x: headingX }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-display font-black leading-[0.9] tracking-tight mb-4 sm:mb-6 md:mb-8 text-white text-center relative overflow-visible px-2"
           >
             {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
             {mounted && !shouldReduceMotion && (
@@ -862,7 +864,7 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ opacity: subtitleOpacity, x: subtitleX }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 max-w-3xl mx-auto mb-8 sm:mb-10 md:mb-12 text-center leading-relaxed relative group px-4"
           >
             <motion.span
               className="inline-block"
@@ -913,11 +915,11 @@ export default function HeroSection() {
               duration: 0.8,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0"
           >
             <MagneticButton
               href="/contact"
-              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+              className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-accent text-white font-bold text-base sm:text-lg rounded-none hover:bg-accent-hover active:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group min-h-[44px] flex items-center justify-center touch-manipulation"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
@@ -958,7 +960,7 @@ export default function HeroSection() {
             </MagneticButton>
             <MagneticButton
               href="/portfolio"
-              className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+              className="w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 border-2 border-white text-white font-bold text-base sm:text-lg rounded-none hover:bg-white hover:text-black active:bg-white active:text-black transition-all duration-300 relative overflow-hidden group min-h-[44px] flex items-center justify-center touch-manipulation"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
@@ -994,7 +996,7 @@ export default function HeroSection() {
               duration: 1.2,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="mt-16 h-1 bg-gradient-to-r from-transparent via-accent to-transparent origin-center"
+            className="mt-8 sm:mt-12 md:mt-16 h-1 bg-gradient-to-r from-transparent via-accent to-transparent origin-center"
           />
         </motion.div>
       </div>
@@ -1004,7 +1006,7 @@ export default function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.8, duration: 0.8 }}
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20"
+        className="absolute bottom-6 sm:bottom-12 left-1/2 transform -translate-x-1/2 z-20"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
