@@ -53,6 +53,10 @@ function Clock() {
 
 export default function StartaProjektPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [audit, setAudit] = useState<any>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Set playback rate to 0.125 (8x slower) when video loads
@@ -77,6 +81,35 @@ export default function StartaProjektPage() {
     };
   }, []);
 
+  const handleAudit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setAudit(null);
+
+    try {
+      const response = await fetch('/api/audit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Kunde inte generera audit');
+      }
+
+      setAudit(data.audit);
+    } catch (err: any) {
+      setError(err.message || 'Ett fel uppstod');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <HeaderNav />
@@ -99,8 +132,8 @@ export default function StartaProjektPage() {
               <source src="/videos/noir_hero.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
-            {/* Dark overlay for noir effect */}
-            <div className="absolute inset-0 bg-black/40" />
+            {/* Dark overlay for noir effect - reduced opacity for better visibility */}
+            <div className="absolute inset-0 bg-black/20" />
           </div>
 
           {/* Black background for other 50% */}
@@ -117,12 +150,157 @@ export default function StartaProjektPage() {
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 text-white">
                 Starta projekt
               </h1>
-              <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto">
+              <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-12">
                 Låt oss prata om ditt nästa projekt
               </p>
+
+              {/* Site Audit Form */}
+              <motion.form
+                onSubmit={handleAudit}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="max-w-2xl mx-auto"
+              >
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="text"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="Ange din webbplats URL (t.ex. sajtstudio.se)"
+                    className="flex-1 px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                    required
+                  />
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Analyserar...' : 'Få gratis audit'}
+                  </motion.button>
+                </div>
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-red-400 text-sm mt-2"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+              </motion.form>
             </motion.div>
           </div>
         </section>
+
+        {/* Audit Results Section */}
+        {audit && (
+          <section className="relative py-24 md:py-32 bg-black border-t border-gray-800">
+            <div className="container mx-auto px-6">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-4xl mx-auto"
+              >
+                <h2 className="text-4xl md:text-5xl font-black mb-8 text-white text-center">
+                  Din webbplats-analys
+                </h2>
+
+                {/* Scores */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+                  {Object.entries(audit.audit_scores || {}).map(([key, value]: [string, any]) => (
+                    <div
+                      key={key}
+                      className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 p-6 rounded-lg"
+                    >
+                      <p className="text-gray-400 text-sm mb-2 uppercase">{key.replace('_', ' ')}</p>
+                      <p className="text-3xl font-bold text-white">{value}/10</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Strengths */}
+                {audit.strengths && audit.strengths.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-white mb-4">Styrkor</h3>
+                    <ul className="space-y-2">
+                      {audit.strengths.map((strength: string, idx: number) => (
+                        <li key={idx} className="text-gray-300 flex items-start">
+                          <span className="text-green-400 mr-2">✓</span>
+                          {strength}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Issues */}
+                {audit.issues && audit.issues.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-white mb-4">Förbättringsområden</h3>
+                    <ul className="space-y-2">
+                      {audit.issues.map((issue: string, idx: number) => (
+                        <li key={idx} className="text-gray-300 flex items-start">
+                          <span className="text-yellow-400 mr-2">⚠</span>
+                          {issue}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Quick Wins */}
+                {audit.improvements?.quick_wins && audit.improvements.quick_wins.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold text-white mb-4">Snabbvinstar</h3>
+                    <div className="space-y-4">
+                      {audit.improvements.quick_wins.map((win: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 p-6 rounded-lg"
+                        >
+                          <h4 className="text-xl font-bold text-white mb-2">{win.item}</h4>
+                          <p className="text-gray-300 mb-2">{win.why}</p>
+                          <p className="text-gray-400 text-sm">
+                            <span className="text-accent">Impact:</span> {win.impact} |{' '}
+                            <span className="text-accent">Effort:</span> {win.effort}
+                          </p>
+                          {win.how && (
+                            <p className="text-gray-300 mt-2 text-sm">
+                              <span className="text-accent">Hur:</span> {win.how}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pitch */}
+                {audit.pitch && (
+                  <div className="bg-gradient-to-r from-accent/20 to-tertiary/20 border border-accent/30 p-8 rounded-lg">
+                    <h3 className="text-2xl font-bold text-white mb-4">{audit.pitch.headline}</h3>
+                    {audit.pitch.summary && (
+                      <p className="text-gray-300 mb-4">{audit.pitch.summary}</p>
+                    )}
+                    {audit.pitch.next_steps && audit.pitch.next_steps.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-bold text-white mb-2">Nästa steg:</h4>
+                        <ul className="space-y-1">
+                          {audit.pitch.next_steps.map((step: string, idx: number) => (
+                            <li key={idx} className="text-gray-300">• {step}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          </section>
+        )}
 
         {/* Contact form section */}
         <section className="relative py-24 md:py-32 bg-black">
