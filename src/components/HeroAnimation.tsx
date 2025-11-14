@@ -27,7 +27,6 @@ export default function HeroAnimation() {
   // Modal state
   const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
   const [isFunctionalityModalOpen, setIsFunctionalityModalOpen] = useState(false);
-  const [explosionTriggered, setExplosionTriggered] = useState(false);
   const [textsShouldStick, setTextsShouldStick] = useState(false);
   const [textsDisappearing, setTextsDisappearing] = useState(false);
   const [modalShake, setModalShake] = useState(false);
@@ -147,15 +146,10 @@ export default function HeroAnimation() {
     amount: 0.2,
   });
 
-  const explosionThreshold = 0.5; // Trigger explosion earlier, synchronized with video zoom
   const previousProgressRef = useRef(smoothMediaProgress.get());
 
-  // Monitor scroll progress and trigger explosion - optimized with throttling
+  // Monitor scroll progress for text stickiness and modal shake - optimized with throttling
   useEffect(() => {
-    if (!imagesInView) {
-      return;
-    }
-
     previousProgressRef.current = smoothMediaProgress.get();
     let rafId: number | null = null;
     let lastCheck = 0;
@@ -170,14 +164,6 @@ export default function HeroAnimation() {
         return;
       }
       lastCheck = now;
-
-      const previous = previousProgressRef.current ?? 0;
-      const crossedThreshold =
-        previous < explosionThreshold && latest >= explosionThreshold;
-
-      if (crossedThreshold && !explosionTriggered) {
-        setExplosionTriggered(true);
-      }
 
       // Make texts stick when scrolling past 0.8 and trigger modal shake
       if (latest > 0.8 && !textsShouldStick) {
@@ -198,7 +184,7 @@ export default function HeroAnimation() {
         cancelAnimationFrame(rafId);
       }
     };
-  }, [smoothMediaProgress, explosionTriggered, imagesInView, textsShouldStick]);
+  }, [smoothMediaProgress, textsShouldStick]);
 
   // Special section: When images disappear and video is prominent (scroll 0.5-1.0)
   // This creates a "Design? vs Functionality?" moment - starts earlier for better visibility
@@ -371,34 +357,36 @@ export default function HeroAnimation() {
   ];
 
   // Enhanced image transforms - dramatic and simultaneous explosion synchronized with video zoom
-  // Images explode at the same time as video starts zooming aggressively (0.5-0.6)
-  // Image 0 (top-left): "Svävar iväg" - dramatic floating movement
-  const image0X = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, -600, -1000]);
-  const image0Y = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, -500, -800]);
-  const image0Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, -90, -150]);
-  const image0Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.2, 0]);
-  const image0Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 1.6, 2.0]);
+  // Images explode at the same time as video starts zooming aggressively (0.5-0.65)
+  // More dramatic and faster explosion for better visual impact
+  
+  // Image 0 (top-left): "Svävar iväg uppåt" - dramatic floating upward movement with spin
+  const image0X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -400, -1200]);
+  const image0Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -600, -1000]);
+  const image0Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -120, -200]);
+  const image0Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
+  const image0Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 1.8, 2.5]);
 
-  // Image 1 (top-right): "Dras åt sidan" - dramatic slide to the right
-  const image1X = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 900, 1500]);
-  const image1Y = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 300, 600]);
-  const image1Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 45, 90]);
-  const image1Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.2, 0]);
-  const image1Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.3, 0.2]);
+  // Image 1 (top-right): "Dras åt höger" - dramatic slide to the right with flip
+  const image1X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 800, 1800]);
+  const image1Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 200, 500]);
+  const image1Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 60, 120]);
+  const image1Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
+  const image1Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
 
-  // Image 2 (bottom-left): "Rullar iväg" - dramatic rolling rotation
-  const image2X = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, -800, -1300]);
-  const image2Y = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 600, 1000]);
-  const image2Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 630, 900]);
-  const image2Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.2, 0]);
-  const image2Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.3, 0.2]);
+  // Image 2 (bottom-left): "Rullar iväg nedåt" - dramatic rolling rotation downward
+  const image2X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -900, -1600]);
+  const image2Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 700, 1200]);
+  const image2Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 720, 1080]);
+  const image2Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
+  const image2Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
 
-  // Image 3 (bottom-right): "Åker upp ur bild" - dramatic upward movement
-  const image3X = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 600, 1000]);
-  const image3Y = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, -700, -1100]);
-  const image3Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [0, 0, 90, 150]);
-  const image3Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.2, 0]);
-  const image3Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.6, 0.7], [1, 1, 0.3, 0.2]);
+  // Image 3 (bottom-right): "Åker upp ur bild" - dramatic upward movement with spin
+  const image3X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 700, 1300]);
+  const image3Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -800, -1400]);
+  const image3Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 120, 220]);
+  const image3Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
+  const image3Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
 
   const imageTransforms = [
     { x: image0X, y: image0Y, rotate: image0Rotate, opacity: image0Opacity, scale: image0Scale },
@@ -494,13 +482,26 @@ export default function HeroAnimation() {
           ref={mediaContainerRef}
           className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 overflow-visible w-full"
         >
-          {/* Red background glow behind images when they explode */}
+          {/* Enhanced red background glow behind images when they explode */}
+          {/* More intense and dramatic glow synchronized with explosion */}
           <motion.div
             className="absolute inset-0 pointer-events-none z-15"
             style={{
-              opacity: useTransform(smoothMediaProgress, [0.4, 0.55, 0.7], [0, 0.4, 0.2]),
-              background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.6) 0%, rgba(255, 0, 51, 0.3) 40%, transparent 70%)',
-              filter: 'blur(80px)',
+              opacity: useTransform(smoothMediaProgress, [0.45, 0.55, 0.65, 0.75], [0, 0.6, 0.4, 0.1]),
+              background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.8) 0%, rgba(255, 0, 51, 0.5) 30%, rgba(255, 0, 51, 0.2) 60%, transparent 80%)',
+              filter: 'blur(100px)',
+              transform: 'scale(1.2)',
+            }}
+          />
+          
+          {/* Additional explosion particles effect */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-15"
+            style={{
+              opacity: useTransform(smoothMediaProgress, [0.5, 0.55, 0.6], [0, 0.3, 0]),
+              background: 'radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 1) 0%, transparent 50%)',
+              filter: 'blur(60px)',
+              transform: 'scale(0.8)',
             }}
           />
           
@@ -508,7 +509,9 @@ export default function HeroAnimation() {
           <motion.div
             ref={imagesContainerRef}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative max-w-full"
-            style={{ zIndex: explosionTriggered ? 60 : 20 }}
+            style={{ 
+              zIndex: useTransform(smoothMediaProgress, [0, 0.5, 0.65], [20, 60, 20])
+            }}
           >
             {portfolioImages.map((src, index) => {
               const transforms = imageTransforms[index];
@@ -517,63 +520,43 @@ export default function HeroAnimation() {
                 <motion.div
                   key={src}
                   style={{
-                    x: explosionTriggered
-                      ? (index === 0 ? -1200 : index === 1 ? 1200 : index === 2 ? -1200 : 1200)
-                      : transforms.x,
-                    y: explosionTriggered
-                      ? (index === 0 ? -600 : index === 1 ? -700 : index < 2 ? -800 : 800)
-                      : transforms.y,
-                    rotate: explosionTriggered
-                      ? (index === 0 ? -180 : index === 1 ? 270 : (index % 2 === 0 ? 1 : -1) * 360)
-                      : transforms.rotate,
-                    rotateX: explosionTriggered
-                      ? (index === 1 || index === 2 ? 180 : 0)
-                      : 0,
-                    rotateY: explosionTriggered
-                      ? (index === 0 || index === 3 ? 90 : 0)
-                      : 0,
-                    z: explosionTriggered
-                      ? (index === 1 || index === 3 ? 300 : 0)
-                      : 0,
-                    opacity: explosionTriggered
-                      ? 0
-                      : transforms.opacity,
-                    scale: explosionTriggered
-                      ? (index === 1 || index === 3 ? 2.5 : 1.5)
-                      : transforms.scale,
+                    // Use scroll-based transforms for smoother, more natural explosion
+                    x: transforms.x,
+                    y: transforms.y,
+                    rotate: transforms.rotate,
+                    rotateX: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
+                      [0, 0, index === 1 || index === 2 ? 180 : 0, index === 1 || index === 2 ? 180 : 0]),
+                    rotateY: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
+                      [0, 0, index === 0 || index === 3 ? 90 : 0, index === 0 || index === 3 ? 90 : 0]),
+                    z: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
+                      [0, 0, index === 1 || index === 3 ? 200 : 0, 0]),
+                    opacity: transforms.opacity,
+                    scale: transforms.scale,
                     willChange: "transform, opacity",
                     transformStyle: "preserve-3d",
                     perspective: 1000,
                     maxWidth: '100%',
-                    zIndex: explosionTriggered ? 70 : 'auto',
+                    zIndex: useTransform(smoothMediaProgress, [0, 0.5, 0.65], 
+                      ['auto', 70, 'auto']),
+                    pointerEvents: useTransform(smoothMediaProgress, [0, 0.5, 0.65], 
+                      ['auto', 'none', 'none']),
                   }}
                   initial={{ opacity: 0, scale: 0.8, y: 50 }}
                   animate={
-                    explosionTriggered
+                    imagesInView
                       ? {
-                        opacity: 0,
-                        scale: index === 1 || index === 3 ? 2.5 : 1.5,
-                        x: index === 0 ? -1200 : index === 1 ? 1200 : index === 2 ? -1200 : 1200,
-                        y: index === 0 ? -600 : index === 1 ? -700 : index < 2 ? -800 : 800,
-                        z: index === 1 || index === 3 ? 300 : 0,
-                        rotate: index === 0 ? -180 : index === 1 ? 270 : (index % 2 === 0 ? 1 : -1) * 360,
-                        rotateX: index === 1 || index === 2 ? 180 : 0,
-                        rotateY: index === 0 || index === 3 ? 90 : 0,
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
                       }
-                      : imagesInView
-                        ? {
-                          opacity: 1,
-                          scale: 1,
-                          y: 0,
-                        }
-                        : { opacity: 0, scale: 0.8, y: 50 }
+                      : { opacity: 0, scale: 0.8, y: 50 }
                   }
                   transition={{
-                    duration: explosionTriggered ? 2.5 : (shouldReduceMotion ? 0 : 0.7),
-                    delay: explosionTriggered ? index * 0.1 : (shouldReduceMotion ? 0 : index * 0.12),
-                    ease: explosionTriggered ? "easeOut" : [0.16, 1, 0.3, 1],
+                    duration: shouldReduceMotion ? 0 : 0.7,
+                    delay: shouldReduceMotion ? 0 : index * 0.12,
+                    ease: [0.16, 1, 0.3, 1],
                   }}
-                  whileHover={explosionTriggered ? {} : {
+                  whileHover={{
                     scale: 1.05,
                     y: -8,
                     zIndex: 40,
