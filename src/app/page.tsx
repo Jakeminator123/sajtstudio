@@ -6,12 +6,14 @@ import Footer from "@/components/Footer";
 import dynamic from "next/dynamic";
 
 // Critical components loaded immediately for smooth scrolling
-import HeroAnimation from "@/components/HeroAnimation";
 import ScrollIndicator from "@/components/ScrollIndicator";
 // Load first 3-4 sections immediately - they appear early and need smooth scrolling
 import AboutSection from "@/components/AboutSection";
 import USPSection from "@/components/USPSection";
 import ServicesSection from "@/components/ServicesSection";
+// CRITICAL: HeroAnimation must be ready when user scrolls - contains video explosion and Pacman game
+import HeroAnimation from "@/components/HeroAnimation";
+import TechShowcaseSection from "@/components/TechShowcaseSection";
 
 import { SectionSkeleton } from "@/components/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
@@ -82,9 +84,13 @@ export default function Home() {
         </div>
 
         {/* Portfolio animation - behåll nuvarande explosion */}
+        {/* CRITICAL: HeroAnimation loaded directly - video explosion must be ready */}
         <div className="content-visibility-auto">
           <HeroAnimation />
-          {/* Tech vs Design showcase - interactive Pacman demo */}
+        </div>
+        {/* Tech vs Design showcase - interactive Pacman demo */}
+        {/* CRITICAL: TechShowcaseSection loaded directly - Pacman game must be ready */}
+        <div className="content-visibility-auto">
           <TechShowcaseSection />
         </div>
 

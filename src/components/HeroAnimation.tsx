@@ -803,7 +803,7 @@ export default function HeroAnimation() {
                   loop
                   muted
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   className="w-full h-auto relative"
                   style={{ zIndex: 0 }}
                   onError={() => {
