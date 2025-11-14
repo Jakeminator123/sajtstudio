@@ -201,6 +201,12 @@ export const designTokens = {
     xl: '1rem',
     full: '9999px',
   },
+
+  // Layout dimensions
+  layout: {
+    headerHeight: '80px', // Fixed header height - used for padding-top on main content
+    headerHeightMobile: '72px', // Slightly smaller on mobile
+  },
 } as const;
 
 // Export för användning i komponenter

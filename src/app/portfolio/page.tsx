@@ -10,8 +10,8 @@ export default function PortfolioPage() {
   return (
     <>
       <HeaderNav />
-      <main className="bg-black text-white" style={{ paddingTop: 'var(--header-height)' }}>
-        <section className="relative min-h-[70vh] py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden content-visibility-auto">
+      <main className="pt-[var(--header-height)] bg-black text-white">
+        <section className="relative min-h-[70vh] py-24 overflow-hidden content-visibility-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,0,51,0.3),transparent_55%)] opacity-40 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-b from-black via-black/60 to-black pointer-events-none" />
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl relative z-10 text-center">

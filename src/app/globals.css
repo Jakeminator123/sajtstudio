@@ -321,8 +321,15 @@ body::-webkit-scrollbar {
   @apply scroll-smooth;
 }
 
+/* Header height CSS variable for consistent spacing */
+:root {
+  --header-height: 80px;
+  --header-height-mobile: 72px;
+}
+
 /* Smooth section transitions */
-section {
+section,
+[id] {
   scroll-margin-top: var(--header-height);
   transition: opacity 0.3s ease-in-out;
 }

@@ -55,9 +55,9 @@ export default function ContactPage() {
   return (
     <>
       <HeaderNav />
-      <main style={{ paddingTop: 'var(--header-height)' }}>
-        <section className="py-12 sm:py-16 md:py-24 lg:py-32 bg-white" style={{ minHeight: 'calc(100vh - var(--header-height))' }}>
-          <div className="container mx-auto px-4 sm:px-6">
+      <main className="pt-[var(--header-height)]">
+        <section className="min-h-screen py-24 md:py-32 bg-white">
+          <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

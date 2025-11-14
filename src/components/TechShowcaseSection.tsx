@@ -50,20 +50,20 @@ export default function TechShowcaseSection() {
       animate={{ backgroundColor: "#ffffff" }}
       style={{ backgroundColor: "#ffffff" }}
     >
-      {/* Start from white (coming from HeroAnimation white fade) */}
+      {/* Smooth white fade transition from HeroAnimation */}
       <motion.div 
         className="absolute inset-0 bg-white z-0"
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
-        transition={{ duration: 3, delay: 1 }}
+        transition={{ duration: 2.5, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
       />
       
-      {/* Split screen background - fades in as white fades out */}
+      {/* Split screen background - fades in smoothly as white fades out */}
       <motion.div 
         className="absolute inset-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 2, delay: 1.5 }}
+        transition={{ duration: 2.5, delay: 0.8, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-50 to-gray-100">
           {/* Technical/boring side */}
@@ -152,20 +152,20 @@ export default function TechShowcaseSection() {
             >
               {/* Timer or Play button */}
               <motion.div 
-                className="absolute -top-20 left-1/2 -translate-x-1/2 text-center"
+                className="absolute -top-20 left-1/2 -translate-x-1/2 text-center px-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
                 {!gameStarted && countdown > 0 && (
-                  <p className="text-2xl font-bold text-gray-600">
+                  <p className="text-xl md:text-2xl font-bold text-gray-600">
                     Demo time: {countdown}s
                   </p>
                 )}
                 {!isPlaying && (countdown === 0 || gameStarted) && (
                   <motion.button
                     onClick={handlePlayGame}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-lg"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 active:scale-95 transition-transform shadow-lg text-sm md:text-base"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -194,6 +194,8 @@ export default function TechShowcaseSection() {
                   style={{
                     width: isPlaying ? 'min(90vw, 800px)' : 'min(90vw, 600px)',
                     height: isPlaying ? 'min(90vw, 800px)' : 'min(90vw, 600px)',
+                    maxHeight: 'min(90vh, 800px)',
+                    aspectRatio: '560/640', // Maintain Pacman game aspect ratio
                   }}
                   animate={{
                     scale: isPlaying ? 1.2 : (countdown === 0 && !isPlaying ? [1, 0.95, 1] : 1),
@@ -208,7 +210,11 @@ export default function TechShowcaseSection() {
                     src="/bla-pacman.html"
                     title="Pacman Demo"
                     className="w-full h-full border-0"
-                    style={{ pointerEvents: isPlaying ? 'auto' : (countdown > 0 ? 'auto' : 'none') }}
+                    style={{ 
+                      pointerEvents: isPlaying ? 'auto' : (countdown > 0 ? 'auto' : 'none'),
+                      touchAction: 'none',
+                    }}
+                    allow="gamepad"
                   />
                   
                   {/* Game over overlay */}
@@ -236,15 +242,15 @@ export default function TechShowcaseSection() {
                 </motion.div>
               </div>
 
-              {/* Tech vs Design labels */}
-              <div className="absolute -left-32 top-1/2 -translate-y-1/2 text-right">
+              {/* Tech vs Design labels - hidden on mobile */}
+              <div className="hidden md:block absolute -left-32 top-1/2 -translate-y-1/2 text-right">
                 <p className="text-sm font-mono text-gray-500">TECHNICAL</p>
                 <p className="text-xs text-gray-400">• Data-driven</p>
                 <p className="text-xs text-gray-400">• Functional</p>
                 <p className="text-xs text-gray-400">• Interactive</p>
               </div>
               
-              <div className="absolute -right-32 top-1/2 -translate-y-1/2">
+              <div className="hidden md:block absolute -right-32 top-1/2 -translate-y-1/2">
                 <p className="text-sm font-bold text-purple-600">CREATIVE</p>
                 <p className="text-xs text-purple-400">• Beautiful</p>
                 <p className="text-xs text-purple-400">• Animated</p>

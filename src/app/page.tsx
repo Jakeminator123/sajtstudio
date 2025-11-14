@@ -63,7 +63,7 @@ export default function Home() {
   return (
     <>
       <HeaderNav />
-      <main id="main-content" tabIndex={-1} className="relative z-10">
+      <main id="main-content" tabIndex={-1} className="relative z-10 pt-[var(--header-height)]">
         {/* Hero with rain, lightning, and text animations */}
         <HeroSection />
 
