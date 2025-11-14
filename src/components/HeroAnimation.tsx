@@ -358,35 +358,35 @@ export default function HeroAnimation() {
 
   // Enhanced image transforms - dramatic and simultaneous explosion synchronized with video zoom
   // Images explode at the same time as video starts zooming aggressively (0.5-0.65)
-  // More dramatic and faster explosion for better visual impact
+  // Two images fly towards screen (3D effect), two images spin/slide sideways
   
-  // Image 0 (top-left): "Svävar iväg uppåt" - dramatic floating upward movement with spin
-  const image0X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -400, -1200]);
-  const image0Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -600, -1000]);
-  const image0Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -120, -200]);
+  // Image 0 (top-left): "Snurrar åt vänster" - dramatic spinning rotation to the left
+  const image0X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -600, -1400]);
+  const image0Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -300, -600]);
+  const image0Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -180, -360]);
   const image0Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
-  const image0Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 1.8, 2.5]);
+  const image0Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.5, 0.2]);
 
-  // Image 1 (top-right): "Dras åt höger" - dramatic slide to the right with flip
-  const image1X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 800, 1800]);
-  const image1Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 200, 500]);
-  const image1Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 60, 120]);
-  const image1Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
-  const image1Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
+  // Image 1 (top-right): "Flyger mot skärmen" - dramatic 3D fly towards screen
+  const image1X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 400, 800]);
+  const image1Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -200, -400]);
+  const image1Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 15, 30]);
+  const image1Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0]);
+  const image1Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 2.2, 3.5]); // Grows larger as it comes forward
 
-  // Image 2 (bottom-left): "Rullar iväg nedåt" - dramatic rolling rotation downward
-  const image2X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -900, -1600]);
-  const image2Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 700, 1200]);
-  const image2Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 720, 1080]);
+  // Image 2 (bottom-left): "Rullar åt vänster" - dramatic rolling rotation to the left
+  const image2X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -800, -1600]);
+  const image2Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 400, 800]);
+  const image2Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 720, 1440]); // Multiple full rotations
   const image2Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
-  const image2Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
+  const image2Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.5, 0.2]);
 
-  // Image 3 (bottom-right): "Åker upp ur bild" - dramatic upward movement with spin
-  const image3X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 700, 1300]);
-  const image3Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -800, -1400]);
-  const image3Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 120, 220]);
-  const image3Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.3, 0]);
-  const image3Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0.15]);
+  // Image 3 (bottom-right): "Flyger mot skärmen" - dramatic 3D fly towards screen
+  const image3X = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, 500, 1000]);
+  const image3Y = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -300, -600]);
+  const image3Rotate = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [0, 0, -15, -30]);
+  const image3Opacity = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 0.4, 0]);
+  const image3Scale = useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], [1, 1, 2.2, 3.5]); // Grows larger as it comes forward
 
   const imageTransforms = [
     { x: image0X, y: image0Y, rotate: image0Rotate, opacity: image0Opacity, scale: image0Scale },
@@ -525,16 +525,16 @@ export default function HeroAnimation() {
                     y: transforms.y,
                     rotate: transforms.rotate,
                     rotateX: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
-                      [0, 0, index === 1 || index === 2 ? 180 : 0, index === 1 || index === 2 ? 180 : 0]),
+                      [0, 0, index === 1 || index === 3 ? 10 : 0, index === 1 || index === 3 ? 20 : 0]), // Slight tilt for 3D effect
                     rotateY: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
-                      [0, 0, index === 0 || index === 3 ? 90 : 0, index === 0 || index === 3 ? 90 : 0]),
+                      [0, 0, index === 1 || index === 3 ? 5 : 0, index === 1 || index === 3 ? 10 : 0]), // Slight tilt for 3D effect
                     z: useTransform(smoothMediaProgress, [0, 0.5, 0.55, 0.65], 
-                      [0, 0, index === 1 || index === 3 ? 200 : 0, 0]),
+                      [0, 0, index === 1 || index === 3 ? 500 : 0, index === 1 || index === 3 ? 800 : 0]), // Fly towards screen (large z value)
                     opacity: transforms.opacity,
                     scale: transforms.scale,
                     willChange: "transform, opacity",
                     transformStyle: "preserve-3d",
-                    perspective: 1000,
+                    perspective: 2000, // Increased for better 3D effect when images fly towards screen
                     maxWidth: '100%',
                     zIndex: useTransform(smoothMediaProgress, [0, 0.5, 0.65], 
                       ['auto', 70, 'auto']),
