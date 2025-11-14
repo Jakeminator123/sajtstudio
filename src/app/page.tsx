@@ -8,19 +8,15 @@ import dynamic from "next/dynamic";
 // Critical components loaded immediately
 import HeroAnimation from "@/components/HeroAnimation";
 import ScrollIndicator from "@/components/ScrollIndicator";
+// Load early sections immediately for better scroll responsiveness
+import AboutSection from "@/components/AboutSection";
+import USPSection from "@/components/USPSection";
 
 import { SectionSkeleton } from "@/components/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
+import { usePrefetchOnScroll } from "@/hooks/usePrefetchOnScroll";
 
-// Lazy load non-critical sections for better performance
-const AboutSection = dynamic(() => import("@/components/AboutSection"), {
-  loading: () => <SectionSkeleton />,
-});
-
-const USPSection = dynamic(() => import("@/components/USPSection"), {
-  loading: () => <SectionSkeleton />,
-});
-
+// Lazy load sections that appear later - prefetched via usePrefetchOnScroll
 const ServicesSection = dynamic(() => import("@/components/ServicesSection"), {
   loading: () => <SectionSkeleton />,
 });
@@ -59,6 +55,8 @@ const TechShowcaseSection = dynamic(
 export default function Home() {
   // Prefetch links on hover for faster navigation
   usePrefetch();
+  // Prefetch components as user scrolls near them
+  usePrefetchOnScroll();
 
   return (
     <>

@@ -128,8 +128,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        {/* Preload only critical above-the-fold resources */}
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="https://agent.d-id.com" />
+        {/* Preload critical above-the-fold resources */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
+        {/* Preload hero video metadata for faster playback */}
+        <link rel="preload" href="/videos/background.mp4" as="video" type="video/mp4" />
+        {/* Preload hero background image */}
+        <link rel="preload" href="/images/hero/hero-background.webp" as="image" type="image/webp" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
