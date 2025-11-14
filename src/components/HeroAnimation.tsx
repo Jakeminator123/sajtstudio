@@ -544,6 +544,8 @@ export default function HeroAnimation() {
                     willChange: "transform, opacity",
                     transformStyle: "preserve-3d",
                     perspective: 1000,
+                    maxWidth: '100%',
+                    zIndex: explosionTriggered ? 70 : 'auto',
                   }}
                   initial={{ opacity: 0, scale: 0.8, y: 50 }}
                   animate={
@@ -577,11 +579,6 @@ export default function HeroAnimation() {
                     zIndex: 40,
                   }}
                   className="relative aspect-square overflow-hidden rounded-lg border border-accent/20 group cursor-pointer max-w-full"
-                  style={{ 
-                    maxWidth: '100%', 
-                    transformStyle: "preserve-3d",
-                    zIndex: explosionTriggered ? 70 : 'auto'
-                  }}
                 >
                   <Image
                     src={src}
