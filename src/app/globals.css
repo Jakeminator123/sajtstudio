@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Header height variable for consistent spacing */
+:root {
+  --header-height: 80px;
+}
+
 /* Content visibility optimization - skip layout/paint for offscreen sections */
 @layer utilities {
   .content-visibility-auto {
@@ -238,11 +243,6 @@
   overflow-y: auto;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Scroll snap only on desktop to avoid mobile issues */
 @media (min-width: 768px) {
   html {
@@ -310,14 +310,14 @@ body::-webkit-scrollbar {
 
 /* Smooth section transitions */
 section {
-  scroll-margin-top: 80px;
+  scroll-margin-top: var(--header-height);
   transition: opacity 0.3s ease-in-out;
 }
 
 /* Enhanced scroll behavior */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: var(--header-height);
 }
 
 /* Section fade-in on scroll */
