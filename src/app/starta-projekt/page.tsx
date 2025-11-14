@@ -7,9 +7,18 @@ import Footer from '@/components/Footer';
 import ContactForm from '@/components/ContactForm';
 
 function Clock() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Only set time on client to avoid hydration mismatch
+    setMounted(true);
+    setTime(new Date());
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Use requestAnimationFrame for smoother updates and less DOM work
     let rafId: number;
     let lastUpdate = Date.now();
@@ -29,7 +38,24 @@ function Clock() {
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [mounted]);
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted || !time) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="text-center"
+      >
+        <div className="text-6xl md:text-8xl font-bold mb-4 font-mono text-white">
+          --:--
+        </div>
+        <p className="text-gray-400">Stockholm, Sverige</p>
+      </motion.div>
+    );
+  }
 
   const hours = time.getHours().toString().padStart(2, '0');
   const minutes = time.getMinutes().toString().padStart(2, '0');

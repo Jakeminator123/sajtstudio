@@ -6,6 +6,7 @@ import PageTransition from "@/components/PageTransition";
 import SkipLink from "@/components/SkipLink";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ChatFallback from "@/components/ChatFallback";
+import ConditionalPreloads from "@/components/ConditionalPreloads";
 import {
   getOrganizationSchema,
   getWebSiteSchema,
@@ -130,27 +131,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="dns-prefetch" href="https://agent.d-id.com" />
-        {/* Preload critical above-the-fold resources */}
+        {/* Preload only global resources used on all pages */}
         <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
-        {/* Preload hero video metadata for faster playback */}
-        <link rel="preload" href="/videos/background.mp4" as="video" type="video/mp4" />
-        {/* Preload hero background image */}
-        <link rel="preload" href="/images/hero/hero-background.webp" as="image" type="image/webp" />
-        {/* Preload ServicesSection video since it's loaded directly for smooth scrolling */}
-        <link rel="preload" href="/videos/background_vid.mp4" as="video" type="video/mp4" />
-        
-        {/* CRITICAL: Preload HeroAnimation resources - video explosion must be ready */}
-        <link rel="preload" href="/videos/telephone_ringin.mp4" as="video" type="video/mp4" />
-        <link rel="preload" href="/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/images/portfolio/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/images/backgrounds/section-background.webp" as="image" type="image/webp" />
-        
-        {/* Preload additional resources for smooth scrolling experience */}
-        <link rel="preload" href="/images/animations/hero-animation.gif" as="image" type="image/gif" />
-        {/* Preload noir video for starta-projekt page */}
-        <link rel="preload" href="/videos/noir_hero.mp4" as="video" type="video/mp4" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
@@ -161,6 +143,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" style={{ overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
+        <ConditionalPreloads />
         <SkipLink />
         <ErrorBoundary>
           <PageTransition>{children}</PageTransition>
