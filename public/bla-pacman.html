@@ -34,8 +34,31 @@
       height:100%;
       overflow:hidden;
       background: radial-gradient(900px 600px at 50% 10%, rgba(21,59,129,.25), rgba(4,12,26,.7));
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-    canvas{ width:100%; height:100%; display:block; }
+    canvas{ 
+      width:100%; 
+      height:100%; 
+      max-width:100%;
+      max-height:100%;
+      display:block;
+      touch-action: none; /* Prevent default touch behaviors */
+      object-fit: contain;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .stage {
+        padding: 8px;
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 560/640; /* Maintain original aspect ratio */
+      }
+    }
 
     .overlay{
       position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -49,6 +72,15 @@
     }
     .overlay h2{margin:0 0 8px; font-size: clamp(18px, 4vw, 24px); color:#e6f0ff}
     .overlay p{margin:6px 0; color:#c7dbff}
+    
+    /* Mobile controls hint */
+    @media (max-width: 768px) {
+      .overlay p:last-child {
+        margin-top: 12px;
+        font-size: clamp(14px, 3vw, 18px);
+        color: #a7c7ff;
+      }
+    }
   </style>
 </head>
 <body>
@@ -59,6 +91,7 @@
     <div class="box">
       <h2>🟦 Pac-Man Demo</h2>
       <p>Use arrow keys or WASD</p>
+      <p style="display: none;" id="mobile-hint">Swipe to move on mobile</p>
     </div>
   </div>
 </div>
@@ -97,8 +130,37 @@ let ghosts = [{x:13, y:10, dx:1, dy:0, color:'#ff6b9d'}];
 
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-canvas.width = cols * cs;
-canvas.height = rows * cs;
+
+// Responsive canvas sizing
+function resizeCanvas() {
+  const container = canvas.parentElement;
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+  
+  // Calculate scale to fit container while maintaining aspect ratio
+  const scaleX = containerWidth / (cols * cs);
+  const scaleY = containerHeight / (rows * cs);
+  const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+  
+  canvas.width = cols * cs;
+  canvas.height = rows * cs;
+  canvas.style.width = (cols * cs * scale) + 'px';
+  canvas.style.height = (rows * cs * scale) + 'px';
+}
+
+// Initial resize
+resizeCanvas();
+
+// Resize on window resize
+window.addEventListener('resize', resizeCanvas);
+
+// Detect mobile and show hint
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  const mobileHint = document.getElementById('mobile-hint');
+  if(mobileHint) {
+    mobileHint.style.display = 'block';
+  }
+}
 
 // Count pellets
 map.forEach(row => {
@@ -244,7 +306,62 @@ function draw() {
   }
 }
 
-// Controls
+// Touch controls for mobile
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchEnd(e) {
+  if(gameOver) return;
+  
+  const touchEndX = e.changedTouches[0].clientX;
+  const touchEndY = e.changedTouches[0].clientY;
+  
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  const minSwipeDistance = 30; // Minimum swipe distance
+  
+  if(Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Horizontal swipe
+    if(Math.abs(deltaX) > minSwipeDistance) {
+      if(deltaX > 0) {
+        // Swipe right
+        pacman.dx = 1; pacman.dy = 0; pacman.dir = 0;
+      } else {
+        // Swipe left
+        pacman.dx = -1; pacman.dy = 0; pacman.dir = 2;
+      }
+    }
+  } else {
+    // Vertical swipe
+    if(Math.abs(deltaY) > minSwipeDistance) {
+      if(deltaY > 0) {
+        // Swipe down
+        pacman.dx = 0; pacman.dy = 1; pacman.dir = 1;
+      } else {
+        // Swipe up
+        pacman.dx = 0; pacman.dy = -1; pacman.dir = 3;
+      }
+    }
+  }
+  
+  if(document.getElementById('msg').style.display !== 'none') {
+    document.getElementById('msg').style.display = 'none';
+  }
+  
+  e.preventDefault();
+}
+
+// Add touch event listeners
+canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
+canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+// Keyboard controls
 document.addEventListener('keydown', e => {
   if(gameOver) return;
   
