@@ -4,7 +4,8 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
 export default function TechShowcaseSection() {
-  const sectionRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const pacmanRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const [showTechText, setShowTechText] = useState(false);
   const [showPacman, setShowPacman] = useState(false);
@@ -12,6 +13,7 @@ export default function TechShowcaseSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [whiteFadeOut, setWhiteFadeOut] = useState(false);
+  const [hasScrolledToPacman, setHasScrolledToPacman] = useState(false);
 
   useEffect(() => {
     if (isInView) {
@@ -24,12 +26,30 @@ export default function TechShowcaseSection() {
       // Show Pacman after 2s
       const pacmanTimer = setTimeout(() => setShowPacman(true), 2000);
       
+      // Auto-scroll to Pacman game when white fade is almost done
+      // This creates the optical illusion of fading into the centered game
+      // Scroll happens when white fade is ~80% complete (2 seconds into 2.5s fade)
+      const scrollTimer = setTimeout(() => {
+        if (pacmanRef.current && !hasScrolledToPacman) {
+          // Use requestAnimationFrame for smoother scroll
+          requestAnimationFrame(() => {
+            pacmanRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'center'
+            });
+            setHasScrolledToPacman(true);
+          });
+        }
+      }, 2000); // Start scrolling when white fade is ~80% complete
+      
       return () => {
         clearTimeout(textTimer);
         clearTimeout(pacmanTimer);
+        clearTimeout(scrollTimer);
       };
     }
-  }, [isInView]);
+  }, [isInView, hasScrolledToPacman]);
 
   useEffect(() => {
     // Countdown when Pacman shows and game hasn't started yet
@@ -62,8 +82,9 @@ export default function TechShowcaseSection() {
       {/* Start from white (coming from HeroAnimation white fade) */}
       {/* This white overlay fades out when section comes into view */}
       {/* Ensures smooth transition from HeroAnimation white fade */}
+      {/* Auto-scrolls to Pacman game when fade is halfway through for optical illusion */}
       <motion.div 
-        className="absolute inset-0 bg-white z-[10]"
+        className="fixed inset-0 bg-white z-[10] pointer-events-none"
         initial={{ opacity: 1 }}
         animate={{ opacity: whiteFadeOut ? 0 : 1 }}
         transition={{ duration: 2.5, ease: [0.25, 0.1, 0.25, 1] }}
@@ -123,7 +144,8 @@ export default function TechShowcaseSection() {
       </motion.div>
 
       {/* Content - only show when section is in view */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8 pt-32 md:pt-40">
+      {/* Extra height ensures Pacman can be centered in viewport during auto-scroll */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[200vh] p-8 pt-32 md:pt-40">
         <AnimatePresence mode="wait">
           {isInView && showTechText && !showPacman && (
             <motion.div
@@ -157,9 +179,11 @@ export default function TechShowcaseSection() {
 
           {isInView && showPacman && (
             <motion.div
+              ref={pacmanRef}
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               className="relative"
+              style={{ scrollMarginTop: '50vh' }} // Center in viewport when scrolled to
             >
               {/* Timer or Play button - positioned above game, always visible */}
               <motion.div 
@@ -255,19 +279,127 @@ export default function TechShowcaseSection() {
                 </motion.div>
               </div>
 
-              {/* Tech vs Design labels - improved visibility and design */}
-              <div className="absolute -left-40 md:-left-48 top-1/2 -translate-y-1/2 text-right space-y-2">
-                <p className="text-lg md:text-xl font-black text-gray-700 tracking-wider mb-2">TECHNICAL</p>
-                <p className="text-sm md:text-base text-gray-600 font-medium">• Data-driven</p>
-                <p className="text-sm md:text-base text-gray-600 font-medium">• Functional</p>
-                <p className="text-sm md:text-base text-gray-600 font-medium">• Interactive</p>
+              {/* Tech vs Design labels - Nintendo 8-bit Super Mario style */}
+              <div className="absolute -left-40 md:-left-48 top-1/2 -translate-y-1/2 text-right space-y-3 z-30">
+                <p 
+                  className="text-lg md:text-xl font-black mb-3"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#0066CC", // Super Mario blue
+                    textShadow: `
+                      2px 2px 0px #000,
+                      -1px -1px 0px #000,
+                      1px -1px 0px #000,
+                      -1px 1px 0px #000,
+                      0px 2px 0px #000,
+                      2px 0px 0px #000,
+                      -2px 0px 0px #000,
+                      0px -2px 0px #000
+                    `,
+                    imageRendering: "pixelated",
+                    letterSpacing: "2px",
+                    lineHeight: "1.2"
+                  }}
+                >
+                  TECHNICAL
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Data-driven
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Functional
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Interactive
+                </p>
               </div>
               
-              <div className="absolute -right-40 md:-right-48 top-1/2 -translate-y-1/2 space-y-2">
-                <p className="text-lg md:text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent tracking-wider mb-2">CREATIVE</p>
-                <p className="text-sm md:text-base text-purple-600 font-medium">• Beautiful</p>
-                <p className="text-sm md:text-base text-purple-600 font-medium">• Animated</p>
-                <p className="text-sm md:text-base text-purple-600 font-medium">• Engaging</p>
+              <div className="absolute -right-40 md:-right-48 top-1/2 -translate-y-1/2 space-y-3 z-30">
+                <p 
+                  className="text-lg md:text-xl font-black mb-3"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#FF0000", // Super Mario red
+                    textShadow: `
+                      2px 2px 0px #000,
+                      -1px -1px 0px #000,
+                      1px -1px 0px #000,
+                      -1px 1px 0px #000,
+                      0px 2px 0px #000,
+                      2px 0px 0px #000,
+                      -2px 0px 0px #000,
+                      0px -2px 0px #000
+                    `,
+                    imageRendering: "pixelated",
+                    letterSpacing: "2px",
+                    lineHeight: "1.2"
+                  }}
+                >
+                  CREATIVE
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Beautiful
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Animated
+                </p>
+                <p 
+                  className="text-sm md:text-base font-bold"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    color: "#000000",
+                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
+                    imageRendering: "pixelated",
+                    letterSpacing: "1px"
+                  }}
+                >
+                  • Engaging
+                </p>
               </div>
             </motion.div>
           )}
