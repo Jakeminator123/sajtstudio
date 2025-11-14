@@ -28,7 +28,7 @@ export default function TechShowcaseSection() {
       
       // Auto-scroll to Pacman game when white fade is almost done
       // This creates the optical illusion of fading into the centered game
-      // Scroll happens when white fade is ~80% complete (2 seconds into 2.5s fade)
+      // Scroll happens when white fade is ~80% complete (1.2 seconds into 1.5s fade)
       const scrollTimer = setTimeout(() => {
         if (pacmanRef.current && !hasScrolledToPacman) {
           // Use requestAnimationFrame for smoother scroll
@@ -41,7 +41,7 @@ export default function TechShowcaseSection() {
             setHasScrolledToPacman(true);
           });
         }
-      }, 2000); // Start scrolling when white fade is ~80% complete
+      }, 1200); // Start scrolling when white fade is ~80% complete (1.2s into 1.5s fade)
       
       return () => {
         clearTimeout(textTimer);
@@ -87,8 +87,48 @@ export default function TechShowcaseSection() {
         className="fixed inset-0 bg-white z-[10] pointer-events-none"
         initial={{ opacity: 1 }}
         animate={{ opacity: whiteFadeOut ? 0 : 1 }}
-        transition={{ duration: 2.5, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
       />
+      
+      {/* Matrix-style text - shows during white fade */}
+      <motion.div
+        className="fixed inset-0 flex items-center justify-center z-[11] pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: whiteFadeOut && !showPacman ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.p
+          className="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-center px-4"
+          style={{
+            color: "#00ff41", // Matrix green
+            textShadow: `
+              0 0 5px #00ff41,
+              0 0 10px #00ff41,
+              0 0 15px #00ff41,
+              0 0 20px #00ff41,
+              2px 2px 0px #000,
+              -2px -2px 0px #000,
+              2px -2px 0px #000,
+              -2px 2px 0px #000
+            `,
+            fontFamily: "monospace",
+            letterSpacing: "2px",
+            lineHeight: "1.4",
+            filter: "blur(0.5px)", // Slight blur for matrix effect
+          }}
+          animate={{
+            opacity: [1, 0.7, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          Enough of the design.<br />
+          Can you build competitive data dashboards..?
+        </motion.p>
+      </motion.div>
       
       {/* Split screen background - fades in as white fades out */}
       <motion.div 
