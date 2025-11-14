@@ -126,14 +126,14 @@ export default function HeaderNav() {
           />
         )}
 
-        <nav className="container mx-auto px-6 py-4" style={{ position: 'relative' }}>
+        <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4" style={{ position: 'relative' }}>
           <div className="flex items-center justify-between" style={{ position: 'relative' }}>
             {/* Logo */}
-            <Link href="/" className="group relative">
+            <Link href="/" className="group relative min-h-[44px] min-w-[44px] flex items-center" aria-label="Sajtstudio hem">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-3"
+                className="flex items-center gap-2 sm:gap-3"
               >
                 {/* Logo glow effect */}
                 <div className="relative">
@@ -148,14 +148,14 @@ export default function HeaderNav() {
                       ease: "easeInOut",
                     }}
                   />
-                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-accent to-tertiary p-0.5">
+                  <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-accent to-tertiary p-0.5">
                     <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
                       <Image
                         src="/logo.svg"
                         alt="Sajtstudio"
                         width={24}
                         height={24}
-                        className="brightness-0 invert"
+                        className="brightness-0 invert w-4 h-4 sm:w-6 sm:h-6"
                         priority
                       />
                     </div>
@@ -164,7 +164,7 @@ export default function HeaderNav() {
 
                 {/* Text logo */}
                 <div className="relative">
-                  <span className="text-xl font-black text-white">
+                  <span className="text-base sm:text-xl font-black text-white">
                     Sajtstudio
                   </span>
                   <motion.span
@@ -229,11 +229,11 @@ export default function HeaderNav() {
               </div>
             </nav>
 
-              {/* CTA Button */}
+              {/* CTA Button - Hidden on mobile, shown on desktop */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative group cta-button-header"
+                className="hidden lg:block relative group cta-button-header"
               >
                 {/* Button glow */}
                 <motion.div
@@ -249,7 +249,7 @@ export default function HeaderNav() {
                 />
                 <Link
                   href="/contact"
-                  className="relative px-6 py-2.5 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full overflow-hidden block"
+                  className="relative px-6 py-2.5 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full overflow-hidden block min-h-[44px] flex items-center justify-center"
                 >
                   {/* Shimmer effect */}
                   <motion.span
@@ -271,7 +271,9 @@ export default function HeaderNav() {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden relative w-10 h-10 flex items-center justify-center"
+              className="lg:hidden relative w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
+              aria-label="Öppna meny"
+              aria-expanded={menuOpen}
             >
               <div className="relative w-6 h-5 flex flex-col justify-between">
                 <motion.span
@@ -320,18 +322,19 @@ export default function HeaderNav() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 20 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto custom-scrollbar"
             >
               {/* Gradient background */}
               <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90" />
 
               {/* Content */}
-              <div className="relative p-8 pt-20">
+              <div className="relative p-6 sm:p-8 pt-20 sm:pt-24">
                 {/* Close button */}
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setMenuOpen(false)}
-                  className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 transition-colors touch-manipulation"
+                  aria-label="Stäng meny"
                 >
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -350,7 +353,7 @@ export default function HeaderNav() {
                       <Link
                         href={link.href}
                         onClick={() => setMenuOpen(false)}
-                        className="block py-3 px-4 text-lg font-semibold text-white hover:text-accent transition-colors relative group overflow-hidden rounded-lg"
+                        className="block py-4 px-4 text-lg font-semibold text-white hover:text-accent active:text-accent transition-colors relative group overflow-hidden rounded-lg min-h-[44px] flex items-center touch-manipulation"
                       >
                         {/* Hover background */}
                         <motion.div

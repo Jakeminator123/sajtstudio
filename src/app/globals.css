@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Header height variable for consistent spacing */
+:root {
+  --header-height: 80px;
+}
+
 /* Content visibility optimization - skip layout/paint for offscreen sections */
 @layer utilities {
   .content-visibility-auto {
@@ -192,7 +197,7 @@
   }
 }
 
-/* Touch-friendly enhancements */
+  /* Touch-friendly enhancements */
 @media (hover: none) and (pointer: coarse) {
   /* Increase tap target size */
   button,
@@ -202,6 +207,13 @@
   textarea {
     min-height: 44px;
     min-width: 44px;
+  }
+  
+  /* Better touch feedback */
+  button:active,
+  a:active {
+    opacity: 0.8;
+    transform: scale(0.98);
   }
 
   /* Remove hover effects on touch devices */
@@ -215,6 +227,12 @@
     -webkit-tap-highlight-color: rgba(0, 102, 255, 0.2);
     touch-action: manipulation;
     -webkit-touch-callout: none;
+  }
+  
+  /* Touch manipulation utility */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 102, 255, 0.2);
   }
 
   /* Ensure links are clickable on mobile */
@@ -236,11 +254,6 @@
 .touch-scroll {
   -webkit-overflow-scrolling: touch;
   overflow-y: auto;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
 }
 
 /* Scroll snap only on desktop to avoid mobile issues */
@@ -454,17 +467,17 @@ html {
   font-weight: 900;
 }
 
-/* Fantasy-inspired spacing */
+/* Fantasy-inspired spacing - Mobile optimized */
 .section-spacing-lg {
-  padding: clamp(10rem, 20vh, 25rem) 0;
+  padding: clamp(4rem, 12vh, 10rem) clamp(1rem, 4vw, 2rem) clamp(6rem, 20vh, 25rem) clamp(1rem, 4vw, 2rem);
 }
 
 .section-spacing-md {
-  padding: clamp(6rem, 15vh, 15rem) 0;
+  padding: clamp(3rem, 10vh, 6rem) clamp(1rem, 4vw, 2rem) clamp(4rem, 15vh, 15rem) clamp(1rem, 4vw, 2rem);
 }
 
 .section-spacing-sm {
-  padding: clamp(4rem, 10vh, 10rem) 0;
+  padding: clamp(2rem, 8vh, 4rem) clamp(1rem, 4vw, 2rem) clamp(3rem, 10vh, 10rem) clamp(1rem, 4vw, 2rem);
 }
 
 /* 3D transform utilities */

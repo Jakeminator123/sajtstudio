@@ -53,10 +53,10 @@ export default function BigCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center space-y-12"
+          className="text-center space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12"
         >
           {/* Main heading */}
-          <h2 className="text-5xl md:text-7xl lg:text-display-mega font-black leading-none">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-display-mega font-black leading-none px-4">
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function BigCTA() {
 
           {/* Subtext */}
           <motion.p
-            className="text-2xl md:text-4xl lg:text-5xl font-light leading-relaxed"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-light leading-relaxed px-4"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -87,7 +87,7 @@ export default function BigCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed px-4"
           >
             Har du ett projekt i tankarna? Eller vill du bara veta mer om vad vi gör?
             Kontakta oss idag så tar vi ett samtal.
@@ -105,7 +105,7 @@ export default function BigCTA() {
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)" }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative inline-flex items-center gap-4 px-12 py-6 bg-accent text-white font-bold text-xl overflow-hidden transition-all duration-300"
+                className="group relative inline-flex items-center gap-2 sm:gap-4 px-6 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 bg-accent text-white font-bold text-base sm:text-lg md:text-xl overflow-hidden transition-all duration-300 min-h-[44px] touch-manipulation active:bg-accent-hover"
               >
                 {/* Animated background */}
                 <motion.div
@@ -146,7 +146,7 @@ export default function BigCTA() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            className="pt-8 flex flex-col md:flex-row items-center justify-center gap-8 text-gray-400"
+            className="pt-6 sm:pt-8 flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 text-gray-400 px-4"
           >
             <a
               href="mailto:info@sajtstudio.se"
