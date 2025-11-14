@@ -314,10 +314,26 @@ section {
   transition: opacity 0.3s ease-in-out;
 }
 
+/* Ensure anchor links work correctly with fixed header */
+[id] {
+  scroll-margin-top: 80px;
+}
+
 /* Enhanced scroll behavior */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
+}
+
+/* Compensate for fixed header - ensure main content starts below header */
+/* HeroSection should be fullscreen, so we use negative margin to offset padding */
+main {
+  padding-top: 80px;
+}
+
+/* HeroSection should be fullscreen with header overlay */
+main > section:first-child {
+  margin-top: -80px;
 }
 
 /* Section fade-in on scroll */
