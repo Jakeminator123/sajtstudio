@@ -102,18 +102,15 @@ async function fetchWebsiteContent(url: string) {
 }
 
 async function analyzeWithAI(domain: string, websiteContent: any) {
-  const apiKey = process.env.SKYLIGHT_API_KEY || process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   
   if (!apiKey) {
-    throw new Error('SKYLIGHT_API_KEY eller OPENAI_API_KEY saknas i miljövariabler');
+    throw new Error('OPENAI_API_KEY saknas i miljövariabler');
   }
 
-  // Initialize OpenAI client - Skylight API uses OpenAI-compatible endpoint
+  // Initialize OpenAI client
   const client = new OpenAI({
     apiKey: apiKey,
-    baseURL: process.env.SKYLIGHT_API_KEY 
-      ? 'https://api.skylight.ai/v1' 
-      : undefined, // Use default OpenAI endpoint if using OPENAI_API_KEY
   });
 
   const prompt = `Du är en senior Growth/SEO/UX-konsult. Analysera webbplatsen och leverera ENDAST giltig JSON enligt schemat nedan.
