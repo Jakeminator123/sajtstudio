@@ -44,14 +44,6 @@ const OpticScrollShowcase = dynamic(
   }
 );
 
-const TechShowcaseSection = dynamic(
-  () => import("@/components/TechShowcaseSection"),
-  {
-    loading: () => <div className="min-h-screen bg-white" />,
-    ssr: false,
-  }
-);
-
 export default function Home() {
   // Prefetch links on hover for faster navigation
   usePrefetch();
