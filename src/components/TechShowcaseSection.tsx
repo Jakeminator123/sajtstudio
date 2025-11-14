@@ -642,55 +642,229 @@ export default function TechShowcaseSection() {
           </h3>
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {/* Motion Design */}
+            {/* Motion Design - 8-bit Super Mario style */}
             <motion.div 
-              className="bg-white/90 backdrop-blur-sm border border-purple-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
+              className="relative p-6 md:p-8"
+              style={{
+                background: '#FFD700', // Super Mario gold/yellow
+                border: '4px solid #000',
+                imageRendering: 'pixelated',
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  8px 8px 0 rgba(0,0,0,0.5)
+                `,
+              }}
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              whileHover={{ y: -5 }}
+              whileHover={{ 
+                y: -8,
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  12px 12px 0 rgba(0,0,0,0.5)
+                `,
+              }}
             >
-              <div className="text-5xl mb-6">🎭</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Motion Design</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
+              {/* Pixelated emoji */}
+              <div 
+                className="text-5xl mb-4"
+                style={{ 
+                  imageRendering: 'pixelated',
+                  filter: 'contrast(1.2)',
+                }}
+              >
+                🎭
+              </div>
+              <h4 
+                className="text-xl md:text-2xl font-black mb-3"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#000',
+                  textShadow: '2px 2px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff',
+                  imageRendering: 'pixelated',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Motion Design
+              </h4>
+              <p 
+                className="mb-4 text-sm md:text-base leading-relaxed"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#000',
+                  imageRendering: 'pixelated',
+                  lineHeight: '1.6',
+                }}
+              >
                 Vi använder Framer Motion för flytande, prestanda-optimerade animationer som reagerar på användarinteraktion.
               </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg font-mono font-semibold block">useScroll, useTransform, useSpring</code>
+              <code 
+                className="text-xs md:text-sm px-3 py-2 block font-bold"
+                style={{
+                  background: '#000',
+                  color: '#FFD700',
+                  border: '2px solid #000',
+                  fontFamily: "'Courier New', Courier, monospace",
+                  imageRendering: 'pixelated',
+                  boxShadow: 'inset -2px -2px 0 rgba(255,255,255,0.2), inset 2px 2px 0 rgba(0,0,0,0.5)',
+                }}
+              >
+                useScroll, useTransform, useSpring
+              </code>
             </motion.div>
 
-            {/* 3D & WebGL */}
+            {/* 3D & WebGL - 8-bit Super Mario style */}
             <motion.div 
-              className="bg-white/90 backdrop-blur-sm border border-blue-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
+              className="relative p-6 md:p-8"
+              style={{
+                background: '#0066CC', // Super Mario blue
+                border: '4px solid #000',
+                imageRendering: 'pixelated',
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  8px 8px 0 rgba(0,0,0,0.5)
+                `,
+              }}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              whileHover={{ y: -5 }}
+              whileHover={{ 
+                y: -8,
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  12px 12px 0 rgba(0,0,0,0.5)
+                `,
+              }}
             >
-              <div className="text-5xl mb-6">🌐</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">3D & WebGL</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
+              {/* Pixelated emoji */}
+              <div 
+                className="text-5xl mb-4"
+                style={{ 
+                  imageRendering: 'pixelated',
+                  filter: 'contrast(1.2)',
+                }}
+              >
+                🌐
+              </div>
+              <h4 
+                className="text-xl md:text-2xl font-black mb-3"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#FFF',
+                  textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
+                  imageRendering: 'pixelated',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                3D & WebGL
+              </h4>
+              <p 
+                className="mb-4 text-sm md:text-base leading-relaxed"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#FFF',
+                  imageRendering: 'pixelated',
+                  lineHeight: '1.6',
+                }}
+              >
                 Three.js och React Three Fiber för immersiva 3D-upplevelser direkt i webbläsaren.
               </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 px-3 py-2 rounded-lg font-mono font-semibold block">@react-three/fiber, drei</code>
+              <code 
+                className="text-xs md:text-sm px-3 py-2 block font-bold"
+                style={{
+                  background: '#000',
+                  color: '#00F0FF',
+                  border: '2px solid #000',
+                  fontFamily: "'Courier New', Courier, monospace",
+                  imageRendering: 'pixelated',
+                  boxShadow: 'inset -2px -2px 0 rgba(255,255,255,0.2), inset 2px 2px 0 rgba(0,0,0,0.5)',
+                }}
+              >
+                @react-three/fiber, drei
+              </code>
             </motion.div>
 
-            {/* Interactive Storytelling */}
+            {/* Scrollytelling - 8-bit Super Mario style */}
             <motion.div 
-              className="bg-white/90 backdrop-blur-sm border border-green-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
+              className="relative p-6 md:p-8"
+              style={{
+                background: '#00A000', // Super Mario green
+                border: '4px solid #000',
+                imageRendering: 'pixelated',
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  8px 8px 0 rgba(0,0,0,0.5)
+                `,
+              }}
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              whileHover={{ y: -5 }}
+              whileHover={{ 
+                y: -8,
+                boxShadow: `
+                  inset -4px -4px 0 rgba(0,0,0,0.3),
+                  inset 4px 4px 0 rgba(255,255,255,0.3),
+                  12px 12px 0 rgba(0,0,0,0.5)
+                `,
+              }}
             >
-              <div className="text-5xl mb-6">📖</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Scrollytelling</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
+              {/* Pixelated emoji */}
+              <div 
+                className="text-5xl mb-4"
+                style={{ 
+                  imageRendering: 'pixelated',
+                  filter: 'contrast(1.2)',
+                }}
+              >
+                📖
+              </div>
+              <h4 
+                className="text-xl md:text-2xl font-black mb-3"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#FFF',
+                  textShadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
+                  imageRendering: 'pixelated',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Scrollytelling
+              </h4>
+              <p 
+                className="mb-4 text-sm md:text-base leading-relaxed"
+                style={{
+                  fontFamily: "'Courier New', Courier, monospace",
+                  color: '#FFF',
+                  imageRendering: 'pixelated',
+                  lineHeight: '1.6',
+                }}
+              >
                 Scroll-drivna narrativ som guidar besökaren genom er story med visuell magi.
               </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-3 py-2 rounded-lg font-mono font-semibold block">Intersection Observer, GSAP</code>
+              <code 
+                className="text-xs md:text-sm px-3 py-2 block font-bold"
+                style={{
+                  background: '#000',
+                  color: '#00FF88',
+                  border: '2px solid #000',
+                  fontFamily: "'Courier New', Courier, monospace",
+                  imageRendering: 'pixelated',
+                  boxShadow: 'inset -2px -2px 0 rgba(255,255,255,0.2), inset 2px 2px 0 rgba(0,0,0,0.5)',
+                }}
+              >
+                Intersection Observer, GSAP
+              </code>
             </motion.div>
           </div>
 
