@@ -3,10 +3,25 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
+// Helper to get window width safely
+const useWindowWidth = () => {
+  const [width, setWidth] = useState(1920);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWidth(window.innerWidth);
+      const handleResize = () => setWidth(window.innerWidth);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+  return width;
+};
+
 export default function TechShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const pacmanRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const windowWidth = useWindowWidth();
   const [showTechText, setShowTechText] = useState(false);
   const [showPacman, setShowPacman] = useState(false);
   const [countdown, setCountdown] = useState(5);
@@ -136,57 +151,178 @@ export default function TechShowcaseSection() {
         </motion.p>
       </motion.div>
       
-      {/* Split screen background - fades in as white fades out */}
+      {/* 8-bit Super Mario style background - fades in as white fades out */}
       <motion.div 
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: isInView ? 1 : 0 }}
         transition={{ duration: 2, delay: 0.5 }}
+        style={{
+          imageRendering: 'pixelated',
+        }}
       >
-        <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-100 to-gray-200">
-          {/* Technical/boring side */}
-          <div className="absolute inset-0 opacity-20">
-            {/* Grid pattern */}
+        {/* Sky - Classic Super Mario blue */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, #5C94FC 0%, #5C94FC 60%, #87CEEB 100%)',
+            imageRendering: 'pixelated',
+          }}
+        />
+        
+        {/* Animated clouds - Super Mario style */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={`cloud-${i}`}
+            className="absolute"
+            style={{
+              width: '120px',
+              height: '60px',
+              background: '#FFFFFF',
+              borderRadius: '60px',
+              imageRendering: 'pixelated',
+              filter: 'contrast(1.2)',
+              left: `${-150 + (i * 200)}px`,
+              top: `${20 + (i % 3) * 80}px`,
+            }}
+            animate={{
+              x: [0, windowWidth + 300],
+            }}
+            transition={{
+              duration: 30 + i * 5,
+              repeat: Infinity,
+              ease: 'linear',
+              delay: i * 2,
+            }}
+          >
+            {/* Cloud shape - pixelated circles */}
             <div 
-              className="absolute inset-0"
+              className="absolute w-16 h-16 bg-white rounded-full -left-4 top-2"
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <div 
+              className="absolute w-20 h-20 bg-white rounded-full left-4 top-0"
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <div 
+              className="absolute w-16 h-16 bg-white rounded-full left-12 top-2"
+              style={{ imageRendering: 'pixelated' }}
+            />
+          </motion.div>
+        ))}
+        
+        {/* Ground - Super Mario green grass */}
+        <div 
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            height: '200px',
+            background: 'linear-gradient(to bottom, #5C7C3F 0%, #5C7C3F 60%, #8B6F47 60%, #8B6F47 100%)',
+            imageRendering: 'pixelated',
+          }}
+        />
+        
+        {/* Grass tufts */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={`grass-${i}`}
+            className="absolute bottom-[200px]"
+            style={{
+              left: `${(i * 80) % 100}%`,
+              width: '20px',
+              height: '15px',
+              background: '#4A6B2F',
+              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+              imageRendering: 'pixelated',
+            }}
+          />
+        ))}
+        
+        {/* Classic Super Mario blocks - Question blocks and bricks */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`block-${i}`}
+            className="absolute"
+            style={{
+              left: `${100 + (i * 150)}px`,
+              bottom: `${250 + (i % 3) * 60}px`,
+              width: '40px',
+              height: '40px',
+              background: i % 2 === 0 ? '#FFD700' : '#C04000', // Question block or brick
+              border: '3px solid #000',
+              imageRendering: 'pixelated',
+              boxShadow: 'inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.3)',
+            }}
+            animate={i % 2 === 0 ? {
+              y: [0, -5, 0],
+            } : {}}
+            transition={i % 2 === 0 ? {
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: i * 0.2,
+            } : {}}
+          >
+            {i % 2 === 0 && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center text-xl font-bold"
+                style={{ color: '#000', textShadow: '1px 1px 0 #fff' }}
+              >
+                ?
+              </div>
+            )}
+          </motion.div>
+        ))}
+        
+        {/* Pipes - Classic Super Mario green pipes */}
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={`pipe-${i}`}
+            className="absolute"
+            style={{
+              left: `${200 + (i * 300)}px`,
+              bottom: '200px',
+              width: '60px',
+              height: `${80 + (i % 2) * 40}px`,
+              background: '#00A000',
+              border: '3px solid #000',
+              borderTop: 'none',
+              imageRendering: 'pixelated',
+            }}
+          >
+            {/* Pipe top */}
+            <div 
+              className="absolute -top-8 left-0 w-full h-8"
               style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0,0,0,0.15) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px)
-                `,
-                backgroundSize: '20px 20px'
+                background: '#00C000',
+                border: '3px solid #000',
+                borderRadius: '8px 8px 0 0',
+                imageRendering: 'pixelated',
               }}
             />
           </div>
-        </div>
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-bl from-purple-200 via-pink-100 to-blue-200">
-          {/* Design/creative side */}
-          <div className="absolute inset-0">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full"
-                style={{
-                  background: `radial-gradient(circle, ${['#FF0080', '#00F0FF', '#FFD700', '#00FF88'][i % 4]} 0%, transparent 70%)`,
-                  width: `${Math.random() * 100 + 50}px`,
-                  height: `${Math.random() * 100 + 50}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  x: [0, Math.random() * 100 - 50, 0],
-                  y: [0, Math.random() * 100 - 50, 0],
-                  scale: [1, Math.random() + 0.5, 1],
-                }}
-                transition={{
-                  duration: 10 + Math.random() * 10,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-          </div>
-        </div>
+        ))}
+        
+        {/* Split screen divider - pixelated line */}
+        <div 
+          className="absolute inset-y-0 left-1/2 w-1 bg-black opacity-30"
+          style={{
+            transform: 'translateX(-50%)',
+            imageRendering: 'pixelated',
+          }}
+        />
+        
+        {/* Left side - Technical (darker, more grid-like) */}
+        <div 
+          className="absolute inset-y-0 left-0 w-1/2 opacity-40"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, transparent 1px, transparent 8px, rgba(0,0,0,0.1) 9px),
+              repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, transparent 1px, transparent 8px, rgba(0,0,0,0.1) 9px)
+            `,
+            backgroundSize: '8px 8px',
+            imageRendering: 'pixelated',
+          }}
+        />
       </motion.div>
 
       {/* Content - only show when section is in view */}
