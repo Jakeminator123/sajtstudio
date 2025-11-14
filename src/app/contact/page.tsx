@@ -55,7 +55,7 @@ export default function ContactPage() {
   return (
     <>
       <HeaderNav />
-      <main className="pt-24">
+      <main className="pt-[var(--header-height)]">
         <section className="min-h-screen py-24 md:py-32 bg-white">
           <div className="container mx-auto px-6">
             <motion.div

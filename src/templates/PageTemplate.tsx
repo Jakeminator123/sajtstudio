@@ -26,7 +26,7 @@ export default function PageTemplate({
   return (
     <>
       {showHeader && <HeaderNav />}
-      <main className={`pt-24 ${className}`}>
+      <main className={`pt-[var(--header-height)] ${className}`}>
         {children}
       </main>
       {showFooter && <Footer />}
