@@ -6,7 +6,6 @@ import PageTransition from "@/components/PageTransition";
 import SkipLink from "@/components/SkipLink";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ChatFallback from "@/components/ChatFallback";
-import ConditionalPreloads from "@/components/ConditionalPreloads";
 import {
   getOrganizationSchema,
   getWebSiteSchema,
@@ -143,7 +142,6 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" style={{ overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
-        <ConditionalPreloads />
         <SkipLink />
         <ErrorBoundary>
           <PageTransition>{children}</PageTransition>
