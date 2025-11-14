@@ -1,0 +1,35 @@
+{
+  "name": "sajtstudio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "echo 'Linting is handled by Next.js during build. Run: npm run build'",
+    "process-input-docs": "tsx scripts/processInputDocs.ts",
+    "clean": "node scripts/clean.js",
+    "clean:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/quick-clean.ps1",
+    "clean:full": "node scripts/clean-full.js",
+    "rebuild": "npm run clean:full"
+  },
+  "dependencies": {
+    "framer-motion": "^11.0.0",
+    "next": "16.0.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.0",
+    "babel-plugin-react-compiler": "1.0.0",
+    "critters": "^0.0.23",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

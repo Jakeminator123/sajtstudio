@@ -1,0 +1,95 @@
+# Sajtstudio.se - Cursor Rules
+
+## Projektkontext
+Detta är en modern företagswebbplats för Sajtstudio.se, inspirerad av Fantasy's design (ca 70% likhet). Byggd med Next.js 16, React 19, TypeScript, Tailwind CSS och Framer Motion.
+
+## Designprinciper
+- Monokrom minimalism med accentfärg (svart/vit bas med en accentfärg)
+- Stora typografiska element
+- Segmenterad layout med visuella avdelare
+- Interaktiva inslag (hover-effekter, scroll-animationer)
+- Lekfull detalj som ger karaktär
+
+## Kodstil
+- Använd TypeScript för typning
+- Komponentbaserad struktur i `src/components/`
+- Tailwind CSS för styling (utility-first)
+- Framer Motion för animationer
+- Följ Next.js App Router konventioner
+
+## Viktiga filer
+- `sajtstudio_roadmap.txt` - Detaljerad projektplan och designvision
+- `PROJECT_DOCUMENTATION.md` - Fullständig projektdokumentation
+- `TEMPLATE_GUIDE.md` - Mall-struktur och filosofi
+- `INPUT_DOC_README.md` - Guide för INPUT_DOC_FOR_CURSOR
+- `render.yaml` - Render deployment konfiguration
+- `src/config/designTokens.ts` - Design tokens (färger, typsnitt, spacing)
+- `src/config/siteConfig.ts` - Site metadata och konfiguration
+- `src/templates/` - Mallar för sidor och sektioner
+- `src/app/` - Next.js App Router sidor
+- `src/components/` - Återanvändbara React-komponenter
+
+## Design System
+- **Färger**: Definierade i `src/config/designTokens.ts` - ändra där för att uppdatera hela sajten
+- **Typsnitt**: Inter från Google Fonts, responsiva storlekar med clamp()
+- **Spacing**: 8px baserat system (xs, sm, md, lg, xl, 2xl, 3xl, 4xl)
+- **Animationer**: Använd Framer Motion för alla interaktiva effekter
+
+## Template System
+- **PageTemplate**: Använd för nya sidor - ger konsistent struktur med HeaderNav och Footer
+- **SectionTemplate**: Använd för sektioner - ger konsistent padding och animationer
+- **ComponentTemplate**: Använd för komponenter - ger konsistent struktur och animationer
+- Se `TEMPLATE_GUIDE.md` för detaljerad guide
+
+## INPUT_DOC_FOR_CURSOR Workflow
+När användaren lägger filer i `INPUT_DOC_FOR_CURSOR/`:
+1. **Läs filen** från `INPUT_DOC_FOR_CURSOR/`
+2. **Identifiera typ** med `src/lib/inputDocProcessor.ts` funktioner
+3. **Flytta filen** till rätt plats:
+   - Bilder → `public/images/[kategori]/`
+   - Loggor → `public/logos/[kategori]/`
+   - Texter → `src/config/content/`
+   - JSON → `src/data/`
+4. **Uppdatera referenser** i relevanta komponenter om nödvändigt
+5. **Använd `src/lib/assetManager.ts`** för att generera korrekta sökvägar
+
+### Filtyper och destinationsmappar:
+- `hero-*.jpg` → `public/images/hero/`
+- `portfolio-*.png` → `public/images/portfolio/`
+- `logo-client-*.svg` → `public/logos/clients/`
+- `logo-*.svg` → `public/logos/sajtstudio/`
+- `*.txt`, `*.md` → `src/config/content/`
+- `*.json` → `src/data/`
+
+## Best Practices
+1. **Använd Design Tokens**: Importera från `@/config/designTokens.ts` istället för hårdkodade värden
+2. **Använd Templates**: Använd PageTemplate, SectionTemplate eller ComponentTemplate när du skapar nya sidor/sektioner
+3. **Separera Innehåll**: Lägg textinnehåll i `src/config/content/` istället för att hårdkoda i komponenter
+4. **Path Aliases**: Använd `@/` för imports från `src/`
+5. **Responsiv Design**: Bygg mobil-först med Tailwind breakpoints
+6. **TypeScript**: Använd strikt typing för alla props och funktioner
+7. **Komponenter**: Varje komponent i egen fil, 'use client' om hooks/animationer behövs
+
+## När användaren lägger filer i INPUT_DOC_FOR_CURSOR
+1. Läsa filen från `INPUT_DOC_FOR_CURSOR/`
+2. Använd `identifyFileType()` från `src/lib/inputDocProcessor.ts` för att identifiera typ
+3. Använd `getDestinationPath()` för att få korrekt destinationssökväg
+4. Flytta/kopiera filen till destinationsmappen
+5. Uppdatera relevanta komponenter för att använda den nya filen
+6. Använd `getImagePath()` eller `getLogoSrc()` från `src/lib/assetManager.ts` för att generera korrekta sökvägar
+
+## Deployment
+- Render via `render.yaml`
+- Health check på `/api/health`
+- PORT sätts automatiskt av Render
+
+## När du lägger till ny funktionalitet
+1. Kolla `PROJECT_DOCUMENTATION.md` för struktur och best practices
+2. Kolla `TEMPLATE_GUIDE.md` för mall-användning
+3. Använd design tokens från `src/config/designTokens.ts`
+4. Följ namngivningskonventioner (PascalCase för komponenter)
+5. Uppdatera `siteConfig.ts` om navigation eller metadata ändras
+6. Testa responsiv design på mobil och desktop
+7. Separera innehåll från komponenter när möjligt
+
+

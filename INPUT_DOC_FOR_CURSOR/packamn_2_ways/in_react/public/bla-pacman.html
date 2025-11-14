@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blå Pacman</title>
+  <style>
+    :root{
+      --bg1:#071427; /* mörk marin */
+      --bg2:#0b1e3b; /* djupblå */
+      --wall:#1b6ffd; /* neonblå väggar */
+      --wallGlow:#69a7ff;
+      --pac:#5fd3ff;  /* pacman – ljusblå */
+      --ghost:#2ea1ff;/* spöke – mellanförg */
+      --pellet:#e9f2ff;/* vita pellets med blått skimmer */
+      --ui:#a7c7ff;
+      --uiDim:#7da6f8;
+      --danger:#ff8aa1;
+      --win:#89ffcf;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      background: radial-gradient(1200px 800px at 70% 10%, var(--bg2), var(--bg1));
+      color: var(--ui);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    .wrap{
+      max-width: 920px;
+      margin: 24px auto 40px;
+      padding: 16px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 14px;
+    }
+    .title{
+      font-weight: 800;
+      letter-spacing: .4px;
+      font-size: clamp(18px, 4vw, 26px);
+      color:#d6e5ff;
+      text-shadow: 0 0 6px rgba(105,167,255,.35);
+    }
+    .panel{
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+      background: linear-gradient(180deg, rgba(28,55,108,.35), rgba(7,20,39,.6));
+      border:1px solid rgba(121,165,255,.25);
+      border-radius: 16px;
+      padding: 10px 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 24px rgba(21,79,199,.2);
+    }
+    .stat{display:flex; align-items:center; gap:8px; font-weight:700}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--pellet); box-shadow:0 0 8px var(--wallGlow)}
+    .life{width:16px;height:16px;border-radius:50%;background:var(--pac); box-shadow:0 0 8px var(--wallGlow)}
+    .btn{
+      border:1px solid rgba(121,165,255,.35);
+      background:linear-gradient(180deg, rgba(17,56,139,.45), rgba(7,20,39,.7));
+      color:#eaf2ff; font-weight:700; letter-spacing:.3px;
+      border-radius:14px; padding:8px 12px; cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35), inset 0 0 18px rgba(60,120,255,.15);
+      transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .btn:hover{transform: translateY(-1px)}
+    .btn:active{transform: translateY(0)}
+
+    .stage{
+      position:relative;
+      width:min(92vw, 880px);
+      aspect-ratio: 28 / 32; /* responsivt */
+      margin: 14px auto;
+      border-radius: 16px;
+      overflow:hidden;
+      border:1px solid rgba(121,165,255,.25);
+      box-shadow: 0 14px 50px rgba(0,0,0,.5), inset 0 0 36px rgba(33,101,255,.2);
+      background: radial-gradient(900px 600px at 50% 10%, rgba(21,59,129,.25), rgba(4,12,26,.7));
+    }
+    canvas{ width:100%; height:100%; display:block; }
+
+    .overlay{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      pointer-events:none; text-align:center; padding: 18px;
+    }
+    .overlay .box{
+      background:linear-gradient(180deg, rgba(16,36,78,.7), rgba(6,18,38,.85));
+      border:1px solid rgba(121,165,255,.4);
+      border-radius: 18px; padding: 16px 18px; max-width: 700px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.55), inset 0 0 28px rgba(60,120,255,.15);
+    }
+    .overlay h2{margin:0 0 8px; font-size: clamp(18px, 4vw, 24px); color:#e6f0ff}
+    .overlay p{margin:6px 0; color:#c7dbff}
+    .kbd{display:inline-block; padding:2px 8px; border-radius:6px; border:1px solid rgba(121,165,255,.4); background: rgba(16,36,78,.65)}
+
+    /* Pekvänliga kontroller (syns bara under 900px bredder) */
+    .touch{
+      position:absolute; inset:auto 0 8px 0; display:none; justify-content:center; gap:12px;
+      pointer-events:auto;
+    }
+    @media (max-width: 900px){ .touch{display:flex} }
+    .pad{ display:grid; grid-template-columns:repeat(3,48px); grid-template-rows:repeat(3,48px); gap:6px; }
+    .pad button{
+      width:48px; height:48px; border-radius:12px; border:1px solid rgba(121,165,255,.35);
+      background:linear-gradient(180deg, rgba(18,52,115,.6), rgba(6,18,38,.85)); color:#eaf2ff; font-weight:800;
+      box-shadow: inset 0 0 16px rgba(60,120,255,.2), 0 8px 18px rgba(0,0,0,.35);
+    }
+    .pad button:active{transform:translateY(1px)}
+    .empty{visibility:hidden}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">🟦 Blå Pacman – lätt HTML5-version</div>
+      <div class="panel" id="hud">
+        <div class="stat"><span class="dot"></span> <span id="score">0</span></div>
+        <div class="stat" title="Liv">
+          <span class="life" id="life1"></span>
+          <span class="life" id="life2"></span>
+          <span class="life" id="life3"></span>
+        </div>
+        <button class="btn" id="btnPause">Pausa</button>
+        <button class="btn" id="btnReset">Starta om</button>
+      </div>
+    </header>
+
+    <div class="stage">
+      <canvas id="game" width="560" height="640" aria-label="Blå Pacman spelcanvas"></canvas>
+      <div class="overlay" id="overlay" aria-live="polite">
+        <div class="box">
+          <h2 id="ovTitle">Klara, färdiga…</h2>
+          <p>Pilar för att styra. <span class="kbd">P</span> pausa, <span class="kbd">R</span> starta om.</p>
+          <p>Ät alla prickar och undvik spöket. Lycka till!</p>
+        </div>
+      </div>
+      <div class="touch">
+        <div class="pad">
+          <button class="empty"></button>
+          <button data-dir="up">▲</button>
+          <button class="empty"></button>
+          <button data-dir="left">◀</button>
+          <button class="empty"></button>
+          <button data-dir="right">▶</button>
+          <button class="empty"></button>
+          <button data-dir="down">▼</button>
+          <button class="empty"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // --- Blå Pacman (lätt) ---
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const scoreEl = document.getElementById('score');
+  const btnPause = document.getElementById('btnPause');
+  const btnReset = document.getElementById('btnReset');
+
+  const COLS = 28; const ROWS = 32; const TILE = 20;
+
+  const M = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1,2,2,2,2,2,1],
+    [1,2,1,1,1,2,2,1,2,1,1,1,2,2,2,2,1,1,1,2,2,1,2,1,1,1,2,1],
+    [1,2,2,2,1,2,2,2,2,2,2,1,2,1,1,2,1,2,2,2,2,2,2,1,2,2,2,1],
+    [1,2,1,2,1,1,1,2,1,1,2,1,2,1,1,2,1,2,1,1,1,2,1,2,1,2,2,1],
+    [1,2,1,2,2,2,2,2,1,2,2,1,2,2,2,2,1,2,2,1,2,2,2,2,1,2,1,1],
+    [1,2,1,1,1,1,1,2,1,1,0,1,1,1,1,1,1,1,0,1,1,2,1,1,1,2,1,1],
+    [1,2,2,2,2,2,2,2,2,2,0,2,2,0,0,2,2,2,0,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,1,1,1,2,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,2,1],
+    [1,2,2,2,2,2,2,2,1,2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,1,2,1],
+    [1,2,1,1,1,1,1,2,1,2,1,1,1,3,3,1,1,1,1,2,1,1,1,1,2,1,2,1],
+    [1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,1],
+    [1,1,1,1,1,1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1],
+    [1,0,0,0,0,0,2,2,1,2,2,2,1,0,0,0,1,2,2,2,1,2,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,1,2,2,0,0,2,2,1,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1,1,1,2,1],
+    [1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,1],
+    [1,2,1,1,1,1,1,2,1,2,1,1,1,3,3,1,1,1,1,2,1,1,1,1,2,1,2,1],
+    [1,2,2,2,2,2,2,2,1,2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,1,2,1],
+    [1,1,1,1,1,1,1,1,1,2,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,2,1],
+    [1,2,2,2,2,2,2,2,2,2,0,2,2,0,0,2,2,2,0,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,2,2,1,2,1,1,1,2,2,2,2,1,1,1,2,2,1,2,1,1,1,2,1],
+    [1,2,2,2,1,2,2,2,2,2,2,1,2,1,1,2,1,2,2,2,2,2,2,1,2,2,2,1],
+    [1,2,1,2,1,1,1,2,1,1,2,1,2,1,1,2,1,2,1,1,1,2,1,2,1,2,2,1],
+    [1,2,1,2,2,2,2,2,1,2,2,1,2,2,2,2,1,2,2,1,2,2,2,2,1,2,1,1],
+    [1,2,1,1,1,1,1,2,1,1,0,1,1,1,1,1,1,1,0,1,1,2,1,1,1,2,1,1],
+    [1,2,2,2,2,2,2,2,2,2,0,2,2,0,0,2,2,2,0,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  ];
+
+  let totalPellets = 0;
+  for (let r=0; r<ROWS; r++){
+    for (let c=0; c<COLS; c++){
+      if (M[r][c] === 2) totalPellets++;
+    }
+  }
+
+  const state = { score: 0, lives: 3, paused: true, over: false, win: false };
+
+  const startPac = {c: 14, r: 21};
+  const startGhost = {c: 14, r: 13};
+
+  const pac = { x: startPac.c * TILE + TILE/2, y: startPac.r * TILE + TILE/2, dir: {x:0, y:0}, next:{x:0, y:0}, speed: 85, radius: 7.8, mouth: 0 };
+  const ghost = { x: startGhost.c * TILE + TILE/2, y: startGhost.r * TILE + TILE/2, dir: {x:0, y:0}, speed: 72, radius: 8.3, scatter:false, cool:0 };
+
+  function isWall(c, r){
+    if (r<0 || r>=ROWS) return true;
+    if (c<0) c = COLS-1; if (c>=COLS) c = 0;
+    return M[r][c] === 1;
+  }
+  function pelletAt(c,r){ return M[r]?.[c] === 2 }
+
+  function resetPositions(){
+    pac.x = startPac.c*TILE + TILE/2; pac.y = startPac.r*TILE + TILE/2; pac.dir={x:0,y:0}; pac.next={x:0,y:0};
+    ghost.x = startGhost.c*TILE + TILE/2; ghost.y = startGhost.r*TILE + TILE/2; ghost.dir={x:0,y:0}; ghost.cool=60;
+  }
+
+  function clampTunnel(x){
+    const c = Math.floor(x / TILE);
+    if (c < 0) return (COLS-1) * TILE + (x%TILE);
+    if (c >= COLS) return (x%TILE);
+    return x;
+  }
+
+  function attemptTurn(entity, desired){
+    const cx = Math.round(entity.x / TILE) * TILE + TILE/2;
+    const cy = Math.round(entity.y / TILE) * TILE + TILE/2;
+    const dx = Math.abs(entity.x - cx);
+    const dy = Math.abs(entity.y - cy);
+    const aligned = dx < 1.5 && dy < 1.5;
+    if (!aligned) return false;
+
+    const tc = Math.floor(cx / TILE) + desired.x;
+    const tr = Math.floor(cy / TILE) + desired.y;
+    if (!isWall(tc, tr)){
+      entity.x = cx; entity.y = cy;
+      entity.dir = {x:desired.x, y:desired.y};
+      return true;
+    }
+    return false;
+  }
+
+  function availableDirs(c,r, forbid){
+    const dirs = [];
+    const options = [ {x:1,y:0}, {x:-1,y:0}, {x:0,y:1}, {x:0,y:-1} ];
+    for (const d of options){
+      if (forbid && d.x === -forbid.x && d.y === -forbid.y) continue;
+      if (!isWall(c + d.x, r + d.y)) dirs.push(d);
+    }
+    return dirs;
+  }
+
+  function chooseGhostDir(){
+    const c = Math.floor(ghost.x / TILE);
+    const r = Math.floor(ghost.y / TILE);
+    const dirs = availableDirs(c, r, ghost.dir);
+    if (dirs.length === 0) return;
+
+    if (ghost.cool > 0){ ghost.cool--; return; }
+
+    const target = {x: pac.x, y: pac.y};
+    dirs.sort((a,b)=>{
+      const da = Math.abs((c+a.x)*TILE + TILE/2 - target.x) + Math.abs((r+a.y)*TILE + TILE/2 - target.y);
+      const db = Math.abs((c+b.x)*TILE + TILE/2 - target.x) + Math.abs((r+b.y)*TILE + TILE/2 - target.y);
+      return da - db;
+    });
+    const pick = Math.random() < 0.7 ? dirs[0] : dirs[Math.floor(Math.random()*dirs.length)];
+    ghost.dir = {x: pick.x, y: pick.y};
+  }
+
+  const keys = {ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};
+  window.addEventListener('keydown', (e)=>{
+    if (e.key === 'p' || e.key === 'P'){ togglePause(); return; }
+    if (e.key === 'r' || e.key === 'R'){ resetGame(); return; }
+    if (state.over) return;
+    if (e.key in keys){ e.preventDefault(); setDesiredFromKey(e.key); }
+  }, {passive:false});
+  function setDesiredFromKey(k){
+    if (k==='ArrowUp') pac.next={x:0,y:-1};
+    if (k==='ArrowDown') pac.next={x:0,y:1};
+    if (k==='ArrowLeft') pac.next={x:-1,y:0};
+    if (k==='ArrowRight') pac.next={x:1,y:0};
+  }
+
+  document.querySelectorAll('.pad [data-dir]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const d = btn.dataset.dir;
+      if (d==='up') pac.next={x:0,y:-1};
+      if (d==='down') pac.next={x:0,y:1};
+      if (d==='left') pac.next={x:-1,y:0};
+      if (d==='right') pac.next={x:1,y:0};
+      state.paused=false; overlay.style.display='none';
+    });
+  });
+
+  const btnPause = document.getElementById('btnPause');
+  const btnReset = document.getElementById('btnReset');
+  btnPause.addEventListener('click', togglePause);
+  btnReset.addEventListener('click', resetGame);
+
+  function togglePause(){
+    if (state.over) return;
+    state.paused = !state.paused;
+    overlay.style.display = state.paused ? 'flex' : 'none';
+    ovTitle.textContent = state.paused ? 'Paus' : '';
+  }
+  function resetGame(){
+    for (let r=0; r<ROWS; r++){
+      for (let c=0; c<COLS; c++){
+        if (M[r][c]===0) continue;
+        if (M[r][c]!==1) M[r][c]=2;
+      }
+    }
+    M[10][13]=3; M[10][14]=3; M[18][13]=3; M[18][14]=3;
+    state.score=0; scoreEl.textContent='0';
+    state.lives=3; updateLives();
+    state.over=false; state.win=false; state.paused=true;
+    overlay.style.display='flex'; ovTitle.textContent='Klara, färdiga…';
+    resetPositions();
+  }
+  function updateLives(){
+    for (let i=1;i<=3;i++){
+      document.getElementById('life'+i).style.opacity = i<=state.lives ? 1 : .2;
+    }
+  }
+
+  function eatPellet(){
+    const c = Math.floor(pac.x / TILE);
+    const r = Math.floor(pac.y / TILE);
+    if (pelletAt(c,r)){
+      M[r][c]=0;
+      state.score += 10; scoreEl.textContent = state.score;
+      totalPellets--;
+      if (totalPellets<=0){ youWin(); }
+    }
+    if (M[r][c]===3){
+      M[r][c]=0; state.score += 50; scoreEl.textContent=state.score;
+      ghost.scatter=true; ghostScatterTimer=360;
+    }
+  }
+
+  function youWin(){
+    state.win=true; state.over=true; state.paused=true;
+    overlay.style.display='flex';
+    ovTitle.textContent='Du vann! 🟦';
+  }
+  function youDied(){
+    state.lives--;
+    updateLives();
+    if (state.lives<=0){
+      state.over=true; state.paused=true;
+      overlay.style.display='flex';
+      ovTitle.textContent='Game over';
+    } else {
+      resetPositions();
+      state.paused=true; overlay.style.display='flex'; ovTitle.textContent='Aj! Försök igen…';
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.shadowColor = getComputedStyle(document.documentElement).getPropertyValue('--wallGlow').trim();
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--wall').trim();
+    for (let r=0; r<ROWS; r++){
+      for (let c=0; c<COLS; c++){
+        if (M[r][c]===1){
+          const x = c*TILE, y = r*TILE;
+          roundRect(ctx, x+2, y+2, TILE-4, TILE-4, 6, true);
+        }
+      }
+    }
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--pellet').trim();
+    for (let r=0; r<ROWS; r++){
+      for (let c=0; c<COLS; c++){
+        if (M[r][c]===2){
+          const x = c*TILE + TILE/2, y = r*TILE + TILE/2;
+          ctx.beginPath(); ctx.arc(x,y,2,0,Math.PI*2); ctx.fill();
+        } else if (M[r][c]===3){
+          const x = c*TILE + TILE/2, y = r*TILE + TILE/2;
+          ctx.beginPath(); ctx.arc(x,y,4.2,0,Math.PI*2); ctx.fill();
+        }
+      }
+    }
+
+    drawPac();
+    drawGhost();
+  }
+
+  function drawPac(){
+    const P = pac;
+    const col = getComputedStyle(document.documentElement).getPropertyValue('--pac').trim();
+    P.mouth += 0.2; const m = (Math.sin(P.mouth)*0.3+0.7) * Math.PI/6;
+    const angle = Math.atan2(P.dir.y, P.dir.x);
+    const facing = isNaN(angle) ? 0 : angle;
+
+    ctx.fillStyle = col; ctx.strokeStyle = 'rgba(233,242,255,.9)'; ctx.lineWidth=1.5; ctx.shadowColor='rgba(105,167,255,.7)'; ctx.shadowBlur=10;
+    ctx.beginPath();
+    ctx.moveTo(P.x, P.y);
+    ctx.arc(P.x, P.y, P.radius, facing+m, facing-m, false);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur=0;
+  }
+
+  function drawGhost(){
+    const G = ghost;
+    const body = getComputedStyle(document.documentElement).getPropertyValue('--ghost').trim();
+    ctx.fillStyle = body; ctx.strokeStyle='rgba(233,242,255,.8)'; ctx.lineWidth=1; ctx.shadowColor='rgba(105,167,255,.7)'; ctx.shadowBlur=10;
+
+    const w = G.radius*2, h = G.radius*2.2;
+    const x = G.x - w/2, y = G.y - h/2;
+    ctx.beginPath();
+    ctx.moveTo(x, y+h);
+    ctx.quadraticCurveTo(x, y, x+w/2, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+h);
+    for (let i=0;i<4;i++){
+      ctx.quadraticCurveTo(x+w - i*(w/4) - w/8, y+h+4*(i%2?1:-1), x+w - i*(w/4) - w/4, y+h);
+    }
+    ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.shadowBlur=0;
+
+    ctx.fillStyle = '#e9f2ff';
+    const ex = G.x + (G.dir.x*2); const ey = G.y + (G.dir.y*2);
+    ctx.beginPath(); ctx.arc(ex-3, ey-1, 2.6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex+3, ey-1, 2.6, 0, Math.PI*2); ctx.fill();
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    if (fill) ctx.fill(); else ctx.stroke();
+  }
+
+  let last = 0; let ghostScatterTimer = 0;
+  function loop(ts){
+    const dt = Math.min(32, ts - last) / 1000;
+    last = ts;
+
+    if (!state.paused && !state.over){
+      step(dt);
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function step(dt){
+    if (pac.next.x !== pac.dir.x || pac.next.y !== pac.dir.y){
+      attemptTurn(pac, pac.next);
+    }
+
+    moveEntity(pac, dt);
+    pac.x = clampTunnel(pac.x);
+
+    eatPellet();
+
+    if (Math.random() < 0.15) chooseGhostDir();
+    if (ghostScatterTimer>0){ ghostScatterTimer--; ghost.speed=58; } else { ghost.speed=72; ghost.scatter=false; }
+
+    moveEntity(ghost, dt);
+    ghost.x = clampTunnel(ghost.x);
+
+    const dx = pac.x - ghost.x, dy = pac.y - ghost.y; const dist = Math.hypot(dx,dy);
+    if (dist < (pac.radius + ghost.radius - 1)){
+      if (ghost.scatter){
+        state.score += 200; scoreEl.textContent=state.score; ghost.cool = 90;
+        ghost.x = startGhost.c*TILE + TILE/2; ghost.y = startGhost.r*TILE + TILE/2; ghost.dir={x:0,y:0};
+      } else {
+        youDied();
+      }
+    }
+  }
+
+  function moveEntity(ent, dt){
+    let nx = ent.x + ent.dir.x * ent.speed * dt;
+    let ny = ent.y + ent.dir.y * ent.speed * dt;
+
+    const aheadC = Math.floor((nx + Math.sign(ent.dir.x)*ent.radius) / TILE);
+    const aheadR = Math.floor((ny + Math.sign(ent.dir.y)*ent.radius) / TILE);
+    const curC = Math.floor(ent.x / TILE), curR = Math.floor(ent.y / TILE);
+
+    if (ent.dir.x!==0){
+      if (isWall(aheadC, curR)){
+        ent.x = curC*TILE + TILE/2; ent.dir.x = 0;
+      } else {
+        ent.x = nx;
+      }
+    } else if (ent.dir.y!==0){
+      if (isWall(curC, aheadR)){
+        ent.y = curR*TILE + TILE/2; ent.dir.y = 0;
+      } else {
+        ent.y = ny;
+      }
+    }
+  }
+
+  function init(){
+    totalPellets = 0; for (let r=0;r<ROWS;r++){ for (let c=0;c<COLS;c++){ if (M[r][c]===2) totalPellets++; }}
+    resetPositions(); updateLives();
+    requestAnimationFrame(loop);
+  }
+  init();
+
+  overlay.addEventListener('click', ()=>{ if (!state.over){ state.paused=false; overlay.style.display='none'; }});
+
+  </script>
+</body>
+</html>

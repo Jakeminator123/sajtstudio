@@ -1,0 +1,24 @@
+# robots.txt for sajtstudio.se
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+Crawl-delay: 1
+
+# Block sensitive directories
+Disallow: /api/
+Disallow: /_next/
+Disallow: /scripts/
+
+# Sitemap location
+Sitemap: https://www.sajtstudio.se/sitemap.xml
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
