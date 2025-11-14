@@ -486,7 +486,7 @@ export default function HeroSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
+      className="min-h-[calc(100vh-80px)] flex items-center justify-center relative overflow-hidden bg-black z-10 pt-20"
       style={{
         position: 'relative',
         transform: shouldReduceMotion

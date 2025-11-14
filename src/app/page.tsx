@@ -71,7 +71,7 @@ export default function Home() {
         <ScrollIndicator />
 
         {/* About section with word reveal */}
-        <div id="om-oss" className="content-visibility-auto">
+        <div id="om-oss" className="content-visibility-auto scroll-mt-20">
           <AboutSection />
         </div>
 
@@ -81,7 +81,7 @@ export default function Home() {
         </div>
 
         {/* Services with modals */}
-        <div id="tjanster" className="content-visibility-auto">
+        <div id="tjanster" className="content-visibility-auto scroll-mt-20">
           <ServicesSection />
         </div>
 
@@ -98,12 +98,12 @@ export default function Home() {
         </div>
 
         {/* Process steps */}
-        <div id="process" className="content-visibility-auto">
+        <div id="process" className="content-visibility-auto scroll-mt-20">
           <ProcessSection />
         </div>
 
         {/* Testimonials */}
-        <div id="omdomen" className="content-visibility-auto">
+        <div id="omdomen" className="content-visibility-auto scroll-mt-20">
           <TestimonialsSection />
         </div>
 
