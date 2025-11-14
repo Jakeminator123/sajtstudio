@@ -1,27 +1,35 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 
 export default function TechShowcaseSection() {
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const [showTechText, setShowTechText] = useState(false);
   const [showPacman, setShowPacman] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [whiteFadeOut, setWhiteFadeOut] = useState(false);
 
   useEffect(() => {
-    // Show text after 0.5s
-    const textTimer = setTimeout(() => setShowTechText(true), 500);
-    
-    // Show Pacman after 2s
-    const pacmanTimer = setTimeout(() => setShowPacman(true), 2000);
-    
-    return () => {
-      clearTimeout(textTimer);
-      clearTimeout(pacmanTimer);
-    };
-  }, []);
+    if (isInView) {
+      // Start white fade out immediately when section comes into view
+      setWhiteFadeOut(true);
+      
+      // Show text after 0.5s
+      const textTimer = setTimeout(() => setShowTechText(true), 500);
+      
+      // Show Pacman after 2s
+      const pacmanTimer = setTimeout(() => setShowPacman(true), 2000);
+      
+      return () => {
+        clearTimeout(textTimer);
+        clearTimeout(pacmanTimer);
+      };
+    }
+  }, [isInView]);
 
   useEffect(() => {
     // Countdown when Pacman shows and game hasn't started yet
@@ -45,25 +53,27 @@ export default function TechShowcaseSection() {
 
   return (
     <motion.section 
+      ref={sectionRef}
       className="relative min-h-screen overflow-hidden"
       initial={{ backgroundColor: "#ffffff" }}
-      animate={{ backgroundColor: "#ffffff" }}
+      animate={{ backgroundColor: isInView ? "#ffffff" : "#ffffff" }}
       style={{ backgroundColor: "#ffffff" }}
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
+      {/* This white overlay fades out when section comes into view */}
       <motion.div 
-        className="absolute inset-0 bg-white z-0"
+        className="absolute inset-0 bg-white z-[10]"
         initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        transition={{ duration: 3, delay: 1 }}
+        animate={{ opacity: whiteFadeOut ? 0 : 1 }}
+        transition={{ duration: 2, ease: "easeOut" }}
       />
       
       {/* Split screen background - fades in as white fades out */}
       <motion.div 
-        className="absolute inset-0"
+        className="absolute inset-0 z-0"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 2, delay: 1.5 }}
+        animate={{ opacity: isInView ? 1 : 0 }}
+        transition={{ duration: 2, delay: 0.5 }}
       >
         <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-50 to-gray-100">
           {/* Technical/boring side */}
@@ -111,10 +121,10 @@ export default function TechShowcaseSection() {
         </div>
       </motion.div>
 
-      {/* Content */}
+      {/* Content - only show when section is in view */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
         <AnimatePresence mode="wait">
-          {showTechText && !showPacman && (
+          {isInView && showTechText && !showPacman && (
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -144,7 +154,7 @@ export default function TechShowcaseSection() {
             </motion.div>
           )}
 
-          {showPacman && (
+          {isInView && showPacman && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
