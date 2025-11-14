@@ -634,9 +634,29 @@ export default function TechShowcaseSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-20 leading-tight">
-            <span className="text-gray-800">Så skapar vi </span>
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+          <h3 
+            className="text-3xl md:text-4xl lg:text-5xl font-black text-center mb-20 leading-tight"
+            style={{
+              fontFamily: "'Courier New', Courier, monospace",
+              imageRendering: 'pixelated',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+            }}
+          >
+            <span 
+              style={{
+                color: '#000',
+                textShadow: '3px 3px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff, 0px 3px 0px #fff, 3px 0px 0px #fff, -3px 0px 0px #fff, 0px -3px 0px #fff',
+              }}
+            >
+              Så skapar vi{' '}
+            </span>
+            <span 
+              style={{
+                color: '#FF0000', // Super Mario red
+                textShadow: '3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0px 3px 0px #000, 3px 0px 0px #000, -3px 0px 0px #000, 0px -3px 0px #000',
+              }}
+            >
               animationer som betyder något
             </span>
           </h3>
@@ -868,7 +888,7 @@ export default function TechShowcaseSection() {
             </motion.div>
           </div>
 
-          {/* Tech stack - improved design */}
+          {/* Tech stack - 8-bit Super Mario style */}
           <motion.div 
             className="mt-20 text-center"
             initial={{ opacity: 0 }}
@@ -876,7 +896,19 @@ export default function TechShowcaseSection() {
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
           >
-            <p className="text-xl md:text-2xl text-gray-700 font-semibold mb-6">Vårt animations-arsenal:</p>
+            <p 
+              className="text-lg md:text-xl mb-6 font-bold"
+              style={{
+                fontFamily: "'Courier New', Courier, monospace",
+                color: '#000',
+                textShadow: '2px 2px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff',
+                imageRendering: 'pixelated',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Vårt animations-arsenal:
+            </p>
             <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               {[
                 "Framer Motion",
@@ -890,12 +922,37 @@ export default function TechShowcaseSection() {
               ].map((tech, index) => (
                 <motion.span
                   key={tech}
-                  className="px-5 py-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full text-sm md:text-base font-semibold text-gray-800 shadow-md hover:shadow-lg transition-all"
+                  className="px-4 py-2 text-sm md:text-base font-bold"
+                  style={{
+                    background: index % 2 === 0 ? '#FFD700' : '#0066CC', // Alternating gold and blue
+                    color: index % 2 === 0 ? '#000' : '#FFF',
+                    border: '3px solid #000',
+                    fontFamily: "'Courier New', Courier, monospace",
+                    imageRendering: 'pixelated',
+                    textShadow: index % 2 === 0 
+                      ? '1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff'
+                      : '1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
+                    boxShadow: `
+                      inset -2px -2px 0 rgba(0,0,0,0.3),
+                      inset 2px 2px 0 rgba(255,255,255,0.3),
+                      4px 4px 0 rgba(0,0,0,0.5)
+                    `,
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                  }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.6 + index * 0.05 }}
-                  whileHover={{ scale: 1.1, backgroundColor: "#f3f4f6", borderColor: "#d1d5db" }}
+                  whileHover={{ 
+                    scale: 1.1,
+                    y: -4,
+                    boxShadow: `
+                      inset -2px -2px 0 rgba(0,0,0,0.3),
+                      inset 2px 2px 0 rgba(255,255,255,0.3),
+                      6px 6px 0 rgba(0,0,0,0.5)
+                    `,
+                  }}
                 >
                   {tech}
                 </motion.span>
