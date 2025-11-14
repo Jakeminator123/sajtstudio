@@ -32,13 +32,13 @@ export const uspContent = {
       description: 'Du behöver inte vara låst. Våra hemsidor är byggda så att du enkelt kan uppdatera innehåll, lägga till sidor eller ändra design när behovet uppstår.',
     },
   ],
-  
+
   cta: {
     text: 'Låt oss bygga din nästa hemsida',
     buttonText: 'Boka konsultation',
-    href: '/contact',
+    href: '/starta-projekt',
   },
-  
+
   tagline: 'Hemsidor som betyder något. Byggda med data, designade för resultat.',
 } as const;
 
