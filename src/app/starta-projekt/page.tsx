@@ -124,6 +124,7 @@ export default function StartaProjektPage() {
               loop
               muted
               playsInline
+              preload="auto"
               className="w-full h-full object-cover"
               style={{
                 filter: 'grayscale(100%) contrast(1.2)',

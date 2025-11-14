@@ -149,6 +149,8 @@ export default function RootLayout({
         
         {/* Preload additional resources for smooth scrolling experience */}
         <link rel="preload" href="/images/animations/hero-animation.gif" as="image" type="image/gif" />
+        {/* Preload noir video for starta-projekt page */}
+        <link rel="preload" href="/videos/noir_hero.mp4" as="video" type="video/mp4" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([
