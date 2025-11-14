@@ -67,48 +67,65 @@ export default function TechShowcaseSection() {
 
   // Prevent page scroll when playing Pacman game (arrow keys)
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying) {
+      // Re-enable scroll when game stops
+      document.body.style.overflow = '';
+      return;
+    }
+
+    // Disable body scroll completely when game is active
+    document.body.style.overflow = 'hidden';
 
     const preventScroll = (e: KeyboardEvent) => {
       // Arrow keys and Space - prevent page scroll when game is active
-      // These keys should only control the game, not scroll the page
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.key)) {
-        // Check if iframe or game container is focused
-        const activeElement = document.activeElement;
-        const isGameFocused = activeElement?.tagName === 'IFRAME' || 
-                              pacmanRef.current?.contains(activeElement) ||
-                              activeElement?.closest('iframe');
-        
-        // Always prevent page scroll when game is playing
-        // The iframe will handle the key events for the game
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
+        return false;
       }
     };
 
-    // Prevent wheel scroll when hovering over game area
+    // Prevent all wheel scroll when game is active
     const preventWheelScroll = (e: WheelEvent) => {
-      if (pacmanRef.current?.contains(e.target as Node)) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
     };
 
     // Prevent touch scroll on mobile when game is active
     const preventTouchMove = (e: TouchEvent) => {
-      if (pacmanRef.current?.contains(e.target as Node)) {
-        e.preventDefault();
-      }
+      e.preventDefault();
+      return false;
     };
 
-    document.addEventListener('keydown', preventScroll, { passive: false });
-    document.addEventListener('wheel', preventWheelScroll, { passive: false });
-    document.addEventListener('touchmove', preventTouchMove, { passive: false });
+    // Prevent scroll on game container
+    const preventGameScroll = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    window.addEventListener('keydown', preventScroll, { passive: false, capture: true });
+    window.addEventListener('wheel', preventWheelScroll, { passive: false, capture: true });
+    window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true });
+    window.addEventListener('scroll', preventGameScroll, { passive: false, capture: true });
+
+    // Also prevent scroll on the game container itself
+    if (pacmanRef.current) {
+      pacmanRef.current.addEventListener('wheel', preventWheelScroll, { passive: false });
+      pacmanRef.current.addEventListener('touchmove', preventTouchMove, { passive: false });
+    }
 
     return () => {
-      document.removeEventListener('keydown', preventScroll);
-      document.removeEventListener('wheel', preventWheelScroll);
-      document.removeEventListener('touchmove', preventTouchMove);
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', preventScroll, { capture: true });
+      window.removeEventListener('wheel', preventWheelScroll, { capture: true });
+      window.removeEventListener('touchmove', preventTouchMove, { capture: true });
+      window.removeEventListener('scroll', preventGameScroll, { capture: true });
+      if (pacmanRef.current) {
+        pacmanRef.current.removeEventListener('wheel', preventWheelScroll);
+        pacmanRef.current.removeEventListener('touchmove', preventTouchMove);
+      }
     };
   }, [isPlaying]);
 
@@ -198,6 +215,7 @@ export default function TechShowcaseSection() {
         transition={{ duration: 2, delay: 0.5 }}
         style={{
           imageRendering: 'pixelated',
+          pointerEvents: 'none', // Don't interfere with game interactions
         }}
       >
         {/* Sky - Classic Super Mario blue */}
