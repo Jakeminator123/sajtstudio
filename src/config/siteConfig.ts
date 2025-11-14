@@ -29,7 +29,7 @@ export const siteConfig = {
     links: [
       { href: '/', label: 'Hem' },
       { href: '/portfolio', label: 'Portfolio' },
-      { href: '/contact', label: 'Kontakt' },
+      { href: '/starta-projekt', label: 'Kontakt' },
     ],
     // Ankarlänkar för startsidan
     homeAnchors: [

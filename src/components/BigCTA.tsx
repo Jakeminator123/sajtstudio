@@ -101,7 +101,7 @@ export default function BigCTA() {
             transition={{ delay: 1, duration: 0.6 }}
             className="pt-8"
           >
-            <Link href="/contact">
+            <Link href="/starta-projekt">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)" }}
                 whileTap={{ scale: 0.95 }}

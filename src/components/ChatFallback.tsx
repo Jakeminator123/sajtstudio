@@ -100,7 +100,7 @@ export default function ChatFallback() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Link
-                href="/contact"
+                href="/starta-projekt"
                 className="inline-flex items-center justify-center px-6 py-4 bg-black text-white font-semibold hover:bg-accent transition-colors"
               >
                 Kontakta oss

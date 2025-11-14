@@ -916,7 +916,7 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <MagneticButton
-              href="/contact"
+              href="/starta-projekt"
               className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}

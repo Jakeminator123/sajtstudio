@@ -59,7 +59,7 @@ export default function HeaderNav() {
       { href: "#process", label: "Process" },
       { href: "#omdomen", label: "Omdömen" },
       { href: "/portfolio", label: "Portfolio" },
-      { href: "/contact", label: "Kontakt" },
+      { href: "/starta-projekt", label: "Kontakt" },
     ]
     : siteConfig.nav.links;
 

@@ -58,7 +58,7 @@ export default function Footer() {
             {[
               { href: "/", label: "Hem" },
               { href: "/portfolio", label: "Portfolio" },
-              { href: "/contact", label: "Kontakt" },
+              { href: "/starta-projekt", label: "Kontakt" },
             ].map((link, index) => (
               <motion.div
                 key={link.href}
