@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import HeaderNav from '@/components/HeaderNav';
 import Footer from '@/components/Footer';
@@ -42,35 +42,74 @@ function Clock() {
       transition={{ duration: 0.6 }}
       className="text-center"
     >
-      <div className="text-6xl md:text-8xl font-bold mb-4 font-mono">
+      <div className="text-6xl md:text-8xl font-bold mb-4 font-mono text-white">
         {hours}:{minutes}
         <span className="text-4xl md:text-6xl text-gray-400">:{seconds}</span>
       </div>
-      <p className="text-gray-600">Stockholm, Sverige</p>
+      <p className="text-gray-400">Stockholm, Sverige</p>
     </motion.div>
   );
 }
 
 export default function ContactPage() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Set playback rate to 0.125 (8x slower) when video loads
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.125; // 1/8 speed = 8x slower
+    }
+  }, []);
+
   return (
     <>
       <HeaderNav />
-      <main>
-        <section className="min-h-screen py-24 md:py-32 bg-white">
-          <div className="container mx-auto px-6">
+      <main className="relative min-h-screen bg-black">
+        {/* Hero section with noir video background - 50% coverage */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Video background - covers 50% of screen */}
+          <div className="absolute inset-0 w-1/2 left-0 h-full overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{
+                filter: 'grayscale(100%) contrast(1.2)',
+              }}
+            >
+              <source src="/videos/noir_hero.mp4" type="video/mp4" />
+            </video>
+            {/* Dark overlay for noir effect */}
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
+
+          {/* Black background for other 50% */}
+          <div className="absolute inset-0 w-1/2 right-0 h-full bg-black" />
+
+          {/* Content overlay */}
+          <div className="relative z-10 container mx-auto px-6 py-24 md:py-32">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-16"
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16 max-w-4xl mx-auto"
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 text-white">
                 Kontakt
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto">
                 Låt oss prata om ditt nästa projekt
               </p>
             </motion.div>
+          </div>
+        </section>
+
+        {/* Contact form section */}
+        <section className="relative py-24 md:py-32 bg-black">
+          <div className="container mx-auto px-6">
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
               {/* Left side - Contact info */}
@@ -81,22 +120,22 @@ export default function ContactPage() {
                 className="space-y-8"
               >
                 <div>
-                  <h2 className="text-2xl font-bold mb-4">Kontaktinformation</h2>
-                  <div className="space-y-4">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-6 text-white">Kontaktinformation</h2>
+                  <div className="space-y-6">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">E-post</p>
+                      <p className="text-sm text-gray-400 mb-2">E-post</p>
                       <a 
                         href="mailto:hello@sajtstudio.se" 
-                        className="text-lg hover:text-accent transition-colors"
+                        className="text-lg md:text-xl text-white hover:text-accent transition-colors"
                       >
                         hello@sajtstudio.se
                       </a>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Telefon</p>
+                      <p className="text-sm text-gray-400 mb-2">Telefon</p>
                       <a 
                         href="tel:+46701234567" 
-                        className="text-lg hover:text-accent transition-colors"
+                        className="text-lg md:text-xl text-white hover:text-accent transition-colors"
                       >
                         +46 70 123 45 67
                       </a>
@@ -104,7 +143,7 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-gray-200">
+                <div className="pt-8 border-t border-gray-800">
                   <Clock />
                 </div>
               </motion.div>
@@ -114,9 +153,9 @@ export default function ContactPage() {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
-                className="bg-gray-50 p-8 rounded-lg"
+                className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 p-8 md:p-10 rounded-lg"
               >
-                <h2 className="text-2xl font-bold mb-6">Skicka meddelande</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-6 text-white">Skicka meddelande</h2>
                 <ContactForm />
               </motion.div>
             </div>
