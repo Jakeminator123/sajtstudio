@@ -61,11 +61,12 @@ export default function TechShowcaseSection() {
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
       {/* This white overlay fades out when section comes into view */}
+      {/* Ensures smooth transition from HeroAnimation white fade */}
       <motion.div 
         className="absolute inset-0 bg-white z-[10]"
         initial={{ opacity: 1 }}
         animate={{ opacity: whiteFadeOut ? 0 : 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
+        transition={{ duration: 2.5, ease: [0.25, 0.1, 0.25, 1] }}
       />
       
       {/* Split screen background - fades in as white fades out */}
@@ -122,7 +123,7 @@ export default function TechShowcaseSection() {
       </motion.div>
 
       {/* Content - only show when section is in view */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8 pt-32 md:pt-40">
         <AnimatePresence mode="wait">
           {isInView && showTechText && !showPacman && (
             <motion.div
@@ -160,26 +161,26 @@ export default function TechShowcaseSection() {
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               className="relative"
             >
-              {/* Timer or Play button */}
+              {/* Timer or Play button - positioned above game, always visible */}
               <motion.div 
-                className="absolute -top-20 left-1/2 -translate-x-1/2 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                className="absolute -top-16 md:-top-20 left-1/2 -translate-x-1/2 text-center z-20 w-full"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
                 {!gameStarted && countdown > 0 && (
-                  <p className="text-2xl font-bold text-gray-600">
+                  <p className="text-xl md:text-2xl font-bold text-gray-600">
                     Demo time: {countdown}s
                   </p>
                 )}
                 {!isPlaying && (countdown === 0 || gameStarted) && (
                   <motion.button
                     onClick={handlePlayGame}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-lg"
+                    className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-lg text-base md:text-lg"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    🎮 Play Pac-Man
+                    🎮 {gameStarted ? "Spela igen" : "Spela Pac-Man"}
                   </motion.button>
                 )}
               </motion.div>
@@ -227,18 +228,26 @@ export default function TechShowcaseSection() {
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-none"
+                        className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto"
                       >
-                        <div className="text-center">
-                          <h3 className="text-4xl font-bold text-white mb-4">
-                            {gameStarted ? "PAUSED" : "DEMO FINISHED"}
+                        <div className="text-center px-4">
+                          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                            {gameStarted ? "PAUSAT" : "DEMO KLAR"}
                           </h3>
-                          <p className="text-xl text-white/80 mb-6">
+                          <p className="text-lg md:text-xl text-white/80 mb-6">
                             Vi kan bygga allt från spel till företagslösningar!
                           </p>
-                          <p className="text-sm text-white/60">
-                            Klicka på "Play Pac-Man" ovanför för att spela
-                          </p>
+                          <motion.button
+                            onClick={handlePlayGame}
+                            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-lg text-lg md:text-xl"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            🎮 Spela igen
+                          </motion.button>
                         </div>
                       </motion.div>
                     )}
