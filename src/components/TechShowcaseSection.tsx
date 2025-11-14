@@ -76,23 +76,23 @@ export default function TechShowcaseSection() {
         animate={{ opacity: isInView ? 1 : 0 }}
         transition={{ duration: 2, delay: 0.5 }}
       >
-        <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-100 to-gray-200">
           {/* Technical/boring side */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-20">
             {/* Grid pattern */}
             <div 
               className="absolute inset-0"
               style={{
                 backgroundImage: `
-                  linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
+                  linear-gradient(rgba(0,0,0,0.15) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px)
                 `,
                 backgroundSize: '20px 20px'
               }}
             />
           </div>
         </div>
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-bl from-purple-100 via-pink-50 to-blue-100">
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-bl from-purple-200 via-pink-100 to-blue-200">
           {/* Design/creative side */}
           <div className="absolute inset-0">
             {[...Array(20)].map((_, i) => (
@@ -255,99 +255,102 @@ export default function TechShowcaseSection() {
                 </motion.div>
               </div>
 
-              {/* Tech vs Design labels */}
-              <div className="absolute -left-32 top-1/2 -translate-y-1/2 text-right">
-                <p className="text-sm font-mono text-gray-500">TECHNICAL</p>
-                <p className="text-xs text-gray-400">• Data-driven</p>
-                <p className="text-xs text-gray-400">• Functional</p>
-                <p className="text-xs text-gray-400">• Interactive</p>
+              {/* Tech vs Design labels - improved visibility and design */}
+              <div className="absolute -left-40 md:-left-48 top-1/2 -translate-y-1/2 text-right space-y-2">
+                <p className="text-lg md:text-xl font-black text-gray-700 tracking-wider mb-2">TECHNICAL</p>
+                <p className="text-sm md:text-base text-gray-600 font-medium">• Data-driven</p>
+                <p className="text-sm md:text-base text-gray-600 font-medium">• Functional</p>
+                <p className="text-sm md:text-base text-gray-600 font-medium">• Interactive</p>
               </div>
               
-              <div className="absolute -right-32 top-1/2 -translate-y-1/2">
-                <p className="text-sm font-bold text-purple-600">CREATIVE</p>
-                <p className="text-xs text-purple-400">• Beautiful</p>
-                <p className="text-xs text-purple-400">• Animated</p>
-                <p className="text-xs text-purple-400">• Engaging</p>
+              <div className="absolute -right-40 md:-right-48 top-1/2 -translate-y-1/2 space-y-2">
+                <p className="text-lg md:text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent tracking-wider mb-2">CREATIVE</p>
+                <p className="text-sm md:text-base text-purple-600 font-medium">• Beautiful</p>
+                <p className="text-sm md:text-base text-purple-600 font-medium">• Animated</p>
+                <p className="text-sm md:text-base text-purple-600 font-medium">• Engaging</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Animation capabilities section */}
+        {/* Animation capabilities section - improved design */}
         <motion.div 
-          className="mt-32 mb-16 px-8 max-w-6xl mx-auto"
+          className="mt-32 mb-16 px-6 md:px-8 max-w-6xl mx-auto"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h3 className="text-3xl md:text-4xl font-black text-center mb-16">
-            <span className="text-gray-600">Så skapar vi </span>
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-20 leading-tight">
+            <span className="text-gray-800">Så skapar vi </span>
+            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
               animationer som betyder något
             </span>
           </h3>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {/* Motion Design */}
             <motion.div 
-              className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl"
+              className="bg-white/90 backdrop-blur-sm border border-purple-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
+              whileHover={{ y: -5 }}
             >
-              <div className="text-4xl mb-4">🎭</div>
-              <h4 className="text-xl font-bold mb-3">Motion Design</h4>
-              <p className="text-gray-600 mb-4">
+              <div className="text-5xl mb-6">🎭</div>
+              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Motion Design</h4>
+              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
                 Vi använder Framer Motion för flytande, prestanda-optimerade animationer som reagerar på användarinteraktion.
               </p>
-              <code className="text-sm bg-white/80 px-2 py-1 rounded">useScroll, useTransform, useSpring</code>
+              <code className="text-xs md:text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg font-mono font-semibold block">useScroll, useTransform, useSpring</code>
             </motion.div>
 
             {/* 3D & WebGL */}
             <motion.div 
-              className="bg-gradient-to-br from-blue-50 to-cyan-50 p-8 rounded-2xl"
+              className="bg-white/90 backdrop-blur-sm border border-blue-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
+              whileHover={{ y: -5 }}
             >
-              <div className="text-4xl mb-4">🌐</div>
-              <h4 className="text-xl font-bold mb-3">3D & WebGL</h4>
-              <p className="text-gray-600 mb-4">
+              <div className="text-5xl mb-6">🌐</div>
+              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">3D & WebGL</h4>
+              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
                 Three.js och React Three Fiber för immersiva 3D-upplevelser direkt i webbläsaren.
               </p>
-              <code className="text-sm bg-white/80 px-2 py-1 rounded">@react-three/fiber, drei</code>
+              <code className="text-xs md:text-sm bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 px-3 py-2 rounded-lg font-mono font-semibold block">@react-three/fiber, drei</code>
             </motion.div>
 
             {/* Interactive Storytelling */}
             <motion.div 
-              className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl"
+              className="bg-white/90 backdrop-blur-sm border border-green-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
+              whileHover={{ y: -5 }}
             >
-              <div className="text-4xl mb-4">📖</div>
-              <h4 className="text-xl font-bold mb-3">Scrollytelling</h4>
-              <p className="text-gray-600 mb-4">
+              <div className="text-5xl mb-6">📖</div>
+              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Scrollytelling</h4>
+              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
                 Scroll-drivna narrativ som guidar besökaren genom er story med visuell magi.
               </p>
-              <code className="text-sm bg-white/80 px-2 py-1 rounded">Intersection Observer, GSAP</code>
+              <code className="text-xs md:text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-3 py-2 rounded-lg font-mono font-semibold block">Intersection Observer, GSAP</code>
             </motion.div>
           </div>
 
-          {/* Tech stack */}
+          {/* Tech stack - improved design */}
           <motion.div 
-            className="mt-16 text-center"
+            className="mt-20 text-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
           >
-            <p className="text-lg text-gray-600 mb-4">Vårt animations-arsenal:</p>
-            <div className="flex flex-wrap justify-center gap-3">
+            <p className="text-xl md:text-2xl text-gray-700 font-semibold mb-6">Vårt animations-arsenal:</p>
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               {[
                 "Framer Motion",
                 "Three.js",
@@ -360,12 +363,12 @@ export default function TechShowcaseSection() {
               ].map((tech, index) => (
                 <motion.span
                   key={tech}
-                  className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium"
+                  className="px-5 py-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full text-sm md:text-base font-semibold text-gray-800 shadow-md hover:shadow-lg transition-all"
                   initial={{ opacity: 0, scale: 0.8 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.6 + index * 0.05 }}
-                  whileHover={{ scale: 1.05, backgroundColor: "#e0e7ff" }}
+                  whileHover={{ scale: 1.1, backgroundColor: "#f3f4f6", borderColor: "#d1d5db" }}
                 >
                   {tech}
                 </motion.span>
