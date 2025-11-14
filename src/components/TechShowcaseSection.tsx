@@ -23,12 +23,13 @@ export default function TechShowcaseSection() {
       // Show text after 0.5s
       const textTimer = setTimeout(() => setShowTechText(true), 500);
       
-      // Show Pacman after 2s
-      const pacmanTimer = setTimeout(() => setShowPacman(true), 2000);
+      // Show Pacman first (but invisible) so we can scroll to it
+      const showPacmanTimer = setTimeout(() => {
+        setShowPacman(true);
+      }, 800);
       
-      // Auto-scroll to Pacman game when white fade is almost done
-      // This creates the optical illusion of fading into the centered game
-      // Scroll happens when white fade is ~80% complete (1.2 seconds into 1.5s fade)
+      // Auto-scroll to center Pacman game AFTER it's rendered but before it's visible
+      // This ensures the game is centered in viewport when it fades in
       const scrollTimer = setTimeout(() => {
         if (pacmanRef.current && !hasScrolledToPacman) {
           // Use requestAnimationFrame for smoother scroll
@@ -41,11 +42,11 @@ export default function TechShowcaseSection() {
             setHasScrolledToPacman(true);
           });
         }
-      }, 1200); // Start scrolling when white fade is ~80% complete (1.2s into 1.5s fade)
+      }, 1000); // Scroll after Pacman is rendered but before fade-in completes
       
       return () => {
         clearTimeout(textTimer);
-        clearTimeout(pacmanTimer);
+        clearTimeout(showPacmanTimer);
         clearTimeout(scrollTimer);
       };
     }
@@ -94,30 +95,31 @@ export default function TechShowcaseSection() {
       <motion.div
         className="fixed inset-0 flex items-center justify-center z-[11] pointer-events-none"
         initial={{ opacity: 0 }}
-        animate={{ opacity: whiteFadeOut && !showPacman ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
+        animate={{ opacity: whiteFadeOut && !hasScrolledToPacman ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
       >
         <motion.p
-          className="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-center px-4"
+          className="text-3xl md:text-5xl lg:text-6xl font-bold text-center px-4"
           style={{
             color: "#00ff41", // Matrix green
             textShadow: `
-              0 0 5px #00ff41,
               0 0 10px #00ff41,
-              0 0 15px #00ff41,
               0 0 20px #00ff41,
-              2px 2px 0px #000,
-              -2px -2px 0px #000,
-              2px -2px 0px #000,
-              -2px 2px 0px #000
+              0 0 30px #00ff41,
+              0 0 40px #00ff41,
+              3px 3px 0px #000,
+              -3px -3px 0px #000,
+              3px -3px 0px #000,
+              -3px 3px 0px #000
             `,
-            fontFamily: "monospace",
-            letterSpacing: "2px",
+            fontFamily: "'Courier New', Courier, monospace", // Classic terminal font
+            letterSpacing: "4px",
             lineHeight: "1.4",
-            filter: "blur(0.5px)", // Slight blur for matrix effect
+            fontWeight: "bold",
+            textTransform: "uppercase",
           }}
           animate={{
-            opacity: [1, 0.7, 1],
+            opacity: [1, 0.8, 1],
           }}
           transition={{
             duration: 2,
@@ -185,7 +187,10 @@ export default function TechShowcaseSection() {
 
       {/* Content - only show when section is in view */}
       {/* Extra height ensures Pacman can be centered in viewport during auto-scroll */}
+      {/* Pacman game positioned to be centered in viewport when it appears */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[200vh] p-8 pt-32 md:pt-40">
+        {/* Spacer to push Pacman to viewport center */}
+        <div className="h-[50vh] w-full" />
         <AnimatePresence mode="wait">
           {isInView && showTechText && !showPacman && (
             <motion.div
@@ -220,8 +225,9 @@ export default function TechShowcaseSection() {
           {isInView && showPacman && (
             <motion.div
               ref={pacmanRef}
-              initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: hasScrolledToPacman ? 1 : 0, scale: hasScrolledToPacman ? 1 : 0.8 }}
+              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative"
               style={{ scrollMarginTop: '50vh' }} // Center in viewport when scrolled to
             >
