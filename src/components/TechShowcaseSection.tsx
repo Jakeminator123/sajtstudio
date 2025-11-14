@@ -3,25 +3,10 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 
-// Helper to get window width safely
-const useWindowWidth = () => {
-  const [width, setWidth] = useState(1920);
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setWidth(window.innerWidth);
-      const handleResize = () => setWidth(window.innerWidth);
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
-  return width;
-};
-
 export default function TechShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const pacmanRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const windowWidth = useWindowWidth();
   const [showTechText, setShowTechText] = useState(false);
   const [showPacman, setShowPacman] = useState(false);
   const [countdown, setCountdown] = useState(5);
@@ -89,10 +74,7 @@ export default function TechShowcaseSection() {
   return (
     <motion.section 
       ref={sectionRef}
-      className="relative min-h-screen overflow-hidden"
-      initial={{ backgroundColor: "#ffffff" }}
-      animate={{ backgroundColor: isInView ? "#ffffff" : "#ffffff" }}
-      style={{ backgroundColor: "#ffffff" }}
+      className="relative min-h-screen overflow-hidden bg-white"
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
       {/* This white overlay fades out when section comes into view */}
@@ -186,7 +168,7 @@ export default function TechShowcaseSection() {
               top: `${20 + (i % 3) * 80}px`,
             }}
             animate={{
-              x: [0, windowWidth + 300],
+              x: [0, typeof window !== 'undefined' ? window.innerWidth + 300 : 2220],
             }}
             transition={{
               duration: 30 + i * 5,
