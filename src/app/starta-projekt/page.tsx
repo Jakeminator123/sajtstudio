@@ -191,7 +191,10 @@ export default function StartaProjektPage() {
               >
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <input
-                    type="text"
+                    type="url"
+                    id="website-url"
+                    name="website-url"
+                    autoComplete="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="Ange din webbplats URL (t.ex. sajtstudio.se)"

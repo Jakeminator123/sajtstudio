@@ -113,6 +113,7 @@ export default function ContactForm() {
           type="text"
           id="name"
           name="name"
+          autoComplete="name"
           value={formState.name}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, name: e.target.value }))
@@ -130,6 +131,7 @@ export default function ContactForm() {
           type="email"
           id="email"
           name="email"
+          autoComplete="email"
           value={formState.email}
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, email: e.target.value }))
@@ -146,6 +148,7 @@ export default function ContactForm() {
         <textarea
           id="message"
           name="message"
+          autoComplete="off"
           rows={6}
           value={formState.message}
           onChange={(e) =>
