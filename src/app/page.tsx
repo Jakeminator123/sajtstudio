@@ -5,21 +5,19 @@ import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import dynamic from "next/dynamic";
 
-// Critical components loaded immediately
+// Critical components loaded immediately for smooth scrolling
 import HeroAnimation from "@/components/HeroAnimation";
 import ScrollIndicator from "@/components/ScrollIndicator";
-// Load early sections immediately for better scroll responsiveness
+// Load first 3-4 sections immediately - they appear early and need smooth scrolling
 import AboutSection from "@/components/AboutSection";
 import USPSection from "@/components/USPSection";
+import ServicesSection from "@/components/ServicesSection";
 
 import { SectionSkeleton } from "@/components/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
 import { usePrefetchOnScroll } from "@/hooks/usePrefetchOnScroll";
 
-// Lazy load sections that appear later - prefetched via usePrefetchOnScroll
-const ServicesSection = dynamic(() => import("@/components/ServicesSection"), {
-  loading: () => <SectionSkeleton />,
-});
+// Lazy load sections that appear later - prefetched via usePrefetchOnScroll for smooth scrolling
 
 const ProcessSection = dynamic(() => import("@/components/ProcessSection"), {
   loading: () => <SectionSkeleton />,

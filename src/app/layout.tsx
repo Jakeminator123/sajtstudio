@@ -136,6 +136,8 @@ export default function RootLayout({
         <link rel="preload" href="/videos/background.mp4" as="video" type="video/mp4" />
         {/* Preload hero background image */}
         <link rel="preload" href="/images/hero/hero-background.webp" as="image" type="image/webp" />
+        {/* Preload ServicesSection video since it's loaded directly for smooth scrolling */}
+        <link rel="preload" href="/videos/background_vid.mp4" as="video" type="video/mp4" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([

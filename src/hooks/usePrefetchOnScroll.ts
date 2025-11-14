@@ -11,21 +11,23 @@ export function usePrefetchOnScroll() {
     }
 
     // Sections to prefetch resources for when user gets close
+    // Note: ServicesSection (#tjanster) is now loaded directly, so we prefetch resources earlier
     const prefetchTargets: Array<{
       selector: string;
       threshold?: number;
     }> = [
       {
-        selector: '#tjanster',
-        threshold: 0.3, // Prefetch when 30% visible
-      },
-      {
         selector: '#process',
-        threshold: 0.2,
+        threshold: 0.2, // Prefetch when 20% visible
       },
       {
         selector: '#omdomen',
         threshold: 0.2,
+      },
+      // Prefetch HeroAnimation resources when user scrolls past ServicesSection
+      {
+        selector: '#tjanster',
+        threshold: 0.8, // When ServicesSection is mostly scrolled past, prefetch next section
       },
     ];
 
@@ -45,16 +47,33 @@ export function usePrefetchOnScroll() {
       const element = document.querySelector(selector);
       if (!element) return;
 
-      // Prefetch video metadata for ServicesSection
+      // Prefetch HeroAnimation resources when ServicesSection is scrolled past
       if (selector === '#tjanster') {
+        // Prefetch telephone video for HeroAnimation (comes after ServicesSection)
         const videoLink = document.createElement('link');
         videoLink.rel = 'preload';
-        videoLink.href = '/videos/background_vid.mp4';
+        videoLink.href = '/videos/telephone_ringin.mp4';
         videoLink.as = 'video';
         videoLink.setAttribute('type', 'video/mp4');
-        if (!document.querySelector(`link[rel="preload"][href="/videos/background_vid.mp4"]`)) {
+        if (!document.querySelector(`link[rel="preload"][href="/videos/telephone_ringin.mp4"]`)) {
           document.head.appendChild(videoLink);
         }
+        
+        // Prefetch portfolio images that will be needed soon
+        const portfolioImages = [
+          '/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp',
+          '/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp',
+        ];
+        portfolioImages.forEach((src) => {
+          if (!document.querySelector(`link[rel="preload"][href="${src}"]`)) {
+            const imageLink = document.createElement('link');
+            imageLink.rel = 'preload';
+            imageLink.href = src;
+            imageLink.as = 'image';
+            imageLink.setAttribute('type', 'image/webp');
+            document.head.appendChild(imageLink);
+          }
+        });
       }
 
       // Prefetch images for ProcessSection
@@ -79,18 +98,6 @@ export function usePrefetchOnScroll() {
         });
       }
 
-      // Prefetch video for HeroAnimation section (comes before TechShowcase)
-      if (selector === '#tjanster') {
-        // Also prefetch telephone video for HeroAnimation
-        const videoLink2 = document.createElement('link');
-        videoLink2.rel = 'preload';
-        videoLink2.href = '/videos/telephone_ringin.mp4';
-        videoLink2.as = 'video';
-        videoLink2.setAttribute('type', 'video/mp4');
-        if (!document.querySelector(`link[rel="preload"][href="/videos/telephone_ringin.mp4"]`)) {
-          document.head.appendChild(videoLink2);
-        }
-      }
     };
 
     const observers: IntersectionObserver[] = [];
