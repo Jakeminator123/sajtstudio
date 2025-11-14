@@ -67,6 +67,13 @@ export default function TechShowcaseSection() {
 
   // Prevent page scroll when playing Pacman game (arrow keys)
   useEffect(() => {
+    // Always restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isPlaying) {
       // Re-enable scroll when game stops
       document.body.style.overflow = '';
@@ -109,22 +116,24 @@ export default function TechShowcaseSection() {
     window.addEventListener('wheel', preventWheelScroll, { passive: false, capture: true });
     window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true });
     window.addEventListener('scroll', preventGameScroll, { passive: false, capture: true });
-
+    
     // Also prevent scroll on the game container itself
-    if (pacmanRef.current) {
-      pacmanRef.current.addEventListener('wheel', preventWheelScroll, { passive: false });
-      pacmanRef.current.addEventListener('touchmove', preventTouchMove, { passive: false });
+    const pacmanElement = pacmanRef.current;
+    if (pacmanElement) {
+      pacmanElement.addEventListener('wheel', preventWheelScroll, { passive: false });
+      pacmanElement.addEventListener('touchmove', preventTouchMove, { passive: false });
     }
 
     return () => {
-      document.body.style.overflow = '';
+      // Always restore scroll when effect cleans up
+      document.body.style.overflow = originalOverflow || '';
       window.removeEventListener('keydown', preventScroll, { capture: true });
       window.removeEventListener('wheel', preventWheelScroll, { capture: true });
       window.removeEventListener('touchmove', preventTouchMove, { capture: true });
       window.removeEventListener('scroll', preventGameScroll, { capture: true });
-      if (pacmanRef.current) {
-        pacmanRef.current.removeEventListener('wheel', preventWheelScroll);
-        pacmanRef.current.removeEventListener('touchmove', preventTouchMove);
+      if (pacmanElement) {
+        pacmanElement.removeEventListener('wheel', preventWheelScroll);
+        pacmanElement.removeEventListener('touchmove', preventTouchMove);
       }
     };
   }, [isPlaying]);

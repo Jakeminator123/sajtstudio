@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import HeaderNav from '@/components/HeaderNav';
 import Footer from '@/components/Footer';
 import ContactForm from '@/components/ContactForm';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function Clock() {
   const [time, setTime] = useState(new Date());
