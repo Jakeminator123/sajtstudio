@@ -65,10 +65,67 @@ export default function TechShowcaseSection() {
     };
   }, [showPacman, countdown, gameStarted, isPlaying]);
 
+  // Prevent page scroll when playing Pacman game (arrow keys)
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const preventScroll = (e: KeyboardEvent) => {
+      // Arrow keys and Space - prevent page scroll when game is active
+      // These keys should only control the game, not scroll the page
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.key)) {
+        // Check if iframe or game container is focused
+        const activeElement = document.activeElement;
+        const isGameFocused = activeElement?.tagName === 'IFRAME' || 
+                              pacmanRef.current?.contains(activeElement) ||
+                              activeElement?.closest('iframe');
+        
+        // Always prevent page scroll when game is playing
+        // The iframe will handle the key events for the game
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Prevent wheel scroll when hovering over game area
+    const preventWheelScroll = (e: WheelEvent) => {
+      if (pacmanRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Prevent touch scroll on mobile when game is active
+    const preventTouchMove = (e: TouchEvent) => {
+      if (pacmanRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventWheelScroll, { passive: false });
+    document.addEventListener('touchmove', preventTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener('keydown', preventScroll);
+      document.removeEventListener('wheel', preventWheelScroll);
+      document.removeEventListener('touchmove', preventTouchMove);
+    };
+  }, [isPlaying]);
+
   const handlePlayGame = () => {
     setIsPlaying(true);
     setGameStarted(true);
     setCountdown(0); // Hide countdown
+    
+    // Focus the iframe so keyboard events work properly
+    setTimeout(() => {
+      const iframe = pacmanRef.current?.querySelector('iframe');
+      if (iframe) {
+        iframe.focus();
+        // Also try clicking to ensure focus
+        iframe.contentWindow?.focus();
+      }
+    }, 100);
   };
 
   return (
