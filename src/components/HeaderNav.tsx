@@ -248,7 +248,7 @@ export default function HeaderNav() {
                   }}
                 />
                 <Link
-                  href="/contact"
+                  href="/starta-projekt"
                   className="relative px-6 py-2.5 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full overflow-hidden block"
                 >
                   {/* Shimmer effect */}
@@ -373,7 +373,7 @@ export default function HeaderNav() {
                   className="mt-8"
                 >
                   <Link
-                    href="/contact"
+                    href="/starta-projekt"
                     onClick={() => setMenuOpen(false)}
                     className="block w-full text-center px-6 py-3 bg-gradient-to-r from-accent to-tertiary text-white font-bold rounded-full relative overflow-hidden"
                   >
