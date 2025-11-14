@@ -141,9 +141,9 @@ export default function StartaProjektPage() {
       <HeaderNav />
       <main className="relative min-h-screen bg-black">
         {/* Hero section with noir video background - 50% coverage */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
           {/* Video background - covers 50% of screen */}
-          <div className="absolute inset-0 w-1/2 left-0 h-full overflow-hidden">
+          <div className="absolute top-20 left-0 right-1/2 bottom-0 overflow-hidden">
             <video
               ref={videoRef}
               autoPlay
@@ -164,7 +164,7 @@ export default function StartaProjektPage() {
           </div>
 
           {/* Black background for other 50% */}
-          <div className="absolute inset-0 w-1/2 right-0 h-full bg-black" />
+          <div className="absolute top-20 right-0 left-1/2 bottom-0 bg-black" />
 
           {/* Content overlay */}
           <div className="relative z-10 container mx-auto px-6 py-24 md:py-32">
