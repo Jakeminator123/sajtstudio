@@ -260,7 +260,7 @@ export default function AboutSection() {
         >
           {/* Main heading with enhanced styling - morphs to blob */}
           <motion.h2 
-            className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-12 leading-none"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black mb-6 sm:mb-8 md:mb-10 lg:mb-12 leading-none px-2"
             style={{
               textShadow: "0 0 100px rgba(0, 102, 255, 0.5), 0 0 150px rgba(0, 102, 255, 0.3), 0 0 200px rgba(0, 102, 255, 0.1)",
               opacity: textOpacity,
@@ -277,7 +277,7 @@ export default function AboutSection() {
           <div className="max-w-5xl mx-auto space-y-12">
             {/* Tagline - morphs to blob */}
             <motion.p 
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight px-4"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -302,7 +302,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              className="text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto px-4"
               style={{
                 opacity: textOpacity,
                 scale: textScale,
@@ -319,7 +319,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: 1, duration: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-16"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 pt-8 sm:pt-12 md:pt-16"
               style={{ y: statsY }}
             >
               {[
@@ -382,7 +382,7 @@ export default function AboutSection() {
                     {/* Content */}
                     <div className="relative z-10 text-center">
                       <motion.div 
-                        className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 bg-clip-text text-transparent"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-2 sm:mb-3 md:mb-4 bg-clip-text text-transparent"
                         style={{
                           backgroundImage: stat.color === 'accent'
                             ? 'linear-gradient(to right, #0066FF, #FF0033)'
@@ -396,7 +396,7 @@ export default function AboutSection() {
                         <AnimatedNumber value={stat.number} />
                       </motion.div>
                       <motion.div 
-                        className="text-sm md:text-base lg:text-lg text-gray-300 uppercase tracking-widest font-semibold"
+                        className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-300 uppercase tracking-widest font-semibold px-2"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}

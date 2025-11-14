@@ -42,9 +42,9 @@ function Clock() {
       transition={{ duration: 0.6 }}
       className="text-center"
     >
-      <div className="text-6xl md:text-8xl font-bold mb-4 font-mono">
+      <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-2 sm:mb-4 font-mono">
         {hours}:{minutes}
-        <span className="text-4xl md:text-6xl text-gray-400">:{seconds}</span>
+        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-gray-400">:{seconds}</span>
       </div>
       <p className="text-gray-600">Stockholm, Sverige</p>
     </motion.div>
@@ -56,23 +56,23 @@ export default function ContactPage() {
     <>
       <HeaderNav />
       <main style={{ paddingTop: 'var(--header-height)' }}>
-        <section className="py-24 md:py-32 bg-white" style={{ minHeight: 'calc(100vh - var(--header-height))' }}>
-          <div className="container mx-auto px-6">
+        <section className="py-12 sm:py-16 md:py-24 lg:py-32 bg-white" style={{ minHeight: 'calc(100vh - var(--header-height))' }}>
+          <div className="container mx-auto px-4 sm:px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-16"
+              className="text-center mb-8 sm:mb-12 md:mb-16"
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6">
                 Kontakt
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
                 Låt oss prata om ditt nästa projekt
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 max-w-6xl mx-auto">
               {/* Left side - Contact info */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
@@ -81,22 +81,22 @@ export default function ContactPage() {
                 className="space-y-8"
               >
                 <div>
-                  <h2 className="text-2xl font-bold mb-4">Kontaktinformation</h2>
-                  <div className="space-y-4">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Kontaktinformation</h2>
+                  <div className="space-y-4 sm:space-y-6">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">E-post</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">E-post</p>
                       <a 
                         href="mailto:hello@sajtstudio.se" 
-                        className="text-lg hover:text-accent transition-colors"
+                        className="text-base sm:text-lg hover:text-accent active:text-accent transition-colors break-all touch-manipulation"
                       >
                         hello@sajtstudio.se
                       </a>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Telefon</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">Telefon</p>
                       <a 
                         href="tel:+46701234567" 
-                        className="text-lg hover:text-accent transition-colors"
+                        className="text-base sm:text-lg hover:text-accent active:text-accent transition-colors touch-manipulation"
                       >
                         +46 70 123 45 67
                       </a>
@@ -114,9 +114,9 @@ export default function ContactPage() {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
-                className="bg-gray-50 p-8 rounded-lg"
+                className="bg-gray-50 p-4 sm:p-6 md:p-8 rounded-lg"
               >
-                <h2 className="text-2xl font-bold mb-6">Skicka meddelande</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Skicka meddelande</h2>
                 <ContactForm />
               </motion.div>
             </div>
