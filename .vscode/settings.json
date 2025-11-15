@@ -1,0 +1,47 @@
+{
+  "json.schemas": [],
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "webhint.enable": false,
+  "edgeTools.webhint.enable": false,
+  "edgeTools.webhint.diagnostics": false,
+  "edgeTools.webhint.problems": false,
+  "files.exclude": {
+    "**/.webhint": true
+  },
+  "problems.showCurrentInStatus": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "markdownlint.config": {
+    "default": true,
+    "MD012": {
+      "maximum": 2
+    },
+    "MD026": false,
+    "MD032": false
+  },
+  "markdownlint.ignore": [".cursorrules"],
+  "markdownlint.files.ignore": [".cursorrules"],
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.ts": "typescript"
+  },
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false
+}

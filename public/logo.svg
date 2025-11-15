@@ -1,0 +1,40 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="18" stroke="#000000" stroke-width="2" fill="none"/>
+  
+  <!-- Left side: 1930s telephone (black) -->
+  <g transform="translate(5, 10)">
+    <!-- Phone base -->
+    <path d="M0 16 Q0 14 2 14 L10 14 Q12 14 12 16 L12 18 Q12 20 10 20 L2 20 Q0 20 0 18 Z" fill="#000000"/>
+    <!-- Phone stand -->
+    <rect x="5" y="10" width="2" height="4" fill="#000000"/>
+    <!-- Phone earpiece -->
+    <path d="M2 10 Q1 9 1 8 Q1 6 3 6 L9 6 Q11 6 11 8 Q11 9 10 10 Z" fill="#000000"/>
+    <!-- Phone cord (curved) -->
+    <path d="M6 10 Q4 12 3 14" stroke="#000000" stroke-width="1.5" fill="none"/>
+  </g>
+  
+  <!-- Arrow transformation (blue) -->
+  <path d="M18 20 L22 20 M22 20 L20 18 M22 20 L20 22" stroke="#0066FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Right side: Modern supercomputer (blue/red accents) -->
+  <g transform="translate(25, 10)">
+    <!-- Computer frame -->
+    <rect x="0" y="4" width="10" height="12" stroke="#0066FF" stroke-width="2" fill="none" rx="1"/>
+    <!-- Screen area -->
+    <rect x="1" y="5" width="8" height="7" fill="#000000" opacity="0.1"/>
+    <!-- LED lights (red accents) -->
+    <circle cx="2" cy="14" r="0.8" fill="#FF0033"/>
+    <circle cx="5" cy="14" r="0.8" fill="#FF0033"/>
+    <circle cx="8" cy="14" r="0.8" fill="#FF0033"/>
+    <!-- Data lines -->
+    <line x1="2" y1="7" x2="7" y2="7" stroke="#0066FF" stroke-width="0.5"/>
+    <line x1="2" y1="9" x2="7" y2="9" stroke="#0066FF" stroke-width="0.5"/>
+    <!-- Circuit pattern -->
+    <circle cx="5" cy="8" r="1" stroke="#0066FF" stroke-width="0.5" fill="none"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="20" cy="33" r="1" fill="#FF0033"/>
+  <circle cx="20" cy="7" r="1" fill="#0066FF"/>
+</svg>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blå Pacman</title>
+  <style>
+    :root{
+      --bg1:#071427;
+      --bg2:#0b1e3b;
+      --wall:#1b6ffd;
+      --wallGlow:#69a7ff;
+      --pac:#5fd3ff;
+      --ghost:#2ea1ff;
+      --pellet:#e9f2ff;
+      --ui:#a7c7ff;
+      --uiDim:#7da6f8;
+      --danger:#ff8aa1;
+      --win:#89ffcf;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      background: radial-gradient(1200px 800px at 70% 10%, var(--bg2), var(--bg1));
+      color: var(--ui);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    
+    .stage{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background: radial-gradient(900px 600px at 50% 10%, rgba(21,59,129,.25), rgba(4,12,26,.7));
+    }
+    canvas{ width:100%; height:100%; display:block; }
+
+    .overlay{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      pointer-events:none; text-align:center; padding: 18px;
+    }
+    .overlay .box{
+      background:linear-gradient(180deg, rgba(16,36,78,.7), rgba(6,18,38,.85));
+      border:1px solid rgba(121,165,255,.4);
+      border-radius: 18px; padding: 16px 18px; max-width: 700px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.55), inset 0 0 28px rgba(60,120,255,.15);
+    }
+    .overlay h2{margin:0 0 8px; font-size: clamp(18px, 4vw, 24px); color:#e6f0ff}
+    .overlay p{margin:6px 0; color:#c7dbff}
+  </style>
+</head>
+<body>
+
+<div class="stage">
+  <canvas id="c"></canvas>
+  <div class="overlay" id="msg">
+    <div class="box">
+      <h2>🟦 Pac-Man Demo</h2>
+      <p>Use arrow keys or WASD</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const cs = 24; // cell size
+const map = [
+  "############################",
+  "#............##............#",
+  "#.####.#####.##.#####.####.#",
+  "#o####.#####.##.#####.####o#",
+  "#..........................#",
+  "#.####.##.########.##.####.#",
+  "#......##....##....##......#",
+  "######.##### ## #####.######",
+  "     #.##          ##.#     ",
+  "######.## ###--### ##.######",
+  "#      .  #      #  .      #",
+  "######.## ######## ##.######",
+  "     #.##          ##.#     ",
+  "######.## ######## ##.######",
+  "#............##............#",
+  "#.####.#####.##.#####.####.#",
+  "#o..##.......P .......##..o#",
+  "###.##.##.########.##.##.###",
+  "#......##....##....##......#",
+  "#.##########.##.##########.#",
+  "#..........................#",
+  "############################"
+];
+
+const rows = map.length, cols = map[0].length;
+let pellets = 0, score = 0, gameOver = false;
+let pacman = {x:13, y:16, dx:0, dy:0, mouth:0, dir:1};
+let ghosts = [{x:13, y:10, dx:1, dy:0, color:'#ff6b9d'}];
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = cols * cs;
+canvas.height = rows * cs;
+
+// Count pellets
+map.forEach(row => {
+  for(let ch of row) {
+    if(ch === '.' || ch === 'o') pellets++;
+  }
+});
+
+function drawMap() {
+  ctx.fillStyle = '#071427';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  for(let r = 0; r < rows; r++) {
+    for(let c = 0; c < cols; c++) {
+      const cell = map[r][c];
+      const x = c * cs;
+      const y = r * cs;
+      
+      if(cell === '#') {
+        // Wall with glow
+        ctx.shadowColor = '#69a7ff';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#1b6ffd';
+        ctx.fillRect(x + 2, y + 2, cs - 4, cs - 4);
+        ctx.shadowBlur = 0;
+      } else if(cell === '.') {
+        // Pellet
+        ctx.fillStyle = '#e9f2ff';
+        ctx.beginPath();
+        ctx.arc(x + cs/2, y + cs/2, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else if(cell === 'o') {
+        // Power pellet
+        ctx.fillStyle = '#e9f2ff';
+        ctx.shadowColor = '#69a7ff';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(x + cs/2, y + cs/2, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+  }
+}
+
+function drawPacman() {
+  const x = pacman.x * cs + cs/2;
+  const y = pacman.y * cs + cs/2;
+  
+  ctx.fillStyle = '#5fd3ff';
+  ctx.shadowColor = '#69a7ff';
+  ctx.shadowBlur = 15;
+  
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(pacman.dir * Math.PI / 2);
+  
+  ctx.beginPath();
+  ctx.arc(0, 0, cs/2 - 2, 0.2 * pacman.mouth, Math.PI * 2 - 0.2 * pacman.mouth);
+  ctx.lineTo(0, 0);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.restore();
+  ctx.shadowBlur = 0;
+}
+
+function moveGhosts() {
+  ghosts.forEach(g => {
+    // Simple AI
+    if(Math.random() < 0.1) {
+      const dirs = [[0,-1], [1,0], [0,1], [-1,0]];
+      const dir = dirs[Math.floor(Math.random() * 4)];
+      g.dx = dir[0];
+      g.dy = dir[1];
+    }
+    
+    const nx = g.x + g.dx;
+    const ny = g.y + g.dy;
+    
+    if(map[ny] && map[ny][nx] !== '#') {
+      g.x = nx;
+      g.y = ny;
+    }
+  });
+}
+
+function update() {
+  if(gameOver) return;
+  
+  // Update pacman
+  const nx = pacman.x + pacman.dx;
+  const ny = pacman.y + pacman.dy;
+  
+  if(map[ny] && map[ny][nx] !== '#') {
+    pacman.x = nx;
+    pacman.y = ny;
+    
+    // Eat pellets
+    if(map[pacman.y][pacman.x] === '.') {
+      map[pacman.y] = map[pacman.y].substring(0, pacman.x) + ' ' + map[pacman.y].substring(pacman.x + 1);
+      score += 10;
+      pellets--;
+    }
+  }
+  
+  // Animate mouth
+  pacman.mouth = (pacman.mouth + 0.3) % 1;
+  
+  // Move ghosts
+  moveGhosts();
+  
+  // Check collisions
+  ghosts.forEach(g => {
+    if(g.x === pacman.x && g.y === pacman.y) {
+      gameOver = true;
+    }
+  });
+  
+  if(pellets === 0) {
+    gameOver = true;
+  }
+}
+
+function draw() {
+  drawMap();
+  
+  // Draw ghosts
+  ghosts.forEach(g => {
+    const x = g.x * cs + cs/2;
+    const y = g.y * cs + cs/2;
+    
+    ctx.fillStyle = g.color;
+    ctx.beginPath();
+    ctx.arc(x, y, cs/2 - 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  
+  drawPacman();
+  
+  if(gameOver) {
+    document.getElementById('msg').style.display = 'flex';
+  }
+}
+
+// Controls
+document.addEventListener('keydown', e => {
+  if(gameOver) return;
+  
+  switch(e.key) {
+    case 'ArrowUp':
+    case 'w':
+    case 'W':
+      pacman.dx = 0; pacman.dy = -1; pacman.dir = 3;
+      break;
+    case 'ArrowRight':
+    case 'd':
+    case 'D':
+      pacman.dx = 1; pacman.dy = 0; pacman.dir = 0;
+      break;
+    case 'ArrowDown':
+    case 's':
+    case 'S':
+      pacman.dx = 0; pacman.dy = 1; pacman.dir = 1;
+      break;
+    case 'ArrowLeft':
+    case 'a':
+    case 'A':
+      pacman.dx = -1; pacman.dy = 0; pacman.dir = 2;
+      break;
+  }
+  
+  if(document.getElementById('msg').style.display !== 'none') {
+    document.getElementById('msg').style.display = 'none';
+  }
+});
+
+// Game loop
+setInterval(() => {
+  update();
+  draw();
+}, 150);
+
+draw();
+</script>
+
+</body>
+</html>
