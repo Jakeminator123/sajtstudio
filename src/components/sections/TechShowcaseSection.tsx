@@ -302,7 +302,7 @@ export default function TechShowcaseSection() {
       }}>
         <AnimatePresence mode="wait">
 
-          {mounted && isInView && showPacman && (
+          {mounted && showPacman && (
             <motion.div
               ref={pacmanRef}
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
