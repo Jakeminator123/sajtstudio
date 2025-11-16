@@ -11,6 +11,7 @@ export default function HeroAnimation() {
   const mediaContainerRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const hasAutoScrolledRef = useRef(false);
+  const heroWhiteoutActiveRef = useRef(true);
   const { videoRef, videoError, mounted } = useVideoLoader();
 
   // Scroll progress for the section
@@ -55,6 +56,7 @@ export default function HeroAnimation() {
   const [functionalityTextFlyingToModal, setFunctionalityTextFlyingToModal] = useState(false);
   const timeoutRefs = useRef<{ design1?: NodeJS.Timeout; design2?: NodeJS.Timeout; func1?: NodeJS.Timeout; func2?: NodeJS.Timeout }>({});
   const [explosionAutoPlay, setExplosionAutoPlay] = useState(false);
+  const [isHeroWhiteoutActive, setIsHeroWhiteoutActive] = useState(true);
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
@@ -78,6 +80,25 @@ export default function HeroAnimation() {
       if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
     };
   }, [textsShouldStick, textsDisappearing]);
+
+  // Track when the hero whiteout effect has finished so we can let the Pacman section show through
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      const whiteoutActive = heroWhiteoutActiveRef.current;
+
+      if (latest >= 0.995 && whiteoutActive) {
+        heroWhiteoutActiveRef.current = false;
+        setIsHeroWhiteoutActive(false);
+      } else if (latest < 0.85 && !whiteoutActive) {
+        heroWhiteoutActiveRef.current = true;
+        setIsHeroWhiteoutActive(true);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [scrollYProgress]);
 
   // Ensure video plays when it becomes visible
   useEffect(() => {
@@ -1019,15 +1040,17 @@ export default function HeroAnimation() {
         </div>
       </div>
 
-      {/* White fade overlay - fades in when video is large enough */}
-      {/* Only shows at the very end to transition to next section */}
-      {/* Lower z-index to allow TechShowcaseSection content to appear above */}
-      <motion.div
-        className="fixed inset-0 bg-white pointer-events-none z-[99]"
-        style={{
-          opacity: whiteFadeOverlayOpacity,
-        }}
-      />
+        {/* White fade overlay - fades in when video is large enough */}
+        {/* Only shows at the very end to transition to next section */}
+        {/* Lower z-index to allow TechShowcaseSection content to appear above */}
+        {isHeroWhiteoutActive && (
+          <motion.div
+            className="fixed inset-0 bg-white pointer-events-none z-[99]"
+            style={{
+              opacity: whiteFadeOverlayOpacity,
+            }}
+          />
+        )}
 
       {/* Design Modal */}
       <AnimatePresence>
@@ -1223,14 +1246,16 @@ export default function HeroAnimation() {
         )}
       </AnimatePresence>
 
-      {/* White fade transition to next section */}
-      <motion.div
-        className="fixed inset-0 bg-white pointer-events-none"
-        style={{
-          opacity: whiteFadeTransitionOpacity,
-          zIndex: 100,
-        }}
-      />
+        {/* White fade transition to next section */}
+        {isHeroWhiteoutActive && (
+          <motion.div
+            className="fixed inset-0 bg-white pointer-events-none"
+            style={{
+              opacity: whiteFadeTransitionOpacity,
+              zIndex: 100,
+            }}
+          />
+        )}
     </section>
   );
 }
