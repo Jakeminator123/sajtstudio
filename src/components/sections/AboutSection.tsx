@@ -99,7 +99,7 @@ function FloatingParticle({
         y,
         pointerEvents: mounted ? 'auto' : 'none',
       }}
-      animate={mounted && isSectionVisible ? {
+      animate={mounted ? {
         x: [0, Math.sin(particle.id) * 20, 0],
         y: [0, Math.cos(particle.id) * 20, 0],
       } : {}}
@@ -155,7 +155,7 @@ function GlowingOrb({
         opacity,
         scale,
       }}
-      animate={mounted && isSectionVisible ? {
+      animate={mounted ? {
         x: animateX,
         y: animateY,
       } : {}}
