@@ -308,12 +308,12 @@ export default function HeroAnimation() {
     [0.3, 0.6, 0.85, 0.95, 1, 1, 1, 1, 1, 1, 1] // Visible from the start, fully visible during zoom phase
   );
 
-  // Video scale - very aggressive and fast scaling when centered, fills viewport
+  // Video scale - aggressive scaling but capped to prevent viewport issues
   // Expands much faster when centered (0.5-0.6) - synchronized with image explosion
   const videoScale = useTransform(
     smoothMediaProgress,
     [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-    [0.6, 0.7, 1.0, 3.0, 5.0, 7.0, 9.0, 12.0] // Much faster expansion - jumps from 1.0 to 3.0 at 0.5-0.6
+    [0.6, 0.7, 1.0, 2.0, 3.5, 5.0, 6.5, 7.5] // Further reduced max scale to prevent viewport zoom issues
   );
 
   // Video glow - increases with zoom, creating immersive atmosphere
@@ -521,10 +521,13 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-black text-white relative overflow-hidden"
+      className="py-32 md:py-48 bg-black text-white relative"
       style={{
         scrollSnapAlign: 'start' as any,
         minHeight: '350vh', // Extended section for immersive zoom effect - allows smooth zoom experience
+        overflow: 'visible', // Allow content to overflow during zoom
+        position: 'relative',
+        zIndex: 1,
       }}
     >
       {/* ============================================ */}
@@ -602,7 +605,13 @@ export default function HeroAnimation() {
         {/* ============================================ */}
         <div
           ref={mediaContainerRef}
-          className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 overflow-visible w-full"
+          className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 w-full"
+          style={{
+            overflow: 'visible',
+            position: 'relative',
+            zIndex: 1,
+            transform: 'translateZ(0)', // Force GPU acceleration
+          }}
         >
           {/* Enhanced red background glow behind images when they explode */}
           {/* More intense and dramatic glow synchronized with explosion */}
@@ -644,8 +653,15 @@ export default function HeroAnimation() {
             ref={imagesContainerRef}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative max-w-full"
             style={mounted ? {
-              zIndex: imagesContainerZIndex
-            } : { zIndex: 20 }}
+              zIndex: imagesContainerZIndex,
+              overflow: 'visible',
+              position: 'relative',
+              transform: 'translateZ(0)', // Force GPU acceleration
+            } : { 
+              zIndex: 20,
+              overflow: 'visible',
+              position: 'relative',
+            }}
             suppressHydrationWarning
           >
             {portfolioImages.map((src, index) => {
@@ -911,8 +927,12 @@ export default function HeroAnimation() {
               top: "50%",
               zIndex: 30,
               maxWidth: 'min(100%, 80rem)',
+              transformOrigin: 'center center',
+              willChange: 'transform, opacity',
+              position: 'absolute',
+              overflow: 'visible', // Allow video to overflow during zoom
             }}
-            className="absolute w-full overflow-visible"
+            className="w-full"
           >
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative">
               {/* Video red tint overlay - increases with scroll */}
@@ -1001,8 +1021,9 @@ export default function HeroAnimation() {
 
       {/* White fade overlay - fades in when video is large enough */}
       {/* Only shows at the very end to transition to next section */}
+      {/* Lower z-index to allow TechShowcaseSection content to appear above */}
       <motion.div
-        className="fixed inset-0 bg-white pointer-events-none z-[100]"
+        className="fixed inset-0 bg-white pointer-events-none z-[99]"
         style={{
           opacity: whiteFadeOverlayOpacity,
         }}
