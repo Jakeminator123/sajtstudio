@@ -185,6 +185,8 @@ export default function TechShowcaseSection() {
         backgroundSize: "cover",
         backgroundPosition: "center top",
         imageRendering: "pixelated",
+        position: "relative",
+        zIndex: 100,
       }}
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
@@ -193,7 +195,7 @@ export default function TechShowcaseSection() {
       {whiteFadeOut && (
         <motion.div
           className="fixed inset-0 bg-white pointer-events-none"
-          style={{ zIndex: 9 }}
+          style={{ zIndex: 10 }}
           initial={{ opacity: 1 }}
           animate={{ opacity: showPacman ? 0 : 1 }}
           transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
@@ -215,7 +217,7 @@ export default function TechShowcaseSection() {
             {/* Matrix text container - exactly centered */}
             <motion.div
               className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-              style={{ zIndex: 999 }}
+              style={{ zIndex: 1000 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -228,13 +230,15 @@ export default function TechShowcaseSection() {
                   textShadow: `
                     0 0 8px rgba(57,255,20,0.8),
                     0 0 16px rgba(57,255,20,0.6),
-                    0 0 24px rgba(57,255,20,0.4)
+                    0 0 24px rgba(57,255,20,0.4),
+                    0 0 40px rgba(57,255,20,0.3)
                   `,
-                  fontFamily: "'Press Start 2P', 'Courier New', monospace",
+                  fontFamily: "var(--font-pixel), 'Courier New', monospace",
                   letterSpacing: "6px",
                   lineHeight: "1.4",
                   fontWeight: "bold",
                   textTransform: "uppercase",
+                  WebkitTextStroke: "1px rgba(57,255,20,0.5)",
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -251,7 +255,7 @@ export default function TechShowcaseSection() {
             {matrixFinished && postMatrixMessageVisible && (
               <motion.div
                 className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-                style={{ zIndex: 998 }}
+                style={{ zIndex: 999 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -273,7 +277,11 @@ export default function TechShowcaseSection() {
 
       {/* Content - only show when section is in view */}
       {/* Extra height ensures Pacman can be centered in viewport during auto-scroll */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[200vh] p-8 pt-32 md:pt-40">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[200vh] p-8 pt-32 md:pt-40" style={{ 
+        position: 'relative',
+        zIndex: 101,
+        transform: 'translateZ(0)', // Force GPU acceleration
+      }}>
         <AnimatePresence mode="wait">
 
           {isInView && showPacman && (
@@ -281,7 +289,8 @@ export default function TechShowcaseSection() {
               ref={pacmanRef}
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              className="relative [scroll-margin-top:50vh]" // Center in viewport when scrolled to
+              className="relative [scroll-margin-top:50vh] z-50" // Center in viewport when scrolled to
+              style={{ position: 'relative', zIndex: 50 }}
             >
               {/* Static heading above Pacman game */}
               <motion.h2
@@ -323,10 +332,13 @@ export default function TechShowcaseSection() {
 
               {/* Pacman container - wraps both frame and game */}
               <motion.div
-                className="relative"
+                className="relative mx-auto"
                 style={{
                   width: isPlaying ? 'min(90vw, 800px)' : 'min(90vw, 600px)',
                   height: isPlaying ? 'min(90vw, 800px)' : 'min(90vw, 600px)',
+                  maxWidth: '100%',
+                  transform: 'translateZ(0)', // Force GPU acceleration
+                  willChange: 'transform',
                 }}
                 animate={{
                   rotate: countdown === 0 && !isPlaying ? [0, -5, 5, -5, 0] : 0,
@@ -351,12 +363,21 @@ export default function TechShowcaseSection() {
                 {/* Pacman game iframe */}
                 <div
                   className="relative rounded-lg overflow-hidden w-full h-full"
+                  style={{
+                    transform: 'translateZ(0)', // Force GPU acceleration
+                    willChange: 'transform',
+                  }}
                 >
                   <iframe
                     src="/bla-pacman.html"
                     title="Pacman Demo"
                     className="w-full h-full border-0"
-                    style={{ pointerEvents: isPlaying ? 'auto' : (countdown > 0 ? 'auto' : 'none') }}
+                    style={{ 
+                      pointerEvents: isPlaying ? 'auto' : (countdown > 0 ? 'auto' : 'none'),
+                      transform: 'translateZ(0)', // Force GPU acceleration
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                    }}
                   />
 
                   {/* Game over overlay */}

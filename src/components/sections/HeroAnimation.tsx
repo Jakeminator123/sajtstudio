@@ -308,12 +308,12 @@ export default function HeroAnimation() {
     [0.3, 0.6, 0.85, 0.95, 1, 1, 1, 1, 1, 1, 1] // Visible from the start, fully visible during zoom phase
   );
 
-  // Video scale - very aggressive and fast scaling when centered, fills viewport
+  // Video scale - aggressive scaling but capped to prevent viewport issues
   // Expands much faster when centered (0.5-0.6) - synchronized with image explosion
   const videoScale = useTransform(
     smoothMediaProgress,
     [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-    [0.6, 0.7, 1.0, 3.0, 5.0, 7.0, 9.0, 12.0] // Much faster expansion - jumps from 1.0 to 3.0 at 0.5-0.6
+    [0.6, 0.7, 1.0, 2.5, 4.0, 5.5, 7.0, 8.5] // Reduced max scale to prevent viewport zoom issues
   );
 
   // Video glow - increases with zoom, creating immersive atmosphere
@@ -911,8 +911,10 @@ export default function HeroAnimation() {
               top: "50%",
               zIndex: 30,
               maxWidth: 'min(100%, 80rem)',
+              transformOrigin: 'center center',
+              willChange: 'transform, opacity',
             }}
-            className="absolute w-full overflow-visible"
+            className="absolute w-full overflow-hidden"
           >
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative">
               {/* Video red tint overlay - increases with scroll */}
@@ -1001,8 +1003,9 @@ export default function HeroAnimation() {
 
       {/* White fade overlay - fades in when video is large enough */}
       {/* Only shows at the very end to transition to next section */}
+      {/* Lower z-index to allow TechShowcaseSection content to appear above */}
       <motion.div
-        className="fixed inset-0 bg-white pointer-events-none z-[100]"
+        className="fixed inset-0 bg-white pointer-events-none z-[99]"
         style={{
           opacity: whiteFadeOverlayOpacity,
         }}
