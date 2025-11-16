@@ -24,7 +24,7 @@ export default function TechShowcaseSection() {
 
   // Matrix text typing animation
   useEffect(() => {
-    if (showTechText && !showPacman) {
+    if (showTechText && !showPacman && mounted) {
       setMatrixText("");
       setMatrixFinished(false);
       setPostMatrixMessageVisible(false);
@@ -32,13 +32,13 @@ export default function TechShowcaseSection() {
       let timeoutId: NodeJS.Timeout;
 
       const typeText = () => {
-        if (currentIndex < matrixFullText.length) {
+        if (currentIndex < matrixFullText.length && showTechText && !showPacman) {
           setMatrixText(matrixFullText.slice(0, currentIndex + 1));
           currentIndex++;
           const lastChar = matrixFullText[currentIndex - 1];
           const delay = lastChar === ' ' ? 25 : 55;
           timeoutId = setTimeout(typeText, delay);
-        } else {
+        } else if (currentIndex >= matrixFullText.length) {
           setMatrixFinished(true);
           setTimeout(() => setPostMatrixMessageVisible(true), 400);
         }
@@ -57,7 +57,7 @@ export default function TechShowcaseSection() {
       setMatrixFinished(false);
       setPostMatrixMessageVisible(false);
     }
-  }, [showTechText, showPacman, matrixFullText]);
+  }, [showTechText, showPacman, matrixFullText, mounted]);
 
   useEffect(() => {
     if (!mounted || !isInView) {
@@ -177,7 +177,7 @@ export default function TechShowcaseSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="relative min-h-screen overflow-hidden"
+      className="relative min-h-screen"
       initial={{ backgroundColor: "#ffffff" }}
       animate={{ backgroundColor: "#ffffff" }}
       style={{
@@ -187,6 +187,7 @@ export default function TechShowcaseSection() {
         imageRendering: "pixelated",
         position: "relative",
         zIndex: 100,
+        overflow: "visible", // Allow content to overflow during animations
       }}
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
@@ -199,6 +200,7 @@ export default function TechShowcaseSection() {
           initial={{ opacity: 1 }}
           animate={{ opacity: showPacman ? 0 : 1 }}
           transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
+          suppressHydrationWarning
         />
       )}
 
@@ -217,7 +219,14 @@ export default function TechShowcaseSection() {
             {/* Matrix text container - exactly centered */}
             <motion.div
               className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-              style={{ zIndex: 1000 }}
+              style={{ 
+                zIndex: 1000,
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -239,6 +248,8 @@ export default function TechShowcaseSection() {
                   fontWeight: "bold",
                   textTransform: "uppercase",
                   WebkitTextStroke: "1px rgba(57,255,20,0.5)",
+                  mixBlendMode: 'normal',
+                  isolation: 'isolate',
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -255,7 +266,14 @@ export default function TechShowcaseSection() {
             {matrixFinished && postMatrixMessageVisible && (
               <motion.div
                 className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-                style={{ zIndex: 999 }}
+                style={{ 
+                  zIndex: 999,
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -373,20 +391,24 @@ export default function TechShowcaseSection() {
                     title="Pacman Demo"
                     className="w-full h-full border-0"
                     style={{ 
-                      pointerEvents: isPlaying ? 'auto' : (countdown > 0 ? 'auto' : 'none'),
+                      // Always allow pointer events when game is visible (overlay handles blocking when needed)
+                      pointerEvents: (countdown === 0 && !isPlaying) ? 'none' : 'auto',
                       transform: 'translateZ(0)', // Force GPU acceleration
                       maxWidth: '100%',
                       maxHeight: '100%',
+                      display: 'block',
                     }}
+                    allow="gamepad; fullscreen"
                   />
 
-                  {/* Game over overlay */}
+                  {/* Game over overlay - only shows when countdown is 0 and game is not playing */}
                   <AnimatePresence>
                     {countdown === 0 && !isPlaying && (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto"
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto z-10"
                       >
                         <div className="text-center px-4">
                           <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
