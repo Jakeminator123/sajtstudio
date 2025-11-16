@@ -98,7 +98,7 @@ export default function ProcessSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Section header */}
         <motion.div
-          className="mb-16 md:mb-24 text-center"
+          className="mb-12 sm:mb-16 md:mb-24 text-center"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -107,7 +107,7 @@ export default function ProcessSection() {
             ease: designTokens.animation.framerEasing.smooth
           }}
         >
-          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 sm:mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vår Process"
               className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
@@ -136,7 +136,7 @@ export default function ProcessSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/5 backdrop-blur-md p-8 rounded-lg hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
+              className="group relative bg-white/5 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-lg hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
               {/* Number indicator */}
               <motion.div
@@ -144,7 +144,7 @@ export default function ProcessSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-accent via-tertiary to-accent-dark text-white font-mono text-3xl font-black mb-6 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-[0_0_30px_rgba(0,102,255,0.5)]"
+                className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-accent via-tertiary to-accent-dark text-white font-mono text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-[0_0_30px_rgba(0,102,255,0.5)]"
               >
                 {step.number}
               </motion.div>

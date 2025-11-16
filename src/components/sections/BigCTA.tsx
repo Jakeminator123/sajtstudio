@@ -53,7 +53,7 @@ export default function BigCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center space-y-12"
+          className="text-center space-y-8 sm:space-y-10 md:space-y-12"
         >
           {/* Main heading */}
           <h2 className="text-5xl md:text-7xl lg:text-display-mega font-black leading-none">
@@ -99,13 +99,13 @@ export default function BigCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 1, duration: 0.6 }}
-            className="pt-8"
+            className="pt-6 sm:pt-8"
           >
             <Link href="/contact">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)" }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative inline-flex items-center gap-4 px-12 py-6 bg-accent text-white font-bold text-xl overflow-hidden transition-all duration-300"
+                className="group relative inline-flex items-center gap-3 sm:gap-4 px-6 py-4 sm:px-8 sm:py-5 md:px-12 md:py-6 bg-accent text-white font-bold text-base sm:text-lg md:text-xl overflow-hidden transition-all duration-300 min-h-[44px]"
               >
                 {/* Animated background */}
                 <motion.div
@@ -146,7 +146,7 @@ export default function BigCTA() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            className="pt-8 flex flex-col md:flex-row items-center justify-center gap-8 text-gray-400"
+            className="pt-6 sm:pt-8 flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 text-gray-400"
           >
             <a
               href="mailto:info@sajtstudio.se"

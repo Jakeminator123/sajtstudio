@@ -424,7 +424,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: 1, duration: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-16"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 pt-12 sm:pt-16"
               style={mounted ? { y: statsY } : { y: 0 }}
               suppressHydrationWarning
             >
@@ -453,7 +453,7 @@ export default function AboutSection() {
                   className="group relative"
                 >
                   {/* Glassmorphism card */}
-                  <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 overflow-hidden group-hover:bg-white/10 group-hover:border-accent/50 transition-all duration-500">
+                  <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 md:p-12 overflow-hidden group-hover:bg-white/10 group-hover:border-accent/50 transition-all duration-500">
                     {/* Gradient border glow on hover */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div
