@@ -213,7 +213,7 @@ export default function USPSection() {
         }}
       />
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
@@ -305,7 +305,7 @@ export default function USPSection() {
           >
             <Link
               href={uspContent.cta.href}
-              className="inline-block px-10 py-5 bg-black text-white text-lg font-semibold hover:bg-accent transition-all duration-300 transform relative overflow-hidden group"
+              className="inline-block px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 bg-black text-white text-base sm:text-lg font-semibold hover:bg-accent transition-all duration-300 transform relative overflow-hidden group"
             >
               {/* Shimmer effect */}
               <motion.span

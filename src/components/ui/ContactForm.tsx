@@ -112,9 +112,9 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-3 text-white/80 uppercase tracking-wider">
+        <label htmlFor="name" className="block text-sm font-medium mb-2 sm:mb-3 text-white/80 uppercase tracking-wider">
           Namn
         </label>
         <input
@@ -125,7 +125,7 @@ export default function ContactForm() {
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, name: e.target.value }))
           }
-          className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40"
+          className="w-full px-4 py-3 sm:px-5 sm:py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40 min-h-[44px]"
           required
           disabled={formState.status === "sending"}
           placeholder="Ditt namn"
@@ -143,7 +143,7 @@ export default function ContactForm() {
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, email: e.target.value }))
           }
-          className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40"
+          className="w-full px-4 py-3 sm:px-5 sm:py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40 min-h-[44px]"
           required
           disabled={formState.status === "sending"}
           placeholder="din@email.se"
@@ -161,7 +161,7 @@ export default function ContactForm() {
           onChange={(e) =>
             setFormState((prev) => ({ ...prev, message: e.target.value }))
           }
-          className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all resize-none text-white placeholder-white/40"
+          className="w-full px-4 py-3 sm:px-5 sm:py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all resize-none text-white placeholder-white/40 min-h-[120px] sm:min-h-[150px]"
           required
           disabled={formState.status === "sending"}
           placeholder="Berätta om ditt projekt..."
@@ -201,7 +201,7 @@ export default function ContactForm() {
       <motion.button
         type="submit"
         disabled={formState.status === "sending"}
-        className="w-full px-8 py-5 bg-white text-black font-bold text-lg rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+        className="w-full px-6 py-4 sm:px-8 sm:py-5 bg-white text-black font-bold text-base sm:text-lg rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group min-h-[44px]"
         aria-busy={formState.status === "sending"}
         aria-live="polite"
         whileHover={{ scale: 1.02 }}

@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 const testimonials = [
   {
@@ -34,18 +35,42 @@ const testimonials = [
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
+  // Only enable scroll animations when section is visible
+  const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-200px",
+  });
+
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
+    layoutEffect: false, // Don't trigger layout recalculations
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
+  // Only calculate transforms when section is visible
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+  });
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+  });
+
+  // Set visibility ref to section ref
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, []);
 
   return (
     <motion.section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="section-spacing-md bg-black text-white relative overflow-hidden"
       style={{ 
         opacity, 
@@ -74,7 +99,7 @@ export default function TestimonialsSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Section header */}
         <motion.div
-          className="mb-16 md:mb-24 text-center"
+          className="mb-12 sm:mb-16 md:mb-24 text-center"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -83,7 +108,7 @@ export default function TestimonialsSection() {
             ease: designTokens.animation.framerEasing.smooth
           }}
         >
-          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 sm:mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vad Våra Kunder Säger"
               className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
@@ -113,7 +138,7 @@ export default function TestimonialsSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
+              className="group relative bg-white/5 backdrop-blur-md p-6 sm:p-8 md:p-10 hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
               {/* Quote icon */}
               <motion.div
@@ -121,10 +146,10 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="w-14 h-14 bg-gradient-to-br from-accent/30 via-tertiary/20 to-accent/10 flex items-center justify-center mb-6 rounded-lg shadow-[0_0_20px_rgba(0,102,255,0.3)]"
+                className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-accent/30 via-tertiary/20 to-accent/10 flex items-center justify-center mb-4 sm:mb-6 rounded-lg shadow-[0_0_20px_rgba(0,102,255,0.3)]"
               >
                 <svg
-                  className="w-7 h-7 text-accent"
+                  className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-accent"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -138,7 +163,7 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.3 }}
-                className="text-white/80 text-lg md:text-xl leading-relaxed mb-6 italic"
+                className="text-white/80 text-lg md:text-xl leading-relaxed mb-4 sm:mb-6 italic"
               >
                 "{testimonial.quote}"
               </motion.p>
@@ -149,9 +174,9 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.4 }}
-                className="border-t border-white/20 pt-6"
+                className="border-t border-white/20 pt-4 sm:pt-6"
               >
-                <div className="font-bold text-white text-lg">{testimonial.author}</div>
+                <div className="font-bold text-white text-base sm:text-lg">{testimonial.author}</div>
                 <div className="text-sm text-white/60">
                   {testimonial.role}, {testimonial.company}
                 </div>

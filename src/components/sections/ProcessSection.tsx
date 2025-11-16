@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useMounted } from "@/hooks/useMounted";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 const processSteps = [
   {
@@ -39,19 +40,46 @@ export default function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
 
+  // Only enable scroll animations when section is visible
+  const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-200px",
+  });
+
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
+    layoutEffect: false, // Don't trigger layout recalculations
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
-  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-5, 0, 5]);
+  // Only calculate transforms when section is visible
+  // Use conditional logic in transform function instead of ternary in array
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+  });
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+  });
+  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], (value) => {
+    return isSectionVisible ? (value < 0.5 ? -5 + (value / 0.5) * 5 : 5 - ((value - 0.5) / 0.5) * 5) : 0;
+  });
+
+  // Set visibility ref to section ref
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, [mounted]);
 
   return (
     <motion.section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="section-spacing-md bg-black text-white relative overflow-hidden"
       style={mounted ? {
         opacity,
@@ -98,7 +126,7 @@ export default function ProcessSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Section header */}
         <motion.div
-          className="mb-16 md:mb-24 text-center"
+          className="mb-12 sm:mb-16 md:mb-24 text-center"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -107,7 +135,7 @@ export default function ProcessSection() {
             ease: designTokens.animation.framerEasing.smooth
           }}
         >
-          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
+          <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 sm:mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vår Process"
               className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
@@ -136,7 +164,7 @@ export default function ProcessSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/5 backdrop-blur-md p-8 rounded-lg hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
+              className="group relative bg-white/5 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-lg hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
               {/* Number indicator */}
               <motion.div
@@ -144,7 +172,7 @@ export default function ProcessSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-accent via-tertiary to-accent-dark text-white font-mono text-3xl font-black mb-6 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-[0_0_30px_rgba(0,102,255,0.5)]"
+                className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-accent via-tertiary to-accent-dark text-white font-mono text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 group-hover:scale-110 transition-all duration-300 rounded-lg shadow-[0_0_30px_rgba(0,102,255,0.5)]"
               >
                 {step.number}
               </motion.div>

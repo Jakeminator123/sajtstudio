@@ -4,6 +4,7 @@ import WordReveal from "@/components/animations/WordReveal";
 import { useMounted } from "@/hooks/useMounted";
 import { MotionValue, motion, useInView, useMotionValue, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 // Animated counter component
 function AnimatedNumber({ value, suffix = "", duration = 2 }: { value: string; suffix?: string; duration?: number }) {
@@ -98,7 +99,7 @@ function FloatingParticle({
         y,
         pointerEvents: mounted ? 'auto' : 'none',
       }}
-      animate={mounted ? {
+      animate={mounted && isSectionVisible ? {
         x: [0, Math.sin(particle.id) * 20, 0],
         y: [0, Math.cos(particle.id) * 20, 0],
       } : {}}
@@ -154,7 +155,7 @@ function GlowingOrb({
         opacity,
         scale,
       }}
-      animate={mounted ? {
+      animate={mounted && isSectionVisible ? {
         x: animateX,
         y: animateY,
       } : {}}
@@ -171,9 +172,17 @@ function GlowingOrb({
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
+  
+  // Only enable scroll animations when section is visible
+  const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-200px",
+  });
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false, // Don't trigger layout recalculations
   });
 
   // Morphing effects - text becomes smoke-like blob that disappears earlier
@@ -275,9 +284,21 @@ export default function AboutSection() {
     delay: i * 0.1,
   }));
 
+  // Set visibility ref to section ref
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, [mounted]);
+
   return (
     <section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="section-spacing-md bg-gradient-to-b from-black via-gray-950 to-black text-white relative overflow-hidden min-h-screen flex items-center"
     >
       {/* Animated background layers */}
@@ -424,7 +445,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: 1, duration: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-16"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 pt-12 sm:pt-16"
               style={mounted ? { y: statsY } : { y: 0 }}
               suppressHydrationWarning
             >
@@ -453,7 +474,7 @@ export default function AboutSection() {
                   className="group relative"
                 >
                   {/* Glassmorphism card */}
-                  <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 overflow-hidden group-hover:bg-white/10 group-hover:border-accent/50 transition-all duration-500">
+                  <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 md:p-12 overflow-hidden group-hover:bg-white/10 group-hover:border-accent/50 transition-all duration-500">
                     {/* Gradient border glow on hover */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div

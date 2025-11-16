@@ -69,7 +69,7 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.15 + 0.2 }}
-            className="inline-flex items-center justify-center w-16 h-16 bg-accent text-white font-mono text-xl font-bold mb-6 group-hover:bg-accent-hover transition-colors duration-300"
+            className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-accent text-white font-mono text-lg sm:text-xl font-bold mb-4 sm:mb-6 group-hover:bg-accent-hover transition-colors duration-300"
           >
             {service.number}
           </motion.div>
@@ -94,7 +94,7 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.15 + 0.4 }}
-            className="text-gray-200 text-lg mb-6 leading-relaxed group-hover:text-white transition-colors duration-300"
+            className="text-gray-200 text-base sm:text-lg mb-4 sm:mb-6 leading-relaxed group-hover:text-white transition-colors duration-300"
           >
             {service.shortDesc}
           </motion.p>

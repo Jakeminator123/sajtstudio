@@ -174,7 +174,7 @@ export default function HeaderNav() {
           />
         )}
 
-        <nav className="container mx-auto px-6 py-4 relative">
+        <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
           <div className="flex items-center justify-between relative">
             {/* ============================================
                LOGO
@@ -325,7 +325,7 @@ export default function HeaderNav() {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden relative w-10 h-10 flex items-center justify-center"
+              className="lg:hidden relative w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center min-w-[44px] min-h-[44px]"
               aria-label={menuOpen ? "Stäng meny" : "Öppna meny"}
             >
               <div className="relative w-6 h-5 flex flex-col justify-between">

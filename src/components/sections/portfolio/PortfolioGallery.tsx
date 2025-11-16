@@ -78,16 +78,16 @@ export default function PortfolioGallery() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
       </motion.div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-16 md:mb-20"
         >
-          <h2 className="text-4xl md:text-6xl font-black mb-6">
+          <h2 className="text-4xl md:text-6xl font-black mb-4 sm:mb-6">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-white">
               Våra Senaste Projekt
             </span>
@@ -180,15 +180,15 @@ export default function PortfolioGallery() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center mt-20"
+          className="text-center mt-12 sm:mt-16 md:mt-20"
         >
-          <p className="text-gray-400 mb-8">
+          <p className="text-gray-400 mb-6 sm:mb-8">
             Vill du se mer av vårt arbete eller diskutera ditt nästa projekt?
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-100 transition-colors"
+            className="px-6 py-3 sm:px-8 sm:py-4 bg-white text-black font-bold text-sm sm:text-base rounded-full hover:bg-gray-100 transition-colors min-h-[44px]"
           >
             Starta ett projekt
           </motion.button>
@@ -249,7 +249,7 @@ export default function PortfolioGallery() {
               <p className="text-gray-300 text-lg mb-6">
                 {selectedProject.description}
               </p>
-              <button className={`px-6 py-3 bg-gradient-to-r ${selectedProject.color} text-white font-semibold rounded-lg hover:scale-105 transition-transform`}>
+              <button className={`px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r ${selectedProject.color} text-white text-sm sm:text-base font-semibold rounded-lg hover:scale-105 transition-transform min-h-[44px]`}>
                 Visa projekt
               </button>
             </div>

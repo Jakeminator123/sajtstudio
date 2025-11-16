@@ -6,6 +6,7 @@ import { prefersReducedMotion } from "@/lib/performance";
 import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 // Magnetic button component that follows mouse
 function MagneticButton({
@@ -314,11 +315,18 @@ export default function HeroSection() {
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
+  // Only track mouse when hero section is visible
+  const { ref: visibilityRef, isVisible: isHeroVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-100px",
+  });
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   // Track mouse position for 3D tilt and cursor effects with throttling
+  // Only when hero section is visible to save performance
   const mousePositionRef = useRef({ x: 0, y: 0 });
   const rafIdRef = useRef<number | null>(null);
   const lastUpdateRef = useRef(0);
@@ -326,7 +334,7 @@ export default function HeroSection() {
   const pendingUpdateRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    if (shouldReduceMotion) return;
+    if (shouldReduceMotion || !isHeroVisible) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       // Prevent multiple simultaneous updates
@@ -404,7 +412,7 @@ export default function HeroSection() {
       isUpdatingRef.current = false;
       pendingUpdateRef.current = null;
     };
-  }, [shouldReduceMotion]);
+  }, [shouldReduceMotion, isHeroVisible]);
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -493,9 +501,21 @@ export default function HeroSection() {
     };
   }, [shouldReduceMotion]);
 
+  // Combine refs for section and visibility
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, [mounted]);
+
   return (
     <motion.section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
       style={{
         position: 'relative',
@@ -559,8 +579,8 @@ export default function HeroSection() {
         </div>
       )}
 
-      {/* Cursor trail particles - optimized version */}
-      {mounted && !shouldReduceMotion && !isHoveringButton && (
+      {/* Cursor trail particles - optimized version - only when hero is visible */}
+      {mounted && !shouldReduceMotion && !isHoveringButton && isHeroVisible && (
         <CursorTrail mousePosition={mousePosition} />
       )}
       {/* Dynamic background with image overlays - only render on client */}
@@ -943,7 +963,7 @@ export default function HeroSection() {
           >
             <MagneticButton
               href="/utvardera"
-              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+              className="px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 bg-accent text-white font-bold text-base sm:text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
@@ -984,7 +1004,7 @@ export default function HeroSection() {
             </MagneticButton>
             <MagneticButton
               href="/portfolio"
-              className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+              className="px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-2 border-white text-white font-bold text-base sm:text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
