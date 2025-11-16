@@ -1,8 +1,8 @@
 'use client';
 
-import { motion, useMotionValue } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -58,12 +58,12 @@ export default function PageTransition({ children }: PageTransitionProps) {
           scaleX: progressScale,
           opacity: progressOpacity,
         }}
-        transition={{ 
-          duration: isLoading ? 0.3 : 0.2, 
+        transition={{
+          duration: isLoading ? 0.3 : 0.2,
           ease: isLoading ? [0, 0.58, 1, 1] : [0.42, 0, 1, 1] // Use arrays instead of strings
         }}
       />
-      
+
       {children}
     </div>
   );
@@ -87,11 +87,11 @@ export function FancyPageTransition({ children }: PageTransitionProps) {
             ease: [0.25, 0.1, 0.25, 1],
           }}
         />
-        
+
         {/* Content animation */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ 
+          animate={{
             opacity: 1,
             transition: {
               delay: 0.2,
@@ -99,7 +99,7 @@ export function FancyPageTransition({ children }: PageTransitionProps) {
               ease: [0.25, 0.1, 0.25, 1],
             }
           }}
-          exit={{ 
+          exit={{
             opacity: 0,
             transition: {
               duration: 0.2,
