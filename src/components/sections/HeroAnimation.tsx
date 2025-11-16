@@ -313,7 +313,7 @@ export default function HeroAnimation() {
   const videoScale = useTransform(
     smoothMediaProgress,
     [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-    [0.6, 0.7, 1.0, 2.5, 4.0, 5.5, 7.0, 8.5] // Reduced max scale to prevent viewport zoom issues
+    [0.6, 0.7, 1.0, 2.0, 3.5, 5.0, 6.5, 7.5] // Further reduced max scale to prevent viewport zoom issues
   );
 
   // Video glow - increases with zoom, creating immersive atmosphere
@@ -521,10 +521,13 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-black text-white relative overflow-hidden"
+      className="py-32 md:py-48 bg-black text-white relative"
       style={{
         scrollSnapAlign: 'start' as any,
         minHeight: '350vh', // Extended section for immersive zoom effect - allows smooth zoom experience
+        overflow: 'visible', // Allow content to overflow during zoom
+        position: 'relative',
+        zIndex: 1,
       }}
     >
       {/* ============================================ */}
@@ -602,7 +605,13 @@ export default function HeroAnimation() {
         {/* ============================================ */}
         <div
           ref={mediaContainerRef}
-          className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 overflow-visible w-full"
+          className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 w-full"
+          style={{
+            overflow: 'visible',
+            position: 'relative',
+            zIndex: 1,
+            transform: 'translateZ(0)', // Force GPU acceleration
+          }}
         >
           {/* Enhanced red background glow behind images when they explode */}
           {/* More intense and dramatic glow synchronized with explosion */}
@@ -644,8 +653,15 @@ export default function HeroAnimation() {
             ref={imagesContainerRef}
             className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative max-w-full"
             style={mounted ? {
-              zIndex: imagesContainerZIndex
-            } : { zIndex: 20 }}
+              zIndex: imagesContainerZIndex,
+              overflow: 'visible',
+              position: 'relative',
+              transform: 'translateZ(0)', // Force GPU acceleration
+            } : { 
+              zIndex: 20,
+              overflow: 'visible',
+              position: 'relative',
+            }}
             suppressHydrationWarning
           >
             {portfolioImages.map((src, index) => {
@@ -913,8 +929,10 @@ export default function HeroAnimation() {
               maxWidth: 'min(100%, 80rem)',
               transformOrigin: 'center center',
               willChange: 'transform, opacity',
+              position: 'absolute',
+              overflow: 'visible', // Allow video to overflow during zoom
             }}
-            className="absolute w-full overflow-hidden"
+            className="w-full"
           >
             <div className="rounded-lg overflow-hidden shadow-2xl border-2 border-accent/20 relative">
               {/* Video red tint overlay - increases with scroll */}
