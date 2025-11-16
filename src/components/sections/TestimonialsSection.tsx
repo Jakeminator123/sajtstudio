@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 const testimonials = [
   {
@@ -34,18 +35,42 @@ const testimonials = [
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
+  // Only enable scroll animations when section is visible
+  const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-200px",
+  });
+
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
+    layoutEffect: false, // Don't trigger layout recalculations
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
+  // Only calculate transforms when section is visible
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+  });
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
+    return isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+  });
+
+  // Set visibility ref to section ref
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, []);
 
   return (
     <motion.section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="section-spacing-md bg-black text-white relative overflow-hidden"
       style={{ 
         opacity, 

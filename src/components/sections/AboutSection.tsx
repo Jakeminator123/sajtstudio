@@ -4,6 +4,7 @@ import WordReveal from "@/components/animations/WordReveal";
 import { useMounted } from "@/hooks/useMounted";
 import { MotionValue, motion, useInView, useMotionValue, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useViewportVisibility } from "@/hooks/useViewportVisibility";
 
 // Animated counter component
 function AnimatedNumber({ value, suffix = "", duration = 2 }: { value: string; suffix?: string; duration?: number }) {
@@ -98,7 +99,7 @@ function FloatingParticle({
         y,
         pointerEvents: mounted ? 'auto' : 'none',
       }}
-      animate={mounted ? {
+      animate={mounted && isSectionVisible ? {
         x: [0, Math.sin(particle.id) * 20, 0],
         y: [0, Math.cos(particle.id) * 20, 0],
       } : {}}
@@ -154,7 +155,7 @@ function GlowingOrb({
         opacity,
         scale,
       }}
-      animate={mounted ? {
+      animate={mounted && isSectionVisible ? {
         x: animateX,
         y: animateY,
       } : {}}
@@ -171,9 +172,17 @@ function GlowingOrb({
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
+  
+  // Only enable scroll animations when section is visible
+  const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
+    threshold: 0.1,
+    rootMargin: "-200px",
+  });
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false, // Don't trigger layout recalculations
   });
 
   // Morphing effects - text becomes smoke-like blob that disappears earlier
@@ -275,9 +284,21 @@ export default function AboutSection() {
     delay: i * 0.1,
   }));
 
+  // Set visibility ref to section ref
+  useEffect(() => {
+    if (sectionRef.current && visibilityRef.current !== sectionRef.current) {
+      (visibilityRef as any).current = sectionRef.current;
+    }
+  }, [mounted]);
+
   return (
     <section
-      ref={sectionRef}
+      ref={(node) => {
+        sectionRef.current = node;
+        if (visibilityRef && typeof visibilityRef === 'object' && 'current' in visibilityRef) {
+          (visibilityRef as any).current = node;
+        }
+      }}
       className="section-spacing-md bg-gradient-to-b from-black via-gray-950 to-black text-white relative overflow-hidden min-h-screen flex items-center"
     >
       {/* Animated background layers */}
