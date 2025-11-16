@@ -214,7 +214,7 @@ export default function TechShowcaseSection() {
 
       {/* Matrix text - EXACTLY centered in viewport */}
       <AnimatePresence>
-        {isInView && showTechText && !showPacman && (
+        {mounted && isInView && showTechText && !showPacman && (
           <>
             {/* Matrix text container - exactly centered */}
             <motion.div
@@ -302,7 +302,7 @@ export default function TechShowcaseSection() {
       }}>
         <AnimatePresence mode="wait">
 
-          {isInView && showPacman && (
+          {mounted && isInView && showPacman && (
             <motion.div
               ref={pacmanRef}
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
