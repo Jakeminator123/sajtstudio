@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect } from "react";
+import { useMounted } from "@/hooks/useMounted";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
@@ -34,6 +35,7 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const mounted = useMounted();
 
   // Only enable scroll animations when section is visible
   const { ref: visibilityRef, isVisible: isSectionVisible } = useViewportVisibility({
@@ -48,12 +50,12 @@ export default function TestimonialsSection() {
     layoutEffect: false, // Don't trigger layout recalculations
   });
 
-  // Only calculate transforms when section is visible
+  // Only calculate transforms when section is visible and mounted
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+    return mounted && isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
   });
   const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+    return mounted && isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
   });
 
   // Set visibility ref to section ref
@@ -72,10 +74,14 @@ export default function TestimonialsSection() {
         }
       }}
       className="section-spacing-md bg-black text-white relative overflow-hidden"
-      style={{ 
+      style={mounted ? {
         opacity, 
         scale 
+      } : {
+        opacity: 1,
+        scale: 1
       }}
+      suppressHydrationWarning
     >
       {/* Background layers - much darker */}
       <div className="absolute inset-0">

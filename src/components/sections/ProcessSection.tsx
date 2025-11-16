@@ -53,16 +53,16 @@ export default function ProcessSection() {
     layoutEffect: false, // Don't trigger layout recalculations
   });
 
-  // Only calculate transforms when section is visible
+  // Only calculate transforms when section is visible and mounted
   // Use conditional logic in transform function instead of ternary in array
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+    return mounted && isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
   });
   const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+    return mounted && isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
   });
   const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], (value) => {
-    return isSectionVisible ? (value < 0.5 ? -5 + (value / 0.5) * 5 : 5 - ((value - 0.5) / 0.5) * 5) : 0;
+    return mounted && isSectionVisible ? (value < 0.5 ? -5 + (value / 0.5) * 5 : 5 - ((value - 0.5) / 0.5) * 5) : 0;
   });
 
   // Set visibility ref to section ref
