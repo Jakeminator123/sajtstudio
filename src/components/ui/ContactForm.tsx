@@ -201,7 +201,7 @@ export default function ContactForm() {
       <motion.button
         type="submit"
         disabled={formState.status === "sending"}
-        className="w-full px-8 py-5 bg-white text-black font-bold text-lg rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+        className="w-full px-6 py-4 sm:px-8 sm:py-5 bg-white text-black font-bold text-base sm:text-lg rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group min-h-[44px]"
         aria-busy={formState.status === "sending"}
         aria-live="polite"
         whileHover={{ scale: 1.02 }}

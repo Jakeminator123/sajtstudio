@@ -241,7 +241,7 @@ export default function PortfolioSection() {
           >
             <Link
               href="/portfolio"
-              className="inline-block px-10 py-5 border-2 border-white text-white text-lg font-semibold hover:bg-white hover:text-black transition-all duration-300"
+              className="inline-block px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-2 border-white text-white text-base sm:text-lg font-semibold hover:bg-white hover:text-black transition-all duration-300"
             >
               Se alla projekt
             </Link>

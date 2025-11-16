@@ -943,7 +943,7 @@ export default function HeroSection() {
           >
             <MagneticButton
               href="/utvardera"
-              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+              className="px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 bg-accent text-white font-bold text-base sm:text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
@@ -984,7 +984,7 @@ export default function HeroSection() {
             </MagneticButton>
             <MagneticButton
               href="/portfolio"
-              className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+              className="px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 border-2 border-white text-white font-bold text-base sm:text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}

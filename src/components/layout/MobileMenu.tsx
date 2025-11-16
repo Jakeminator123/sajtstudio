@@ -49,18 +49,18 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 20 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md sm:max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto"
           >
             {/* Gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90" />
 
             {/* Content */}
-            <div className="relative p-8 pt-20">
+            <div className="relative p-4 sm:p-6 md:p-8 pt-16 sm:pt-20">
               {/* Close button */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors min-w-[44px] min-h-[44px]"
                 aria-label="Stäng meny"
               >
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,7 +89,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
                           window.location.href = link.href;
                         }
                       }}
-                      className="block py-3 px-4 text-lg font-semibold text-white hover:text-accent transition-colors relative group overflow-hidden rounded-lg"
+                      className="block py-3 px-4 text-base sm:text-lg font-semibold text-white hover:text-accent transition-colors relative group overflow-hidden rounded-lg"
                     >
                       {/* Hover background */}
                       <motion.div

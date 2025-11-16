@@ -8,7 +8,7 @@ export default function Footer() {
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-gradient-to-t from-accent/5 via-transparent to-transparent pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           <div>
             <h3 className="text-2xl font-bold mb-2">
