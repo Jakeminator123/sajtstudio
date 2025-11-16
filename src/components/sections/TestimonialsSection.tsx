@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { useMounted } from "@/hooks/useMounted";
 import WordReveal from "@/components/animations/WordReveal";
@@ -50,12 +50,19 @@ export default function TestimonialsSection() {
     layoutEffect: false, // Don't trigger layout recalculations
   });
 
+  // Create reactive value for visibility check
+  const isVisibleValue = useMotionValue(mounted && isSectionVisible ? 1 : 0);
+  
+  useEffect(() => {
+    isVisibleValue.set(mounted && isSectionVisible ? 1 : 0);
+  }, [mounted, isSectionVisible, isVisibleValue]);
+
   // Only calculate transforms when section is visible and mounted
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return mounted && isSectionVisible ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
+  const opacity = useTransform([scrollYProgress, isVisibleValue], ([value, visible]: number[]) => {
+    return visible > 0 ? (value < 0.2 ? 0.3 + (value / 0.2) * 0.7 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.7 : 1) : 1;
   });
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], (value) => {
-    return mounted && isSectionVisible ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
+  const scale = useTransform([scrollYProgress, isVisibleValue], ([value, visible]: number[]) => {
+    return visible > 0 ? (value < 0.2 ? 0.95 + (value / 0.2) * 0.05 : value > 0.8 ? 1 - ((value - 0.8) / 0.2) * 0.05 : 1) : 1;
   });
 
   // Set visibility ref to section ref
