@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/.next/**": true
+    }
+  }
+}
