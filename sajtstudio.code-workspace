@@ -1,0 +1,63 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    // Use workspace settings
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+
+    // ESLint
+    "eslint.enable": true,
+    "eslint.workingDirectories": ["."],
+
+    // Editor
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+
+    // Tailwind CSS
+    "tailwindCSS.experimental.classRegex": [
+      ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+      ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"],
+    ],
+
+    // Files
+    "files.exclude": {
+      "**/.next": true,
+      "**/out": true,
+      "**/dist": true,
+      "**/.turbo": true,
+    },
+
+    // Search
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/out": true,
+      "**/dist": true,
+      "**/.turbo": true,
+    },
+
+    // Disable Microsoft Edge Tools warnings
+    "webhint.enable": false,
+    "edgeTools.webhint.enable": false,
+    "edgeTools.webhint.diagnostics": false,
+    "edgeTools.webhint.problems": false,
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next",
+      "eamodio.gitlens",
+      "usernamehw.errorlens",
+      "christian-kohler.path-intellisense",
+    ],
+  },
+}

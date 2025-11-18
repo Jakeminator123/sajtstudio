@@ -1,0 +1,59 @@
+{
+  "company": "Kebabrestaurang B2B",
+  "website_type_recommendation": "E-handelswebbplats med B2B-fokus som möjliggör onlineförsäljning av kebabprodukter, med sektion för information om företaget samt flerspråkig support för att nå olika kundsegment.",
+  "improvements": [
+    {
+      "item": "E-handelsplattform med B2B-funktioner",
+      "impact": "high",
+      "effort": "high",
+      "why": "Detta möjliggör enkelt beställande av produkter online, vilket kan öka försäljningen och förbättra kundupplevelsen för företag.",
+      "how": "Implementera en e-handelslösning som Shopify, WooCommerce eller en skräddarsydd plattform med B2B-stöd."
+    },
+    {
+      "item": "Flerspråkighet",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Möjliggör att nå en bredare kundbas och tillgodoser olika språkpreferenser hos företagskunder.",
+      "how": "Använd en flerspråkig plugin eller implementera språkval direkt på webbplatsen."
+    },
+    {
+      "item": "SEO-optimering",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Att synas på nätet är avgörande för att nå potensiala kunder och öka trafiken till webbplatsen.",
+      "how": "Optimera webbplatsens innehåll, metadata och URL-struktur samt implementera en blogg för att öka synligheten."
+    },
+    {
+      "item": "Responsiv design",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "En responsiv design ser till att webbplatsen fungerar bra på olika enheter, vilket är viktigt för användarupplevelsen.",
+      "how": "Använd ett flexibelt grid-system och media queries i CSS."
+    }
+  ],
+  "budget_estimate": {
+    "low": 50000,
+    "high": 120000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad onlineförsäljning av kebabprodukter",
+    "Bredare kundbas genom flerspråkighet",
+    "Förbättrad kundupplevelse och effektivare beställningsprocess"
+  ],
+  "technical_requirements": [
+    "E-handelsplattform med B2B-stöd",
+    "Flerspråkig funktionalitet",
+    "SEO-verktyg och analys",
+    "Responsiv webdesign",
+    "Säker betalningslösning"
+  ],
+  "audit_type": "recommendation",
+  "domain": null,
+  "cost": {
+    "tokens": 1103,
+    "sek": 0.07,
+    "usd": 0.0066
+  },
+  "timestamp": "2025-11-18T13:23:40.586Z"
+}

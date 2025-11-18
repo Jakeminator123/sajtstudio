@@ -1,0 +1,51 @@
+{
+  "company": "StrumpE-handel",
+  "website_type_recommendation": "En e-handelswebbplats som fokuserar på att sälja strumpor online med en användarvänlig design och responsiv layout för både desktop och mobila enheter.",
+  "improvements": [
+    {
+      "item": "Sökfunktion",
+      "impact": "high",
+      "effort": "medium",
+      "why": "En effektiv sökfunktion är kritisk för att kunden snabbt ska kunna hitta sina önskade produkter, vilket ökar konverteringsgraden.",
+      "how": "Implementering via ett skräddarsytt sökverktyg som kan filtrera produkter baserat på kategori, färg, storlek och pris."
+    },
+    {
+      "item": "Flerspråkighet",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Om företaget vill nå en bredare publik kan flerspråkighet hjälpa till att attrahera kunder som pratar olika språk.",
+      "how": "Använda ett innehållshanteringssystem (CMS) som stöder flerspråkiga funktioner och lägga till språkval på hemsidan."
+    },
+    {
+      "item": "Kontaktformulär",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Ett kontaktformulär möjliggör för kunder att enkelt ställa frågor och ökar engagemanget.",
+      "how": "Lägga till ett enkelt kontaktformulär med kryssrutor för olika frågor som gör det lätt för kunder att få svar."
+    }
+  ],
+  "budget_estimate": {
+    "low": 100000,
+    "high": 150000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökade försäljningar genom en användarvänlig köpupplevelse",
+    "Bättre kundengagemang genom kontaktmöjligheter och flerspråkig support",
+    "Förbättrad synlighet i sökmotorer vilket leder till ökad trafik"
+  ],
+  "technical_requirements": [
+    "Responsiv design för mobil och desktop",
+    "Integrerad betalningslösning",
+    "Sökmotoroptimering (SEO) från start",
+    "Användarvänlig CMS för enkel hantering av produkter och innehåll"
+  ],
+  "audit_type": "recommendation",
+  "domain": null,
+  "cost": {
+    "tokens": 1037,
+    "sek": 0.06,
+    "usd": 0.0059
+  },
+  "timestamp": "2025-11-16T04:37:55.725Z"
+}

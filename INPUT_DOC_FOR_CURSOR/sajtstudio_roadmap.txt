@@ -1,0 +1,207 @@
+Mall och Roadmap för Sajtstudio.se – modern företagswebbplats inspirerad av Fantasy
+Introduktion
+Denna plan beskriver en grundmall och roadmap för att bygga Sajtstudio.se som en modern, företagsanpassad webbplats med Next.js/React. Målet är att efterlikna ca 70% av designstilen från byrån Fantasy’s berömda webbplats, samtidigt som ~30% anpassas för Sajtstudios egen profil och innehåll. Vi utgår från ett helt nytt koncept (ingen befintlig mall) men drar nytta av de tekniker och designelement som gjorde Fantasy’s sajt framgångsrik. Resultatet ska bli en framåtblickande, modern webbsida som kommunicerar Sajtstudios erbjudande (skräddarsydda, toppmoderna hemsidor för utvalda företag) på ett innovativt sätt. I det följande beskrivs designinspiration från Fantasy, tekniska val (Next.js/React) och arkitektur, förslag på komponenter, interaktiva funktioner samt en stegvis utvecklingsplan. Citat från källor bekräftar viktiga insikter och beprövade metoder underbyggda av forskning och branschpraxis.
+Designinspiration från Fantasy
+Fantasy’s hemsida använder en segmenterad, minimalistisk layout med diskreta bakgrundsbilder och tydlig typografi. Varje avsnitt av startsidan har en egen högupplöst bakgrundsbild i svartvitt som är kraftigt nedtonad – bilden anas bara svagt i bakgrunden
+designrush.com
+. Detta grepp skapar visuellt djup mellan sektionerna utan att distrahera från innehållet. Ovanpå bakgrunderna visas fet, svart rubriktext som kortfattat beskriver vad Fantasy erbjuder. Kombinationen av bleka bilder och stark typografi ger ett modernt, luftigt intryck samt guidar besökaren genom sidans olika delar på ett enkelt sätt. Denna designprincip (monokrom bakgrund + fet text) bör vi efterlikna för Sajtstudio.se’s startsida, med egna texter om företagets fokus. Fantasy’s portföljsida presenterar projekt i ett färgglatt rutnät med ikoner/logotyper för klienter. Alla projekt visas som separata paneler med kraftfulla bakgrundsfärger och kundens namn eller logotyp i centrum
+designrush.com
+. Detta skapar en livfull mosaik av referenscase som genast fångar ögat och signalerar bredden på byråns kundbas. Ovanför portföljrutnätet finns en fast meny med ikoner/kategorier som hjälper användaren att filtrera eller hoppa direkt till projekt inom en viss kategori
+designrush.com
+. Menyn “följer med” när man scrollar (sticky navigation), vilket gör det lätt att utforska portföljen och snabbt hitta relevant innehåll. På Sajtstudio.se kan vi implementera en liknande case-sektion – antingen faktiska kundprojekt eller exempelcase – presenterade med starka färger och en enkel filtreringsfunktion för att visa olika typer av hemsidor vi kan bygga. Fantasy’s kontaktsida utmärker sig med hög kontrast och kreativa detaljer (t.ex. dubbla klockor för olika kontor). Sidan är designad i svart och vitt med endast en accentfärg för interaktiva element, vilket ger ett stilrent uttryck
+designrush.com
+. Informationen är tydligt uppdelad – t.ex. en ljus bakgrundssektion som visar adresser och analoga klockor med lokal tid för byråns kontor (San Francisco och New York)
+designrush.com
+. På en mörk sidopanel visas kontaktdetaljer (e-post, jobblänk) med den accentfärgade texten som blickfång. Denna lekfulla inslag (levande klockor) är både informativ och ger personlighet åt sajten. För Sajtstudio.se, som kanske inte har flera kontor, kan vi ändå inspireras att inkludera en unik visuell detalj på kontaktsidan – exempelvis en dynamisk tidvisning, ett interaktivt citat eller annan grafik som förstärker företagets identitet. Det viktiga är att hålla kontaktsidan enkel, svart/vit och överskådlig, med eventuellt en stark accentfärg som kontrast (Fantasy använde t.ex. en enda röd färg som accent
+awwwards.com
+). Sammanfattning av designprinciper att efterlikna:
+Monokrom minimalism med accentfärg: Använd en övervägande svart/vit basdesign med enstaka accentfärg för viktiga detaljer (Fantasy’s sajt har en ren färgpalett med i princip bara en accentfärg
+awwwards.com
+). Detta ger ett enhetligt och exklusivt intryck.
+Stora typografiska element: Kommunicera budskap genom korta, kraftfulla rubriker i stort font, snarare än långa textstycken. Fantasy’s sektioner domineras av några få ord i fet stil
+designrush.com
+, vilket vi kan anpassa till Sajtstudios kärnbudskap (t.ex. “Modern webbdesign”, “Skräddarsydda lösningar”, etc).
+Segmenterad layout med visuella avdelare: Dela upp innehållet i tydliga sektioner (t.ex. Hero, Tjänster, Portfolio, Kontakt) med varierande bakgrund (färg eller subtil bild) för att skilja dem visuellt
+designrush.com
+. Varje sektion bör fylla hela skärmbredden och ha egen karaktär, för att skapa en “storytelling” vid scroll.
+Interaktiva inslag för engagemang: Implementera små men effektfulla interaktioner som hover-effekter, scroll-animations och eventuellt parallax-rörelser för att ge sidan liv. Fantasy’s portfolio-ikoner ändrar t.ex. utseende vid hover (färgskiftning) enligt äldre exempel
+stackoverflow.com
+, och den sticky menyn ökar användarvänligheten genom att alltid finnas till hands
+designrush.com
+. Vi kan också överväga moderna effekter som mjuka sidövergångar och scroll-baserade animationer för att imponera besökaren. (En branschkommentar föreslår t.o.m. att lägga till CSS view-transitions, parallax-effekter och horisontell scroll för att få en riktigt dynamisk upplevelse
+reddit.com
+.)
+Lekfull detalj som ger karaktär: Precis som Fantasy använder klockor för att sticka ut, kan vi välja en signaturdetalj för Sajtstudio. Det kan vara t.ex. en liten animation i logotypen, en subtil micro-interaction på knappar, eller något i bakgrunden som rör sig. Poängen är att ge besökaren något att minnas, utan att kompromissa med den professionella tonen.
+Genom att följa ovanstående designstrategier får Sajtstudio.se en look & feel som ligger nära Fantasy (ca 70% likhet), men vi justerar färgval, innehåll och detaljer för att bevara unikitet. Nästa steg är att översätta denna designvision till en robust teknisk lösning med moderna verktyg.
+Teknisk arkitektur: Next.js, React och modern webbstack
+För att implementera den avancerade designen använder vi Next.js, som är ett React-baserat ramverk för webbappar. Next.js ger oss en solid grund med stöd för både statisk generering och server-side rendering, vilket innebär att vi kan bygga en sajt som laddar mycket snabbt och är sökmotorvänlig (SEO) från start
+kinsta.com
+. Faktum är att Next kan kompilera sidorna till statiska filer för blixtsnabb leverans (passar bra för portfoliosidor) samtidigt som vi kan rendera vissa delar på servern vid behov för dynamiskt innehåll – det bästa av två världar. Denna kombination gör Next.js utmärkt för moderna företagshemsidor där prestanda och SEO är viktiga, men man kanske ändå vill ha lite dynamik (t.ex. ett kontaktformulär eller en bloggsektion i framtiden). Tekniska fördelar med Next.js som vi drar nytta av:
+Filbaserad routing: Sidstrukturen byggs enkelt upp genom filsystemet (t.ex. pages/index.js för startsida, pages/portfolio.js för portföljsidan etc.), vilket ger automatisk routing utan extra kod
+kinsta.com
+. Detta förenklar navigationsimplementeringen för sidor som Hem, Portfolio, Kontakt osv.
+Bildoptimering: Next.js har inbyggd optimering för bilder via sin Image-komponent
+kinsta.com
+. Vi kan leverera högupplösta bilder (t.ex. bakgrundsfoton eller projektbilder) i optimerade format och storlekar automatiskt, vilket säkerställer snabbare laddning trots visuellt rika element.
+Prestanda och UX: Next.js optimerar rendering och har stöd för koddelning, cache, med mera. Sammantaget bidrar det till att användaren får en snabb och responsiv upplevelse, något som harmonierar med designens höga standard. Vi kan också lätt lägga in tredjepartslösningar som analytics, om så önskas, via Next’s plugin-system.
+Utvecklingen kommer ske med React som bas (Next är ju React under huven). All funktionalitet och layout bryts ned i återanvändbara React-komponenter, så att koden hålls ren och modulär. För stilmallar finns ett par alternativ: antingen använda ett CSS-ramverk som Tailwind CSS för snabb utveckling, eller traditionell CSS/SCSS med egna klasser för maximal kontroll. Båda är gångbara – givet Fantasy-inspirerad design med unika element lutar det åt att vi kombinerar: kanske Tailwind för grundläggande styling/utilities och egen CSS för finjusteringar. En modern frontend-stacks förebild är t.ex. en öppen Next.js-baserad byråmall som använder Next.js + Tailwind + Framer Motion för animeringar
+reddit.com
+reddit.com
+. Vi kan efterlikna detta genom att:
+Installera Tailwind för utility-first CSS (snabbt bygga layout som grid för portfoliorutnätet, responsiva brytpunkter, etc).
+Utnyttja Framer Motion (ett populärt animationsbibliotek för React) eller liknande för att implementera mjuka övergångar och scroll-animationer. Smidiga och engagerande sidövergångar har blivit en viktig del av modern UX, och Next.js ihop med Framer Motion är en kraftfull kombination för att ge liv åt övergångar
+dev.to
+. Exempelvis kan vi animera in sektionerna när man scrollar ned, eller ha en fin övergångseffekt när man navigerar mellan sidor (Home → Portfolio → Kontakt).
+Hålla koden uppdaterad med senaste Next.js-versionen (App Router-strukturen i Next 13/14) för att få bättre performance och enklare layout-hantering. T.ex. kan vi ha gemensamma layout-komponenter (header, footer) definierade en gång som appliceras på alla sidor. Detta ger konsekvens i design och underlättar kodunderhåll.
+Responsiv design är ett krav – vi bygger mobil-först eller åtminstone parallellt för mobil och desktop. Fantasy’s designprinciper (stora texter, sektioner) lämpar sig väl även för mobil med rätt anpassningar. Tailwind underlättar detta med inbyggda breakpoints, eller så skriver vi media queries manuellt i CSS. Vi bör också testa i flera webbläsare och skärmstorlekar under utvecklingen. Slutligen, om Sajtstudio.se kommer ha innehåll som behöver uppdateras ofta (t.ex. bloggposter, nya case), kan det vara värt att integrera en headless CMS i Next-projektet. Det finns moderna CMS:er som Sanity, Prismic etc, vilka enkelt kan kopplas in för att redigera innehåll utan att koda. Detta är dock valfritt – enligt uppdraget finns inget förhandsgivet innehåll, så initialt kan vi hårdkoda eller använda JSON för case-listan. Men vi lämnar utrymme i arkitekturen för att koppla på ett CMS senare om behov uppstår
+reddit.com
+. Sammanfattningsvis ger Next.js/React stacken oss stabilitet, prestanda och flexibilitet att implementera den design vi önskar, med möjlighet att utöka funktionalitet över tid.
+Exempel på komponenter i gränssnittet
+En React-komponent kan beskrivas som en återanvändbar byggsten i användargränssnittet – t.ex. en navigationsmeny, en sidfot eller en sektion av sidan. Genom att dela upp webbplatsen i komponenter blir koden mer hanterbar och vi kan enkelt återanvända sektioner på flera sidor
+reddit.com
+. Nedan listas några viktiga exempelkomponenter vi kommer att skapa för Sajtstudio.se, tillsammans med deras roll:
+<HeaderNav> – Navigationshuvud: En toppmeny som visas på alla sidor. Den innehåller Sajtstudio’s logotyp samt länkar (Home, Portfolio, Kontakt, ev. Om/Tjänster). Denna komponent kan göras sticky, så att den förblir överst vid scroll. Designmässigt hålls headern minimalistisk (förmodligen vit/svart bakgrund med enkel typografi, inspirerat av Fantasy’s rena meny).
+<HeroSection> – Hero-introsektion: Första skärmbilden på startsidan med en slagkraftig tagline och ev. en bakgrund (bild eller video). Här förmedlar vi direkt företagets värde: t.ex. “Sajtstudio – Modern webbdesign för framgångsrika företag”. Bakgrunden kan likt Fantasy vara nedtonad svartvit (kanske en abstrakt bild av kod eller design). <HeroSection> kan också inkludera en CTA-knapp (“Kontakta oss” eller “Se våra case”).
+<ServicesSection> – Tjänster/erbjudande: En sektion (kanske med 2-4 kolumner eller punkter) som beskriver vad Sajtstudio erbjuder. Fantasy hade tre numrerade områden (01 AI, 02 Produktinnovation, 03 Brand)
+fantasy.co
+ – vi kan på liknande sätt presentera Sajtstudios fokus, t.ex. “Modern design”, “Snabba laddtider”, “Mobilanpassning” eller liknande USPar. Varje punkt kan visas med en ikon eller siffra och kort beskrivning. Komponentmässigt kan detta vara ett <ServicesSection> som mappar ut varje tjänst via en underkomponent <ServiceItem>.
+<PortfolioSection> – Portfolio-preview på startsidan: Om vi vill lyfta fram några utvalda case direkt på förstasidan (Fantasy gör ju det med “Is this the future of X?” segmenten). Detta kan vara en horisontell scroll eller ett grid med 2-3 projekt. Varje projekt visas kanske som en bild och titel plus en “Läs mer” länk. Denna komponent kan ge en smak av portföljen och länka till fulla portföljsidan.
+<PortfolioPage> / <ProjectsGrid> – Portföljsidan: En egen sida (ex. /portfolio) där alla projekt listas i ett grid likt Fantasy’s färgglada mosaik
+designrush.com
+. Här kan vi använda en <ProjectsGrid>-komponent som itererar över en lista av projektobjekt och renderar ett <ProjectCard> för varje. <ProjectCard> visar t.ex. kundens logotyp eller projektets namn på en bakgrundsfärg (färger kan slumpas eller definieras per kategori för variation). Vi kan också inkludera filter/navigation – antingen en horisontell lista över kategorier högst upp (som i Fantasy med ikoner), eller en sidopanel. Den logik som behövs (kanske en React state för aktiv kategori och en scrollfunktion) kapslas in i portföljkomponenten.
+<ProjectCaseStudy> – Projektdetaljsida (valfritt): Om vi planerar att ha djupare case studies för varje projekt, skulle vi använda Next.js dynamiska routes (t.ex. /portfolio/[slug].js) och en komponent som tar in ett projekt-id och visar detaljer (bilder, text, utmaningar/lösning osv.). I början kanske detta inte behövs om vi bara presenterar en översikt, men arkitekturen kan enkelt utökas för det när innehåll finns.
+<ContactSection> – Kontaktinfo (footer eller egen sida): En komponent som visar kontaktinformation. På en one-page site kunde detta vara en sektion längst ner, men troligen har vi en separat sida /contact. Vi kommer visa företagets adress, e-post, telefon, och kanske ett enkelt kontaktformulär eller en direkt mailto-länk. För att ge sidan “det lilla extra” kan <ContactSection> inkludera en specialdetalj, t.ex. en klockkomponent som visar aktuell tid på kontoret. Det kan implementeras i React med useEffect som uppdaterar tiden varje minut. I Fantasy’s fall visas två tidszoner
+designrush.com
+, men här kanske det räcker med en (lokal tid för Sajtstudio’s kontor).
+<Footer> – Sidfot: Längst ned på varje sida en enkel footer med ©-info, länk till ev. policy etc. Fantasy’s footer är extremt enkel
+fantasy.co
+, vilket vi också kan efterlikna för en ren avslutning på sidan.
+Alla dessa komponenter byggs i React/JSX och kan ha egna CSS-stilar. Genom att strukturera på detta sätt blir det lätt att jobba på varje del separat och även att framtida ändringar eller tillägg (som nya sektioner) inte påverkar övriga delar. Komponentbaserad utveckling ger också möjligheten att anima specifika komponenter separat – t.ex. animera in <HeroSection> på load, applicera hover-effekt på <ProjectCard>, etc., utan att blanda in logik i andra delar. Detta modulariserade tänk följer industristandard och gör koden mer hållbar över tid
+reddit.com
+.
+Roadmap för utveckling
+För att gå från idé till färdig webbplats följer vi en tydlig roadmap med milstolpar. Nedan är en steg-för-steg-plan:
+Projektuppstart och setup: Initiera ett nytt Next.js-projekt med TypeScript-stöd (valfritt) genom att köra t.ex. npx create-next-app@latest sajtstudio
+kinsta.com
+. Detta skapar grundstrukturen för projektet. Sätt upp versionshantering (git) och ett repo på GitHub/GitLab. Installera nödvändiga beroenden: t.ex. Tailwind CSS (om vi använder det) enligt dess dokumentation, samt eventuella animationsbibliotek som Framer Motion (npm install framer-motion). Konfigurera också projektets metadata (titel, favicon etc.) i Next.js konfig och <Head>-komponent för bra SEO-basics.
+Grundläggande struktur och layout: Implementera det globala ramverket för sajten. Detta inkluderar <HeaderNav> och <Footer> komponenterna samt en layout-komponent som omger sidorna (i Next 13+ lägger man detta i app/layout.tsx eller använder _app.js i äldre struktur). Bestäm färgtema och typsnitt här – exempelvis importera Google Fonts om ett modernt sans-serif typsnitt ska användas för rubriker. Definiera också CSS-variabler eller Tailwind-konfiguration för primär färg (accentfärgen) och neutrala färger. I detta skede säkerställer vi att navigationen fungerar (länkar mellan sidor), och att sidan har en basstil som stämmer med det minimalistiska Fantasy-uttrycket (mycket vitt/svart, stora rubriker). Testa att köra dev-servern och se att inget brutet.
+Bygga startsidan (Home): Koda startsidans innehåll genom att komponera sektionerna i ordning. Börja med <HeroSection> – sätt bakgrund (placeholder-bild om riktig saknas än), skriv tagline och CTA. Applicera CSS för att centrera innehållet vertikalt, ge fullhöjd-vy kanske. Därefter lägg in <ServicesSection> med några kolumner; skriv korta beskrivningar för Sajtstudio’s erbjudanden. Fortsätt med <PortfolioSection> om vi vill visa utvalda case; här kan vi behöva placeholder-projekt (om inga riktiga kundcase finns ännu kan vi använda generiska exempel för designens skull). Slutligen placera en uppmaning till kontakt eller preview av kontaktinfo på slutet av sidan (alternativt en knapp “Kontakta oss”). Under utvecklingen av dessa delar, se till att responsiv anpassning görs parallellt – titta på mobilvy, justera texters storlek etc. Eftersom designen är sektionerad är det relativt enkelt att stapla dem på mobil.
+Bygga portföljsida och undersidor: Implementera /portfolio sidan med <ProjectsGrid> och eventuellt filtermenyn. Här skriver vi logik för att lista alla projekt. Vi kan skapa en JS-objektlista eller JSON-fil med projektdata (namn, kategori, färg, bildlänk etc.) som komponenten itererar över. Lägg till klick eller hoverefekter på projektkorten (t.ex. ändra opacitet eller zooma bilden vid hover – en effekt liknande den som efterfrågades för fantasy.co/work
+stackoverflow.com
+). Om en projektsida per case ska finnas, implementera Next.js dynamiska routes: skapa filen [slug].jsx under /pages/portfolio/ och hämta motsvarande data baserat på slug för att rendera <ProjectCaseStudy> sidan. (Detta kan initialt utelämnas om vi bara gör one-page portfolio). Även en eventuell Om oss-sida eller sektion kan byggas här om det är relevant – t.ex. en sida om Sajtstudio, dess vision, team etc., för att ge en personlig touch.
+Kontakt och formulär: Koda /contact sidan med <ContactSection>. Inkludera företagets kontaktinformation. Om vi väljer att ha ett formulär (t.ex. namn, e-post, meddelande), behöver vi bestämma hur det ska hanteras – enklast initialt är att använda mailto-länk eller tredjepartstjänst (som Formspree) för att slippa sätta upp egen backend. Gärna implementera den utmärkande detaljen här: exempelvis en <Clock> sub-komponent som med JavaScript visar aktuell tid. Denna klocka kan stylas analogt (svårt utan bild/svg) eller digitalt. Poängen är att demonstrera den kreativa approachen även tekniskt. Testa att formulär/mejl-länk faktiskt fungerar.
+Interaktiva förbättringar och animationer: När all statisk layout är klar och innehåll på plats, förädla upplevelsen genom att lägga till animationer och interaktivitet. Med Framer Motion kan vi t.ex. wrappa våra sidkomponenter i <AnimatePresence> för att få snygga fade/slide-effekter när man byter sida
+reddit.com
+. Vi kan animera in sektionerna på startsidan: t.ex. att <HeroSection> text glider in uppifrån med opacity transition vid load, att varje service-item dyker upp sekventiellt, eller att portföljkorten får en liten hover-lyft. Scroll-triggered animationer (där innehåll fades in när det blir synligt) kan implementeras med Framer Motion’s hooks eller med Intersection Observer API i React (som kollar när en komponent är i viewport och då lägger på en CSS-klass). Även sticky navigation på portföljsidan programmeras nu: vi gör så att när användaren scrollar, den aktiva kategorin i menyn markeras (kan göras genom Intersection Observer som lyssnar på vilken sektion i grid:en som är i fokus). Parallax-effekter kan övervägas för bakgrundsbilder (t.ex. hero-bakgrund rör sig långsammare än förgrundstext vid scroll) – det kan uppnås med CSS transform och JS på scroll event, men bör användas sparsamt för prestandan. I detta steg optimerar vi också alla hover-effekter och feedback på knappar/länkar för god UX.
+Testning, prestandaoptimering och SEO-finishing: Nu testar vi sajten grundligt. Kontrollera i olika webbläsare (Chrome, Firefox, Safari, Edge) och på olika enheter (mobil, tablet, desktop). Justera eventuella responsive-problem. Kör Lighthouse audit eller WebPageTest för att se om prestandamål uppfylls – vid behov, optimera vidare (t.ex. lazy-loada bilder med Next Image, minifiera/tune animations). Next.js har redan skött mycket, men vi kan t.ex. aktivera Image-componentens automatiska optimering med hjälp av biblioteket sharp för bästa resultat
+kinsta.com
+kinsta.com
+. Se även till att alla sidtitlar, meta-descriptions och alt-taggar på bilder är ifyllda för SEO. Skapa en sitemap och robots.txt. Om sidan är flerspråkig (troligen ej nu, men om svenska/engelska var aktuellt) kan Next’s i18n användas – men här antar vi endast svenska initialt.
+Deployment (lansering): När allt är färdigt och testat är det dags att lansera. Next.js-appar är lätta att driftsätta – vi kan bygga projektet (npm run build) och välja en hosting. Ett smidigt val är Vercel, som är plattformen skaparna av Next.js erbjuder: man kan koppla Git-repot och få auto-deploy vid push. Alternativt kan vi använda ett traditionellt webbhotell eller en tjänst som Kinsta, som i sin guide visade hur man kan deploya Next.js direkt via Github på några minuter
+kinsta.com
+. Domänen sajtstudio.se konfigureras att peka mot den hosting vi väljer. Efter uppladdning testar vi en gång till den skarpa miljön så allt fungerar (ibland kan miljövariabler för kontaktformulär eller liknande behöva sättas). Därefter är Sajtstudio.se live för världen! 🎉
+När webbplatsen är lanserad kan man överväga kontinuerlig förbättring: samla in besöksdata, se hur användare interagerar, och finjustera både design och funktionalitet. Tack vare den valda Next.js/React-arkitekturen är det enkelt att vidareutveckla – lägga till nya case, nya blogginlägg eller vad som kan behövas – vilket gör att sidan kan växa med företaget. Med denna mall och roadmap har vi en tydlig riktning för att skapa en modern, imponerande webbplats som kombinerar Fantasy-inspirerad design med Sajtstudios unika innehåll och teknisk excellens. Källor: De idéer och metoder som föreslås ovan stöds av insikter från designanalys av Fantasy’s egen webbplats
+designrush.com
+designrush.com
+, community-exempel på moderna Next.js-byggen
+reddit.com
+ samt etablerade utvecklingsresurser om Next.js och React
+kinsta.com
+dev.to
+. Dessa källor försäkrar att vår plan vilar på beprövad grund, så att Sajtstudio.se kan byggas effektivt och uppnå en högkvalitativ slutprodukt.
+Citations
+
+Fantasy Website Design: The Full Analysis | DesignRush
+
+https://www.designrush.com/best-designs/websites/fantasy
+
+Fantasy Website Design: The Full Analysis | DesignRush
+
+https://www.designrush.com/best-designs/websites/fantasy
+
+Fantasy Website Design: The Full Analysis | DesignRush
+
+https://www.designrush.com/best-designs/websites/fantasy
+
+Fantasy Website Design: The Full Analysis | DesignRush
+
+https://www.designrush.com/best-designs/websites/fantasy
+
+Fantasy - Awwwards SOTD
+
+https://www.awwwards.com/sites/fantasy
+
+jquery - javascript fade / zoom effect .. what am i doing wrong - Stack Overflow
+
+https://stackoverflow.com/questions/42275053/javascript-fade-zoom-effect-what-am-i-doing-wrong
+
+Open Source Animated Next.js Portfolio & Agency Template : r/tailwindcss
+
+https://www.reddit.com/r/tailwindcss/comments/1lbbpwg/open_source_animated_nextjs_portfolio_agency/
+
+How To Build and Deploy a Developer Portfolio With Next.js - Kinsta®
+
+https://kinsta.com/blog/next-js-portfolio/
+
+How To Build and Deploy a Developer Portfolio With Next.js - Kinsta®
+
+https://kinsta.com/blog/next-js-portfolio/
+
+Open Source Animated Next.js Portfolio & Agency Template : r/tailwindcss
+
+https://www.reddit.com/r/tailwindcss/comments/1lbbpwg/open_source_animated_nextjs_portfolio_agency/
+
+Open Source Animated Next.js Portfolio & Agency Template : r/tailwindcss
+
+https://www.reddit.com/r/tailwindcss/comments/1lbbpwg/open_source_animated_nextjs_portfolio_agency/
+
+Nextjs Page Transition With Framer-Motion - DEV Community
+
+https://dev.to/joseph42a/nextjs-page-transition-with-framer-motion-33dg
+
+Open Source Animated Next.js Portfolio & Agency Template : r/tailwindcss
+
+https://www.reddit.com/r/tailwindcss/comments/1lbbpwg/open_source_animated_nextjs_portfolio_agency/
+
+Open Source Animated Next.js Portfolio & Agency Template : r/tailwindcss
+
+https://www.reddit.com/r/tailwindcss/comments/1lbbpwg/open_source_animated_nextjs_portfolio_agency/
+
+Fantasy | Lead by Design
+
+https://fantasy.co/
+
+Fantasy | Lead by Design
+
+https://fantasy.co/
+
+How To Build and Deploy a Developer Portfolio With Next.js - Kinsta®
+
+https://kinsta.com/blog/next-js-portfolio/
+
+How can I make page transition like this using NextJS + Framer ...
+
+https://www.reddit.com/r/nextjs/comments/18d0uwf/how_can_i_make_page_transition_like_this_using/
+
+How To Build and Deploy a Developer Portfolio With Next.js - Kinsta®
+
+https://kinsta.com/blog/next-js-portfolio/
+
+How To Build and Deploy a Developer Portfolio With Next.js - Kinsta®
+
+https://kinsta.com/blog/next-js-portfolio/
+All Sources
+
+designrush
+
+awwwards
+
+stackoverflow
+
+reddit
+
+kinsta
+
+dev
+
+fantasy

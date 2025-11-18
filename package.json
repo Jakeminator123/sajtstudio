@@ -1,0 +1,56 @@
+{
+  "name": "sajtstudio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "ci": "npm ci",
+    "dev": "next dev --turbopack",
+    "dev:safe": "node scripts/safe-dev-start.js",
+    "dev:mobile": "node scripts/safe-dev-start-mobile.js",
+    "dev:turbo": "next dev --turbopack",
+    "kill": "node scripts/kill-node-processes.js",
+    "kill:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/kill-node-processes.ps1",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "clean": "node scripts/clean.js",
+    "clean:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/quick-clean.ps1",
+    "clean:full": "node scripts/clean-full.js",
+    "rebuild": "npm run clean:full",
+    "fix:warnings": "node scripts/auto-fix-warnings.js",
+    "check:warnings": "node scripts/read-cursor-warnings.js",
+    "check:errors": "node scripts/check-browser-errors.js"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
+    "@types/cheerio": "^0.22.35",
+    "cheerio": "^1.1.0",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^11.0.0",
+    "lint": "^1.1.2",
+    "next": "16.0.1",
+    "openai": "^6.9.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "resend": "^6.4.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.22",
+    "babel-plugin-react-compiler": "1.0.0",
+    "critters": "^0.0.23",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.0.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "glob": "11.1.0"
+  }
+}

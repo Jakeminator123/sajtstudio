@@ -1,0 +1,51 @@
+{
+  "company": "Restaurang & Mat",
+  "website_type_recommendation": "En informativ och interaktiv hemsida som presenterar företagets tjänster, priser och nyheter. Den ska vara responsiv och flerspråkig för att nå både privatpersoner och företag.",
+  "improvements": [
+    {
+      "item": "Flerspråkighet",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Att erbjuda en flerspråkig hemsida gör den tillgänglig för en bredare publik, vilket är viktigt i en mångkulturell miljö.",
+      "how": "Genom att använda ett flerspråkighetsplugin eller en skräddarsydd lösning där innehållet kan översättas och hanteras enkelt."
+    },
+    {
+      "item": "Nyhetsbrev",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Nyhetsbrev kan öka engagemanget och kundlojaliteten genom att hålla kunder informerade om erbjudanden och nyheter.",
+      "how": "Implementera en formulärlösning och en e-posttjänst för att samla in och hantera prenumerationer."
+    },
+    {
+      "item": "Medlemsinlogg",
+      "impact": "medium",
+      "effort": "high",
+      "why": "Med en medlemsinlogg kan du erbjuda skräddarsydda upplevelser och exklusiva erbjudanden till återkommande kunder.",
+      "how": "Skapa en kontohanteringslösning som gör det möjligt för användare att logga in och hantera sina konton."
+    }
+  ],
+  "budget_estimate": {
+    "low": 50000,
+    "high": 100000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad synlighet och trafik till hemsidan",
+    "Höjd kundengagemang genom nyhetsbrev",
+    "Flertalet nya registreringar i medlemsprogrammet"
+  ],
+  "technical_requirements": [
+    "Responsiv design",
+    "SEO-optimerad struktur",
+    "CMS för enkel innehållshantering",
+    "Säkerhetsprotokoll för medlemsinloggning"
+  ],
+  "audit_type": "recommendation",
+  "cost": {
+    "tokens": 1017,
+    "sek": 0.06,
+    "usd": 0.0057
+  },
+  "domain": null,
+  "timestamp": "2025-11-18T14:41:20.867Z"
+}

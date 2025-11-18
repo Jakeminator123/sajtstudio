@@ -1,0 +1,60 @@
+{
+  "company": "Sjuksköterskeverksamhet inom Hälsa & Vård",
+  "website_type_recommendation": "En professionell och användarvänlig varumärkeshemsida med fokus på att bygga förtroende och etablera lokal närvaro. Den bör inkludera patientberättelser och möjlighet att enkelt boka tider.",
+  "improvements": [
+    {
+      "item": "Bokningssystem",
+      "impact": "high",
+      "effort": "high",
+      "why": "Tillåter kunder att enkelt boka tider vilket kan leda till högre konverteringsgrad och bättre resursallokering.",
+      "how": "Implementera ett integrerat bokningsverktyg som synkas med personalens scheman."
+    },
+    {
+      "item": "SEO-optimering",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Ökar synligheten hos lokalbefolkningen, vilket är avgörande för att nå målgruppen.",
+      "how": "Använd lokala sökord, meta-tags och optimerade bilder."
+    },
+    {
+      "item": "Kundcase/Referenser",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Bygger förtroende och ökar trovärdigheten hos nya kunder.",
+      "how": "Publicera detaljerade patientberättelser och citat på sidan."
+    },
+    {
+      "item": "Prisinformation",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Klart kommunicerade priser kan reducera osäkerhet och öka konvertering.",
+      "how": "Lista tjänster med tydliga prisuppgifter och eventuella paketlösningar."
+    }
+  ],
+  "budget_estimate": {
+    "low": 50000,
+    "high": 100000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökat förtroende för varumärket",
+    "Bättre lokal synlighet och ökade bokningar",
+    "Effektivare resursallokering",
+    "Förbättrad kundkommunikation"
+  ],
+  "technical_requirements": [
+    "Responsiv design",
+    "SSL-certifikat",
+    "CMS för enkel uppdatering av innehåll",
+    "Integrerat bokningssystem",
+    "SEO-optimerat innehåll och struktur"
+  ],
+  "audit_type": "recommendation",
+  "domain": null,
+  "cost": {
+    "tokens": 1046,
+    "sek": 0.07,
+    "usd": 0.006
+  },
+  "timestamp": "2025-11-18T13:16:40.155Z"
+}

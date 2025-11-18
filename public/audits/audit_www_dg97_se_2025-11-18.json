@@ -1,0 +1,61 @@
+{
+  "company": "DG97",
+  "audit_scores": {
+    "seo": 70,
+    "technical_seo": 80,
+    "ux": 75,
+    "content": 70,
+    "performance": 65,
+    "accessibility": 70
+  },
+  "strengths": [
+    "SSL installerat",
+    "Bra placering i Stockholm"
+  ],
+  "issues": [
+    "Lång svarstid",
+    "Möjligheter för förbättrad rubrikhierarki",
+    "Innehåll kan vara mer engagerande"
+  ],
+  "improvements": [
+    {
+      "item": "Optimera laddningstid",
+      "impact": "high",
+      "effort": "high",
+      "why": "Förbättra användarupplevelsen och SEO",
+      "how": "Komprimera bilder och använd caching"
+    },
+    {
+      "item": "Förbättra rubrikhierarki",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Öka SEO och läsbarhet",
+      "how": "Använd H1, H2 och H3 korrekt"
+    },
+    {
+      "item": "Optimera innehållet",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Göra texten mer engagerande",
+      "how": "Införlivande av kundrecensioner och case studies"
+    }
+  ],
+  "budget_estimate": {
+    "low": 10000,
+    "high": 30000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Förbättrad SEO-ranking",
+    "Minskad avvisningsfrekvens",
+    "Högre konverteringsgrad"
+  ],
+  "audit_type": "website_audit",
+  "domain": "www.dg97.se",
+  "cost": {
+    "tokens": 1041,
+    "sek": 0.05,
+    "usd": 0.0046
+  },
+  "timestamp": "2025-11-18T13:09:42.287Z"
+}
