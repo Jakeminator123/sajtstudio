@@ -235,9 +235,15 @@ export default function UtvarderaPage() {
     setLoadingStage("connecting");
     setLoadingProgress(0);
 
+    // Track if component is still mounted and request is active
+    let isActive = true;
+    const stageTimeouts: NodeJS.Timeout[] = [];
+
     // Simulate progress updates
     const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => Math.min(prev + 5, 90));
+      if (isActive) {
+        setLoadingProgress((prev) => Math.min(prev + 5, 90));
+      }
     }, 500);
 
     try {
@@ -245,26 +251,33 @@ export default function UtvarderaPage() {
       setLoadingStage("connecting");
       setLoadingProgress(10);
 
-      // Stage 2: Scraping
-      setTimeout(() => {
-        if (isLoading) {
+      // Stage 2: Scraping - use ref to track active state
+      const scrapingTimeout = setTimeout(() => {
+        if (isActive) {
           setLoadingStage("scraping");
           setLoadingProgress(30);
         }
       }, 1000);
+      stageTimeouts.push(scrapingTimeout);
 
       // Stage 3: Analyzing
-      setTimeout(() => {
-        if (isLoading) {
+      const analyzingTimeout = setTimeout(() => {
+        if (isActive) {
           setLoadingStage("analyzing");
           setLoadingProgress(60);
         }
       }, 3000);
+      stageTimeouts.push(analyzingTimeout);
 
       // Create AbortController for timeout handling
       const controller = new AbortController();
       setAbortController(controller);
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+      const timeoutId = setTimeout(() => {
+        if (isActive) {
+          controller.abort();
+        }
+      }, 300000); // 5 minute timeout
+      stageTimeouts.push(timeoutId);
 
       const response = await fetch("/api/audit", {
         method: "POST",
@@ -282,8 +295,10 @@ export default function UtvarderaPage() {
       clearTimeout(timeoutId);
 
       // Stage 4: Generating
-      setLoadingStage("generating");
-      setLoadingProgress(85);
+      if (isActive) {
+        setLoadingStage("generating");
+        setLoadingProgress(85);
+      }
 
       if (!response.ok) {
         const errorData = await response
@@ -306,34 +321,43 @@ export default function UtvarderaPage() {
         throw new Error(data.error || "Analysen misslyckades");
       }
 
-      setLoadingProgress(100);
-      setTimeout(() => {
-        setResult(data.result);
-        setMode("results");
-        showToast("Analysen är klar! 🎉", "success");
-      }, 500);
+      if (isActive) {
+        setLoadingProgress(100);
+        // Delay transition to allow progress animation to complete
+        setTimeout(() => {
+          if (isActive) {
+            setResult(data.result);
+            setMode("results");
+            showToast("Analysen är klar! 🎉", "success");
+          }
+        }, 500);
+      }
     } catch (error) {
       console.error("Audit error:", error);
-      if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
-        } else if (
-          error.message.includes("timeout") ||
-          error.message.includes("Timeout")
-        ) {
-          setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
+      if (isActive) {
+        if (error instanceof Error) {
+          if (error.name === "AbortError") {
+            setError(
+              "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
+            );
+          } else if (
+            error.message.includes("timeout") ||
+            error.message.includes("Timeout")
+          ) {
+            setError(
+              "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
+            );
+          } else {
+            setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          }
         } else {
-          setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          setError("Ett oväntat fel uppstod. Försök igen.");
         }
-      } else {
-        setError("Ett oväntat fel uppstod. Försök igen.");
       }
     } finally {
+      isActive = false;
       clearInterval(progressInterval);
+      stageTimeouts.forEach((timeout) => clearTimeout(timeout));
       setIsLoading(false);
       setLoadingProgress(0);
       setAbortController(null);
@@ -346,19 +370,32 @@ export default function UtvarderaPage() {
     setLoadingStage("connecting");
     setLoadingProgress(0);
 
+    // Track if component is still mounted and request is active
+    let isActive = true;
+    const stageTimeouts: NodeJS.Timeout[] = [];
+
     // Simulate progress
     const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => Math.min(prev + 10, 90));
+      if (isActive) {
+        setLoadingProgress((prev) => Math.min(prev + 10, 90));
+      }
     }, 300);
 
     try {
-      setLoadingStage("analyzing");
-      setLoadingProgress(30);
+      if (isActive) {
+        setLoadingStage("analyzing");
+        setLoadingProgress(30);
+      }
 
       // Create AbortController for timeout handling
       const controller = new AbortController();
       setAbortController(controller);
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+      const timeoutId = setTimeout(() => {
+        if (isActive) {
+          controller.abort();
+        }
+      }, 300000); // 5 minute timeout
+      stageTimeouts.push(timeoutId);
 
       const response = await fetch("/api/audit", {
         method: "POST",
@@ -375,8 +412,10 @@ export default function UtvarderaPage() {
 
       clearTimeout(timeoutId);
 
-      setLoadingStage("generating");
-      setLoadingProgress(70);
+      if (isActive) {
+        setLoadingStage("generating");
+        setLoadingProgress(70);
+      }
 
       if (!response.ok) {
         const errorData = await response
@@ -421,34 +460,43 @@ export default function UtvarderaPage() {
         );
       }
 
-      setLoadingProgress(100);
-      setTimeout(() => {
-        setResult(data.result);
-        setMode("results");
-        showToast("Analysen är klar! 🎉", "success");
-      }, 500);
+      if (isActive) {
+        setLoadingProgress(100);
+        // Delay transition to allow progress animation to complete
+        setTimeout(() => {
+          if (isActive) {
+            setResult(data.result);
+            setMode("results");
+            showToast("Analysen är klar! 🎉", "success");
+          }
+        }, 500);
+      }
     } catch (error) {
       console.error("Recommendation error:", error);
-      if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
-        } else if (
-          error.message.includes("timeout") ||
-          error.message.includes("Timeout")
-        ) {
-          setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
+      if (isActive) {
+        if (error instanceof Error) {
+          if (error.name === "AbortError") {
+            setError(
+              "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
+            );
+          } else if (
+            error.message.includes("timeout") ||
+            error.message.includes("Timeout")
+          ) {
+            setError(
+              "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
+            );
+          } else {
+            setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          }
         } else {
-          setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          setError("Ett oväntat fel uppstod. Försök igen.");
         }
-      } else {
-        setError("Ett oväntat fel uppstod. Försök igen.");
       }
     } finally {
+      isActive = false;
       clearInterval(progressInterval);
+      stageTimeouts.forEach((timeout) => clearTimeout(timeout));
       setIsLoading(false);
       setLoadingProgress(0);
       setAbortController(null);
@@ -463,7 +511,7 @@ export default function UtvarderaPage() {
     setIsLoading(false);
     setLoadingProgress(0);
     setLoadingStage("connecting");
-    setError("Analysen avbröts av användaren");
+    setError(null); // Clear any existing errors
     showToast("Analysen avbröts", "info");
   };
 
@@ -763,14 +811,14 @@ export default function UtvarderaPage() {
         <div className="fixed inset-x-0 bottom-0 -z-10 pointer-events-none">
           <WaveVisualizer variant="sound" color="#60a5fa" height={140} />
         </div>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {mode === "choice" && (
             <motion.section
               key="choice"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-4xl">
@@ -1061,10 +1109,10 @@ export default function UtvarderaPage() {
           {mode === "audit" && !isLoading && (
             <motion.section
               key="audit"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, x: 50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -50, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-2xl">
@@ -1239,10 +1287,11 @@ export default function UtvarderaPage() {
 
           {mode === "audit" && isLoading && (
             <motion.section
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              key="audit-loading"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden"
             >
               <div className="container mx-auto px-6">
@@ -1258,9 +1307,10 @@ export default function UtvarderaPage() {
           {mode === "questions" && isLoading && (
             <motion.section
               key="questions-loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden"
             >
               <div className="container mx-auto px-6">
@@ -1276,10 +1326,10 @@ export default function UtvarderaPage() {
           {mode === "questions" && !isLoading && (
             <motion.section
               key="questions"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, x: -50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 50, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-2xl">
@@ -1557,10 +1607,10 @@ export default function UtvarderaPage() {
           {mode === "results" && result && (
             <motion.section
               key="results"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.98 }}
+              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden"
             >
               <div className="container mx-auto px-6 relative z-10">
@@ -1573,19 +1623,22 @@ export default function UtvarderaPage() {
                   {/* Back Button with animation */}
                   <motion.button
                     onClick={() => {
-                      setMode("choice");
-                      setResult(null);
-                      setError(null);
-                      setUrl("");
-                      setCurrentQuestion(0);
-                      setAnswers({
-                        industry: "",
-                        industryDescription: "",
-                        purpose: "",
-                        audience: "",
-                        content: [],
-                        features: [],
-                      });
+                      // Delay state reset to allow exit animation to complete
+                      setTimeout(() => {
+                        setMode("choice");
+                        setResult(null);
+                        setError(null);
+                        setUrl("");
+                        setCurrentQuestion(0);
+                        setAnswers({
+                          industry: "",
+                          industryDescription: "",
+                          purpose: "",
+                          audience: "",
+                          content: [],
+                          features: [],
+                        });
+                      }, 300);
                     }}
                     className="text-gray-400 hover:text-white mb-8 flex items-center gap-2 transition-all"
                     whileHover={{ scale: 1.05, x: -5 }}

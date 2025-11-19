@@ -1,7 +1,8 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Modal from '@/components/ui/Modal';
 
 interface Improvement {
   item: string;
@@ -213,84 +214,67 @@ export default function ImprovementMatrix({ improvements, priorityMatrix: _prior
       </motion.div>
 
       {/* Improvement Detail Modal */}
-      <AnimatePresence>
+      <Modal
+        isOpen={!!selectedImprovement}
+        onClose={() => setSelectedImprovement(null)}
+        maxWidth="lg"
+        darkMode={true}
+      >
         {selectedImprovement && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedImprovement(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-900 border border-white/20 rounded-2xl p-6 max-w-2xl max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-start mb-6">
-                <h3 className="text-2xl font-bold text-white pr-4">{selectedImprovement.item}</h3>
-                <button
-                  onClick={() => setSelectedImprovement(null)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+          <div className="p-6 text-white min-h-[200px]">
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-2xl font-bold pr-4">{selectedImprovement.item}</h3>
+            </div>
 
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className={`px-4 py-2 rounded-lg ${
-                    selectedImprovement.impact === 'high' ? 'bg-green-500/20 text-green-400' :
-                    selectedImprovement.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
-                    Påverkan: {selectedImprovement.impact}
-                  </div>
-                  <div className={`px-4 py-2 rounded-lg ${
-                    selectedImprovement.effort === 'low' ? 'bg-green-500/20 text-green-400' :
-                    selectedImprovement.effort === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
-                    Insats: {selectedImprovement.effort}
-                  </div>
-                  {selectedImprovement.estimated_time && (
-                    <div className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400">
-                      ⏱️ {selectedImprovement.estimated_time}
-                    </div>
-                  )}
+            <div className="space-y-4">
+              <div className="flex gap-4 flex-wrap">
+                <div className={`px-4 py-2 rounded-lg ${
+                  selectedImprovement.impact === 'high' ? 'bg-green-500/20 text-green-400' :
+                  selectedImprovement.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                  Påverkan: {selectedImprovement.impact}
                 </div>
-
-                {selectedImprovement.why && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-white mb-2">Varför?</h4>
-                    <p className="text-gray-300">{selectedImprovement.why}</p>
-                  </div>
-                )}
-
-                {selectedImprovement.how && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-white mb-2">Hur?</h4>
-                    <p className="text-gray-300">{selectedImprovement.how}</p>
-                  </div>
-                )}
-
-                {selectedImprovement.code_example && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-white mb-2">Kodexempel</h4>
-                    <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto">
-                      <code className="text-sm text-gray-300">{selectedImprovement.code_example}</code>
-                    </pre>
+                <div className={`px-4 py-2 rounded-lg ${
+                  selectedImprovement.effort === 'low' ? 'bg-green-500/20 text-green-400' :
+                  selectedImprovement.effort === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                  Insats: {selectedImprovement.effort}
+                </div>
+                {selectedImprovement.estimated_time && (
+                  <div className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400">
+                    ⏱️ {selectedImprovement.estimated_time}
                   </div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+
+              {selectedImprovement.why && (
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Varför?</h4>
+                  <p className="text-gray-300">{selectedImprovement.why}</p>
+                </div>
+              )}
+
+              {selectedImprovement.how && (
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Hur?</h4>
+                  <p className="text-gray-300">{selectedImprovement.how}</p>
+                </div>
+              )}
+
+              {selectedImprovement.code_example && (
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Kodexempel</h4>
+                  <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto">
+                    <code className="text-sm text-gray-300">{selectedImprovement.code_example}</code>
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </Modal>
     </>
   );
 }

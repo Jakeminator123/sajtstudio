@@ -11,6 +11,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
+  darkMode?: boolean;
 }
 
 export default function Modal({
@@ -18,6 +19,7 @@ export default function Modal({
   onClose,
   children,
   maxWidth = "lg",
+  darkMode = false,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +113,11 @@ export default function Modal({
                 stiffness: 300,
                 damping: 30,
               }}
-              className={`relative bg-white w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200`}
+              className={`relative w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl ${
+                darkMode 
+                  ? 'bg-gray-900 border-gray-700' 
+                  : 'bg-white border-gray-200'
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Animated border glow with blue/gray gradient */}
