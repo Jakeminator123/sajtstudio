@@ -8,8 +8,9 @@ const INTRO_VIDEO_SEEN_KEY = "intro_video_seen";
 
 export default function IntroVideo() {
   const [isVisible, setIsVisible] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasEndedRef = useRef(false);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   // Preload critical resources while intro video is playing
   usePreloadDuringIntro(isVisible);
@@ -25,29 +26,51 @@ export default function IntroVideo() {
     }
   }, []);
 
+  // Hide video and mark as seen
+  const hideVideo = () => {
+    if (hasEndedRef.current) return; // Already hidden
+    hasEndedRef.current = true;
+    
+    // Clear timeout if it exists
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+    
+    setIsVisible(false);
+    // Mark as seen in localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem(INTRO_VIDEO_SEEN_KEY, "true");
+    }
+  };
+
   useEffect(() => {
     if (!isVisible) return;
 
     const video = videoRef.current;
     if (!video) {
-      // Video ref not ready yet, try again shortly
+      // Video ref not ready yet, retry after a short delay
       const retryTimeout = setTimeout(() => {
-        if (videoRef.current && isVisible) {
-          // Retry logic will be handled by the next effect run
+        if (videoRef.current && isVisible && !hasEndedRef.current) {
+          // Effect will re-run when video ref is available
         }
       }, 100);
       return () => clearTimeout(retryTimeout);
     }
 
+    // Reset ended flag when video becomes visible
+    hasEndedRef.current = false;
+
     // Force video to start playing immediately when visible
     const startPlaying = async () => {
+      if (hasEndedRef.current) return;
       try {
         video.currentTime = 0; // Start from beginning
         video.muted = true; // Ensure muted for autoplay
         await video.play();
       } catch (error) {
         // If autoplay is blocked, try again when video is ready
-        if (video.readyState >= 2) {
+        if (video.readyState >= 2 && !hasEndedRef.current) {
           video.play().catch(() => {
             // Autoplay blocked - will try again on user interaction
           });
@@ -57,6 +80,7 @@ export default function IntroVideo() {
 
     // Try to play video when it's loaded
     const handleCanPlay = async () => {
+      if (hasEndedRef.current) return;
       try {
         if (video.paused) {
           video.muted = true;
@@ -69,6 +93,7 @@ export default function IntroVideo() {
 
     // Also try to play when video has enough data
     const handleLoadedData = async () => {
+      if (hasEndedRef.current) return;
       try {
         if (video.paused) {
           video.muted = true;
@@ -79,25 +104,10 @@ export default function IntroVideo() {
       }
     };
 
-    // Hide video when it ends
-    const handleEnded = () => {
-      setHasPlayed(true);
-      setIsVisible(false);
-      // Mark as seen in localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem(INTRO_VIDEO_SEEN_KEY, "true");
-      }
-    };
-
     // Hide after max 8 seconds even if video hasn't ended
-    const timeoutId = setTimeout(() => {
-      if (!hasPlayed) {
-        setHasPlayed(true);
-        setIsVisible(false);
-        // Mark as seen in localStorage
-        if (typeof window !== "undefined") {
-          localStorage.setItem(INTRO_VIDEO_SEEN_KEY, "true");
-        }
+    timeoutIdRef.current = setTimeout(() => {
+      if (!hasEndedRef.current) {
+        hideVideo();
       }
     }, 8000);
 
@@ -117,28 +127,25 @@ export default function IntroVideo() {
     video.addEventListener("canplay", handleCanPlay, { once: true });
     video.addEventListener("canplaythrough", handleCanPlay, { once: true });
     video.addEventListener("loadeddata", handleLoadedData, { once: true });
-    video.addEventListener("ended", handleEnded);
+    // Note: onEnded is handled via the onEnded prop on the video element to avoid double handling
 
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("canplaythrough", handleCanPlay);
       video.removeEventListener("loadeddata", handleLoadedData);
-      video.removeEventListener("ended", handleEnded);
     };
-  }, [isVisible, hasPlayed]);
+  }, [isVisible]);
 
   // Allow user to skip by clicking
   const handleClick = () => {
     if (videoRef.current) {
       videoRef.current.pause();
     }
-    setHasPlayed(true);
-    setIsVisible(false);
-    // Mark as seen in localStorage
-    if (typeof window !== "undefined") {
-      localStorage.setItem(INTRO_VIDEO_SEEN_KEY, "true");
-    }
+    hideVideo();
   };
 
   return (
@@ -174,16 +181,10 @@ export default function IntroVideo() {
             muted
             playsInline
             preload="auto"
-            onEnded={() => {
-              setHasPlayed(true);
-              setIsVisible(false);
-              // Mark as seen in localStorage
-              if (typeof window !== "undefined") {
-                localStorage.setItem(INTRO_VIDEO_SEEN_KEY, "true");
-              }
-            }}
+            onEnded={hideVideo}
             onLoadedData={(e) => {
               // Ensure video plays when loaded
+              if (hasEndedRef.current) return;
               const video = e.currentTarget;
               if (video.paused) {
                 video.play().catch(() => {
