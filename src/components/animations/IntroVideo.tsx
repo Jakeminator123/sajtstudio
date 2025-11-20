@@ -26,7 +26,10 @@ export default function IntroVideo() {
       // localStorage.removeItem(INTRO_VIDEO_SEEN_KEY);
       if (!hasSeen) {
         // Show video immediately - this is the first thing when user logs in
-        setIsVisible(true);
+        // Use requestAnimationFrame to avoid setState in effect warning
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
       } else {
         // Debug: log if video was skipped due to localStorage
         console.log("Intro video skipped - already seen (localStorage key exists)");
@@ -38,13 +41,13 @@ export default function IntroVideo() {
   const hideVideo = () => {
     if (hasEndedRef.current) return; // Already hidden
     hasEndedRef.current = true;
-    
+
     // Clear timeout if it exists
     if (timeoutIdRef.current) {
       clearTimeout(timeoutIdRef.current);
       timeoutIdRef.current = null;
     }
-    
+
     setIsVisible(false);
     // Mark as seen in localStorage
     if (typeof window !== "undefined") {
@@ -80,7 +83,7 @@ export default function IntroVideo() {
         video.setAttribute("webkit-playsinline", "true");
         video.setAttribute("x5-playsinline", "true");
         await video.play();
-      } catch (error) {
+      } catch {
         // If autoplay is blocked, try again when video is ready
         if (video.readyState >= 2 && !hasEndedRef.current) {
           video.play().catch((err) => {
@@ -99,7 +102,7 @@ export default function IntroVideo() {
           video.muted = true;
           await video.play();
         }
-      } catch (error) {
+      } catch {
         // Autoplay blocked - try again
       }
     };
@@ -112,7 +115,7 @@ export default function IntroVideo() {
           video.muted = true;
           await video.play();
         }
-      } catch (error) {
+      } catch {
         // Autoplay blocked
       }
     };

@@ -7,6 +7,12 @@ interface FloatingIconsProps {
   count?: number;
 }
 
+// Deterministic seed function using golden ratio for consistent values
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return Math.abs(x - Math.floor(x));
+}
+
 export default function FloatingIcons({
   icons = ["🚀", "⚡", "✨", "💡", "🎯", "🔥", "💎", "🌟", "⭐", "🎨"],
   count = 10,
@@ -14,11 +20,12 @@ export default function FloatingIcons({
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(count)].map((_, i) => {
-        const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-        const randomX = Math.random() * 100;
-        const randomDelay = Math.random() * 5;
-        const randomDuration = 15 + Math.random() * 10;
-        const randomSize = 20 + Math.random() * 40;
+        const seed = i * 0.618033988749895; // Golden ratio
+        const randomIcon = icons[Math.floor(seededRandom(seed) * icons.length)];
+        const randomX = seededRandom(seed + 1) * 100;
+        const randomDelay = seededRandom(seed + 2) * 5;
+        const randomDuration = 15 + seededRandom(seed + 3) * 10;
+        const randomSize = 20 + seededRandom(seed + 4) * 40;
 
         return (
           <motion.div

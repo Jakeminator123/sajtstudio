@@ -3,15 +3,25 @@
 import Footer from '@/components/layout/Footer';
 import HeaderNav from '@/components/layout/HeaderNav';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SajtgranskningPage() {
   const [url, setUrl] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    // TODO: Implementera granskningslogik här
-    console.log('Granska:', url);
+    if (!url.trim()) return;
+
+    // Normalize URL
+    let normalizedUrl = url.trim();
+    if (!normalizedUrl.match(/^https?:\/\//i)) {
+      normalizedUrl = `https://${normalizedUrl}`;
+    }
+
+    // Redirect to utvardera page with audit mode and URL
+    router.push(`/utvardera?mode=audit&url=${encodeURIComponent(normalizedUrl)}`);
   };
 
   return (

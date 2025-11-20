@@ -15,7 +15,8 @@ import NeonButton from "@/components/effects/NeonButton";
 import FloatingIcons from "@/components/effects/FloatingIcons";
 import WaveVisualizer from "@/components/effects/WaveVisualizer";
 import { AnimatePresence, motion } from "framer-motion";
-import { FormEvent, useEffect, useState, useCallback } from "react";
+import { FormEvent, useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Mode = "choice" | "audit" | "questions" | "results";
 
@@ -146,7 +147,8 @@ interface QuestionAnswers {
   timeline?: string;
 }
 
-export default function UtvarderaPage() {
+function UtvarderaPageContent() {
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<Mode>("choice");
   const [url, setUrl] = useState("");
@@ -186,6 +188,37 @@ export default function UtvarderaPage() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  // URL normalization helper
+  const normalizeUrl = useCallback((urlInput: string): string => {
+    let normalized = urlInput.trim();
+    if (!normalized) {
+      throw new Error("URL kan inte vara tom");
+    }
+
+    // Remove any leading/trailing whitespace and slashes
+    normalized = normalized.trim().replace(/^\/+|\/+$/g, "");
+
+    // Auto-add https:// if missing protocol
+    if (!normalized.match(/^https?:\/\//i)) {
+      normalized = `https://${normalized}`;
+    }
+
+    // Validate URL format
+    try {
+      const urlObj = new URL(normalized);
+      // Ensure we have a valid hostname
+      if (!urlObj.hostname || urlObj.hostname.length === 0) {
+        throw new Error("Ogiltig URL - saknar domännamn");
+      }
+      return normalized;
+    } catch (error) {
+      if (error instanceof TypeError) {
+        throw new Error("Ogiltig URL-format. Ange t.ex. 'exempel.se' eller 'https://exempel.se'");
+      }
+      throw error;
+    }
+  }, []);
+
   // Auto-save result to localStorage
   useEffect(() => {
     if (result) {
@@ -206,20 +239,6 @@ export default function UtvarderaPage() {
     }
   }, [result]);
 
-  // Load last result on mount (optional - can be removed if not desired)
-  useEffect(() => {
-    try {
-      const savedResults = JSON.parse(
-        localStorage.getItem("audit-results") || "[]"
-      );
-      if (savedResults.length > 0 && !result) {
-        // Optionally restore last result - commented out by default
-        // setResult(savedResults[0]);
-      }
-    } catch (error) {
-      console.error("Failed to load saved results:", error);
-    }
-  }, []);
 
   useEffect(() => {
     // Use requestAnimationFrame to ensure DOM is ready
@@ -228,9 +247,49 @@ export default function UtvarderaPage() {
     });
   }, []);
 
+  // Handle URL parameters from sajtgranskning page
+  useEffect(() => {
+    if (!mounted || isLoading) return;
+
+    const urlParam = searchParams.get("url");
+    const modeParam = searchParams.get("mode");
+
+    if (modeParam === "audit" && urlParam) {
+      try {
+        const decodedUrl = decodeURIComponent(urlParam);
+        // Normalize URL before setting
+        const normalizedUrl = normalizeUrl(decodedUrl);
+        setUrl(normalizedUrl);
+        setMode("audit");
+        // Auto-submit after a short delay to allow UI to render
+        const timeoutId = setTimeout(() => {
+          const form = document.querySelector('form') as HTMLFormElement | null;
+          if (form) {
+            form.requestSubmit();
+          }
+        }, 200);
+
+        return () => clearTimeout(timeoutId);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Ogiltig URL i länken");
+        setMode("audit");
+      }
+    }
+  }, [mounted, searchParams, normalizeUrl, isLoading]);
+
   const handleUrlSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate and normalize URL
+    let normalizedUrl: string;
+    try {
+      normalizedUrl = normalizeUrl(url);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Ogiltig URL");
+      return;
+    }
+
     setIsLoading(true);
     setLoadingStage("connecting");
     setLoadingProgress(0);
@@ -240,31 +299,36 @@ export default function UtvarderaPage() {
       setLoadingProgress((prev) => Math.min(prev + 5, 90));
     }, 500);
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    setAbortController(controller);
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+
+    // Stage timers with cleanup (only for visual stages)
+    const stageTimeouts: NodeJS.Timeout[] = [];
+
     try {
       // Stage 1: Connecting
       setLoadingStage("connecting");
       setLoadingProgress(10);
 
       // Stage 2: Scraping
-      setTimeout(() => {
-        if (isLoading) {
+      const scrapingTimer = setTimeout(() => {
+        if (!controller.signal.aborted) {
           setLoadingStage("scraping");
           setLoadingProgress(30);
         }
       }, 1000);
+      stageTimeouts.push(scrapingTimer);
 
       // Stage 3: Analyzing
-      setTimeout(() => {
-        if (isLoading) {
+      const analyzingTimer = setTimeout(() => {
+        if (!controller.signal.aborted) {
           setLoadingStage("analyzing");
           setLoadingProgress(60);
         }
       }, 3000);
-
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      setAbortController(controller);
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+      stageTimeouts.push(analyzingTimer);
 
       const response = await fetch("/api/audit", {
         method: "POST",
@@ -273,7 +337,7 @@ export default function UtvarderaPage() {
         },
         body: JSON.stringify({
           mode: "audit",
-          url: url.trim(),
+          url: normalizedUrl,
           model: selectedModel,
         }),
         signal: controller.signal,
@@ -298,7 +362,6 @@ export default function UtvarderaPage() {
       const data = await response.json();
 
       if (!data || !data.result) {
-        console.error("Invalid response data:", data);
         throw new Error("Kunde inte hämta resultat från servern");
       }
 
@@ -308,12 +371,13 @@ export default function UtvarderaPage() {
 
       setLoadingProgress(100);
       setTimeout(() => {
-        setResult(data.result);
-        setMode("results");
-        showToast("Analysen är klar! 🎉", "success");
+        if (!controller.signal.aborted) {
+          setResult(data.result);
+          setMode("results");
+          showToast("Analysen är klar! 🎉", "success");
+        }
       }, 500);
     } catch (error) {
-      console.error("Audit error:", error);
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           setError(
@@ -333,7 +397,10 @@ export default function UtvarderaPage() {
         setError("Ett oväntat fel uppstod. Försök igen.");
       }
     } finally {
+      // Cleanup all timers
       clearInterval(progressInterval);
+      clearTimeout(timeoutId);
+      stageTimeouts.forEach((timer) => clearTimeout(timer));
       setIsLoading(false);
       setLoadingProgress(0);
       setAbortController(null);
@@ -351,14 +418,14 @@ export default function UtvarderaPage() {
       setLoadingProgress((prev) => Math.min(prev + 10, 90));
     }, 300);
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    setAbortController(controller);
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+
     try {
       setLoadingStage("analyzing");
       setLoadingProgress(30);
-
-      // Create AbortController for timeout handling
-      const controller = new AbortController();
-      setAbortController(controller);
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
 
       const response = await fetch("/api/audit", {
         method: "POST",
@@ -392,7 +459,6 @@ export default function UtvarderaPage() {
 
       // Validate response structure
       if (!data || typeof data !== "object") {
-        console.error("Invalid response data structure:", data);
         throw new Error(
           "Kunde inte hämta resultat från servern - ogiltigt svar"
         );
@@ -403,7 +469,6 @@ export default function UtvarderaPage() {
       }
 
       if (!data.result || typeof data.result !== "object") {
-        console.error("Invalid result in response:", data);
         throw new Error(
           "Kunde inte hämta resultat från servern - saknar resultat"
         );
@@ -411,24 +476,27 @@ export default function UtvarderaPage() {
 
       // Validate result has required fields
       if (!data.result.audit_type || !data.result.cost) {
-        console.error("Result missing required fields:", {
-          hasAuditType: !!data.result.audit_type,
-          hasCost: !!data.result.cost,
-          resultKeys: Object.keys(data.result),
-        });
         throw new Error(
           "Kunde inte hämta resultat från servern - ogiltigt resultatformat"
         );
       }
 
       setLoadingProgress(100);
+
+      // Set result after a short delay for smooth transition
       setTimeout(() => {
         setResult(data.result);
         setMode("results");
         showToast("Analysen är klar! 🎉", "success");
+        setIsLoading(false);
+        setLoadingProgress(0);
+        setAbortController(null);
       }, 500);
+
+      // Cleanup timers but not the result timer
+      clearInterval(progressInterval);
+      clearTimeout(timeoutId);
     } catch (error) {
-      console.error("Recommendation error:", error);
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           setError(
@@ -448,7 +516,9 @@ export default function UtvarderaPage() {
         setError("Ett oväntat fel uppstod. Försök igen.");
       }
     } finally {
+      // Ensure cleanup even if error occurs
       clearInterval(progressInterval);
+      clearTimeout(timeoutId);
       setIsLoading(false);
       setLoadingProgress(0);
       setAbortController(null);
@@ -1097,27 +1167,36 @@ export default function UtvarderaPage() {
                         id="url"
                         value={url}
                         onChange={(e) => {
-                          let value = e.target.value.trim();
-                          // Auto-add https:// if missing
-                          if (value && !value.match(/^https?:\/\//i)) {
-                            value = `https://${value}`;
-                          }
-                          setUrl(value);
+                          setUrl(e.target.value);
                         }}
                         onBlur={(e) => {
                           let value = e.target.value.trim();
-                          // Validate and normalize URL
+                          if (!value) {
+                            setUrl("");
+                            return;
+                          }
+                          // Remove any leading/trailing whitespace
+                          value = value.trim();
+                          // Auto-add https:// if missing protocol
                           if (value && !value.match(/^https?:\/\//i)) {
+                            // Remove any leading slashes
+                            value = value.replace(/^\/+/, "");
                             value = `https://${value}`;
+                          }
+                          // Basic URL validation
+                          try {
+                            new URL(value);
+                            setUrl(value);
+                          } catch {
+                            // Invalid URL, but let user continue typing
                             setUrl(value);
                           }
                         }}
-                        placeholder="https://exempel.se"
+                        placeholder="https://exempel.se eller exempel.se"
                         className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40"
                         required
                         disabled={isLoading}
-                        pattern="https?://.+"
-                        title="Ange en giltig URL (t.ex. https://exempel.se)"
+                        title="Ange en giltig URL (t.ex. https://exempel.se eller bara exempel.se)"
                       />
                       <p className="mt-2 text-sm text-gray-400">
                         💡 Tips: Du kan ange URL:en med eller utan https://
@@ -1279,7 +1358,11 @@ export default function UtvarderaPage() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{
+                duration: 0.3,
+                ease: "easeOut"
+              }}
+              style={{ willChange: "transform, opacity" }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-2xl">
@@ -1316,7 +1399,11 @@ export default function UtvarderaPage() {
                             ((currentQuestion + 1) / questions.length) * 100
                           }%`,
                         }}
-                        transition={{ duration: 0.5 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: "easeOut"
+                        }}
+                        style={{ willChange: "width" }}
                       />
                     </div>
                   </div>
@@ -1327,7 +1414,11 @@ export default function UtvarderaPage() {
                       initial={{ opacity: 0, x: 50 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -50 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{
+                        duration: 0.2,
+                        ease: "easeOut"
+                      }}
+                      style={{ willChange: "transform, opacity" }}
                     >
                       <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
                         {currentQ.title}
@@ -1343,7 +1434,7 @@ export default function UtvarderaPage() {
                                 industry: e.target.value,
                               })
                             }
-                            className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white"
+                            className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-colors duration-200 text-white"
                           >
                             <option value="" className="bg-black">
                               Välj bransch...
@@ -1368,7 +1459,7 @@ export default function UtvarderaPage() {
                             }
                             placeholder="Beskriv din verksamhet..."
                             rows={4}
-                            className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all text-white placeholder-white/40 resize-none"
+                            className="w-full px-5 py-4 backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl focus:border-white/40 focus:bg-white/15 focus:outline-none transition-colors duration-200 text-white placeholder-white/40 resize-none"
                           />
                         </div>
                       )}
@@ -1399,13 +1490,14 @@ export default function UtvarderaPage() {
                                   className="sr-only"
                                 />
                                 <div
-                                  className={`p-4 rounded-xl border transition-all ${
+                                  className={`p-4 rounded-xl border transition-colors duration-200 ${
                                     answers[
                                       currentQ.id as keyof QuestionAnswers
                                     ] === option
                                       ? "bg-white/20 border-white/40 text-white"
                                       : "bg-white/5 border-white/20 text-gray-300 hover:bg-white/10"
                                   }`}
+                                  style={{ willChange: "background-color, border-color" }}
                                 >
                                   {option}
                                 </div>
@@ -1450,11 +1542,12 @@ export default function UtvarderaPage() {
                                   className="sr-only"
                                 />
                                 <div
-                                  className={`p-4 rounded-xl border transition-all ${
+                                  className={`p-4 rounded-xl border transition-colors duration-200 ${
                                     isChecked
                                       ? "bg-white/20 border-white/40 text-white"
                                       : "bg-white/5 border-white/20 text-gray-300 hover:bg-white/10"
                                   }`}
+                                  style={{ willChange: "background-color, border-color" }}
                                 >
                                   <span className="mr-2">
                                     {isChecked ? "✓" : "○"}
@@ -1471,9 +1564,11 @@ export default function UtvarderaPage() {
 
                   <div className="mt-8 flex justify-end">
                     <NeonButton
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         if (currentQuestion < questions.length - 1) {
-                          setCurrentQuestion(currentQuestion + 1);
+                          setCurrentQuestion((prev) => prev + 1);
                         } else {
                           handleQuestionSubmit();
                         }
@@ -1481,7 +1576,7 @@ export default function UtvarderaPage() {
                       disabled={
                         isLoading ||
                         (currentQ.id === "industry"
-                          ? !answers.industry || !answers.industryDescription
+                          ? !answers.industry || !answers.industryDescription.trim()
                           : currentQ.type === "single"
                           ? !answers[currentQ.id as keyof QuestionAnswers]
                           : currentQ.type === "multi"
@@ -1680,5 +1775,19 @@ export default function UtvarderaPage() {
       <Footer />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
+  );
+}
+
+export default function UtvarderaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <LoadingSpinner className="text-white" size="lg" />
+        </div>
+      }
+    >
+      <UtvarderaPageContent />
+    </Suspense>
   );
 }

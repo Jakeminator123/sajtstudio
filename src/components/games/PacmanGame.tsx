@@ -78,7 +78,9 @@ export default function PacmanGame() {
     });
 
     const drawMaze = () => {
-      ctx.fillStyle = "#071427";
+      // Semi-transparent dark background to maintain game contrast while showing CSS background
+      // Reduced opacity to better show the 8-bit background image
+      ctx.fillStyle = "rgba(7, 20, 39, 0.25)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       for (let y = 0; y < ROWS; y++) {
@@ -181,9 +183,9 @@ export default function PacmanGame() {
       // Animate mouth
       pacman.mouth = (pacman.mouth + 0.3) % 1;
 
-      // Move ghosts with improved AI
+      // Move ghosts with improved AI - aggressive chase
       ghostsRef.current.forEach(ghost => {
-        // Smart AI - chase Pacman
+        // Smart AI - chase Pacman aggressively
         const dirs = [
           { dx: 0, dy: -1 }, // Up
           { dx: 1, dy: 0 },  // Right
@@ -197,45 +199,62 @@ export default function PacmanGame() {
             const nx = ghost.x + dir.dx;
             const ny = ghost.y + dir.dy;
 
-            // Check if this direction is valid (not a wall and not reversing)
+            // Check if this direction is valid (not a wall)
             const isValid = MAZE[ny] && MAZE[ny][nx] && MAZE[ny][nx] !== "#";
-            const isReversing = dir.dx === -ghost.dx && dir.dy === -ghost.dy;
 
-            if (!isValid || isReversing) return null;
+            if (!isValid) return null;
 
-            // Calculate distance to Pacman
-            const distX = nx - pacman.x;
-            const distY = ny - pacman.y;
-            const distance = Math.sqrt(distX * distX + distY * distY);
+            // Calculate Manhattan distance to Pacman (faster and more direct)
+            const distX = Math.abs(nx - pacman.x);
+            const distY = Math.abs(ny - pacman.y);
+            const distance = distX + distY; // Manhattan distance for more direct pathfinding
 
             return { ...dir, distance, nx, ny };
           })
           .filter(move => move !== null) as Array<{ dx: number; dy: number; distance: number; nx: number; ny: number }>;
 
         if (possibleMoves.length > 0) {
-          // Choose the direction that gets closest to Pacman
-          // Add some randomness (70% chase, 30% random) to make it less predictable
+          // Always choose the direction that gets closest to Pacman (90% chase, 10% random for unpredictability)
           let chosenMove;
-          if (Math.random() < 0.7) {
-            // Chase mode: choose closest to Pacman
+          if (Math.random() < 0.9) {
+            // Aggressive chase mode: choose closest to Pacman
             chosenMove = possibleMoves.reduce((best, current) =>
               current.distance < best.distance ? current : best
             );
           } else {
-            // Random mode: choose random valid direction
+            // Small chance for random move to add unpredictability
             chosenMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
           }
 
+          // Update ghost direction
           ghost.dx = chosenMove.dx;
           ghost.dy = chosenMove.dy;
+        } else {
+          // If no valid moves, try to reverse direction as last resort
+          ghost.dx = -ghost.dx;
+          ghost.dy = -ghost.dy;
         }
 
+        // Move ghost
         const nx = ghost.x + ghost.dx;
         const ny = ghost.y + ghost.dy;
 
         if (MAZE[ny] && MAZE[ny][nx] && MAZE[ny][nx] !== "#") {
           ghost.x = nx;
           ghost.y = ny;
+        } else {
+          // If can't move in current direction, try to find any valid direction
+          const validDirs = dirs.filter(dir => {
+            const testX = ghost.x + dir.dx;
+            const testY = ghost.y + dir.dy;
+            return MAZE[testY] && MAZE[testY][testX] && MAZE[testY][testX] !== "#";
+          });
+
+          if (validDirs.length > 0) {
+            const randomDir = validDirs[Math.floor(Math.random() * validDirs.length)];
+            ghost.dx = randomDir.dx;
+            ghost.dy = randomDir.dy;
+          }
         }
 
         // Check collision with pacman
@@ -328,7 +347,7 @@ export default function PacmanGame() {
           ref={canvasRef}
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
-          className="rounded-lg shadow-2xl"
+          className="shadow-2xl"
         />
 
         {/* Game over / Win overlay */}

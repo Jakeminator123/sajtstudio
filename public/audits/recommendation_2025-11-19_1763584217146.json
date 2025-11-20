@@ -1,0 +1,52 @@
+{
+  "company": "E-handel för böcker",
+  "website_type_recommendation": "En responsiv e-handelswebbplats med fokus på varumärkesbyggande och användarvänlighet, som inkluderar kundreferenser och live-chat för att öka kundengagemang.",
+  "improvements": [
+    {
+      "item": "Live-chatt",
+      "impact": "high",
+      "effort": "medium",
+      "why": "En live-chatt förbättrar kundsupporten och ökar konverteringsgraden genom att ge omedelbar hjälp till besökare.",
+      "how": "Integrera en live-chattlösning som Zendesk eller Tawk.to på webbsidan."
+    },
+    {
+      "item": "Kundcase/referenser",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Kundreferenser förstärker trovärdigheten och kan öka förtroendet för varumärket bland nya kunder.",
+      "how": "Skapa en sektion på hemsidan som visar upp kundcase och vittnesmål."
+    },
+    {
+      "item": "SEO-optimering",
+      "impact": "medium",
+      "effort": "high",
+      "why": "Bra SEO gör att webbplatsen blir mer synlig i sökmotorer och kan öka trafiken.",
+      "how": "Implementera on-page SEO-principer och skapa kvalitetsinnehåll kring böcker och läsning."
+    }
+  ],
+  "budget_estimate": {
+    "low": 50000,
+    "high": 150000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad varumärkeskännedom och förtroende",
+    "Högre konverteringsgrader från besökare till köpare",
+    "Ökad kundnöjdhet genom förbättrad support"
+  ],
+  "technical_requirements": [
+    "Responsiv design för alla enheter",
+    "CMS för enkel hantering av innehåll",
+    "E-handelslösning med betalningsintegration",
+    "Analysverktyg för trafik och konvertering",
+    "Integration av live-chattfunktion"
+  ],
+  "audit_type": "recommendation",
+  "cost": {
+    "tokens": 989,
+    "sek": 0.06,
+    "usd": 0.0055
+  },
+  "domain": null,
+  "timestamp": "2025-11-19T20:30:17.146Z"
+}

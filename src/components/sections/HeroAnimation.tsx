@@ -10,22 +10,60 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  MotionValue,
 } from "framer-motion";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+type ImageTransformConfig = {
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  rotate: MotionValue<number>;
+  opacity: MotionValue<number>;
+  scale: MotionValue<number>;
+  skewX?: MotionValue<number>;
+  skewY?: MotionValue<number>;
+  rotateXMotion?: MotionValue<number>;
+  rotateYMotion?: MotionValue<number>;
+  zMotion?: MotionValue<number>;
+};
+
+type DebrisSnapshot = {
+  x: number;
+  y: number;
+  rotate: number;
+  opacity: number;
+  scale: number;
+  skewX: number;
+  skewY: number;
+  rotateX: number;
+  rotateY: number;
+  z: number;
+};
 
 export default function HeroAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const mediaContainerRef = useRef<HTMLDivElement>(null);
   const imagesContainerRef = useRef<HTMLDivElement>(null);
+  const secondaryImagesContainerRef = useRef<HTMLDivElement>(null);
   const hasAutoScrolledRef = useRef(false);
+  const imageTransformsRef = useRef<{
+    primary: ImageTransformConfig[];
+    secondary: ImageTransformConfig[];
+  } | null>(null);
+  const sideImageTransformsRef = useRef<ImageTransformConfig[] | null>(null);
+  const [primaryDebrisPositions, setPrimaryDebrisPositions] = useState<DebrisSnapshot[] | null>(null);
+  const [secondaryDebrisPositions, setSecondaryDebrisPositions] = useState<DebrisSnapshot[] | null>(null);
+  const [sideDebrisPositions, setSideDebrisPositions] = useState<Array<{
+    x: number;
+    y: number;
+    rotate: number;
+    opacity: number;
+    scale: number;
+    skewX: number;
+    skewY: number;
+  }> | null>(null);
   const { videoRef, videoError, mounted } = useVideoLoader();
-
-  // Scroll progress for the section (removed unused variable)
-  // const { scrollYProgress } = useScroll({
-  //   target: sectionRef,
-  //   offset: ["start start", "end start"]
-  // });
 
   const scrollToTechSection = useCallback(() => {
     if (hasAutoScrolledRef.current) return;
@@ -73,7 +111,8 @@ export default function HeroAnimation() {
     func2?: NodeJS.Timeout;
   }>({});
   const [explosionAutoPlay, setExplosionAutoPlay] = useState(false);
-  // const [isAnimationComplete, setIsAnimationComplete] = useState(false); // Disabled for burnt debris feature
+  const [hasExploded, setHasExploded] = useState(false);
+  const hasExplodedRef = useRef(false);
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
@@ -159,6 +198,7 @@ export default function HeroAnimation() {
   const { scrollYProgress: headingScrollProgress } = useScroll({
     target: sectionRef,
     offset: ["start center", "center center", "end center"],
+    layoutEffect: false,
   });
 
   // Interpolate color from white to red (tertiary) as it comes into center
@@ -196,6 +236,11 @@ export default function HeroAnimation() {
     margin: "-100px",
     amount: 0.2,
   });
+  const secondaryImagesInView = useInView(secondaryImagesContainerRef, {
+    once: false,
+    margin: "-100px",
+    amount: 0.2,
+  });
 
   const previousProgressRef = useRef(smoothMediaProgress.get());
 
@@ -203,14 +248,16 @@ export default function HeroAnimation() {
   useEffect(() => {
     if (explosionAutoPlay) return;
 
-    const explosionDuration = 2500; // 2.5 seconds - faster expansion
-    const whiteoutScrollDelay = 600; // wait for white screen before scrolling
+    const explosionDuration = 2500;
+    const whiteoutScrollDelay = 600;
     let whiteoutCheckRaf: number | null = null;
-    const explosionStartProgress = 0.25; // Trigger even earlier for large screens
+    const explosionStartProgress = 0.35;
 
     const unsubscribe = mediaScrollProgress.on("change", (latest) => {
       if (latest >= explosionStartProgress && !explosionAutoPlay) {
         setExplosionAutoPlay(true);
+        setHasExploded(true);
+        hasExplodedRef.current = true;
         autoProgressMotion.set(latest);
 
         let startTime: number | null = null;
@@ -225,6 +272,104 @@ export default function HeroAnimation() {
           const newValue = startValue + (1 - startValue) * eased;
 
           autoProgressMotion.set(newValue);
+
+          // Save debris positions when explosion is complete
+          if (progress >= 1) {
+            const transformsSnapshot = imageTransformsRef.current;
+            const sideTransformsSnapshot = sideImageTransformsRef.current;
+
+            // Get viewport dimensions for viewport-relative positioning
+            const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+            const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
+
+            // Calculate viewport-relative bounds (keep images mostly visible)
+            const maxX = viewportWidth * 0.35;
+            const maxY = viewportHeight * 0.4;
+
+            if (!primaryDebrisPositions && transformsSnapshot?.primary) {
+              const primarySnapshot = transformsSnapshot.primary.map((transform, index) => {
+                let x = transform.x.get();
+                let y = transform.y.get();
+
+                // Clamp to viewport bounds with asymmetric distribution
+                const xRatio = index % 2 === 0 ? -0.3 : 0.3;
+                const yRatio = index < 2 ? -0.25 : 0.25;
+
+                x = Math.max(-maxX, Math.min(maxX, x * 0.6 + viewportWidth * xRatio));
+                y = Math.max(-maxY, Math.min(maxY, y * 0.6 + viewportHeight * yRatio));
+
+                return {
+                  x,
+                  y,
+                  rotate: transform.rotate.get(),
+                  opacity: transform.opacity.get(),
+                  scale: transform.scale.get(),
+                  skewX: transform.skewX?.get() || 0,
+                  skewY: transform.skewY?.get() || 0,
+                  rotateX: transform.rotateXMotion?.get() || 0,
+                  rotateY: transform.rotateYMotion?.get() || 0,
+                  z: transform.zMotion?.get() || 0,
+                };
+              });
+
+              setPrimaryDebrisPositions(primarySnapshot);
+            }
+
+            if (!secondaryDebrisPositions && transformsSnapshot?.secondary) {
+              const secondarySnapshot = transformsSnapshot.secondary.map((transform, index) => {
+                let x = transform.x.get();
+                let y = transform.y.get();
+
+                // Clamp to viewport bounds with asymmetric distribution
+                const xRatio = index % 2 === 0 ? -0.2 : 0.2;
+                const yRatio = index < 2 ? -0.15 : 0.15;
+
+                x = Math.max(-maxX * 0.8, Math.min(maxX * 0.8, x * 0.5 + viewportWidth * xRatio));
+                y = Math.max(-maxY * 0.7, Math.min(maxY * 0.7, y * 0.5 + viewportHeight * yRatio));
+
+                return {
+                  x,
+                  y,
+                  rotate: transform.rotate.get(),
+                  opacity: transform.opacity.get(),
+                  scale: transform.scale.get(),
+                  skewX: transform.skewX?.get() || 0,
+                  skewY: transform.skewY?.get() || 0,
+                  rotateX: transform.rotateXMotion?.get() || 0,
+                  rotateY: transform.rotateYMotion?.get() || 0,
+                  z: transform.zMotion?.get() || 0,
+                };
+              });
+
+              setSecondaryDebrisPositions(secondarySnapshot);
+            }
+
+            if (!sideDebrisPositions && sideTransformsSnapshot) {
+              const sideSnapshot = sideTransformsSnapshot.map((transform, index) => {
+                let x = transform.x.get();
+                let y = transform.y.get();
+
+                // Side images: keep them more to the edges but still visible
+                const xRatio = index < 2 ? -0.4 : 0.4;
+                const yRatio = index % 2 === 0 ? -0.2 : 0.2;
+
+                x = Math.max(-maxX * 1.2, Math.min(maxX * 1.2, x * 0.7 + viewportWidth * xRatio));
+                y = Math.max(-maxY * 0.6, Math.min(maxY * 0.6, y * 0.6 + viewportHeight * yRatio));
+
+                return {
+                  x,
+                  y,
+                  rotate: transform.rotate.get(),
+                  opacity: transform.opacity.get(),
+                  scale: transform.scale.get(),
+                  skewX: transform.skewX?.get() || 0,
+                  skewY: transform.skewY?.get() || 0,
+                };
+              });
+
+              setSideDebrisPositions(sideSnapshot);
+            }
+          }
 
           if (progress < 1) {
             requestAnimationFrame(animate);
@@ -266,6 +411,9 @@ export default function HeroAnimation() {
     mediaScrollProgress,
     autoProgressMotion,
     scrollToTechSection,
+    primaryDebrisPositions,
+    secondaryDebrisPositions,
+    sideDebrisPositions,
   ]);
 
   // Monitor scroll progress for text stickiness and modal shake - optimized with throttling
@@ -329,18 +477,23 @@ export default function HeroAnimation() {
 
   // Video opacity - visible at start, then fades out completely after explosion
   // Video disappears to leave only image debris
-  const videoOpacity = useTransform(
+  const baseVideoOpacity = useTransform(
     smoothMediaProgress,
     [0, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1],
     [0.3, 0.6, 0.85, 0.95, 1, 0.8, 0.5, 0.2, 0, 0, 0] // Fades out after explosion
   );
 
+  // Video should remain hidden permanently after explosion - never show again when scrolling back
+  const videoOpacity = useTransform(baseVideoOpacity, (opacity) =>
+    (mounted && hasExploded) ? 0 : opacity
+  );
+
   // Video scale - grows gradually, then auto-expands when touching images
-  // Aggressive expansion starts at 0.25 when auto-explosion triggers
+  // More controlled expansion for better viewing
   const videoScale = useTransform(
     smoothMediaProgress,
     [0, 0.15, 0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1],
-    [0.6, 0.75, 0.9, 1.1, 2.0, 3.5, 5.0, 7.0, 9.0, 10.5, 11.5, 12.0] // Touches images at 0.25, then explodes
+    [0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.8, 2.5, 3.5, 4.5, 5.0, 5.5] // Much smaller scale for better viewing
   );
 
   // Video glow - increases with zoom, creating immersive atmosphere
@@ -478,6 +631,12 @@ export default function HeroAnimation() {
     "/images/portfolio/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp",
     "/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp",
   ];
+  const secondaryPortfolioImages = [
+    "/images/portfolio/assets_task_01k05sqa0wedsbvfk5c0773fz5_1752541456_img_0.webp",
+    "/images/portfolio/assets_task_01k1c880wqft0s0bcr3p77v2me_1753831780_img_0.webp",
+    "/images/portfolio/assets_task_01k80qdg0ze1rskjzfpj7r1za3_1760961264_img_0.webp",
+    "/images/portfolio/task_01k9et3f60e4782n74d3pkapg7_1762507579_img_0.webp",
+  ];
 
   // New side images that appear beside the video - reuse existing portfolio images
   const sideImages = [
@@ -491,21 +650,21 @@ export default function HeroAnimation() {
   // Images explode and stay as scattered pieces after video disappears
   // Two images fly towards screen (3D effect), two images spin/slide sideways
 
-  // Image 0 (top-left): "Snurrar åt vänster" - spins and stays as debris
+  // Image 0 (top-left): "Snurrar åt vänster-upp" - spins diagonally and stays as debris
   const image0X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -300, -600, -800, -850, -850]
+    [0, 0, -180, -320, -420, -480, -480] // More centered, asymmetric
   );
   const image0Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -150, -300, -400, -420, -420]
+    [0, 0, 20, -80, -140, -180, -180] // More centered, slightly down
   );
   const image0Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -90, -180, -360, -380, -380]
+    [0, 0, -120, -240, -450, -480, -480]
   );
   const image0Opacity = useTransform(
     smoothMediaProgress,
@@ -518,21 +677,21 @@ export default function HeroAnimation() {
     [1, 1, 0.8, 0.5, 0.3, 0.25, 0.25]
   );
 
-  // Image 1 (top-right): "Flyger mot skärmen" - flies forward and stays as debris
+  // Image 1 (top-right): "Flyger diagonalt upp-höger" - flies diagonally and stays as debris
   const image1X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 200, 400, 600, 650, 650]
+    [0, 0, 200, 380, 520, 600, 600] // More centered, asymmetric
   );
   const image1Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -100, -200, -300, -320, -320]
+    [0, 0, -40, -150, -220, -260, -260] // More centered
   );
   const image1Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 7, 15, 30, 35, 35]
+    [0, 0, 25, 45, 75, 85, 85]
   );
   const image1Opacity = useTransform(
     smoothMediaProgress,
@@ -545,21 +704,21 @@ export default function HeroAnimation() {
     [1, 1, 1.5, 2.2, 1.0, 0.4, 0.4]
   ); // Shrinks back to debris
 
-  // Image 2 (bottom-left): "Rullar åt vänster" - rolls and stays as debris
+  // Image 2 (bottom-left): "Rullar diagonalt ned-vänster" - rolls diagonally and stays as debris
   const image2X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -400, -800, -1000, -1050, -1050]
+    [0, 0, -200, -380, -500, -580, -580] // More centered, asymmetric
   );
   const image2Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 200, 400, 500, 520, 520]
+    [0, 0, 80, 180, 250, 280, 280] // More centered
   );
   const image2Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 360, 720, 1440, 1480, 1480]
+    [0, 0, 450, 900, 1800, 1900, 1900]
   );
   const image2Opacity = useTransform(
     smoothMediaProgress,
@@ -572,21 +731,21 @@ export default function HeroAnimation() {
     [1, 1, 0.8, 0.5, 0.3, 0.2, 0.2]
   );
 
-  // Image 3 (bottom-right): "Flyger mot skärmen" - flies and stays as debris
+  // Image 3 (bottom-right): "Flyger diagonalt ned-höger" - flies diagonally and stays as debris
   const image3X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 250, 500, 700, 750, 750]
+    [0, 0, 220, 420, 580, 680, 680] // More centered, asymmetric
   );
   const image3Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -150, -300, -450, -480, -480]
+    [0, 0, 60, 140, 200, 230, 230] // More centered
   );
   const image3Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -7, -15, -30, -35, -35]
+    [0, 0, -25, -50, -90, -100, -100]
   );
   const image3Opacity = useTransform(
     smoothMediaProgress,
@@ -599,53 +758,409 @@ export default function HeroAnimation() {
     [1, 1, 1.5, 2.2, 0.8, 0.35, 0.35]
   ); // Shrinks to debris size
 
-  const imageTransforms = [
-    {
-      x: image0X,
-      y: image0Y,
-      rotate: image0Rotate,
-      opacity: image0Opacity,
-      scale: image0Scale,
-    },
-    {
-      x: image1X,
-      y: image1Y,
-      rotate: image1Rotate,
-      opacity: image1Opacity,
-      scale: image1Scale,
-    },
-    {
-      x: image2X,
-      y: image2Y,
-      rotate: image2Rotate,
-      opacity: image2Opacity,
-      scale: image2Scale,
-    },
-    {
-      x: image3X,
-      y: image3Y,
-      rotate: image3Rotate,
-      opacity: image3Opacity,
-      scale: image3Scale,
-    },
-  ];
+  // Skew transforms for folded/torn effect
+  const image0SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 3, 8, 12, 15, 15]
+  );
+  const image0SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -4, -9, -12, -14, -14]
+  );
+
+  const image1SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -4, -10, -15, -17, -17]
+  );
+  const image1SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 5, 11, 15, 16, 16]
+  );
+
+  const image2SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 6, 12, 17, 20, 20]
+  );
+  const image2SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -7, -15, -20, -22, -22]
+  );
+
+  const image3SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -5, -11, -16, -19, -19]
+  );
+  const image3SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 6, 14, 19, 21, 21]
+  );
+
+  // 3D transforms for selected images
+  const image3DRotateX = useTransform(
+    smoothMediaProgress,
+    [0, 0.5, 0.55, 0.65],
+    [0, 0, 10, 20]
+  );
+  const image3DRotateY = useTransform(
+    smoothMediaProgress,
+    [0, 0.5, 0.55, 0.65],
+    [0, 0, 5, 10]
+  );
+  const image3DZ = useTransform(
+    smoothMediaProgress,
+    [0, 0.5, 0.55, 0.65],
+    [0, 0, 500, 800]
+  );
+
+  // Static MotionValues for flat images
+  const imageNo3DRotateX = useMotionValue(0);
+  const imageNo3DRotateY = useMotionValue(0);
+  const imageNo3DZ = useMotionValue(0);
+
+  const primaryImageTransforms = useMemo<ImageTransformConfig[]>(
+    () => [
+      {
+        x: image0X,
+        y: image0Y,
+        rotate: image0Rotate,
+        opacity: image0Opacity,
+        scale: image0Scale,
+        skewX: image0SkewX,
+        skewY: image0SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+      {
+        x: image1X,
+        y: image1Y,
+        rotate: image1Rotate,
+        opacity: image1Opacity,
+        scale: image1Scale,
+        skewX: image1SkewX,
+        skewY: image1SkewY,
+        rotateXMotion: image3DRotateX,
+        rotateYMotion: image3DRotateY,
+        zMotion: image3DZ,
+      },
+      {
+        x: image2X,
+        y: image2Y,
+        rotate: image2Rotate,
+        opacity: image2Opacity,
+        scale: image2Scale,
+        skewX: image2SkewX,
+        skewY: image2SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+      {
+        x: image3X,
+        y: image3Y,
+        rotate: image3Rotate,
+        opacity: image3Opacity,
+        scale: image3Scale,
+        skewX: image3SkewX,
+        skewY: image3SkewY,
+        rotateXMotion: image3DRotateX,
+        rotateYMotion: image3DRotateY,
+        zMotion: image3DZ,
+      },
+    ],
+    [
+      image0X,
+      image0Y,
+      image0Rotate,
+      image0Opacity,
+      image0Scale,
+      image0SkewX,
+      image0SkewY,
+      image1X,
+      image1Y,
+      image1Rotate,
+      image1Opacity,
+      image1Scale,
+      image1SkewX,
+      image1SkewY,
+      image2X,
+      image2Y,
+      image2Rotate,
+      image2Opacity,
+      image2Scale,
+      image2SkewX,
+      image2SkewY,
+      image3X,
+      image3Y,
+      image3Rotate,
+      image3Opacity,
+      image3Scale,
+      image3SkewX,
+      image3SkewY,
+      image3DRotateX,
+      image3DRotateY,
+      image3DZ,
+      imageNo3DRotateX,
+      imageNo3DRotateY,
+      imageNo3DZ,
+    ]
+  );
+
+  // Secondary grid images (additional debris)
+  const secondaryImage0X = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -60, -140, -200, -240, -240] // More centered, asymmetric
+  );
+  const secondaryImage0Y = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 30, -40, -90, -120, -120] // More centered
+  );
+  const secondaryImage0Rotate = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -40, -110, -170, -190, -190]
+  );
+  const secondaryImage0Opacity = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.85, 0.6, 0.55, 0.55]
+  );
+  const secondaryImage0Scale = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.9, 0.65, 0.5, 0.5]
+  );
+  const secondaryImage0SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -2, -6, -10, -12, -12]
+  );
+  const secondaryImage0SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 3, 7, 11, 13, 13]
+  );
+
+  const secondaryImage1X = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 120, 250, 360, 450, 450] // More centered, asymmetric
+  );
+  const secondaryImage1Y = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 20, -60, -110, -135, -135] // More centered
+  );
+  const secondaryImage1Rotate = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 30, 90, 150, 180, 180]
+  );
+  const secondaryImage1Opacity = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.8, 0.55, 0.5, 0.5]
+  );
+  const secondaryImage1Scale = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 1.1, 0.75, 0.55, 0.55]
+  );
+  const secondaryImage1SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 2, 6, 10, 12, 12]
+  );
+  const secondaryImage1SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -3, -7, -11, -12, -12]
+  );
+
+  const secondaryImage2X = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -80, -160, -240, -300, -300] // More centered, asymmetric
+  );
+  const secondaryImage2Y = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 40, 120, 180, 210, 210] // More centered
+  );
+  const secondaryImage2Rotate = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 200, 360, 520, 540, 540]
+  );
+  const secondaryImage2Opacity = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.8, 0.45, 0.45, 0.45]
+  );
+  const secondaryImage2Scale = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.85, 0.55, 0.4, 0.4]
+  );
+  const secondaryImage2SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -4, -9, -13, -15, -15]
+  );
+  const secondaryImage2SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 5, 11, 15, 17, 17]
+  );
+
+  const secondaryImage3X = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 160, 320, 460, 560, 560] // More centered, asymmetric
+  );
+  const secondaryImage3Y = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 10, 80, 140, 170, 170] // More centered
+  );
+  const secondaryImage3Rotate = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -220, -380, -520, -560, -560]
+  );
+  const secondaryImage3Opacity = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 0.78, 0.5, 0.5, 0.5]
+  );
+  const secondaryImage3Scale = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [1, 1, 1.05, 0.7, 0.48, 0.48]
+  );
+  const secondaryImage3SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, 5, 10, 15, 17, 17]
+  );
+  const secondaryImage3SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.35, 0.45, 0.7, 1],
+    [0, -6, -12, -16, -18, -18]
+  );
+
+  const secondaryImageTransforms = useMemo<ImageTransformConfig[]>(
+    () => [
+      {
+        x: secondaryImage0X,
+        y: secondaryImage0Y,
+        rotate: secondaryImage0Rotate,
+        opacity: secondaryImage0Opacity,
+        scale: secondaryImage0Scale,
+        skewX: secondaryImage0SkewX,
+        skewY: secondaryImage0SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+      {
+        x: secondaryImage1X,
+        y: secondaryImage1Y,
+        rotate: secondaryImage1Rotate,
+        opacity: secondaryImage1Opacity,
+        scale: secondaryImage1Scale,
+        skewX: secondaryImage1SkewX,
+        skewY: secondaryImage1SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+      {
+        x: secondaryImage2X,
+        y: secondaryImage2Y,
+        rotate: secondaryImage2Rotate,
+        opacity: secondaryImage2Opacity,
+        scale: secondaryImage2Scale,
+        skewX: secondaryImage2SkewX,
+        skewY: secondaryImage2SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+      {
+        x: secondaryImage3X,
+        y: secondaryImage3Y,
+        rotate: secondaryImage3Rotate,
+        opacity: secondaryImage3Opacity,
+        scale: secondaryImage3Scale,
+        skewX: secondaryImage3SkewX,
+        skewY: secondaryImage3SkewY,
+        rotateXMotion: imageNo3DRotateX,
+        rotateYMotion: imageNo3DRotateY,
+        zMotion: imageNo3DZ,
+      },
+    ],
+    [
+      secondaryImage0X,
+      secondaryImage0Y,
+      secondaryImage0Rotate,
+      secondaryImage0Opacity,
+      secondaryImage0Scale,
+      secondaryImage0SkewX,
+      secondaryImage0SkewY,
+      secondaryImage1X,
+      secondaryImage1Y,
+      secondaryImage1Rotate,
+      secondaryImage1Opacity,
+      secondaryImage1Scale,
+      secondaryImage1SkewX,
+      secondaryImage1SkewY,
+      secondaryImage2X,
+      secondaryImage2Y,
+      secondaryImage2Rotate,
+      secondaryImage2Opacity,
+      secondaryImage2Scale,
+      secondaryImage2SkewX,
+      secondaryImage2SkewY,
+      secondaryImage3X,
+      secondaryImage3Y,
+      secondaryImage3Rotate,
+      secondaryImage3Opacity,
+      secondaryImage3Scale,
+      secondaryImage3SkewX,
+      secondaryImage3SkewY,
+      imageNo3DRotateX,
+      imageNo3DRotateY,
+      imageNo3DZ,
+    ]
+  );
 
   // Side images transforms - explode outward from video
-  // Side image 0 (left top): flies left-up
+  // Side image 0 (left top): flies diagonally left-up
   const sideImage0X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -200, -400, -500, -550, -550]
+    [0, 0, -150, -300, -375, -400, -400]
   );
   const sideImage0Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -100, -200, -250, -270, -270]
+    [0, 0, -90, -175, -225, -250, -250]
   );
   const sideImage0Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -45, -90, -180, -200, -200]
+    [0, 0, -60, -120, -240, -270, -270]
   );
   const sideImage0Opacity = useTransform(
     smoothMediaProgress,
@@ -658,21 +1173,21 @@ export default function HeroAnimation() {
     [1, 1, 0.9, 0.6, 0.4, 0.35, 0.35]
   );
 
-  // Side image 1 (left bottom): flies left-down
+  // Side image 1 (left bottom): flies diagonally left-down
   const sideImage1X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -250, -450, -550, -600, -600]
+    [0, 0, -200, -375, -475, -525, -525]
   );
   const sideImage1Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 150, 300, 350, 380, 380]
+    [0, 0, 110, 225, 300, 325, 325]
   );
   const sideImage1Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 90, 180, 270, 300, 300]
+    [0, 0, 120, 240, 450, 500, 500]
   );
   const sideImage1Opacity = useTransform(
     smoothMediaProgress,
@@ -685,21 +1200,21 @@ export default function HeroAnimation() {
     [1, 1, 0.85, 0.5, 0.35, 0.3, 0.3]
   );
 
-  // Side image 2 (right top): flies right-up
+  // Side image 2 (right top): flies diagonally right-up
   const sideImage2X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 200, 400, 500, 550, 550]
+    [0, 0, 175, 325, 425, 475, 475]
   );
   const sideImage2Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -120, -240, -300, -330, -330]
+    [0, 0, -100, -200, -275, -300, -300]
   );
   const sideImage2Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 60, 120, 240, 260, 260]
+    [0, 0, 80, 160, 300, 340, 340]
   );
   const sideImage2Opacity = useTransform(
     smoothMediaProgress,
@@ -712,21 +1227,21 @@ export default function HeroAnimation() {
     [1, 1, 0.95, 0.7, 0.45, 0.4, 0.4]
   );
 
-  // Side image 3 (right bottom): flies right-down
+  // Side image 3 (right bottom): flies diagonally right-down
   const sideImage3X = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 300, 500, 650, 700, 700]
+    [0, 0, 225, 400, 500, 550, 550]
   );
   const sideImage3Y = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, 180, 360, 450, 480, 480]
+    [0, 0, 125, 250, 325, 360, 360]
   );
   const sideImage3Rotate = useTransform(
     smoothMediaProgress,
     [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
-    [0, 0, -120, -240, -480, -520, -520]
+    [0, 0, -140, -280, -550, -600, -600]
   );
   const sideImage3Opacity = useTransform(
     smoothMediaProgress,
@@ -739,36 +1254,121 @@ export default function HeroAnimation() {
     [1, 1, 0.9, 0.55, 0.35, 0.3, 0.3]
   );
 
-  const sideImageTransforms = [
-    {
-      x: sideImage0X,
-      y: sideImage0Y,
-      rotate: sideImage0Rotate,
-      opacity: sideImage0Opacity,
-      scale: sideImage0Scale,
-    },
-    {
-      x: sideImage1X,
-      y: sideImage1Y,
-      rotate: sideImage1Rotate,
-      opacity: sideImage1Opacity,
-      scale: sideImage1Scale,
-    },
-    {
-      x: sideImage2X,
-      y: sideImage2Y,
-      rotate: sideImage2Rotate,
-      opacity: sideImage2Opacity,
-      scale: sideImage2Scale,
-    },
-    {
-      x: sideImage3X,
-      y: sideImage3Y,
-      rotate: sideImage3Rotate,
-      opacity: sideImage3Opacity,
-      scale: sideImage3Scale,
-    },
-  ];
+  // Skew transforms for side images
+  const sideImage0SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 8, 18, 25, 28, 28]
+  );
+  const sideImage0SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -10, -20, -28, -30, -30]
+  );
+
+  const sideImage1SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -10, -22, -30, -35, -35]
+  );
+  const sideImage1SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 15, 30, 40, 45, 45]
+  );
+
+  const sideImage2SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -12, -25, -35, -40, -40]
+  );
+  const sideImage2SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 8, 18, 25, 28, 28]
+  );
+
+  const sideImage3SkewX = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, 10, 22, 32, 38, 38]
+  );
+  const sideImage3SkewY = useTransform(
+    smoothMediaProgress,
+    [0, 0.25, 0.3, 0.35, 0.45, 0.7, 1],
+    [0, 0, -12, -25, -35, -40, -40]
+  );
+
+  const sideImageTransforms = useMemo(
+    () => [
+      {
+        x: sideImage0X,
+        y: sideImage0Y,
+        rotate: sideImage0Rotate,
+        opacity: sideImage0Opacity,
+        scale: sideImage0Scale,
+        skewX: sideImage0SkewX,
+        skewY: sideImage0SkewY,
+      },
+      {
+        x: sideImage1X,
+        y: sideImage1Y,
+        rotate: sideImage1Rotate,
+        opacity: sideImage1Opacity,
+        scale: sideImage1Scale,
+        skewX: sideImage1SkewX,
+        skewY: sideImage1SkewY,
+      },
+      {
+        x: sideImage2X,
+        y: sideImage2Y,
+        rotate: sideImage2Rotate,
+        opacity: sideImage2Opacity,
+        scale: sideImage2Scale,
+        skewX: sideImage2SkewX,
+        skewY: sideImage2SkewY,
+      },
+      {
+        x: sideImage3X,
+        y: sideImage3Y,
+        rotate: sideImage3Rotate,
+        opacity: sideImage3Opacity,
+        scale: sideImage3Scale,
+        skewX: sideImage3SkewX,
+        skewY: sideImage3SkewY,
+      },
+    ],
+    [
+      sideImage0X,
+      sideImage0Y,
+      sideImage0Rotate,
+      sideImage0Opacity,
+      sideImage0Scale,
+      sideImage0SkewX,
+      sideImage0SkewY,
+      sideImage1X,
+      sideImage1Y,
+      sideImage1Rotate,
+      sideImage1Opacity,
+      sideImage1Scale,
+      sideImage1SkewX,
+      sideImage1SkewY,
+      sideImage2X,
+      sideImage2Y,
+      sideImage2Rotate,
+      sideImage2Opacity,
+      sideImage2Scale,
+      sideImage2SkewX,
+      sideImage2SkewY,
+      sideImage3X,
+      sideImage3Y,
+      sideImage3Rotate,
+      sideImage3Opacity,
+      sideImage3Scale,
+      sideImage3SkewX,
+      sideImage3SkewY,
+    ]
+  );
 
   // Additional transforms for explosion effects - must be at top level
   const explosionGlowOpacity = useTransform(
@@ -787,28 +1387,6 @@ export default function HeroAnimation() {
     [20, 60, 20]
   );
 
-  // 3D transforms for images - only for images 1 and 3 that fly towards screen
-  const image3DRotateX = useTransform(
-    smoothMediaProgress,
-    [0, 0.5, 0.55, 0.65],
-    [0, 0, 10, 20]
-  );
-  const image3DRotateY = useTransform(
-    smoothMediaProgress,
-    [0, 0.5, 0.55, 0.65],
-    [0, 0, 5, 10]
-  );
-  const image3DZ = useTransform(
-    smoothMediaProgress,
-    [0, 0.5, 0.55, 0.65],
-    [0, 0, 500, 800]
-  );
-
-  // Static MotionValues for images 0 and 2 (no 3D effect) - must be hooks to maintain hook order
-  const imageNo3DRotateX = useMotionValue(0);
-  const imageNo3DRotateY = useMotionValue(0);
-  const imageNo3DZ = useMotionValue(0);
-
   // Z-index and pointer events for images during explosion
   const imageZIndexExplosion = useTransform(
     smoothMediaProgress,
@@ -825,114 +1403,341 @@ export default function HeroAnimation() {
     (val) => (val === 1 ? "auto" : "none")
   );
 
-  // Transform for burnt effects after explosion - use transforms instead of .get() to avoid hydration mismatch
-  const burntFilter = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "contrast(1.5) brightness(0.7) sepia(0.3) hue-rotate(10deg) saturate(0.8)"
+  // Varied burnt filters - some more burned than others
+  const burntFilter0 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.3) brightness(0.8) sepia(0.2) hue-rotate(5deg) saturate(0.9)" // Less burned
+      : "none"
+  );
+  const burntFilter1 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.8) brightness(0.5) sepia(0.5) hue-rotate(15deg) saturate(0.6)" // More burned
+      : "none"
+  );
+  const burntFilter2 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.6) brightness(0.6) sepia(0.4) hue-rotate(12deg) saturate(0.7)" // Medium burned
+      : "none"
+  );
+  const burntFilter3 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(2.0) brightness(0.4) sepia(0.6) hue-rotate(20deg) saturate(0.5)" // Very burned
       : "none"
   );
 
-  // Clip paths for each image when burnt
+  // Clip paths for each image when burnt/torn - varied torn edges (some more torn)
+  // Remain active permanently after explosion
   const burntClipPath0 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(5% 0%, 95% 3%, 98% 15%, 96% 35%, 100% 50%, 94% 70%, 97% 85%, 92% 100%, 8% 96%, 3% 80%, 0% 60%, 4% 40%, 1% 20%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 0%, 45% 0%, 50% 5%, 55% 0%, 100% 2%, 98% 20%, 100% 40%, 95% 60%, 98% 80%, 92% 95%, 85% 100%, 60% 98%, 40% 100%, 20% 95%, 5% 90%, 0% 70%, 2% 50%, 0% 30%, 3% 15%)" // Medium torn
       : "none"
   );
   const burntClipPath1 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(3% 5%, 97% 0%, 95% 20%, 100% 40%, 96% 60%, 98% 80%, 93% 97%, 10% 100%, 5% 85%, 0% 65%, 3% 45%, 2% 25%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 2%, 25% 0%, 45% 3%, 65% 0%, 85% 2%, 100% 8%, 95% 18%, 98% 30%, 100% 50%, 92% 70%, 85% 88%, 65% 95%, 45% 100%, 25% 98%, 8% 92%, 0% 75%, 3% 55%, 0% 35%, 2% 15%)" // More torn
       : "none"
   );
   const burntClipPath2 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(0% 8%, 92% 0%, 97% 18%, 94% 38%, 100% 55%, 95% 75%, 98% 92%, 5% 100%, 2% 83%, 5% 63%, 0% 43%, 3% 23%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(2% 0%, 15% 3%, 35% 0%, 55% 2%, 75% 0%, 95% 5%, 100% 20%, 92% 40%, 95% 60%, 88% 80%, 75% 92%, 55% 98%, 35% 100%, 15% 95%, 0% 85%, 5% 65%, 0% 45%, 3% 25%, 0% 10%)" // Very torn
       : "none"
   );
   const burntClipPath3 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(7% 0%, 100% 7%, 96% 25%, 99% 45%, 95% 65%, 97% 82%, 91% 100%, 0% 93%, 4% 75%, 1% 55%, 5% 35%, 2% 15%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(5% 0%, 30% 2%, 50% 0%, 70% 3%, 95% 0%, 100% 15%, 98% 35%, 100% 55%, 95% 75%, 90% 90%, 70% 100%, 50% 98%, 30% 100%, 10% 95%, 0% 80%, 2% 60%, 0% 40%, 3% 20%)" // Medium torn
       : "none"
   );
 
-  // Side image clip paths
+  // Side image clip paths - more dramatic torn edges
+  // Remain active permanently after explosion
   const sideBurntClipPath0 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(2% 3%, 98% 0%, 95% 25%, 99% 50%, 95% 75%, 98% 95%, 5% 100%, 0% 80%, 3% 60%, 0% 40%, 4% 20%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 0%, 40% 2%, 60% 0%, 100% 3%, 98% 20%, 100% 45%, 95% 70%, 98% 90%, 85% 100%, 55% 98%, 35% 100%, 10% 95%, 0% 75%, 2% 50%, 0% 25%, 3% 10%)"
       : "none"
   );
   const sideBurntClipPath1 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(0% 5%, 95% 2%, 100% 30%, 96% 55%, 99% 80%, 92% 100%, 8% 97%, 3% 70%, 0% 45%, 5% 20%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(5% 0%, 30% 3%, 55% 0%, 80% 2%, 100% 8%, 95% 30%, 98% 55%, 100% 75%, 88% 95%, 60% 100%, 40% 98%, 15% 95%, 0% 70%, 3% 45%, 0% 20%, 4% 5%)"
       : "none"
   );
   const sideBurntClipPath2 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(5% 0%, 100% 8%, 97% 35%, 100% 60%, 94% 85%, 99% 98%, 3% 95%, 0% 75%, 4% 50%, 0% 25%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(8% 0%, 35% 2%, 60% 0%, 85% 3%, 100% 10%, 96% 35%, 99% 60%, 94% 85%, 82% 100%, 55% 98%, 30% 100%, 5% 92%, 0% 65%, 4% 40%, 0% 15%, 3% 5%)"
       : "none"
   );
   const sideBurntClipPath3 = useTransform(smoothMediaProgress, (progress) =>
-    progress > 0.7
-      ? "polygon(0% 2%, 96% 5%, 100% 28%, 95% 53%, 99% 78%, 93% 100%, 5% 98%, 2% 73%, 0% 48%, 3% 23%)"
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 3%, 25% 0%, 50% 2%, 75% 0%, 100% 5%, 97% 30%, 100% 55%, 96% 80%, 90% 100%, 65% 98%, 40% 100%, 20% 95%, 0% 75%, 3% 50%, 0% 25%, 4% 10%)"
       : "none"
   );
 
-  const burntClipPaths = [
-    burntClipPath0,
-    burntClipPath1,
-    burntClipPath2,
-    burntClipPath3,
+  // Varied burnt filters for secondary images
+  const secondaryBurntFilter0 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.4) brightness(0.75) sepia(0.25) hue-rotate(8deg) saturate(0.85)" // Less burned
+      : "none"
+  );
+  const secondaryBurntFilter1 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.9) brightness(0.45) sepia(0.55) hue-rotate(18deg) saturate(0.55)" // More burned
+      : "none"
+  );
+  const secondaryBurntFilter2 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.7) brightness(0.55) sepia(0.45) hue-rotate(14deg) saturate(0.65)" // Medium burned
+      : "none"
+  );
+  const secondaryBurntFilter3 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(2.1) brightness(0.35) sepia(0.65) hue-rotate(22deg) saturate(0.45)" // Very burned
+      : "none"
+  );
+
+  // Varied clip paths for secondary images (more torn)
+  const secondaryBurntClipPath0 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 3%, 20% 0%, 40% 2%, 60% 0%, 80% 3%, 100% 8%, 95% 25%, 98% 45%, 100% 65%, 92% 85%, 80% 95%, 60% 100%, 40% 98%, 20% 100%, 0% 90%, 3% 70%, 0% 50%, 2% 30%, 0% 15%)" // Medium torn
+      : "none"
+  );
+  const secondaryBurntClipPath1 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(0% 5%, 15% 2%, 35% 0%, 55% 3%, 75% 0%, 95% 6%, 100% 25%, 90% 45%, 93% 65%, 85% 85%, 70% 95%, 50% 100%, 30% 98%, 12% 92%, 0% 80%, 4% 60%, 0% 40%, 3% 20%, 0% 8%)" // More torn
+      : "none"
+  );
+  const secondaryBurntClipPath2 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(3% 0%, 12% 4%, 30% 0%, 50% 3%, 70% 0%, 88% 4%, 100% 15%, 88% 35%, 90% 55%, 82% 75%, 65% 88%, 45% 95%, 25% 98%, 8% 90%, 0% 75%, 5% 55%, 0% 35%, 4% 18%, 0% 6%)" // Very torn
+      : "none"
+  );
+  const secondaryBurntClipPath3 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "polygon(2% 2%, 25% 0%, 45% 2%, 65% 0%, 85% 3%, 100% 10%, 96% 30%, 99% 50%, 94% 70%, 85% 88%, 65% 96%, 45% 100%, 25% 97%, 8% 88%, 0% 72%, 3% 52%, 0% 32%, 4% 15%, 0% 5%)" // Medium torn
+      : "none"
+  );
+
+  const burntClipPaths: MotionValue<string>[] = [
+    burntClipPath0 as MotionValue<string>,
+    burntClipPath1 as MotionValue<string>,
+    burntClipPath2 as MotionValue<string>,
+    burntClipPath3 as MotionValue<string>,
   ];
-  const sideBurntClipPaths = [
-    sideBurntClipPath0,
-    sideBurntClipPath1,
-    sideBurntClipPath2,
-    sideBurntClipPath3,
+  const secondaryBurntClipPaths: MotionValue<string>[] = [
+    secondaryBurntClipPath0 as MotionValue<string>,
+    secondaryBurntClipPath1 as MotionValue<string>,
+    secondaryBurntClipPath2 as MotionValue<string>,
+    secondaryBurntClipPath3 as MotionValue<string>,
   ];
+  const burntFilters: MotionValue<string>[] = [
+    burntFilter0 as MotionValue<string>,
+    burntFilter1 as MotionValue<string>,
+    burntFilter2 as MotionValue<string>,
+    burntFilter3 as MotionValue<string>,
+  ];
+  const secondaryBurntFilters: MotionValue<string>[] = [
+    secondaryBurntFilter0 as MotionValue<string>,
+    secondaryBurntFilter1 as MotionValue<string>,
+    secondaryBurntFilter2 as MotionValue<string>,
+    secondaryBurntFilter3 as MotionValue<string>,
+  ];
+  // Varied burnt filters for side images
+  const sideBurntFilter0 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.5) brightness(0.7) sepia(0.3) hue-rotate(10deg) saturate(0.8)"
+      : "none"
+  );
+  const sideBurntFilter1 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.8) brightness(0.5) sepia(0.5) hue-rotate(15deg) saturate(0.6)"
+      : "none"
+  );
+  const sideBurntFilter2 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(1.6) brightness(0.6) sepia(0.4) hue-rotate(12deg) saturate(0.7)"
+      : "none"
+  );
+  const sideBurntFilter3 = useTransform(smoothMediaProgress, (progress) =>
+    (progress > 0.7 || hasExplodedRef.current)
+      ? "contrast(2.0) brightness(0.4) sepia(0.6) hue-rotate(20deg) saturate(0.5)"
+      : "none"
+  );
+  const sideBurntFilters: MotionValue<string>[] = [
+    sideBurntFilter0 as MotionValue<string>,
+    sideBurntFilter1 as MotionValue<string>,
+    sideBurntFilter2 as MotionValue<string>,
+    sideBurntFilter3 as MotionValue<string>,
+  ];
+  const sideBurntClipPaths: MotionValue<string>[] = [
+    sideBurntClipPath0 as MotionValue<string>,
+    sideBurntClipPath1 as MotionValue<string>,
+    sideBurntClipPath2 as MotionValue<string>,
+    sideBurntClipPath3 as MotionValue<string>,
+  ];
+
+  useEffect(() => {
+    imageTransformsRef.current = {
+      primary: primaryImageTransforms,
+      secondary: secondaryImageTransforms,
+    };
+  }, [primaryImageTransforms, secondaryImageTransforms]);
+
+  useEffect(() => {
+    sideImageTransformsRef.current = sideImageTransforms;
+  }, [sideImageTransforms]);
+
+  const renderPortfolioCard = (
+    src: string,
+    index: number,
+    inView: boolean,
+    keyPrefix: string,
+    transformsArray: ImageTransformConfig[],
+    debrisSnapshot: DebrisSnapshot[] | null,
+    burntFilter: MotionValue<string>,
+    clipPath: MotionValue<string>
+  ) => {
+    const transforms = transformsArray[index];
+
+    if (!transforms) {
+      return null;
+    }
+
+    return (
+      <motion.div
+        key={`${keyPrefix}-${src}`}
+        style={
+          mounted
+            ? {
+                x: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.x ?? transforms.x
+                  : transforms.x,
+                y: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.y ?? transforms.y
+                  : transforms.y,
+                rotate: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.rotate ?? transforms.rotate
+                  : transforms.rotate,
+                rotateX: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.rotateX ?? 0
+                  : transforms.rotateXMotion ?? imageNo3DRotateX,
+                rotateY: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.rotateY ?? 0
+                  : transforms.rotateYMotion ?? imageNo3DRotateY,
+                z: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.z ?? 0
+                  : transforms.zMotion ?? imageNo3DZ,
+                opacity: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.opacity ?? transforms.opacity
+                  : transforms.opacity,
+                scale: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.scale ?? transforms.scale
+                  : transforms.scale,
+                skewX: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.skewX ?? (transforms.skewX || 0)
+                  : transforms.skewX || 0,
+                skewY: (mounted && hasExploded && debrisSnapshot)
+                  ? debrisSnapshot[index]?.skewY ?? (transforms.skewY || 0)
+                  : transforms.skewY || 0,
+                willChange: "transform, opacity, filter",
+                transformStyle: "preserve-3d",
+                perspective: 2000,
+                transformOrigin: "center center",
+                maxWidth: "100%",
+                zIndex: imageZIndexExplosion,
+                pointerEvents: imagePointerEventsExplosion,
+                filter: burntFilter,
+                clipPath: clipPath,
+                minHeight: "200px",
+              }
+            : {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                rotateX: 0,
+                rotateY: 0,
+                z: 0,
+                opacity: 1,
+                scale: 1,
+                willChange: "transform, opacity",
+                transformStyle: "preserve-3d",
+                perspective: 2000,
+                maxWidth: "100%",
+                zIndex: "auto",
+                pointerEvents: "auto",
+                minHeight: "200px",
+              }
+        }
+        suppressHydrationWarning
+        initial={{ opacity: 0, scale: 0.8, y: 50 }}
+        animate={
+          inView
+            ? {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }
+            : { opacity: 0, scale: 0.8, y: 50 }
+        }
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.7,
+          delay: shouldReduceMotion ? 0 : index * 0.12,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        whileHover={{
+          scale: 1.05,
+          y: -8,
+          zIndex: 40,
+        }}
+        className="relative aspect-square overflow-hidden rounded-lg border border-accent/20 group cursor-pointer max-w-full w-full"
+      >
+        <Image
+          src={src}
+          alt={`Portfolio exempel ${index + 1}`}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
+        />
+
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+
+        <motion.div
+          className="absolute inset-0 border-2 border-accent opacity-0 group-hover:opacity-50"
+          initial={{ scale: 0.9 }}
+          whileHover={{ scale: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
+          initial={{ x: "-100%" }}
+          whileHover={{ x: "100%" }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        />
+      </motion.div>
+    );
+  };
 
   // Additional transforms for video effects
   const smokeLayerOpacity = useTransform(videoRedTint, [0, 1], [0, 0.5]);
   // White fade that fades to white during explosion then back to transparent
-  // Changed to respond to explosion progress for better sync
   const whiteFadeOverlayOpacity = useTransform(
     smoothMediaProgress,
     [0.6, 0.7, 0.8, 0.9, 0.95, 1],
     [0, 0.2, 0.5, 0.9, 0.7, 0] // Reaches near-white then fades back
   );
-  // Remove second white overlay - not needed (removed unused variable)
-
-  // Hide section when animation is complete (after white fade is done)
-  // DISABLED: Keep section visible to show burnt debris
-  /*
-  useEffect(() => {
-    if (isAnimationComplete) return;
-
-    const unsubscribe = smoothMediaProgress.on("change", (latest) => {
-      const whiteFadeOpacity = whiteFadeOverlayOpacity.get();
-      // When progress reaches 1 and white fade is back to 0, animation is complete
-      if (latest >= 0.99 && whiteFadeOpacity <= 0.1) {
-        setIsAnimationComplete(true);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [smoothMediaProgress, whiteFadeOverlayOpacity, isAnimationComplete]);
-
-  // Hide section completely when animation is done
-  if (isAnimationComplete) {
-    return null;
-  }
-  */
 
   return (
     <section
       ref={sectionRef}
       className="relative py-32 md:py-48 bg-black text-white overflow-hidden"
       style={{
-        position: "relative" /* Explicit position for scroll tracking */,
+        position: "relative",
         scrollSnapAlign: "start" as const,
-        minHeight: "350vh", // Extended section for immersive zoom effect - allows smooth zoom experience
+        minHeight: "350vh",
       }}
     >
       {/* ============================================ */}
@@ -1016,9 +1821,7 @@ export default function HeroAnimation() {
         <div
           ref={mediaContainerRef}
           className="relative max-w-6xl mx-auto min-h-[600px] md:min-h-[700px] px-4 overflow-visible w-full"
-          style={{
-            position: "relative",
-          }} /* Explicit position for scroll tracking */
+          suppressHydrationWarning
         >
           {/* Enhanced red background glow behind images when they explode */}
           {/* More intense and dramatic glow synchronized with explosion */}
@@ -1080,118 +1883,18 @@ export default function HeroAnimation() {
             }
             suppressHydrationWarning
           >
-            {portfolioImages.map((src, index) => {
-              const transforms = imageTransforms[index];
-
-              return (
-                <motion.div
-                  key={src}
-                  style={
-                    mounted
-                      ? {
-                          // Use scroll-based transforms for smoother, more natural explosion
-                          x: transforms.x,
-                          y: transforms.y,
-                          rotate: transforms.rotate,
-                          rotateX:
-                            index === 1 || index === 3
-                              ? image3DRotateX
-                              : imageNo3DRotateX,
-                          rotateY:
-                            index === 1 || index === 3
-                              ? image3DRotateY
-                              : imageNo3DRotateY,
-                          z: index === 1 || index === 3 ? image3DZ : imageNo3DZ,
-                          opacity: transforms.opacity,
-                          scale: transforms.scale,
-                          willChange: "transform, opacity, filter",
-                          transformStyle: "preserve-3d",
-                          perspective: 2000, // Increased for better 3D effect when images fly towards screen
-                          maxWidth: "100%",
-                          zIndex: imageZIndexExplosion,
-                          pointerEvents: imagePointerEventsExplosion,
-                          // Apply burnt effect after explosion (when progress > 0.7)
-                          filter: burntFilter,
-                          // Add damaged edges with unique clip-path for each image
-                          clipPath: burntClipPaths[index],
-                          minHeight: "200px",
-                        }
-                      : {
-                          x: 0,
-                          y: 0,
-                          rotate: 0,
-                          rotateX: 0,
-                          rotateY: 0,
-                          z: 0,
-                          opacity: 1,
-                          scale: 1,
-                          willChange: "transform, opacity",
-                          transformStyle: "preserve-3d",
-                          perspective: 2000,
-                          maxWidth: "100%",
-                          zIndex: "auto",
-                          pointerEvents: "auto",
-                          minHeight: "200px",
-                        }
-                  }
-                  suppressHydrationWarning
-                  initial={{ opacity: 0, scale: 0.8, y: 50 }}
-                  animate={
-                    imagesInView
-                      ? {
-                          opacity: 1,
-                          scale: 1,
-                          y: 0,
-                        }
-                      : { opacity: 0, scale: 0.8, y: 50 }
-                  }
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.7,
-                    delay: shouldReduceMotion ? 0 : index * 0.12,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -8,
-                    zIndex: 40,
-                  }}
-                  className="relative aspect-square overflow-hidden rounded-lg border border-accent/20 group cursor-pointer max-w-full w-full"
-                >
-                  <Image
-                    src={src}
-                    alt={`Portfolio exempel ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
-                  />
-
-                  {/* Gradient overlay that intensifies on hover */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-
-                  {/* Accent border glow on hover */}
-                  <motion.div
-                    className="absolute inset-0 border-2 border-accent opacity-0 group-hover:opacity-50"
-                    initial={{ scale: 0.9 }}
-                    whileHover={{ scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                  />
-                </motion.div>
-              );
-            })}
+            {portfolioImages.map((src, index) =>
+              renderPortfolioCard(
+                src,
+                index,
+                imagesInView,
+                "primary",
+                primaryImageTransforms,
+                primaryDebrisPositions,
+                burntFilters[index],
+                burntClipPaths[index]
+              )
+            )}
           </motion.div>
 
           {/* ============================================ */}
@@ -1381,70 +2084,92 @@ export default function HeroAnimation() {
             </h3>
           </motion.div>
 
-          {/* ============================================ */}
-          {/* RED LANDING PAD - Transforms into glowing floor */}
-          {/* ============================================ */}
-          <motion.div
-            className="absolute left-1/2 top-1/2 pointer-events-none"
-            style={{
-              x: redPadX,
-              y: redPadY,
-              scaleX: redPadScaleX,
-              scaleY: redPadScaleY,
-              rotate: redPadRotate,
-              skewX: redPadSkewX,
-              opacity: redPadOpacity,
-              zIndex: 20,
-              boxShadow: redPadShadow,
-            }}
-          >
-            <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
-              <div className="absolute inset-0 rounded-[38%] bg-gradient-to-br from-tertiary via-tertiary/70 to-tertiary/40 opacity-90" />
-              <div className="absolute inset-0 rounded-[40%] blur-3xl bg-tertiary/35" />
-              <div className="absolute -inset-x-[25%] bottom-[-45%] h-[60%] bg-gradient-to-b from-tertiary/28 via-tertiary/12 to-transparent blur-3xl opacity-80" />
-              <div className="absolute inset-x-[-30%] bottom-[-15%] h-[40%] rounded-full bg-tertiary/20 blur-[50px]" />
-            </div>
-          </motion.div>
+          {!hasExploded && (
+            <>
+              {/* ============================================ */}
+              {/* RED LANDING PAD - Transforms into glowing floor */}
+              {/* ============================================ */}
+              <motion.div
+                className="absolute left-1/2 top-1/2 pointer-events-none"
+                style={{
+                  x: redPadX,
+                  y: redPadY,
+                  scaleX: redPadScaleX,
+                  scaleY: redPadScaleY,
+                  rotate: redPadRotate,
+                  skewX: redPadSkewX,
+                  opacity: redPadOpacity,
+                  zIndex: 20,
+                  boxShadow: redPadShadow,
+                }}
+              >
+                <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
+                  <div className="absolute inset-0 rounded-[38%] bg-gradient-to-br from-tertiary via-tertiary/70 to-tertiary/40 opacity-90" />
+                  <div className="absolute inset-0 rounded-[40%] blur-3xl bg-tertiary/35" />
+                  <div className="absolute -inset-x-[25%] bottom-[-45%] h-[60%] bg-gradient-to-b from-tertiary/28 via-tertiary/12 to-transparent blur-3xl opacity-80" />
+                  <div className="absolute inset-x-[-30%] bottom-[-15%] h-[40%] rounded-full bg-tertiary/20 blur-[50px]" />
+                </div>
+              </motion.div>
+            </>
+          )}
 
           {/* ============================================ */}
           {/* VIDEO CONTAINER - Main video element */}
           {/* ============================================ */}
-          <motion.div
-            style={{
-              x: "-50%",
-              y: videoY,
-              scale: videoScale,
-              opacity: videoOpacity,
-              left: "50%",
-              top: "50%",
-              zIndex: 30,
-              maxWidth: "min(100%, 80rem)",
-            }}
-            className="absolute w-full overflow-visible"
-          >
-            {/* Container for video with side images */}
-            {mounted && (
+          {mounted ? (
+            <motion.div
+              style={{
+                x: "-50%",
+                y: videoY,
+                scale: videoScale,
+                opacity: videoOpacity,
+                left: "50%",
+                top: "50%",
+                zIndex: 30,
+                maxWidth: "min(100%, 80rem)",
+              }}
+              className="absolute w-full overflow-visible"
+            >
+              {/* Container for video with side images */}
               <div className="flex items-center gap-4">
                 {/* Left side images */}
                 <div className="flex flex-col gap-4">
                   {sideImages.slice(0, 2).map((src, index) => {
                     const transforms = sideImageTransforms[index];
+                    const sideSnapshot = sideDebrisPositions;
                     return (
                       <motion.div
                         key={src}
                         style={
                           mounted
                             ? {
-                                x: transforms.x,
-                                y: transforms.y,
-                                rotate: transforms.rotate,
-                                opacity: transforms.opacity,
-                                scale: transforms.scale,
+                                x: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.x ?? transforms.x
+                                  : transforms.x,
+                                y: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.y ?? transforms.y
+                                  : transforms.y,
+                                rotate: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.rotate ?? transforms.rotate
+                                  : transforms.rotate,
+                                opacity: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.opacity ?? transforms.opacity
+                                  : transforms.opacity,
+                                scale: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.scale ?? transforms.scale
+                                  : transforms.scale,
+                                skewX: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.skewX ?? (transforms.skewX || 0)
+                                  : (transforms.skewX || 0),
+                                skewY: (mounted && hasExploded && sideSnapshot)
+                                  ? sideSnapshot[index]?.skewY ?? (transforms.skewY || 0)
+                                  : (transforms.skewY || 0),
                                 willChange: "transform, opacity, filter",
+                                transformOrigin: "center center",
                                 maxWidth: "150px",
                                 width: "100%",
                                 // Apply burnt effect after explosion
-                                filter: burntFilter,
+                                filter: sideBurntFilters[index],
                                 // Damaged edges with unique clip-path
                                 clipPath: sideBurntClipPaths[index],
                               }
@@ -1562,27 +2287,44 @@ export default function HeroAnimation() {
                 </div>
 
                 {/* Right side images */}
-                {mounted && (
-                  <div className="flex flex-col gap-4">
-                    {sideImages.slice(2, 4).map((src, globalIndex) => {
-                      const index = globalIndex - 2 + 2; // Adjust index for transforms array
+                <div className="flex flex-col gap-4">
+                    {sideImages.slice(2, 4).map((src, localIndex) => {
+                      const index = localIndex + 2; // Map to transforms array index (2 or 3)
                       const transforms = sideImageTransforms[index];
+                      const sideSnapshot = sideDebrisPositions;
                       return (
                         <motion.div
                           key={src}
                           style={
                             mounted
                               ? {
-                                  x: transforms.x,
-                                  y: transforms.y,
-                                  rotate: transforms.rotate,
-                                  opacity: transforms.opacity,
-                                  scale: transforms.scale,
+                                  x: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.x ?? transforms.x
+                                    : transforms.x,
+                                  y: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.y ?? transforms.y
+                                    : transforms.y,
+                                  rotate: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.rotate ?? transforms.rotate
+                                    : transforms.rotate,
+                                  opacity: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.opacity ?? transforms.opacity
+                                    : transforms.opacity,
+                                  scale: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.scale ?? transforms.scale
+                                    : transforms.scale,
+                                  skewX: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.skewX ?? (transforms.skewX || 0)
+                                    : (transforms.skewX || 0),
+                                  skewY: (mounted && hasExploded && sideSnapshot)
+                                    ? sideSnapshot[index]?.skewY ?? (transforms.skewY || 0)
+                                    : (transforms.skewY || 0),
                                   willChange: "transform, opacity, filter",
+                                  transformOrigin: "center center",
                                   maxWidth: "150px",
                                   width: "100%",
                                   // Apply burnt effect after explosion
-                                  filter: burntFilter,
+                                  filter: sideBurntFilters[index],
                                   // Damaged edges with unique clip-path
                                   clipPath: sideBurntClipPaths[index],
                                 }
@@ -1611,8 +2353,50 @@ export default function HeroAnimation() {
                       );
                     })}
                   </div>
-                )}
-              </div>
+                </div>
+              </motion.div>
+          ) : (
+            <div
+              style={{
+                left: "50%",
+                top: "50%",
+                zIndex: 30,
+                maxWidth: "min(100%, 80rem)",
+                opacity: 0.3,
+                transform: "translateX(-50%) translateY(calc(-50% + 200px)) scale(0.4)",
+              }}
+              className="absolute w-full overflow-visible"
+            >
+              {/* Empty placeholder on server */}
+            </div>
+          )}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none w-full h-[260px] sm:h-[300px] md:h-[380px] lg:h-[440px]"
+          />
+          <motion.div
+            ref={secondaryImagesContainerRef}
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative max-w-full mt-8"
+            style={
+              mounted
+                ? {
+                    zIndex: imagesContainerZIndex,
+                  }
+                : { zIndex: 20 }
+            }
+            suppressHydrationWarning
+          >
+            {secondaryPortfolioImages.map((src, index) =>
+              renderPortfolioCard(
+                src,
+                index,
+                secondaryImagesInView,
+                "secondary",
+                secondaryImageTransforms,
+                secondaryDebrisPositions,
+                secondaryBurntFilters[index],
+                secondaryBurntClipPaths[index]
+              )
             )}
           </motion.div>
         </div>
@@ -1620,12 +2404,14 @@ export default function HeroAnimation() {
 
       {/* White fade overlay - fades in then OUT to reveal Matrix text */}
       {/* Shows white briefly then fades back to transparent */}
-      <motion.div
-        className="fixed inset-0 bg-white pointer-events-none z-[100]"
-        style={{
-          opacity: whiteFadeOverlayOpacity,
-        }}
-      />
+      {!hasExploded && (
+        <motion.div
+          className="fixed inset-0 bg-white pointer-events-none z-[100]"
+          style={{
+            opacity: whiteFadeOverlayOpacity,
+          }}
+        />
+      )}
 
       {/* Design Modal */}
       <AnimatePresence>
@@ -1832,8 +2618,6 @@ export default function HeroAnimation() {
           </>
         )}
       </AnimatePresence>
-
-      {/* Remove second white overlay - not needed anymore */}
     </section>
   );
 }

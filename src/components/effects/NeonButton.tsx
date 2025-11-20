@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, MouseEvent } from "react";
 
 interface NeonButtonProps {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   variant?: "blue" | "purple" | "green" | "red" | "yellow";
   size?: "sm" | "md" | "lg";

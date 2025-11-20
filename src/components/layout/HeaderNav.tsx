@@ -11,7 +11,31 @@
  * @desktop - Desktop navigation (hidden lg:flex), Desktop CTA button
  * @both - Logo, header container
  *
+ * Navigation Structure:
+ * ====================
+ * Navigation links are built from siteConfig.nav and adapt based on current page:
+ *
+ * 1. Page Links (always visible):
+ *    - Hem (/)
+ *    - Portfolio (/portfolio)
+ *    - Kontakt (/contact)
+ *
+ * 2. Anchor Links (included in nav, work from any page):
+ *    - Tjänster (/#tjanster) - scrolls to ServicesSection on homepage
+ *    - Process (/#process) - scrolls to ProcessSection on homepage
+ *    - Omdömen (/#omdomen) - scrolls to TestimonialsSection on homepage
+ *
+ * 3. CTA Button:
+ *    - Desktop: "Starta projekt" button in header → /contact
+ *    - Mobile: Same button inside MobileMenu
+ *
+ * Anchor Link Behavior:
+ * - From homepage: Smooth scrolls to section
+ * - From other pages: Navigates to homepage first, then scrolls to anchor
+ * - This ensures consistent navigation experience across all pages
+ *
  * @see MobileMenu - Mobile-specific menu component
+ * @see siteConfig.nav - Navigation configuration
  * @see RESPONSIVE_DESIGN_GUIDE.md - For responsive patterns
  */
 
@@ -38,6 +62,7 @@ export default function HeaderNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
@@ -46,18 +71,27 @@ export default function HeaderNav() {
     layoutEffect: false,
   });
 
+  // Ensure hydration safety - only track scroll after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 50);
+    // Only update scroll state after mount to prevent hydration mismatch
+    if (mounted) {
+      setIsScrolled(latest > 50);
+    }
   });
 
-  // Track current hash
+  // Track current hash - only after mount to prevent hydration mismatch
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const updateHash = () => {
-      if (typeof window !== 'undefined') {
-        setCurrentHash(window.location.hash);
-      }
+      setCurrentHash(window.location.hash);
     };
 
+    // Set initial hash after mount
     updateHash();
     window.addEventListener('hashchange', updateHash);
     return () => window.removeEventListener('hashchange', updateHash);
@@ -76,10 +110,24 @@ export default function HeaderNav() {
     };
   }, [menuOpen]);
 
+  /**
+   * Navigation links construction
+   *
+   * Builds navigation structure based on current page:
+   * - On homepage (/): Shows Home + Anchor links (Tjänster, Process, Omdömen) + Page links (Portfolio, Kontakt)
+   * - On other pages: Shows Page links only (Hem, Portfolio, Kontakt) - anchor links are still included but work as home+anchor
+   *
+   * Anchor link handling:
+   * - Anchor links are converted to "/#anchor" format so they work from any page
+   * - If user clicks anchor link from non-homepage, they navigate to homepage first, then scroll to anchor
+   * - This ensures consistent navigation behavior across the site
+   */
   const navLinks = useMemo<NavLink[]>(() => {
     const baseLinks = siteConfig.nav.links;
     const homeLink = baseLinks.find((link) => link.href === "/");
     const otherLinks = baseLinks.filter((link) => link.href !== "/");
+
+    // Convert anchor links to full URLs (/#anchor) so they work from any page
     const anchorLinks =
       siteConfig.nav.homeAnchors?.map((anchor) => {
         const normalizedHash = anchor.href.startsWith("#")
@@ -90,10 +138,12 @@ export default function HeaderNav() {
           label: anchor.label,
           hash: normalizedHash,
           // Always link to home page with anchor, so it works from any page
+          // Format: "/#tjanster" navigates to homepage then scrolls to #tjanster section
           href: `/${normalizedHash}`,
         };
       }) ?? [];
 
+    // Navigation order: Home → Anchor links → Other page links
     return [
       ...(homeLink ? [{ ...homeLink }] : []),
       ...anchorLinks,
@@ -144,10 +194,11 @@ export default function HeaderNav() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${mounted && isScrolled
           ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
           : "bg-transparent"
           }`}
+        suppressHydrationWarning
       >
         {/* Animated gradient line at top */}
         <motion.div
@@ -164,7 +215,7 @@ export default function HeaderNav() {
         />
 
         {/* Red accent glow on scroll */}
-        {isScrolled && (
+        {mounted && isScrolled && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -254,14 +305,24 @@ export default function HeaderNav() {
                       <Link
                         href={link.href}
                         onClick={(e) => {
-                          // Handle anchor links: if on different page, navigate first then scroll
+                          /**
+                           * Anchor link navigation handling
+                           *
+                           * If user clicks an anchor link (#tjanster, #process, #omdomen) from a non-homepage:
+                           * - Prevent default Next.js navigation
+                           * - Use window.location.href to navigate to homepage + anchor
+                           * - Browser automatically scrolls to anchor after navigation
+                           *
+                           * This ensures anchor links work correctly from any page on the site.
+                           */
                           if (isAnchorLink && pathname !== "/") {
                             e.preventDefault();
-                            // Use Next.js router for better navigation
+                            // Use window.location.href for full page navigation with anchor
+                            // This ensures browser scrolls to anchor after page load
                             window.location.href = link.href;
                             return;
                           }
-                          // Allow normal navigation for regular links
+                          // Allow normal Next.js navigation for regular page links
                         }}
                         className={`nav-link-shimmer px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${isActive
                           ? "text-white"
@@ -301,6 +362,9 @@ export default function HeaderNav() {
                  DESKTOP CTA BUTTON
                  ============================================
                  Visible on desktop, hidden on mobile (mobile CTA is in MobileMenu)
+
+                 CTA Destination: /contact (start project CTA)
+                 This is the primary conversion button in the header navigation
               */}
             <div className="cta-button-header hidden lg:block">
               <Button

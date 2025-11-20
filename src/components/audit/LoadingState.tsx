@@ -111,7 +111,8 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            style={{ willChange: "width" }}
             className={`absolute left-0 top-0 h-full bg-gradient-to-r ${colorMap[currentStage.color]}`}
           >
             <motion.div

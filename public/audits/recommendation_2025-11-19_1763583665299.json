@@ -1,0 +1,51 @@
+{
+  "company": "Hälsa & Vård företag",
+  "website_type_recommendation": "En e-handelswebbplats med fokus på användarvänlighet och konvertering, anpassad för att sälja hälso- och vårdprodukter till en internationell publik.",
+  "improvements": [
+    {
+      "item": "Sökfunktion",
+      "impact": "high",
+      "effort": "medium",
+      "why": "En effektiv sökfunktion gör det lättare för besökare att hitta produkter, vilket ökar chansen för köp.",
+      "how": "Implementera en sökmotor med autocomplete och filtreringsalternativ som är lätt att använda."
+    },
+    {
+      "item": "Nyhetsbrev",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Ett nyhetsbrev hjälper till att bygga en relation med kunder och öka återkommande försäljningar.",
+      "how": "Integrera en signup-formulär i sidfoten och på produkt- samt landningssidor."
+    },
+    {
+      "item": "Referenser/kundcase",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Kundcase bygger förtroende och kan övertyga besökare att genomföra köp.",
+      "how": "Skapa en sektion på hemsidan dedikerad till kundcase med bilder och berättelser."
+    }
+  ],
+  "budget_estimate": {
+    "low": 80000,
+    "high": 150000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad trafik och konvertering av besökare till kunder",
+    "Ökad kundlojalitet genom nyhetsbrev och återkommande köp",
+    "Skapande av ett starkt varumärke inom hälso- och vårdbranchen"
+  ],
+  "technical_requirements": [
+    "Responsiv design för mobilanpassning",
+    "SEO-optimerat innehåll",
+    "Säker betalningslösning och GDPR-anpassning",
+    "Lättanvänd CMS för innehållshantering"
+  ],
+  "audit_type": "recommendation",
+  "cost": {
+    "tokens": 984,
+    "sek": 0.06,
+    "usd": 0.0054
+  },
+  "domain": null,
+  "timestamp": "2025-11-19T20:21:05.299Z"
+}

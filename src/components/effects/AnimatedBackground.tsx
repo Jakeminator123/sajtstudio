@@ -7,6 +7,12 @@ interface AnimatedBackgroundProps {
   variant?: "aurora" | "nebula" | "matrix" | "waves";
 }
 
+// Deterministic seed function using golden ratio for consistent values
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return Math.abs(x - Math.floor(x));
+}
+
 export default function AnimatedBackground({
   variant = "aurora",
 }: AnimatedBackgroundProps) {
@@ -55,13 +61,14 @@ export default function AnimatedBackground({
             typeof window !== "undefined" ? window.innerWidth : 1920;
           const height =
             typeof window !== "undefined" ? window.innerHeight : 1080;
+          const seed = i * 0.618033988749895; // Golden ratio
           return (
             <motion.div
               key={i}
               className="absolute rounded-full blur-3xl"
               style={{
-                width: Math.random() * 400 + 200,
-                height: Math.random() * 400 + 200,
+                width: seededRandom(seed) * 400 + 200,
+                height: seededRandom(seed + 1) * 400 + 200,
                 background: `radial-gradient(circle, ${
                   [
                     "#ff00ff60",
@@ -75,14 +82,14 @@ export default function AnimatedBackground({
               }}
               animate={{
                 x: [
-                  Math.random() * width,
-                  Math.random() * width,
-                  Math.random() * width,
+                  seededRandom(seed + 2) * width,
+                  seededRandom(seed + 3) * width,
+                  seededRandom(seed + 4) * width,
                 ],
                 y: [
-                  Math.random() * height,
-                  Math.random() * height,
-                  Math.random() * height,
+                  seededRandom(seed + 5) * height,
+                  seededRandom(seed + 6) * height,
+                  seededRandom(seed + 7) * height,
                 ],
                 scale: [1, 1.5, 1],
               }}
@@ -150,27 +157,30 @@ export default function AnimatedBackground({
         />
 
         {/* Stars */}
-        {[...Array(100)].map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            className="absolute rounded-full bg-white"
-            style={{
-              width: Math.random() * 3,
-              height: Math.random() * 3,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 5 + 2,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-            }}
-          />
-        ))}
+        {[...Array(100)].map((_, i) => {
+          const seed = i * 0.618033988749895; // Golden ratio
+          return (
+            <motion.div
+              key={`star-${i}`}
+              className="absolute rounded-full bg-white"
+              style={{
+                width: seededRandom(seed) * 3,
+                height: seededRandom(seed + 1) * 3,
+                left: `${seededRandom(seed + 2) * 100}%`,
+                top: `${seededRandom(seed + 3) * 100}%`,
+              }}
+              animate={{
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: seededRandom(seed + 4) * 5 + 2,
+                repeat: Infinity,
+                delay: seededRandom(seed + 5) * 5,
+              }}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -179,31 +189,37 @@ export default function AnimatedBackground({
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden bg-black">
         {/* Matrix Rain */}
-        {[...Array(30)].map((_, i) => (
-          <motion.div
-            key={`matrix-${i}`}
-            className="absolute text-green-500 font-mono text-xs opacity-70"
-            style={{
-              left: `${i * 3.33}%`,
-            }}
-            animate={{
-              y: [
-                -100,
-                typeof window !== "undefined" ? window.innerHeight + 100 : 1180,
-              ],
-            }}
-            transition={{
-              duration: Math.random() * 5 + 5,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "linear",
-            }}
-          >
-            {[...Array(20)].map((_, j) => (
-              <div key={j}>{Math.random() > 0.5 ? "1" : "0"}</div>
-            ))}
-          </motion.div>
-        ))}
+        {[...Array(30)].map((_, i) => {
+          const seed = i * 0.618033988749895; // Golden ratio
+          return (
+            <motion.div
+              key={`matrix-${i}`}
+              className="absolute text-green-500 font-mono text-xs opacity-70"
+              style={{
+                left: `${i * 3.33}%`,
+              }}
+              animate={{
+                y: [
+                  -100,
+                  typeof window !== "undefined" ? window.innerHeight + 100 : 1180,
+                ],
+              }}
+              transition={{
+                duration: seededRandom(seed) * 5 + 5,
+                repeat: Infinity,
+                delay: seededRandom(seed + 1) * 5,
+                ease: "linear",
+              }}
+            >
+              {[...Array(20)].map((_, j) => {
+                const charSeed = seed + j * 0.1;
+                return (
+                  <div key={j}>{seededRandom(charSeed) > 0.5 ? "1" : "0"}</div>
+                );
+              })}
+            </motion.div>
+          );
+        })}
 
         {/* Glow Effect */}
         <motion.div
@@ -252,17 +268,18 @@ export default function AnimatedBackground({
         const width = typeof window !== "undefined" ? window.innerWidth : 1920;
         const height =
           typeof window !== "undefined" ? window.innerHeight : 1080;
+        const seed = i * 0.618033988749895; // Golden ratio
         return (
           <motion.div
             key={`particle-${i}`}
             className="absolute w-1 h-1 bg-blue-400 rounded-full"
             animate={{
-              x: [Math.random() * width, Math.random() * width],
-              y: [Math.random() * height, Math.random() * height],
+              x: [seededRandom(seed) * width, seededRandom(seed + 1) * width],
+              y: [seededRandom(seed + 2) * height, seededRandom(seed + 3) * height],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: Math.random() * 10 + 5,
+              duration: seededRandom(seed + 4) * 10 + 5,
               repeat: Infinity,
               ease: "easeInOut",
             }}

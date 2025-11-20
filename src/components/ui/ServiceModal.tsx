@@ -177,6 +177,7 @@ export default function ServiceModal({
                 </motion.div>
 
                 {/* CTA */}
+                {/* Service-specific CTA: Links to /contact page */}
                 <motion.a
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

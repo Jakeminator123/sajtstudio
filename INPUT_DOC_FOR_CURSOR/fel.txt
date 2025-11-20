@@ -1,0 +1,406 @@
+PowerShell 7.5.4
+PS C:\Users\Propietario\Desktop\sajtstudio> npm install
+
+up to date, audited 512 packages in 1s
+
+179 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+PS C:\Users\Propietario\Desktop\sajtstudio> npm run dev
+
+> sajtstudio@1.0.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 16.0.1 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.68.201:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 944ms
+ ○ Compiling / ...
+ GET / 200 in 3.8s (compile: 3.3s, render: 484ms)
+Browser error logged: {
+  type: 'warning',
+  message: "You have defined a target options but the provided ref is not yet hydrated, probably because it's defined higher up the tree. Try calling useScroll() in the same component as the ref, or setting its `layoutEffect: false` option.",
+  stack: null,
+  source: null,
+  timestamp: '2025-11-20T08:35:27.177Z',
+  url: 'http://localhost:3000/',
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
+}
+ POST /api/errors 200 in 312ms (compile: 243ms, render: 68ms)
+ GET /portfolio 200 in 842ms (compile: 712ms, render: 130ms)
+PS C:\Users\Propietario\Desktop\sajtstudio>
+
+PS C:\Users\Propietario\Desktop\sajtstudio> npm run lint
+
+> sajtstudio@1.0.0 lint
+> eslint .
+
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\animations\IntroVideo.tsx
+   29:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\animations\IntroVideo.tsx:29:9
+  27 |       if (!hasSeen) {
+  28 |         // Show video immediately - this is the first thing when user logs in
+> 29 |         setIsVisible(true);
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |       } else {
+  31 |         // Debug: log if video was skipped due to localStorage
+  32 |         console.log("Intro video skipped - already seen (localStorage key exists)");  react-hooks/set-state-in-effect
+   83:16  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  102:16  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  115:16  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\audit\Audit3DVisualization.tsx
+  53:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\audit\Audit3DVisualization.tsx:53:5
+  51 |
+  52 |   useEffect(() => {
+> 53 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  54 |     if (typeof window !== 'undefined') {
+  55 |       setWindowWidth(window.innerWidth);
+  56 |       const handleResize = () => setWindowWidth(window.innerWidth);  react-hooks/set-state-in-effect
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx
+   63:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:63:24
+  61 |               className="absolute rounded-full blur-3xl"
+  62 |               style={{
+> 63 |                 width: Math.random() * 400 + 200,
+     |                        ^^^^^^^^^^^^^ Cannot call impure function
+  64 |                 height: Math.random() * 400 + 200,
+  65 |                 background: `radial-gradient(circle, ${
+  66 |                   [                                         react-hooks/purity
+   64:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:64:25
+  62 |               style={{
+  63 |                 width: Math.random() * 400 + 200,
+> 64 |                 height: Math.random() * 400 + 200,
+     |                         ^^^^^^^^^^^^^ Cannot call impure function
+  65 |                 background: `radial-gradient(circle, ${
+  66 |                   [
+  67 |                     "#ff00ff60",                                                                react-hooks/purity
+   78:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:78:19
+  76 |               animate={{
+  77 |                 x: [
+> 78 |                   Math.random() * width,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  79 |                   Math.random() * width,
+  80 |                   Math.random() * width,
+  81 |                 ],                                                                                                                   react-hooks/purity
+   79:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:79:19
+  77 |                 x: [
+  78 |                   Math.random() * width,
+> 79 |                   Math.random() * width,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  80 |                   Math.random() * width,
+  81 |                 ],
+  82 |                 y: [                                                                                                                       react-hooks/purity
+   80:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:80:19
+  78 |                   Math.random() * width,
+  79 |                   Math.random() * width,
+> 80 |                   Math.random() * width,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  81 |                 ],
+  82 |                 y: [
+  83 |                   Math.random() * height,                                                                                                  react-hooks/purity
+   83:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:83:19
+  81 |                 ],
+  82 |                 y: [
+> 83 |                   Math.random() * height,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  84 |                   Math.random() * height,
+  85 |                   Math.random() * height,
+  86 |                 ],                                                                                                                      react-hooks/purity
+   84:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:84:19
+  82 |                 y: [
+  83 |                   Math.random() * height,
+> 84 |                   Math.random() * height,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  85 |                   Math.random() * height,
+  86 |                 ],
+  87 |                 scale: [1, 1.5, 1],                                                                                                     react-hooks/purity
+   85:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:85:19
+  83 |                   Math.random() * height,
+  84 |                   Math.random() * height,
+> 85 |                   Math.random() * height,
+     |                   ^^^^^^^^^^^^^ Cannot call impure function
+  86 |                 ],
+  87 |                 scale: [1, 1.5, 1],
+  88 |               }}                                                                                                         react-hooks/purity
+  158:22  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:158:22
+  156 |             className="absolute rounded-full bg-white"
+  157 |             style={{
+> 158 |               width: Math.random() * 3,
+      |                      ^^^^^^^^^^^^^ Cannot call impure function
+  159 |               height: Math.random() * 3,
+  160 |               left: `${Math.random() * 100}%`,
+  161 |               top: `${Math.random() * 100}%`,                                          react-hooks/purity
+  159:23  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:159:23
+  157 |             style={{
+  158 |               width: Math.random() * 3,
+> 159 |               height: Math.random() * 3,
+      |                       ^^^^^^^^^^^^^ Cannot call impure function
+  160 |               left: `${Math.random() * 100}%`,
+  161 |               top: `${Math.random() * 100}%`,
+  162 |             }}                                                                                 react-hooks/purity
+  160:24  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:160:24
+  158 |               width: Math.random() * 3,
+  159 |               height: Math.random() * 3,
+> 160 |               left: `${Math.random() * 100}%`,
+      |                        ^^^^^^^^^^^^^ Cannot call impure function
+  161 |               top: `${Math.random() * 100}%`,
+  162 |             }}
+  163 |             animate={{                                                                              react-hooks/purity
+  161:23  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:161:23
+  159 |               height: Math.random() * 3,
+  160 |               left: `${Math.random() * 100}%`,
+> 161 |               top: `${Math.random() * 100}%`,
+      |                       ^^^^^^^^^^^^^ Cannot call impure function
+  162 |             }}
+  163 |             animate={{
+  164 |               opacity: [0, 1, 0],                                                                                     react-hooks/purity
+  168:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:168:25
+  166 |             }}
+  167 |             transition={{
+> 168 |               duration: Math.random() * 5 + 2,
+      |                         ^^^^^^^^^^^^^ Cannot call impure function
+  169 |               repeat: Infinity,
+  170 |               delay: Math.random() * 5,
+  171 |             }}                                                                                                                  react-hooks/purity
+  170:22  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:170:22
+  168 |               duration: Math.random() * 5 + 2,
+  169 |               repeat: Infinity,
+> 170 |               delay: Math.random() * 5,
+      |                      ^^^^^^^^^^^^^ Cannot call impure function
+  171 |             }}
+  172 |           />
+  173 |         ))}                                                                                                                                     react-hooks/purity
+  196:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:196:25
+  194 |             }}
+  195 |             transition={{
+> 196 |               duration: Math.random() * 5 + 5,
+      |                         ^^^^^^^^^^^^^ Cannot call impure function
+  197 |               repeat: Infinity,
+  198 |               delay: Math.random() * 5,
+  199 |               ease: "linear",                                                                                                   react-hooks/purity
+  198:22  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:198:22
+  196 |               duration: Math.random() * 5 + 5,
+  197 |               repeat: Infinity,
+> 198 |               delay: Math.random() * 5,
+      |                      ^^^^^^^^^^^^^ Cannot call impure function
+  199 |               ease: "linear",
+  200 |             }}
+  201 |           >                                                                                                                    react-hooks/purity
+  260:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:260:19
+  258 |             className="absolute w-1 h-1 bg-blue-400 rounded-full"
+  259 |             animate={{
+> 260 |               x: [Math.random() * width, Math.random() * width],
+      |                   ^^^^^^^^^^^^^ Cannot call impure function
+  261 |               y: [Math.random() * height, Math.random() * height],
+  262 |               opacity: [0, 1, 0],
+  263 |             }}                         react-hooks/purity
+  260:42  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:260:42
+  258 |             className="absolute w-1 h-1 bg-blue-400 rounded-full"
+  259 |             animate={{
+> 260 |               x: [Math.random() * width, Math.random() * width],
+      |                                          ^^^^^^^^^^^^^ Cannot call impure function
+  261 |               y: [Math.random() * height, Math.random() * height],
+  262 |               opacity: [0, 1, 0],
+  263 |             }}  react-hooks/purity
+  261:19  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:261:19
+  259 |             animate={{
+  260 |               x: [Math.random() * width, Math.random() * width],
+> 261 |               y: [Math.random() * height, Math.random() * height],
+      |                   ^^^^^^^^^^^^^ Cannot call impure function
+  262 |               opacity: [0, 1, 0],
+  263 |             }}
+  264 |             transition={{                                                                 react-hooks/purity
+  261:43  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:261:43
+  259 |             animate={{
+  260 |               x: [Math.random() * width, Math.random() * width],
+> 261 |               y: [Math.random() * height, Math.random() * height],
+      |                                           ^^^^^^^^^^^^^ Cannot call impure function
+  262 |               opacity: [0, 1, 0],
+  263 |             }}
+  264 |             transition={{                                         react-hooks/purity
+  265:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\AnimatedBackground.tsx:265:25
+  263 |             }}
+  264 |             transition={{
+> 265 |               duration: Math.random() * 10 + 5,
+      |                         ^^^^^^^^^^^^^ Cannot call impure function
+  266 |               repeat: Infinity,
+  267 |               ease: "easeInOut",
+  268 |             }}                                                                                                                        react-hooks/purity
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx
+  17:45  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx:17:45
+  15 |     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+  16 |       {[...Array(count)].map((_, i) => {
+> 17 |         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+     |                                             ^^^^^^^^^^^^^ Cannot call impure function
+  18 |         const randomX = Math.random() * 100;
+  19 |         const randomDelay = Math.random() * 5;
+  20 |         const randomDuration = 15 + Math.random() * 10;  react-hooks/purity
+  18:25  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx:18:25
+  16 |       {[...Array(count)].map((_, i) => {
+  17 |         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+> 18 |         const randomX = Math.random() * 100;
+     |                         ^^^^^^^^^^^^^ Cannot call impure function
+  19 |         const randomDelay = Math.random() * 5;
+  20 |         const randomDuration = 15 + Math.random() * 10;
+  21 |         const randomSize = 20 + Math.random() * 40;                                             react-hooks/purity
+  19:29  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx:19:29
+  17 |         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+  18 |         const randomX = Math.random() * 100;
+> 19 |         const randomDelay = Math.random() * 5;
+     |                             ^^^^^^^^^^^^^ Cannot call impure function
+  20 |         const randomDuration = 15 + Math.random() * 10;
+  21 |         const randomSize = 20 + Math.random() * 40;
+  22 |                                                                                  react-hooks/purity
+  20:37  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx:20:37
+  18 |         const randomX = Math.random() * 100;
+  19 |         const randomDelay = Math.random() * 5;
+> 20 |         const randomDuration = 15 + Math.random() * 10;
+     |                                     ^^^^^^^^^^^^^ Cannot call impure function
+  21 |         const randomSize = 20 + Math.random() * 40;
+  22 |
+  23 |         return (                                                                                                                                     react-hooks/purity
+  21:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\effects\FloatingIcons.tsx:21:33
+  19 |         const randomDelay = Math.random() * 5;
+  20 |         const randomDuration = 15 + Math.random() * 10;
+> 21 |         const randomSize = 20 + Math.random() * 40;
+     |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  22 |
+  23 |         return (
+  24 |           <motion.div                                                                                                                                                                react-hooks/purity
+
+C:\Users\Propietario\Desktop\sajtstudio\src\components\ui\SafeErrorBoundary.tsx
+  9:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Propietario\Desktop\sajtstudio\src\hooks\useScrollAnimation.ts
+  22:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 33 problems (28 errors, 5 warnings)
+
+PS C:\Users\Propietario\Desktop\sajtstudio>

@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 // Only use ErrorBoundary in production/browser environment
 const DynamicErrorBoundary = dynamic(() => import("./ErrorBoundary"), {
   ssr: false,
-  loading: ({ children }: any) => <>{children}</>,
 });
 
 interface SafeErrorBoundaryProps {

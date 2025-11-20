@@ -938,6 +938,9 @@ export default function HeroSection() {
           </motion.p>
 
           {/* CTA buttons with magnetic effect */}
+          {/* Primary hero CTAs:
+              - Left button: Links to /utvardera (evaluate website service)
+              - Right button: Links to /portfolio (view portfolio/work) */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -948,6 +951,7 @@ export default function HeroSection() {
             }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
+            {/* Primary CTA: Website evaluation service */}
             <MagneticButton
               href="/utvardera"
               className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
@@ -989,6 +993,7 @@ export default function HeroSection() {
                 </motion.span>
               </span>
             </MagneticButton>
+            {/* Secondary CTA: Portfolio showcase */}
             <MagneticButton
               href="/portfolio"
               className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"

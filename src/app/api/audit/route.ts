@@ -1,12 +1,9 @@
 import {
   buildAuditPrompt,
   buildRecommendationPrompt,
-  buildAuditPromptForReasoning,
-  buildRecommendationPromptForReasoning,
   type PromptMessage,
 } from "@/lib/openai-client";
 import { scrapeWebsite } from "@/lib/webscraper";
-import { scrapeMultiplePages } from "@/lib/advanced-scraper";
 import { promises as fs } from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import { OpenAI } from "openai";
@@ -425,13 +422,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if using reasoning model (currently disabled as o1 models are not available)
-    const isReasoningModel = false; // model === "o1-mini" || model === "o1-preview";
-
     let result: AuditResult;
-    let prompt: PromptMessage[] | string;
+    let prompt: PromptMessage[];
     let websiteContent: WebsiteContent | null = null;
-    let multiPageContent: WebsiteContent[] = [];
 
     if (mode === "audit") {
       // Website audit mode
@@ -442,45 +435,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Scrape website content based on model type
+      // Scrape website content
       const scrapeStartTime = Date.now();
       try {
-        if (isReasoningModel) {
-          // Multi-page scraping for reasoning models
-          console.log(
-            `[${requestId}] Using multi-page scraping for reasoning model`
-          );
-          const multiPageResult = await scrapeMultiplePages(url, {
-            maxPages: 4,
-            priorityPatterns: [
-              "/om",
-              "/om-oss",
-              "/about",
-              "/tjanster",
-              "/services",
-              "/tjänster",
-              "/produkter",
-              "/products",
-              "/kontakt",
-              "/contact",
-              "/priser",
-              "/pricing",
-              "/portfolio",
-              "/case",
-              "/referenser",
-            ],
-          });
-
-          websiteContent = multiPageResult.mainPage;
-          multiPageContent = multiPageResult.additionalPages;
-
-          console.log(
-            `Scraped ${multiPageResult.siteStructure.totalPagesAnalyzed} pages`
-          );
-        } else {
-          // Single page scraping for standard models
-          websiteContent = await scrapeWebsite(url);
-        }
+        websiteContent = await scrapeWebsite(url);
         const scrapeDuration = Date.now() - scrapeStartTime;
         console.log(
           `[${requestId}] Scraping completed in ${scrapeDuration}ms:`,
@@ -508,33 +466,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Build prompt based on model type
-      if (isReasoningModel) {
-        prompt = buildAuditPromptForReasoning(
-          websiteContent,
-          url,
-          multiPageContent
+      // Build prompt
+      prompt = buildAuditPrompt(websiteContent, url);
+      const promptTextLength = JSON.stringify(prompt).length;
+      const actualContentLength = prompt.reduce((sum, msg) => {
+        return (
+          sum +
+          (Array.isArray(msg.content)
+            ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
+            : 0)
         );
-        console.log("Built reasoning prompt, length:", prompt.length);
-      } else {
-        prompt = buildAuditPrompt(websiteContent, url);
-        const promptTextLength = JSON.stringify(prompt).length;
-        const actualContentLength = prompt.reduce((sum, msg) => {
-          return (
-            sum +
-            (Array.isArray(msg.content)
-              ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
-              : 0)
-          );
-        }, 0);
-        console.log("Built standard prompt:", {
-          messageCount: prompt.length,
-          actualContentLength,
-          promptTextLength,
-          hasSystem: prompt.some((p) => p.role === "system"),
-          hasUser: prompt.some((p) => p.role === "user"),
-        });
-      }
+      }, 0);
+      console.log("Built prompt:", {
+        messageCount: prompt.length,
+        actualContentLength,
+        promptTextLength,
+        hasSystem: prompt.some((p) => p.role === "system"),
+        hasUser: prompt.some((p) => p.role === "user"),
+      });
     } else {
       // Questions mode
       if (!answers) {
@@ -544,50 +493,33 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Build prompt based on model type
-      if (isReasoningModel) {
-        prompt = buildRecommendationPromptForReasoning(answers);
-        console.log(
-          "Built reasoning recommendation prompt, length:",
-          prompt.length
+      // Build prompt
+      prompt = buildRecommendationPrompt(answers);
+      const promptTextLength = JSON.stringify(prompt).length;
+      const actualContentLength = prompt.reduce((sum, msg) => {
+        return (
+          sum +
+          (Array.isArray(msg.content)
+            ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
+            : 0)
         );
-      } else {
-        prompt = buildRecommendationPrompt(answers);
-        const promptTextLength = JSON.stringify(prompt).length;
-        const actualContentLength = prompt.reduce((sum, msg) => {
-          return (
-            sum +
-            (Array.isArray(msg.content)
-              ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
-              : 0)
-          );
-        }, 0);
-        console.log("Built standard recommendation prompt:", {
-          messageCount: prompt.length,
-          actualContentLength,
-          promptTextLength,
-          hasSystem: prompt.some((p) => p.role === "system"),
-          hasUser: prompt.some((p) => p.role === "user"),
-        });
-      }
+      }, 0);
+      console.log("Built recommendation prompt:", {
+        messageCount: prompt.length,
+        actualContentLength,
+        promptTextLength,
+        hasSystem: prompt.some((p) => p.role === "system"),
+        hasUser: prompt.some((p) => p.role === "user"),
+      });
     }
 
     // Call OpenAI Responses API
-    type RequestPayload =
-      | {
-          model: string;
-          messages: Array<{
-            role: "user" | "assistant" | "system";
-            content: string;
-          }>;
-          max_completion_tokens: number;
-        }
-      | {
-          model: string;
-          input: Array<{ role: string; content: string }>;
-          max_output_tokens: number;
-          text: { format: { type: string } };
-        };
+    type RequestPayload = {
+      model: string;
+      input: Array<{ role: string; content: string }>;
+      max_output_tokens: number;
+      text: { format: { type: string } };
+    };
     let requestPayload: RequestPayload | undefined;
     try {
       // Validate API key before making request
@@ -599,176 +531,135 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Format payload based on model type
-      if (isReasoningModel) {
-        // o1-mini uses standard chat completions API
-        requestPayload = {
-          model: model,
-          messages: [
-            {
-              role: "user",
-              content: prompt as string,
-            },
-          ],
-          max_completion_tokens: 32000, // o1-mini uses this instead of max_tokens
-          // o1-mini doesn't support: system messages, tools, response_format
-        };
-      } else {
-        // Standard models use Responses API
-        let formattedInput;
-        try {
-          const promptArray = prompt as PromptMessage[];
+      // Format payload for Responses API
+      let formattedInput;
+      try {
+        const promptArray = prompt as PromptMessage[];
 
-          // Validate prompt structure
-          if (!Array.isArray(promptArray) || promptArray.length === 0) {
-            throw new Error("Prompt must be a non-empty array");
-          }
-
-          formattedInput = promptArray.map((msg, idx) => {
-            // Validate message structure
-            if (!msg || typeof msg !== "object") {
-              throw new Error(
-                `Invalid prompt format at index ${idx}: message is not an object`
-              );
-            }
-            if (!msg.role || !["system", "user"].includes(msg.role)) {
-              throw new Error(
-                `Invalid prompt format at index ${idx}: invalid role "${msg.role}"`
-              );
-            }
-            if (!msg.content || !Array.isArray(msg.content)) {
-              throw new Error(
-                `Invalid prompt format at index ${idx}: content is not an array`
-              );
-            }
-            if (msg.content.length === 0) {
-              throw new Error(
-                `Invalid prompt format at index ${idx}: content array is empty`
-              );
-            }
-
-            // Extract and combine text content
-            const combinedContent = msg.content
-              .map((c, cIdx) => {
-                if (typeof c !== "object" || c === null) {
-                  throw new Error(
-                    `Invalid content item format at message ${idx}, content ${cIdx}`
-                  );
-                }
-                if (c.type !== "text") {
-                  throw new Error(
-                    `Unsupported content type "${c.type}" at message ${idx}, content ${cIdx}`
-                  );
-                }
-                if (typeof c.text !== "string") {
-                  throw new Error(
-                    `Content text is not a string at message ${idx}, content ${cIdx}`
-                  );
-                }
-                return c.text;
-              })
-              .join("\n");
-
-            if (!combinedContent || combinedContent.trim().length === 0) {
-              throw new Error(
-                `Empty content after formatting at message ${idx}`
-              );
-            }
-
-            return {
-              role: msg.role,
-              content: combinedContent,
-            };
-          });
-
-          // Validate formatted input
-          if (formattedInput.length === 0) {
-            throw new Error("Formatted input is empty");
-          }
-
-          const hasSystem = formattedInput.some((i) => i.role === "system");
-          const hasUser = formattedInput.some((i) => i.role === "user");
-
-          if (!hasUser) {
-            throw new Error("Prompt must contain at least one user message");
-          }
-        } catch (formatError) {
-          console.error("Failed to format prompt:", formatError, {
-            promptType: typeof prompt,
-            promptIsArray: Array.isArray(prompt),
-            promptLength: Array.isArray(prompt) ? prompt.length : "N/A",
-            prompt: Array.isArray(prompt)
-              ? JSON.stringify(prompt, null, 2).substring(0, 500)
-              : String(prompt).substring(0, 500),
-          });
-          return NextResponse.json(
-            {
-              error: `Fel vid formatering av prompt: ${
-                formatError instanceof Error ? formatError.message : "Okänt fel"
-              }`,
-            },
-            { status: 500 }
-          );
+        // Validate prompt structure
+        if (!Array.isArray(promptArray) || promptArray.length === 0) {
+          throw new Error("Prompt must be a non-empty array");
         }
 
-        requestPayload = {
-          model: model,
-          input: formattedInput,
-          max_output_tokens: 32000, // Increased from 16000 to handle larger responses
-          text: {
-            format: { type: "json_object" },
+        formattedInput = promptArray.map((msg, idx) => {
+          // Validate message structure
+          if (!msg || typeof msg !== "object") {
+            throw new Error(
+              `Invalid prompt format at index ${idx}: message is not an object`
+            );
+          }
+          if (!msg.role || !["system", "user"].includes(msg.role)) {
+            throw new Error(
+              `Invalid prompt format at index ${idx}: invalid role "${msg.role}"`
+            );
+          }
+          if (!msg.content || !Array.isArray(msg.content)) {
+            throw new Error(
+              `Invalid prompt format at index ${idx}: content is not an array`
+            );
+          }
+          if (msg.content.length === 0) {
+            throw new Error(
+              `Invalid prompt format at index ${idx}: content array is empty`
+            );
+          }
+
+          // Extract and combine text content
+          const combinedContent = msg.content
+            .map((c, cIdx) => {
+              if (typeof c !== "object" || c === null) {
+                throw new Error(
+                  `Invalid content item format at message ${idx}, content ${cIdx}`
+                );
+              }
+              if (c.type !== "text") {
+                throw new Error(
+                  `Unsupported content type "${c.type}" at message ${idx}, content ${cIdx}`
+                );
+              }
+              if (typeof c.text !== "string") {
+                throw new Error(
+                  `Content text is not a string at message ${idx}, content ${cIdx}`
+                );
+              }
+              return c.text;
+            })
+            .join("\n");
+
+          if (!combinedContent || combinedContent.trim().length === 0) {
+            throw new Error(`Empty content after formatting at message ${idx}`);
+          }
+
+          return {
+            role: msg.role,
+            content: combinedContent,
+          };
+        });
+
+        // Validate formatted input
+        if (formattedInput.length === 0) {
+          throw new Error("Formatted input is empty");
+        }
+
+        const hasUser = formattedInput.some((i) => i.role === "user");
+
+        if (!hasUser) {
+          throw new Error("Prompt must contain at least one user message");
+        }
+      } catch (formatError) {
+        console.error("Failed to format prompt:", formatError, {
+          promptType: typeof prompt,
+          promptIsArray: Array.isArray(prompt),
+          promptLength: Array.isArray(prompt) ? prompt.length : "N/A",
+          prompt: Array.isArray(prompt)
+            ? JSON.stringify(prompt, null, 2).substring(0, 500)
+            : String(prompt).substring(0, 500),
+        });
+        return NextResponse.json(
+          {
+            error: `Fel vid formatering av prompt: ${
+              formatError instanceof Error ? formatError.message : "Okänt fel"
+            }`,
           },
-        };
+          { status: 500 }
+        );
       }
 
+      requestPayload = {
+        model: model,
+        input: formattedInput,
+        max_output_tokens: 32000, // Increased from 16000 to handle larger responses
+        text: {
+          format: { type: "json_object" },
+        },
+      };
+
       // Calculate actual prompt length for logging
-      let actualPromptLength = 0;
-      if (typeof prompt === "string") {
-        actualPromptLength = prompt.length;
-      } else if (Array.isArray(prompt)) {
-        actualPromptLength = prompt.reduce((sum, msg) => {
-          return (
-            sum +
-            (Array.isArray(msg.content)
-              ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
-              : 0)
-          );
-        }, 0);
-      }
+      const actualPromptLength = prompt.reduce((sum, msg) => {
+        return (
+          sum +
+          (Array.isArray(msg.content)
+            ? msg.content.reduce((s, c) => s + (c.text?.length || 0), 0)
+            : 0)
+        );
+      }, 0);
 
       console.log("Calling OpenAI API with payload:", {
         model: requestPayload.model,
         hasPrompt: !!prompt,
         promptLength: actualPromptLength,
-        promptLengthJSON:
-          typeof prompt === "string"
-            ? prompt.length
-            : JSON.stringify(prompt).length,
-        inputCount: isReasoningModel
-          ? 1
-          : (requestPayload as { input?: unknown[] })?.input?.length || 0,
-        isReasoningModel,
+        promptLengthJSON: JSON.stringify(prompt).length,
+        inputCount: requestPayload.input?.length || 0,
       });
 
       let response;
       const startTime = Date.now();
       try {
-        if (isReasoningModel) {
-          // Use chat completions API for reasoning models
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          response = await openai.chat.completions.create(
-            requestPayload as any,
-            {
-              timeout: 300000, // 5 minutes explicit timeout
-            }
-          );
-        } else {
-          // Use responses API for standard models
-          // @ts-ignore - Responses API typings lack text.format support
-          response = await openai.responses.create(requestPayload, {
-            timeout: 300000, // 5 minutes explicit timeout
-          });
-        }
+        // Use responses API
+        // @ts-ignore - Responses API typings lack text.format support
+        response = await openai.responses.create(requestPayload, {
+          timeout: 300000, // 5 minutes explicit timeout
+        });
         const elapsedTime = Date.now() - startTime;
         console.log(
           `OpenAI API call completed in ${elapsedTime}ms (${(
@@ -791,14 +682,9 @@ export async function POST(request: NextRequest) {
       }
 
       console.log("OpenAI API response received:", {
-        hasOutput: isReasoningModel
-          ? !!(
-              response as {
-                choices?: Array<{ message?: { content?: string } }>;
-              }
-            )?.choices?.[0]?.message?.content
-          : !!(response as { output_text?: string; output?: unknown })
-              ?.output_text || !!(response as { output?: unknown })?.output,
+        hasOutput:
+          !!(response as { output_text?: string; output?: unknown })
+            ?.output_text || !!(response as { output?: unknown })?.output,
         usage: (response as { usage?: unknown })?.usage,
         status: (response as { status?: unknown })?.status,
         incompleteDetails: (response as { incomplete_details?: unknown })
@@ -806,53 +692,28 @@ export async function POST(request: NextRequest) {
       });
 
       // Check for incomplete responses
-      if (isReasoningModel) {
-        const chatResponse = response as {
-          choices?: Array<{ finish_reason?: string }>;
-        };
-        if (chatResponse?.choices?.[0]?.finish_reason !== "stop") {
-          console.warn(
-            "Response incomplete - finish reason:",
-            chatResponse?.choices?.[0]?.finish_reason
-          );
-        }
-      } else {
-        const standardResponse = response as {
-          status?: string;
-          incomplete_details?: { reason?: string };
-        };
-        if (
-          standardResponse?.status === "incomplete" &&
-          standardResponse?.incomplete_details?.reason === "max_output_tokens"
-        ) {
-          console.warn(
-            "Response incomplete - ran out of tokens. Consider increasing max_output_tokens."
-          );
-        }
+      const standardResponse = response as {
+        status?: string;
+        incomplete_details?: { reason?: string };
+      };
+      if (
+        standardResponse?.status === "incomplete" &&
+        standardResponse?.incomplete_details?.reason === "max_output_tokens"
+      ) {
+        console.warn(
+          "Response incomplete - ran out of tokens. Consider increasing max_output_tokens."
+        );
       }
 
       // Parse the response
-      let outputText;
-      if (isReasoningModel) {
-        const chatResponse = response as {
-          choices?: Array<{ message?: { content?: string } }>;
-        };
-        outputText = chatResponse?.choices?.[0]?.message?.content || "";
-        console.log("Extracted output from reasoning model:", {
-          hasContent: !!outputText,
-          contentLength: outputText.length,
-          preview: outputText.substring(0, 200),
-        });
-      } else {
-        outputText = extractOutputText(
-          response as unknown as Record<string, unknown>
-        );
-        console.log("Extracted output from responses API:", {
-          hasContent: !!outputText,
-          contentLength: outputText.length,
-          preview: outputText.substring(0, 200),
-        });
-      }
+      const outputText = extractOutputText(
+        response as unknown as Record<string, unknown>
+      );
+      console.log("Extracted output from responses API:", {
+        hasContent: !!outputText,
+        contentLength: outputText.length,
+        preview: outputText.substring(0, 200),
+      });
 
       if (!outputText || outputText.trim().length === 0) {
         console.error("AI response empty or unreadable", {

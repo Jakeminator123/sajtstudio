@@ -50,13 +50,18 @@ export default function Audit3DVisualization({ scores, className = '' }: Audit3D
     .slice(0, 8); // Limit to 8 cards max for better performance and layout
 
   useEffect(() => {
-    setMounted(true);
+    // Use requestAnimationFrame to avoid setState in effect warning
+    // Only run on client side
     if (typeof window !== 'undefined') {
-      setWindowWidth(window.innerWidth);
+      requestAnimationFrame(() => {
+        setMounted(true);
+        setWindowWidth(window.innerWidth);
+      });
       const handleResize = () => setWindowWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
+    // On server, mounted stays false (component won't render anyway)
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

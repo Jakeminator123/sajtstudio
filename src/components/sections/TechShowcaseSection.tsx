@@ -214,10 +214,6 @@ export default function TechShowcaseSection() {
   };
 
   const renderPacmanExperience = (variant: "overlay" | "inline") => {
-    const buttonPositionClass =
-      variant === "overlay"
-        ? "absolute -top-24 left-1/2 -translate-x-1/2 text-center z-20 w-full"
-        : "absolute -top-16 md:-top-20 left-1/2 -translate-x-1/2 text-center z-20 w-full";
 
     const containerDimensions =
       variant === "overlay"
@@ -237,31 +233,26 @@ export default function TechShowcaseSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+          style={{
+            fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+            textShadow: `
+              3px 3px 0px #000,
+              -3px -3px 0px #000,
+              3px -3px 0px #000,
+              -3px 3px 0px #000,
+              0px 3px 0px #000,
+              3px 0px 0px #000,
+              -3px 0px 0px #000,
+              0px -3px 0px #000
+            `,
+            imageRendering: 'pixelated',
+            letterSpacing: '4px',
+            textTransform: 'uppercase',
+          }}
         >
-          <span className="text-gray-500">Enough of the </span>
-          <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            flashy stuff
-          </span>
+          <span className="text-gray-400">ENOUGH OF THE </span>
+          <span className="text-purple-400">FLASHY STUFF</span>
         </motion.h2>
-
-        <motion.div
-          className={buttonPositionClass}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          {!isPlaying && (
-            <motion.button
-              onClick={handlePlayGame}
-              className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full hover:scale-105 transition-transform shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              disabled={countdown > 0 && !hasPlayed}
-            >
-              🎮 {hasPlayed ? "Spela igen" : "Spela"}
-            </motion.button>
-          )}
-        </motion.div>
 
         <motion.div
           className="relative mx-auto"
@@ -287,20 +278,77 @@ export default function TechShowcaseSection() {
           />
 
           <div
-            className="relative rounded-lg overflow-hidden w-full h-full bg-[#071427] flex items-center justify-center p-8"
+            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-8"
+            style={{
+              backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
           >
+            {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
             <PacmanGame />
 
+            {/* Play button - positioned above DEMO KLAR text, slightly to the left */}
+            {!isPlaying && (
+              <motion.div
+                className="absolute top-[25%] left-[42%] -translate-x-1/2 -translate-y-1/2 z-40"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+              >
+                <motion.button
+                  onClick={handlePlayGame}
+                  className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold hover:scale-105 transition-transform shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white"
+                  style={{
+                    fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                    textShadow: '2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
+                    imageRendering: 'pixelated',
+                    letterSpacing: '2px',
+                    borderRadius: '0',
+                    boxShadow: '4px 4px 0px #000, -2px -2px 0px #000',
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={countdown > 0 && !hasPlayed}
+                >
+                  🎮 {hasPlayed ? "SPELA IGEN" : "SPELA"}
+                </motion.button>
+              </motion.div>
+            )}
+
+            {/* Overlays for countdown and demo ready */}
             <AnimatePresence>
               {countdown > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none"
+                  className="absolute inset-0 z-30 bg-black/60 flex items-center justify-center pointer-events-none"
+                  style={{
+                    imageRendering: 'pixelated',
+                  }}
                 >
                   <div className="text-center px-4">
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h3
+                      className="text-3xl md:text-4xl font-bold text-white mb-4"
+                      style={{
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: `
+                          2px 2px 0px #000,
+                          -2px -2px 0px #000,
+                          2px -2px 0px #000,
+                          -2px 2px 0px #000,
+                          0px 2px 0px #000,
+                          2px 0px 0px #000,
+                          -2px 0px 0px #000,
+                          0px -2px 0px #000
+                        `,
+                        imageRendering: 'pixelated',
+                        letterSpacing: '2px',
+                      }}
+                    >
                       Demo startar om {countdown}s
                     </h3>
                   </div>
@@ -311,16 +359,56 @@ export default function TechShowcaseSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto"
+                  className="absolute inset-0 z-30 flex items-center justify-center pointer-events-auto"
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    imageRendering: 'pixelated',
+                    border: '4px solid #fff',
+                    borderStyle: 'double',
+                  }}
                 >
                   <div className="text-center px-4">
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    <h3
+                      className="text-3xl md:text-4xl font-bold text-white mb-4"
+                      style={{
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: `
+                          3px 3px 0px #000,
+                          -3px -3px 0px #000,
+                          3px -3px 0px #000,
+                          -3px 3px 0px #000,
+                          0px 3px 0px #000,
+                          3px 0px 0px #000,
+                          -3px 0px 0px #000,
+                          0px -3px 0px #000
+                        `,
+                        imageRendering: 'pixelated',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       {gameStarted ? "PAUSAT" : "DEMO KLAR"}
                     </h3>
-                    <p className="text-lg md:text-xl text-white/80 mb-6">
+                    <p
+                      className="text-lg md:text-xl text-white/90 mb-6"
+                      style={{
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: '2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
+                        imageRendering: 'pixelated',
+                        letterSpacing: '1px',
+                      }}
+                    >
                       Vi kan bygga allt från spel till företagslösningar!
                     </p>
-                    <p className="text-base md:text-lg text-white/70">
+                    <p
+                      className="text-base md:text-lg text-white/80"
+                      style={{
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: '1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000',
+                        imageRendering: 'pixelated',
+                        letterSpacing: '1px',
+                      }}
+                    >
                       Tryck på <strong>Spela{hasPlayed ? " igen" : ""}</strong> för att fortsätta.
                     </p>
                   </div>
@@ -328,9 +416,9 @@ export default function TechShowcaseSection() {
               )}
             </AnimatePresence>
           </div>
-        </motion.div>
 
-        <div className="absolute -left-56 md:-left-72 top-1/2 -translate-y-1/2 text-right space-y-3 z-30">
+          {/* TECHNICAL column - positioned relative to game container, further left */}
+          <div className="absolute left-0 -translate-x-full -translate-y-1/2 top-1/2 pr-16 md:pr-24 lg:pr-32 text-right space-y-3 z-30 whitespace-nowrap">
           <p
             className="text-lg md:text-xl font-black mb-3"
             style={{
@@ -351,7 +439,7 @@ export default function TechShowcaseSection() {
               lineHeight: "1.2"
             }}
           >
-            TECHNICAL
+            TEKNISKT
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -363,7 +451,7 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Data-driven
+            • Datadriven
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -375,7 +463,7 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Functional
+            • Funktionell
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -387,11 +475,12 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Interactive
+            • Interaktiv
           </p>
-        </div>
+          </div>
 
-        <div className="absolute -right-56 md:-right-72 top-1/2 -translate-y-1/2 space-y-3 z-30">
+          {/* CREATIVE column - positioned relative to game container, further right */}
+          <div className="absolute right-0 translate-x-full -translate-y-1/2 top-1/2 pl-20 md:pl-28 lg:pl-36 space-y-3 z-30 whitespace-nowrap">
           <p
             className="text-lg md:text-xl font-black mb-3"
             style={{
@@ -412,7 +501,7 @@ export default function TechShowcaseSection() {
               lineHeight: "1.2"
             }}
           >
-            CREATIVE
+            KREATIVT
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -424,7 +513,7 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Beautiful
+            • Vacker
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -436,7 +525,7 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Animated
+            • Animerad
           </p>
           <p
             className="text-sm md:text-base font-bold"
@@ -448,9 +537,10 @@ export default function TechShowcaseSection() {
               letterSpacing: "1px"
             }}
           >
-            • Engaging
+            • Engagerande
           </p>
-        </div>
+          </div>
+        </motion.div>
       </motion.div>
     );
   };
@@ -506,10 +596,10 @@ export default function TechShowcaseSection() {
       ref={sectionRef}
       className="relative min-h-screen overflow-hidden"
       initial={{ backgroundColor: "#ffffff" }}
-      animate={{ backgroundColor: "#ffffff" }}
+      animate={{ backgroundColor: "#0a0a0a" }}
       style={{
-        // Removed background image - just solid color
-        backgroundColor: "#0a0a0a", // Dark background for better contrast
+        // 8-bit Nintendo style dark background
+        backgroundColor: "#0a0a0a",
       }}
     >
       {/* Start from white (coming from HeroAnimation white fade) */}
@@ -527,11 +617,28 @@ export default function TechShowcaseSection() {
       )}
 
 
-      {/* Static overlays for readability */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-white/4 to-white/12" />
-        <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-100/40 to-gray-200/30" />
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-bl from-purple-200/40 via-pink-100/30 to-blue-200/30" />
+      {/* 8-bit Nintendo style background pattern */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Pixelated grid pattern for 8-bit feel */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '8px 8px',
+            imageRendering: 'pixelated',
+          }}
+        />
+        {/* Subtle 8-bit scanline effect */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+            imageRendering: 'pixelated',
+          }}
+        />
       </div>
 
       {/* Matrix text - EXACTLY centered in viewport */}
@@ -632,7 +739,7 @@ export default function TechShowcaseSection() {
       <AnimatePresence>
         {showOverlay && (
           <motion.div
-            className="fixed inset-0 bg-black/95 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center p-4"
             style={{ zIndex: 9999 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -665,132 +772,7 @@ export default function TechShowcaseSection() {
           {showInlinePacman && renderPacmanExperience("inline")}
         </AnimatePresence>
 
-        {/* Tech vs Design labels - only show when inline Pacman is visible */}
-        {showInlinePacman && (
-          <>
-            <div className="absolute -left-56 md:-left-72 top-1/2 -translate-y-1/2 text-right space-y-3 z-30">
-                <p
-                  className="text-lg md:text-xl font-black mb-3"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#0066CC", // Super Mario blue
-                    textShadow: `
-                      2px 2px 0px #000,
-                      -1px -1px 0px #000,
-                      1px -1px 0px #000,
-                      -1px 1px 0px #000,
-                      0px 2px 0px #000,
-                      2px 0px 0px #000,
-                      -2px 0px 0px #000,
-                      0px -2px 0px #000
-                    `,
-                    imageRendering: "pixelated",
-                    letterSpacing: "2px",
-                    lineHeight: "1.2"
-                  }}
-                >
-                  TECHNICAL
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Data-driven
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Functional
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Interactive
-                </p>
-              </div>
-
-              <div className="absolute -right-56 md:-right-72 top-1/2 -translate-y-1/2 space-y-3 z-30">
-                <p
-                  className="text-lg md:text-xl font-black mb-3"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#FF0000", // Super Mario red
-                    textShadow: `
-                      2px 2px 0px #000,
-                      -1px -1px 0px #000,
-                      1px -1px 0px #000,
-                      -1px 1px 0px #000,
-                      0px 2px 0px #000,
-                      2px 0px 0px #000,
-                      -2px 0px 0px #000,
-                      0px -2px 0px #000
-                    `,
-                    imageRendering: "pixelated",
-                    letterSpacing: "2px",
-                    lineHeight: "1.2"
-                  }}
-                >
-                  CREATIVE
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Beautiful
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Animated
-                </p>
-                <p
-                  className="text-sm md:text-base font-bold"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    color: "#000000",
-                    textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff",
-                    imageRendering: "pixelated",
-                    letterSpacing: "1px"
-                  }}
-                >
-                  • Engaging
-                </p>
-              </div>
-          </>
-        )}
+        {/* Tech vs Design labels are now inside renderPacmanExperience for both overlay and inline variants */}
 
         {/* Animation capabilities section - improved design */}
         <motion.div

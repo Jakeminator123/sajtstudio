@@ -55,5 +55,5 @@
   "editor.tabSize": 2,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "typescript.updateImportsOnFileMove.enabled": "always",
-  "terminal.integrated.cwd": "C:\\Users\\Propietario\\Desktop\\sajtstudio"
+  "terminal.integrated.cwd": "${workspaceFolder}"
 }
