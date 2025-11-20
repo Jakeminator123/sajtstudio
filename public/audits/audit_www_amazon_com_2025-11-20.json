@@ -1,0 +1,59 @@
+{
+  "company": "Amazon",
+  "audit_scores": {
+    "seo": 75,
+    "technical_seo": 80,
+    "ux": 85,
+    "content": 70,
+    "performance": 75,
+    "accessibility": 80
+  },
+  "strengths": [
+    "Snabb svarstid",
+    "Bra teknisk grund med SSL"
+  ],
+  "issues": [
+    "Saknar metabeskrivning",
+    "Svag rubrikstruktur"
+  ],
+  "improvements": [
+    {
+      "item": "Lägga till metabeskrivning",
+      "impact": "high",
+      "effort": "low",
+      "why": "Förbättrar sökresultat och CTR",
+      "how": "Skapa en kort och relevant metabeskrivning"
+    },
+    {
+      "item": "Förbättra rubrikstruktur",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Hjälper SEO och användarnavigering",
+      "how": "Använd H1, H2-system mer effektivt"
+    },
+    {
+      "item": "Optimera bilder",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Snabbare laddning och bättre prestanda",
+      "how": "Komprimera bilder och använd moderna format"
+    }
+  ],
+  "budget_estimate": {
+    "low": 10000,
+    "high": 30000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad synlighet i sökmotorer",
+    "Bättre användarupplevelse"
+  ],
+  "audit_type": "website_audit",
+  "cost": {
+    "tokens": 847,
+    "sek": 0.05,
+    "usd": 0.0043
+  },
+  "domain": "www.amazon.com",
+  "timestamp": "2025-11-20T12:03:28.831Z"
+}

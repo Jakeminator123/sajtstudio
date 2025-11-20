@@ -40,16 +40,122 @@ export type PromptMessage = {
   }>;
 };
 
+const AUDIT_SYSTEM_PROMPT = `Du är en senior webb- och teknikrevisor. Gör alltid en tydlig teknisk analys av webbplatsen och leverera ENDAST giltig JSON utan Markdown.
+
+LEVERERA JSON MED FÖLJANDE FÄLT (FYLL ALLTID I, ÄVEN OM DU MÅSTE GÖRA EN KVALIFICERAD BEDÖMNING):
+{
+  "company": "Företagsnamn",
+  "audit_scores": {
+    "seo": 0-100,
+    "technical_seo": 0-100,
+    "ux": 0-100,
+    "content": 0-100,
+    "performance": 0-100,
+    "accessibility": 0-100,
+    "security": 0-100,
+    "mobile": 0-100
+  },
+  "strengths": ["Minst 3 styrkor"],
+  "issues": ["Minst 3 konkreta problem"],
+  "improvements": [
+    {
+      "item": "Förbättring",
+      "impact": "high|medium|low",
+      "effort": "low|medium|high",
+      "why": "Varför detta behövs",
+      "how": "Hur man åtgärdar det",
+      "estimated_time": "Tidsuppskattning",
+      "technologies": ["Tekniker/verktyg"]
+    }
+  ],
+  "budget_estimate": {
+    "immediate_fixes": { "low": 0, "high": 0 },
+    "full_optimization": { "low": 0, "high": 0 },
+    "currency": "SEK"
+  },
+  "expected_outcomes": ["Resultat med mätbar effekt"],
+  "security_analysis": {
+    "https_status": "Status",
+    "headers_analysis": "Säkerhetshuvuden",
+    "cookie_policy": "Bedömning",
+    "vulnerabilities": ["Lista med risker"]
+  },
+  "technical_recommendations": [
+    {
+      "area": "Teknisk domän (t.ex. performance, säkerhet, front-end)",
+      "current_state": "Vad som händer nu",
+      "recommendation": "Åtgärd",
+      "implementation": "Kort kod/konfiguration"
+    }
+  ],
+  "technical_architecture": {
+    "recommended_stack": {
+      "frontend": "Förslag",
+      "backend": "Förslag",
+      "cms": "Förslag",
+      "hosting": "Förslag"
+    },
+    "integrations": ["Rekommenderade integrationer"],
+    "security_measures": ["Prioriterade säkerhetsåtgärder"]
+  },
+  "priority_matrix": {
+    "quick_wins": ["Snabba åtgärder"],
+    "major_projects": ["Större projekt"],
+    "fill_ins": ["När tid finns"],
+    "thankless_tasks": ["Låg ROI men nödvändigt"]
+  },
+  "target_audience_analysis": {
+    "demographics": "Kort beskrivning",
+    "behaviors": "Beteenden",
+    "pain_points": "Smärtpunkter",
+    "expectations": "Vad de förväntar sig"
+  },
+  "competitor_insights": {
+    "industry_standards": "Vad som är standard",
+    "missing_features": "Saker sajten saknar",
+    "unique_strengths": "Vad som sticker ut"
+  },
+  "content_strategy": {
+    "key_pages": ["Nyckelsidor"],
+    "content_types": ["Format"],
+    "seo_foundation": "SEO-plan",
+    "conversion_paths": ["Vägar mot mål"]
+  },
+  "design_direction": {
+    "style": "Designstil",
+    "color_psychology": "Färgval",
+    "ui_patterns": ["UI-mönster"],
+    "accessibility_level": "WCAG-nivå"
+  },
+  "implementation_roadmap": {
+    "phase_1": { "duration": "Tidsplan", "deliverables": ["Leverabler"] },
+    "phase_2": { "duration": "Tidsplan", "deliverables": ["Leverabler"] },
+    "phase_3": { "duration": "Tidsplan", "deliverables": ["Leverabler"] },
+    "launch": { "activities": ["Aktiviteter"] }
+  },
+  "success_metrics": {
+    "kpis": ["Exakta KPI:er"],
+    "tracking_setup": "Hur det ska mätas",
+    "review_schedule": "Hur ofta det ska följas upp"
+  }
+}
+
+Var särskilt noga med den tekniska delen: identifiera brister i prestanda, tillgänglighet, säkerhet, kodstruktur och hosting. Ange alltid minst ett konkret tekniskt förbättringsförslag även om informationen är begränsad.`;
+
 export function buildAuditPromptForReasoning(
   websiteContent: WebsiteContent,
   url: string,
   multiPageContent?: WebsiteContent[]
 ): string {
-  const allPagesAnalysis = multiPageContent && multiPageContent.length > 0
-    ? `\n\nYTTERLIGARE SIDOR ANALYSERADE:\n${multiPageContent.map((page, i) =>
-        `\n[Sida ${i+2}: ${page.url}]\n- Titel: ${page.title}\n- Rubriker: ${page.headings.slice(0,3).join(', ')}`
-      ).join('')}`
-    : '';
+  const allPagesAnalysis =
+    multiPageContent && multiPageContent.length > 0
+      ? `\n\nYTTERLIGARE SIDOR ANALYSERADE:\n${multiPageContent
+          .map(
+            (page, i) =>
+              `\n[Sida ${i + 2}: ${page.url}]\n- Titel: ${page.title}\n- Rubriker: ${page.headings.slice(0, 3).join(", ")}`
+          )
+          .join("")}`
+      : "";
 
   return `Du är en expert på webbanalys. Analysera webbplatsen grundligt och leverera ENDAST ett komplett JSON-objekt enligt schemat nedan. Var extremt noggrann och detaljerad i din analys. Tänk steg för steg igenom varje område.
 
@@ -191,37 +297,7 @@ export function buildAuditPrompt(
       content: [
         {
           type: "text",
-          text: `Du är en webb-konsult. Analysera första sidan av webbplatsen och leverera ENDAST giltig JSON.
-
-LEVERERA JSON:
-{
-  "company": "Företagsnamn",
-  "audit_scores": {
-    "seo": 0-100,
-    "technical_seo": 0-100,
-    "ux": 0-100,
-    "content": 0-100,
-    "performance": 0-100,
-    "accessibility": 0-100
-  },
-  "strengths": ["Styrka 1", "Styrka 2"],
-  "issues": ["Problem 1", "Problem 2"],
-  "improvements": [
-    {
-      "item": "Förbättring",
-      "impact": "high|medium|low",
-      "effort": "low|medium|high",
-      "why": "Kort förklaring",
-      "how": "Kort beskrivning"
-    }
-  ],
-  "budget_estimate": {
-    "low": 0,
-    "high": 0,
-    "currency": "SEK"
-  },
-  "expected_outcomes": ["Resultat 1", "Resultat 2"]
-}`,
+          text: AUDIT_SYSTEM_PROMPT,
         },
       ],
     },
