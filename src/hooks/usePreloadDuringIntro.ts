@@ -18,21 +18,39 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
     // Preload critical videos that will be needed soon
     const criticalVideos = [
       "/videos/telephone_ringin.mp4", // Used in HeroAnimation - CRITICAL
-      "/videos/background.mp4",
-      "/videos/background_vid.mp4",
+      "/videos/background.mp4", // Used in HeroSection
+      "/videos/background_vid.mp4", // Used in ServicesSection
+      "/videos/noir_hero.mp4", // Used in PortfolioHero
     ];
 
-    // Preload critical images
+    // Preload critical images - prioritized by usage order
     const criticalImages = [
-      // Portfolio images used in explosion - CRITICAL
+      // Portfolio images used in explosion - CRITICAL (appear early)
       "/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp",
       "/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp",
       "/images/portfolio/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp",
       "/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp",
-      // Background images
+      // Background images (used in hero and sections)
       "/images/hero/hero-background.webp",
       "/images/backgrounds/section-background.webp",
+      "/images/backgrounds/8-bit.webp",
+      "/images/backgrounds/contact-gradient.webp",
+      // Portfolio gallery images (appear in PortfolioGallery section)
+      "/images/portfolio/portfolio_1.webp",
+      "/images/portfolio/portfolio_2.webp",
+      "/images/portfolio/portfolio_3.webp",
+      "/images/portfolio/portfolio_5.webp",
+      "/images/portfolio/portfolio_6.webp",
+      // Portfolio showcase images
+      "/images/portfolio/showcase_1.webp",
+      "/images/portfolio/showcase_2.webp",
+      // OpticScrollShowcase images (used in parallax section)
+      "/images/portfolio/assets_task_01k05sqa0wedsbvfk5c0773fz5_1752541456_img_0.webp",
+      "/images/portfolio/assets_task_01k1c880wqft0s0bcr3p77v2me_1753831780_img_0.webp",
+      "/images/portfolio/assets_task_01k80qdg0ze1rskjzfpj7r1za3_1760961264_img_0.webp",
+      // Animations
       "/images/animations/hero-animation.gif",
+      "/images/animations/sites-animation.gif",
     ];
 
     // Preload videos with higher priority
@@ -51,38 +69,60 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
       }, index * 100); // Stagger video preloads
     });
 
-    // Preload images
+    // Preload images with priority based on usage order
     criticalImages.forEach((src, index) => {
       setTimeout(() => {
         const link = document.createElement("link");
         link.rel = "preload";
         link.as = "image";
         link.href = src;
-        // High priority for first 4 portfolio images (used in explosion)
+        // High priority for first 4 portfolio images (used in explosion - appear immediately)
+        // High priority for next 6 images (backgrounds and hero images used early)
         if (index < 4) {
+          link.setAttribute("fetchpriority", "high");
+        } else if (index < 10) {
           link.setAttribute("fetchpriority", "high");
         }
         document.head.appendChild(link);
-      }, index * 50); // Stagger image preloads
+      }, index * 30); // Stagger image preloads (reduced delay for faster loading)
     });
+
+    // Preload logo and favicon (used in header immediately)
+    setTimeout(() => {
+      const logoLink = document.createElement("link");
+      logoLink.rel = "preload";
+      logoLink.as = "image";
+      logoLink.href = "/logo.svg";
+      logoLink.setAttribute("fetchpriority", "high");
+      document.head.appendChild(logoLink);
+
+      const faviconLink = document.createElement("link");
+      faviconLink.rel = "preload";
+      faviconLink.as = "image";
+      faviconLink.href = "/favicon.svg";
+      document.head.appendChild(faviconLink);
+    }, 50);
 
     // Prefetch dynamic components that will be needed
     // These are loaded in the background without blocking
     const componentPrefetches = [
+      // Preload PacmanGame component early since it's critical (used in TechShowcaseSection)
+      () => import("@/components/games/PacmanGame"),
+      // Sections that appear early but are lazy loaded
+      () => import("@/components/sections/OpticScrollShowcase"), // Appears mid-page
       () => import("@/components/sections/ProcessSection"),
       () => import("@/components/sections/TestimonialsSection"),
       () => import("@/components/sections/BigCTA"),
-      // Preload PacmanGame component early since it's critical
-      () => import("@/components/games/PacmanGame"),
     ];
 
     // Prefetch components with a delay to not overwhelm the network
+    // Start earlier for critical components, stagger others
     componentPrefetches.forEach((importFunc, index) => {
       setTimeout(() => {
         importFunc().catch(() => {
           // Silently fail - component will load when needed
         });
-      }, 500 + index * 300); // Start after initial resources, stagger prefetches
+      }, 300 + index * 200); // Start earlier, reduced stagger for faster loading
     });
 
     // Warm up video elements by creating hidden video elements
