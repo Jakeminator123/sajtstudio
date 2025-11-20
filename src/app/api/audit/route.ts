@@ -3,6 +3,7 @@ import {
   buildRecommendationPrompt,
   type PromptMessage,
 } from "@/lib/openai-client";
+import { ALLOWED_MODEL_IDS, DEFAULT_MODEL } from "@/config/openai";
 import { scrapeWebsite } from "@/lib/webscraper";
 import { promises as fs } from "fs";
 import { NextRequest, NextResponse } from "next/server";
@@ -147,6 +148,46 @@ function generateMarkdown(result: AuditResult): string {
     markdown += `- **Unika styrkor:** ${result.competitor_insights.unique_strengths}\n\n`;
   }
 
+  if (result.competitor_benchmarking) {
+    markdown += `## Konkurrentbenchmarking\n\n`;
+    if (
+      Array.isArray(result.competitor_benchmarking.industry_leaders) &&
+      result.competitor_benchmarking.industry_leaders.length > 0
+    ) {
+      markdown += `- **Ledande aktörer:**\n`;
+      result.competitor_benchmarking.industry_leaders.forEach(
+        (leader: string) => {
+          markdown += `  - ${leader}\n`;
+        }
+      );
+    }
+    if (
+      Array.isArray(result.competitor_benchmarking.common_features) &&
+      result.competitor_benchmarking.common_features.length > 0
+    ) {
+      markdown += `- **Standardfunktioner:**\n`;
+      result.competitor_benchmarking.common_features.forEach(
+        (feature: string) => {
+          markdown += `  - ${feature}\n`;
+        }
+      );
+    }
+    if (
+      Array.isArray(
+        result.competitor_benchmarking.differentiation_opportunities
+      ) &&
+      result.competitor_benchmarking.differentiation_opportunities.length > 0
+    ) {
+      markdown += `- **Differentieringsmöjligheter:**\n`;
+      result.competitor_benchmarking.differentiation_opportunities.forEach(
+        (opportunity: string) => {
+          markdown += `  - ${opportunity}\n`;
+        }
+      );
+    }
+    markdown += "\n";
+  }
+
   if (
     result.technical_recommendations &&
     result.technical_recommendations.length > 0
@@ -205,6 +246,92 @@ function generateMarkdown(result: AuditResult): string {
     markdown += `- **Förväntningar:** ${result.target_audience_analysis.expectations}\n\n`;
   }
 
+  if (result.content_strategy) {
+    markdown += `## Innehållsstrategi\n\n`;
+    if (
+      Array.isArray(result.content_strategy.key_pages) &&
+      result.content_strategy.key_pages.length > 0
+    ) {
+      markdown += `- **Nyckelsidor:**\n`;
+      result.content_strategy.key_pages.forEach((page: string) => {
+        markdown += `  - ${page}\n`;
+      });
+    }
+    if (
+      Array.isArray(result.content_strategy.content_types) &&
+      result.content_strategy.content_types.length > 0
+    ) {
+      markdown += `- **Innehållstyper:**\n`;
+      result.content_strategy.content_types.forEach((type: string) => {
+        markdown += `  - ${type}\n`;
+      });
+    }
+    if (result.content_strategy.seo_foundation) {
+      markdown += `- **SEO-grund:** ${result.content_strategy.seo_foundation}\n`;
+    }
+    if (
+      Array.isArray(result.content_strategy.conversion_paths) &&
+      result.content_strategy.conversion_paths.length > 0
+    ) {
+      markdown += `- **Konverteringsflöden:**\n`;
+      result.content_strategy.conversion_paths.forEach((path: string) => {
+        markdown += `  - ${path}\n`;
+      });
+    }
+    markdown += "\n";
+  }
+
+  if (result.design_direction) {
+    markdown += `## Designriktning\n\n`;
+    markdown += `- **Stil:** ${result.design_direction.style}\n`;
+    markdown += `- **Färgpsykologi:** ${result.design_direction.color_psychology}\n`;
+    if (
+      Array.isArray(result.design_direction.ui_patterns) &&
+      result.design_direction.ui_patterns.length > 0
+    ) {
+      markdown += `- **UI-mönster:**\n`;
+      result.design_direction.ui_patterns.forEach((pattern: string) => {
+        markdown += `  - ${pattern}\n`;
+      });
+    }
+    markdown += `- **Tillgänglighetsnivå:** ${result.design_direction.accessibility_level}\n\n`;
+  }
+
+  if (result.technical_architecture) {
+    markdown += `## Teknisk arkitektur\n\n`;
+    if (result.technical_architecture.recommended_stack) {
+      markdown += `- **Rekommenderad stack:**\n`;
+      Object.entries(result.technical_architecture.recommended_stack).forEach(
+        ([key, value]) => {
+          markdown += `  - ${key}: ${value}\n`;
+        }
+      );
+    }
+    if (
+      Array.isArray(result.technical_architecture.integrations) &&
+      result.technical_architecture.integrations.length > 0
+    ) {
+      markdown += `- **Integrationer:**\n`;
+      result.technical_architecture.integrations.forEach(
+        (integration: string) => {
+          markdown += `  - ${integration}\n`;
+        }
+      );
+    }
+    if (
+      Array.isArray(result.technical_architecture.security_measures) &&
+      result.technical_architecture.security_measures.length > 0
+    ) {
+      markdown += `- **Säkerhetsåtgärder:**\n`;
+      result.technical_architecture.security_measures.forEach(
+        (measure: string) => {
+          markdown += `  - ${measure}\n`;
+        }
+      );
+    }
+    markdown += "\n";
+  }
+
   if (result.implementation_roadmap) {
     markdown += `## Implementeringsplan\n\n`;
     const roadmap = result.implementation_roadmap;
@@ -231,7 +358,74 @@ function generateMarkdown(result: AuditResult): string {
     });
   }
 
+  if (result.success_metrics) {
+    markdown += `## Framgångsmått\n\n`;
+    if (
+      Array.isArray(result.success_metrics.kpis) &&
+      result.success_metrics.kpis.length > 0
+    ) {
+      markdown += `- **KPI:er:**\n`;
+      result.success_metrics.kpis.forEach((kpi: string) => {
+        markdown += `  - ${kpi}\n`;
+      });
+    }
+    if (result.success_metrics.tracking_setup) {
+      markdown += `- **Spårningsupplägg:** ${result.success_metrics.tracking_setup}\n`;
+    }
+    if (result.success_metrics.review_schedule) {
+      markdown += `- **Uppföljningsplan:** ${result.success_metrics.review_schedule}\n`;
+    }
+    markdown += "\n";
+  }
+
   return markdown;
+}
+
+const MAX_PERSISTED_AUDITS = 24;
+
+async function pruneOldAuditFiles(
+  directory: string,
+  maxFiles = MAX_PERSISTED_AUDITS
+) {
+  try {
+    const entries = await fs.readdir(directory);
+    const auditFiles = entries.filter(
+      (file) => file.startsWith("audit_") || file.startsWith("recommendation_")
+    );
+
+    if (auditFiles.length <= maxFiles) {
+      return;
+    }
+
+    const filesWithMeta = await Promise.all(
+      auditFiles.map(async (fileName) => {
+        const fullPath = path.join(directory, fileName);
+        try {
+          const stats = await fs.stat(fullPath);
+          return { fileName, mtime: stats.mtimeMs };
+        } catch {
+          return { fileName, mtime: 0 };
+        }
+      })
+    );
+
+    const filesToDelete = filesWithMeta
+      .sort((a, b) => b.mtime - a.mtime)
+      .slice(maxFiles);
+
+    await Promise.all(
+      filesToDelete.map(async ({ fileName }) => {
+        const target = path.join(directory, fileName);
+        try {
+          await fs.unlink(target);
+        } catch (error) {
+          console.warn("Failed to prune audit file:", target, error);
+        }
+      })
+    );
+  } catch (error) {
+    console.warn("Failed to prune old audit files:", error);
+  }
 }
 
 function extractOutputText(response: Record<string, unknown>): string {
@@ -391,7 +585,8 @@ export async function POST(request: NextRequest) {
         mode: body.mode,
         hasUrl: !!body.url,
         hasAnswers: !!body.answers,
-        model: body.model || "gpt-4o-mini",
+        model: body.model || DEFAULT_MODEL,
+        webSearch: Boolean(body.webSearch),
       });
     } catch (parseError) {
       console.error(`[${requestId}] Failed to parse request body:`, parseError);
@@ -401,7 +596,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { mode, url, answers, model = "gpt-4o-mini" } = body;
+    const {
+      mode,
+      url,
+      answers,
+      model = DEFAULT_MODEL,
+      webSearch = false,
+    } = body;
 
     if (!mode || !["audit", "questions"].includes(mode)) {
       console.error(`[${requestId}] Invalid mode:`, mode);
@@ -409,12 +610,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate model - Only include models that are actually available
-    const validModels = ["gpt-4o-mini", "gpt-4o"];
-    if (!validModels.includes(model)) {
+    if (!ALLOWED_MODEL_IDS.includes(model)) {
       console.error(`[${requestId}] Invalid model:`, model);
       return NextResponse.json(
         {
-          error: `Ogiltig modell. Tillgängliga modeller: ${validModels.join(
+          error: `Ogiltig modell. Tillgängliga modeller: ${ALLOWED_MODEL_IDS.join(
             ", "
           )}`,
         },
@@ -516,9 +716,11 @@ export async function POST(request: NextRequest) {
     // Call OpenAI Responses API
     type RequestPayload = {
       model: string;
-      input: Array<{ role: string; content: string }>;
+      input: string;
+      instructions?: string;
       max_output_tokens: number;
-      text: { format: { type: string } };
+      text?: { format: { type: string } };
+      tools?: Array<{ type: "web_search" | string }>;
     };
     let requestPayload: RequestPayload | undefined;
     try {
@@ -532,7 +734,8 @@ export async function POST(request: NextRequest) {
       }
 
       // Format payload for Responses API
-      let formattedInput;
+      let combinedInput = "";
+      let combinedInstructions = "";
       try {
         const promptArray = prompt as PromptMessage[];
 
@@ -541,8 +744,7 @@ export async function POST(request: NextRequest) {
           throw new Error("Prompt must be a non-empty array");
         }
 
-        formattedInput = promptArray.map((msg, idx) => {
-          // Validate message structure
+        promptArray.forEach((msg, idx) => {
           if (!msg || typeof msg !== "object") {
             throw new Error(
               `Invalid prompt format at index ${idx}: message is not an object`
@@ -553,18 +755,16 @@ export async function POST(request: NextRequest) {
               `Invalid prompt format at index ${idx}: invalid role "${msg.role}"`
             );
           }
-          if (!msg.content || !Array.isArray(msg.content)) {
+          if (
+            !msg.content ||
+            !Array.isArray(msg.content) ||
+            msg.content.length === 0
+          ) {
             throw new Error(
-              `Invalid prompt format at index ${idx}: content is not an array`
-            );
-          }
-          if (msg.content.length === 0) {
-            throw new Error(
-              `Invalid prompt format at index ${idx}: content array is empty`
+              `Invalid prompt format at index ${idx}: content must be a non-empty array`
             );
           }
 
-          // Extract and combine text content
           const combinedContent = msg.content
             .map((c, cIdx) => {
               if (typeof c !== "object" || c === null) {
@@ -590,20 +790,18 @@ export async function POST(request: NextRequest) {
             throw new Error(`Empty content after formatting at message ${idx}`);
           }
 
-          return {
-            role: msg.role,
-            content: combinedContent,
-          };
+          if (msg.role === "system") {
+            combinedInstructions += combinedInstructions
+              ? `\n\n${combinedContent}`
+              : combinedContent;
+          } else {
+            combinedInput += combinedInput
+              ? `\n\n${combinedContent}`
+              : combinedContent;
+          }
         });
 
-        // Validate formatted input
-        if (formattedInput.length === 0) {
-          throw new Error("Formatted input is empty");
-        }
-
-        const hasUser = formattedInput.some((i) => i.role === "user");
-
-        if (!hasUser) {
+        if (!combinedInput.trim()) {
           throw new Error("Prompt must contain at least one user message");
         }
       } catch (formatError) {
@@ -627,11 +825,15 @@ export async function POST(request: NextRequest) {
 
       requestPayload = {
         model: model,
-        input: formattedInput,
+        input: combinedInput,
+        instructions: combinedInstructions || undefined,
         max_output_tokens: 32000, // Increased from 16000 to handle larger responses
-        text: {
-          format: { type: "json_object" },
-        },
+        text: webSearch
+          ? undefined
+          : {
+              format: { type: "json_object" },
+            },
+        tools: webSearch ? [{ type: "web_search" }] : undefined,
       };
 
       // Calculate actual prompt length for logging
@@ -650,6 +852,7 @@ export async function POST(request: NextRequest) {
         promptLength: actualPromptLength,
         promptLengthJSON: JSON.stringify(prompt).length,
         inputCount: requestPayload.input?.length || 0,
+        webSearchEnabled: webSearch,
       });
 
       let response;
@@ -672,13 +875,57 @@ export async function POST(request: NextRequest) {
           message?: string;
           code?: string;
           status?: number;
+          error?: { code?: string; message?: string };
         };
-        console.error(`OpenAI API call failed after ${elapsedTime}ms:`, {
-          message: err.message,
-          code: err.code,
-          status: err.status,
-        });
-        throw apiError;
+
+        // Handle model_not_found error with fallback
+        const isModelNotFound =
+          err.code === "model_not_found" ||
+          err.error?.code === "model_not_found" ||
+          err.message?.toLowerCase().includes("model_not_found") ||
+          (err.message?.toLowerCase().includes("model") &&
+            err.message?.toLowerCase().includes("not found"));
+
+        if (isModelNotFound && model !== "gpt-4o" && model !== "gpt-4o-mini") {
+          console.warn(
+            `[${requestId}] Model ${model} not found, falling back to gpt-4o`,
+            {
+              originalModel: model,
+              fallbackModel: "gpt-4o",
+            }
+          );
+
+          // Retry with fallback model
+          const fallbackPayload = {
+            ...requestPayload,
+            model: "gpt-4o",
+          };
+
+          try {
+            response = await openai.responses.create(fallbackPayload, {
+              timeout: 300000,
+            });
+            console.log(
+              `[${requestId}] Fallback to gpt-4o succeeded after ${
+                Date.now() - startTime
+              }ms`
+            );
+          } catch (fallbackError) {
+            console.error(
+              `[${requestId}] Fallback also failed:`,
+              fallbackError
+            );
+            throw apiError; // Throw original error
+          }
+        } else {
+          console.error(`OpenAI API call failed after ${elapsedTime}ms:`, {
+            message: err.message,
+            code: err.code,
+            status: err.status,
+            errorCode: err.error?.code,
+          });
+          throw apiError;
+        }
       }
 
       console.log("OpenAI API response received:", {
@@ -921,6 +1168,7 @@ export async function POST(request: NextRequest) {
         // Create directory if it doesn't exist
         const auditsDir = path.join(process.cwd(), "public", "audits");
         await fs.mkdir(auditsDir, { recursive: true });
+        await pruneOldAuditFiles(auditsDir);
 
         // Generate filename based on date and domain/type
         const dateStr = new Date().toISOString().split("T")[0];

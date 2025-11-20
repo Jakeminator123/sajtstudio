@@ -17,135 +17,11 @@ import WaveVisualizer from "@/components/effects/WaveVisualizer";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import type { AuditResult } from "@/types/audit";
+import type { QuestionAnswers } from "@/lib/openai-client";
+import { MODEL_OPTIONS, DEFAULT_MODEL } from "@/config/openai";
 
 type Mode = "choice" | "audit" | "questions" | "results";
-
-interface AuditResult {
-  audit_type: "website_audit" | "recommendation";
-  company: string;
-  domain?: string | null;
-  audit_scores?: {
-    seo: number;
-    ux: number;
-    content: number;
-    performance: number;
-    accessibility: number;
-    technical_seo: number;
-    security?: number;
-    mobile?: number;
-  };
-  improvements?: Array<{
-    item: string;
-    category?: string;
-    impact: "high" | "medium" | "low";
-    effort: "low" | "medium" | "high";
-    why?: string;
-    how?: string;
-    code_example?: string;
-    estimated_time?: string;
-    technologies?: string[];
-  }>;
-  budget_estimate?: {
-    low?: number;
-    high?: number;
-    immediate_fixes?: { low: number; high: number };
-    full_optimization?: { low: number; high: number };
-    ongoing_monthly?: { low: number; high: number };
-    initial_development?: { low: number; high: number };
-    annual_maintenance?: { low: number; high: number };
-    marketing_launch?: { low: number; high: number };
-    currency: string;
-    payment_structure?: string;
-  };
-  cost: {
-    tokens: number;
-    sek: number;
-    usd: number;
-  };
-  strengths?: string[];
-  issues?: string[];
-  website_type_recommendation?: string;
-  expected_outcomes?: string[];
-  security_analysis?: {
-    https_status: string;
-    headers_analysis: string;
-    cookie_policy: string;
-    vulnerabilities: string[];
-  };
-  competitor_insights?: {
-    industry_standards: string;
-    missing_features: string;
-    unique_strengths: string;
-  };
-  technical_recommendations?: Array<{
-    area: string;
-    current_state: string;
-    recommendation: string;
-    implementation: string;
-  }>;
-  priority_matrix?: {
-    quick_wins: string[];
-    major_projects: string[];
-    fill_ins: string[];
-    thankless_tasks?: string[];
-  };
-  target_audience_analysis?: {
-    demographics: string;
-    behaviors: string;
-    pain_points: string;
-    expectations: string;
-  };
-  competitor_benchmarking?: {
-    industry_leaders: string[];
-    common_features: string[];
-    differentiation_opportunities: string[];
-  };
-  technical_architecture?: {
-    recommended_stack: {
-      frontend: string;
-      backend: string;
-      cms: string;
-      hosting: string;
-    };
-    integrations: string[];
-    security_measures: string[];
-  };
-  content_strategy?: {
-    key_pages: string[];
-    content_types: string[];
-    seo_foundation: string;
-    conversion_paths: string[];
-  };
-  design_direction?: {
-    style: string;
-    color_psychology: string;
-    ui_patterns: string[];
-    accessibility_level: string;
-  };
-  implementation_roadmap?: {
-    [phase: string]: {
-      duration?: string;
-      deliverables?: string[];
-      activities?: string[];
-    };
-  };
-  success_metrics?: {
-    kpis: string[];
-    tracking_setup: string;
-    review_schedule: string;
-  };
-}
-
-interface QuestionAnswers {
-  industry: string;
-  industryDescription: string;
-  purpose: string;
-  audience: string;
-  content: string[];
-  features: string[];
-  budget?: string;
-  timeline?: string;
-}
 
 function UtvarderaPageContent() {
   const searchParams = useSearchParams();
@@ -162,7 +38,8 @@ function UtvarderaPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; type?: ToastType; duration?: number }>
   >([]);
@@ -173,7 +50,11 @@ function UtvarderaPageContent() {
     audience: "",
     content: [],
     features: [],
+    budget: "",
+    timeline: "",
   });
+  const selectedModelMeta =
+    MODEL_OPTIONS.find((option) => option.id === selectedModel) ?? MODEL_OPTIONS[0];
 
   // Toast notification helper
   const showToast = useCallback(
@@ -339,6 +220,7 @@ function UtvarderaPageContent() {
           mode: "audit",
           url: normalizedUrl,
           model: selectedModel,
+          webSearch: useWebSearch,
         }),
         signal: controller.signal,
       });
@@ -436,6 +318,7 @@ function UtvarderaPageContent() {
           mode: "questions",
           answers,
           model: selectedModel,
+          webSearch: useWebSearch,
         }),
         signal: controller.signal,
       });
@@ -962,12 +845,16 @@ function UtvarderaPageContent() {
                         boxShadow: "0 0 20px rgba(59, 130, 246, 0.2)",
                       }}
                     >
-                      <option value="gpt-4o-mini" className="bg-gray-900">
-                        Snabb analys (~0.2 SEK) - Rekommenderad
-                      </option>
-                      <option value="gpt-4o" className="bg-gray-900">
-                        Premium analys (~3 SEK)
-                      </option>
+                      {MODEL_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id} className="bg-gray-900 text-white">
+                          {option.label} · ≈{" "}
+                          {option.approxCostSek.toLocaleString("sv-SE", {
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          })}{" "}
+                          SEK
+                        </option>
+                      ))}
                     </motion.select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
                       <svg
@@ -983,12 +870,39 @@ function UtvarderaPageContent() {
                       </svg>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-3 text-center">
-                    {selectedModel === "gpt-4o-mini" &&
-                      "⚡ Snabb grundläggande analys för översikt - Perfekt för de flesta användningsfall"}
-                    {selectedModel === "gpt-4o" &&
-                      "💎 Premium kvalitet med balanserad hastighet - Bästa resultatet"}
-                  </p>
+                  <div className="mt-3 text-center">
+                    {selectedModelMeta.recommended && (
+                      <p className="text-[11px] text-green-300 uppercase tracking-wider">Rekommenderad</p>
+                    )}
+                    <p className="text-xs text-gray-400">
+                      {selectedModelMeta.description} · ≈{" "}
+                      {selectedModelMeta.approxCostSek.toLocaleString("sv-SE", {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      })}{" "}
+                      SEK / körning
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex flex-col items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseWebSearch((prev) => !prev)}
+                      className={`px-5 py-2 rounded-full border transition-all text-sm ${
+                        useWebSearch
+                          ? "bg-green-500/20 border-green-400 text-green-200"
+                          : "bg-white/5 border-white/20 text-gray-200 hover:border-white/40"
+                      }`}
+                      aria-pressed={useWebSearch}
+                    >
+                      {useWebSearch ? "WebSearch aktiverat" : "WebSearch av (standard)"}
+                    </button>
+                    <p className="text-[11px] text-gray-500 text-center">
+                      {useWebSearch
+                        ? "Live-data via Responses API + web_search enligt ALLA.txt. Använd när aktuell fakta krävs."
+                        : "Följer standardinställningen i ALLA.txt – ingen extern webbsök förrän du aktiverar det."}
+                    </p>
+                  </div>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 perspective-1000">
@@ -1680,6 +1594,8 @@ function UtvarderaPageContent() {
                         audience: "",
                         content: [],
                         features: [],
+                        budget: "",
+                        timeline: "",
                       });
                     }}
                     className="text-gray-400 hover:text-white mb-8 flex items-center gap-2 transition-all"

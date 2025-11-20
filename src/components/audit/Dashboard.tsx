@@ -9,6 +9,11 @@ import CompetitorInsights from './CompetitorInsights';
 import TechnicalRecommendations from './TechnicalRecommendations';
 import BudgetBreakdown from './BudgetBreakdown';
 import RoadmapView from './RoadmapView';
+import WebsiteTypeCard from './WebsiteTypeCard';
+import ContentStrategy from './ContentStrategy';
+import DesignDirection from './DesignDirection';
+import CompetitorBenchmark from './CompetitorBenchmark';
+import SuccessMetrics from './SuccessMetrics';
 import type { AuditResult } from '@/types/audit';
 
 interface DashboardProps {
@@ -39,6 +44,21 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
   const hasTechnicalRecs = result.technical_recommendations && result.technical_recommendations.length > 0;
   const hasBudget = result.budget_estimate;
   const hasRoadmap = result.implementation_roadmap;
+  const hasWebsiteType = Boolean(result.website_type_recommendation);
+  const hasContentStrategy = Boolean(result.content_strategy);
+  const hasDesignDirection = Boolean(result.design_direction);
+  const hasBenchmarking = Boolean(result.competitor_benchmarking);
+  const hasSuccessMetrics = Boolean(result.success_metrics);
+  const hasTechnicalContent = Boolean(hasSecurityAnalysis || hasTechnicalRecs || result.technical_architecture);
+  const hasBusinessContent = Boolean(
+    hasCompetitorInsights ||
+      hasBudget ||
+      result.target_audience_analysis ||
+      hasContentStrategy ||
+      hasDesignDirection ||
+      hasBenchmarking ||
+      hasSuccessMetrics
+  );
 
   return (
     <div className="space-y-8">
@@ -161,6 +181,10 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
             {/* Metrics Overview */}
             {hasAuditScores && result.audit_scores && (
               <MetricsChart scores={result.audit_scores as { [key: string]: number }} />
+            )}
+
+            {hasWebsiteType && result.website_type_recommendation && (
+              <WebsiteTypeCard recommendation={result.website_type_recommendation} />
             )}
 
             {/* Strengths and Issues */}
@@ -314,8 +338,42 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                       </div>
                     </div>
                   )}
+                  {result.technical_architecture.integrations && result.technical_architecture.integrations.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-300 mb-3">Integrationer</h4>
+                      <ul className="grid sm:grid-cols-2 gap-2 text-gray-300 text-sm">
+                        {result.technical_architecture.integrations.map((integration: string) => (
+                          <li key={integration} className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
+                            <span className="text-accent text-lg">🔌</span>
+                            {integration}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {result.technical_architecture.security_measures && result.technical_architecture.security_measures.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-300 mb-3">Säkerhetsåtgärder</h4>
+                      <ul className="space-y-2 text-gray-300 text-sm">
+                        {result.technical_architecture.security_measures.map((measure: string) => (
+                          <li key={measure} className="flex items-start gap-2">
+                            <span className="text-green-400 mt-0.5">•</span>
+                            {measure}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </motion.div>
+            )}
+
+            {!hasTechnicalContent && (
+              <EmptyState
+                icon="🧰"
+                title="Ingen teknisk data"
+                description="AI-analysen hittade inga tekniska detaljer. Kör om analysen med en mer avancerad modell eller säkerställ att underlag finns."
+              />
             )}
           </motion.div>
         )}
@@ -356,21 +414,76 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                 </div>
               </motion.div>
             )}
+
+            {(hasContentStrategy || hasDesignDirection) && (
+              <div className="grid md:grid-cols-2 gap-6">
+                {hasContentStrategy && result.content_strategy && (
+                  <ContentStrategy strategy={result.content_strategy} />
+                )}
+                {hasDesignDirection && result.design_direction && (
+                  <DesignDirection direction={result.design_direction} />
+                )}
+              </div>
+            )}
+
+            {hasBenchmarking && result.competitor_benchmarking && (
+              <CompetitorBenchmark benchmarking={result.competitor_benchmarking} />
+            )}
+
+            {hasSuccessMetrics && result.success_metrics && (
+              <SuccessMetrics metrics={result.success_metrics} />
+            )}
+
+            {!hasBusinessContent && (
+              <EmptyState
+                icon="💼"
+                title="Ingen affärsdata"
+                description="Vi kunde inte extrahera affärsinsikter för denna analys. Försök med fler inputs eller en ny körning."
+              />
+            )}
           </motion.div>
         )}
 
         {/* Roadmap View */}
-        {activeView === 'roadmap' && hasRoadmap && result.implementation_roadmap && (
+        {activeView === 'roadmap' && (
           <motion.div
             key="roadmap"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <RoadmapView roadmap={result.implementation_roadmap} />
+            {hasRoadmap && result.implementation_roadmap ? (
+              <RoadmapView roadmap={result.implementation_roadmap} />
+            ) : (
+              <EmptyState
+                icon="🗺️"
+                title="Ingen roadmap"
+                description="Ingen implementation-roadmap genererades i resultatet. Lägg till mer detaljer i briefen eller kör om analysen."
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+interface EmptyStateProps {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+function EmptyState({ icon, title, description }: EmptyStateProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 text-center"
+    >
+      <div className="text-4xl mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+      <p className="text-gray-400 text-sm">{description}</p>
+    </motion.div>
   );
 }

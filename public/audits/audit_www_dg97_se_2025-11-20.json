@@ -1,0 +1,59 @@
+{
+  "company": "DG97",
+  "audit_scores": {
+    "seo": 70,
+    "technical_seo": 65,
+    "ux": 75,
+    "content": 80,
+    "performance": 50,
+    "accessibility": 60
+  },
+  "strengths": [
+    "Central location",
+    "Comprehensive offer"
+  ],
+  "issues": [
+    "Slow response time",
+    "Lack of ALT tags"
+  ],
+  "improvements": [
+    {
+      "item": "Improve site speed",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Slow loading time affects user experience and SEO rankings",
+      "how": "Optimize images, enable caching, and minimize JavaScript"
+    },
+    {
+      "item": "Add ALT tags",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Improves accessibility and SEO",
+      "how": "Ensure all images have descriptive ALT tags"
+    },
+    {
+      "item": "Optimize meta descriptions",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Enhances SEO and click-through rate",
+      "how": "Include unique and relevant meta descriptions for each page"
+    }
+  ],
+  "budget_estimate": {
+    "low": 5000,
+    "high": 15000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Improved SEO rankings",
+    "Better user engagement"
+  ],
+  "audit_type": "website_audit",
+  "cost": {
+    "tokens": 1281,
+    "sek": 0.05,
+    "usd": 0.0044
+  },
+  "domain": "www.dg97.se",
+  "timestamp": "2025-11-20T12:06:22.005Z"
+}
