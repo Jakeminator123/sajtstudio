@@ -20,16 +20,18 @@ import type { WebsiteContent } from "@/lib/openai-client";
 // This is required for long-running AI API calls
 export const maxDuration = 300;
 
-// Initialize OpenAI client with extended timeout
-if (!process.env.OPENAI_API_KEY) {
-  console.error("OPENAI_API_KEY is not set in environment variables");
+// Initialize OpenAI client lazily to avoid build-time errors
+function getOpenAIClient(): OpenAI {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not set in environment variables");
+  }
+  
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    timeout: 300000, // 5 minute timeout for all models (increased from 4 minutes)
+    maxRetries: 3, // Increased retries for better reliability
+  });
 }
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 300000, // 5 minute timeout for all models (increased from 4 minutes)
-  maxRetries: 3, // Increased retries for better reliability
-});
 
 // Cost calculation constants
 const USD_TO_SEK = parseFloat(process.env.USD_TO_SEK || "11.0");
@@ -719,8 +721,8 @@ export async function POST(request: NextRequest) {
       input: string;
       instructions?: string;
       max_output_tokens: number;
-      text?: { format: { type: string } };
-      tools?: Array<{ type: "web_search" | string }>;
+      text?: { format: { type: "json_object" } };
+      tools?: Array<{ type: "web_search" }>;
     };
     let requestPayload: RequestPayload | undefined;
     try {
@@ -859,7 +861,7 @@ export async function POST(request: NextRequest) {
       const startTime = Date.now();
       try {
         // Use responses API
-        // @ts-ignore - Responses API typings lack text.format support
+        const openai = getOpenAIClient();
         response = await openai.responses.create(requestPayload, {
           timeout: 300000, // 5 minutes explicit timeout
         });
@@ -902,6 +904,7 @@ export async function POST(request: NextRequest) {
           };
 
           try {
+            const openai = getOpenAIClient();
             response = await openai.responses.create(fallbackPayload, {
               timeout: 300000,
             });
