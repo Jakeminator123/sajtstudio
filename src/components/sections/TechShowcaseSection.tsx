@@ -167,8 +167,22 @@ export default function TechShowcaseSection() {
   useEffect(() => {
     if (showPacman) {
       setOverlayDismissed(false);
+      // Close any open HeroAnimation modals when Pacman is about to show
+      // This prevents modals from appearing over Pacman game on mobile
+      window.dispatchEvent(new CustomEvent('closeHeroModals'));
     }
   }, [showPacman]);
+
+  // Close HeroAnimation modals when white fade starts (mobile safety)
+  useEffect(() => {
+    if (whiteFadeOut) {
+      // Small delay to ensure modals are closed before white fade appears
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('closeHeroModals'));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [whiteFadeOut]);
 
   // Auto-scroll to Pacman once game is revealed (only once)
   useEffect(() => {
@@ -605,7 +619,7 @@ export default function TechShowcaseSection() {
       {/* Start from white (coming from HeroAnimation white fade) */}
       {/* This white overlay stays white while Matrix text is visible */}
       {/* Only fades out after Matrix text and message are done */}
-      {/* Much higher z-index (1000) to be above HeroAnimation's white overlay (z-index 100) */}
+      {/* Much higher z-index (1000) to be above HeroAnimation's white overlay (z-index 100) and modals (z-index 60) */}
       {whiteFadeOut && (
         <motion.div
           className="fixed inset-0 bg-white pointer-events-none"
