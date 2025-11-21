@@ -24,6 +24,28 @@ const nextConfig: NextConfig = {
       };
     }
 
+    // Fix worker-related deployment issues
+    // Ensure optimization config exists and doesn't use workers
+    if (!config.optimization) {
+      config.optimization = {};
+    }
+    
+    // Disable parallel processing to prevent worker null errors
+    config.optimization.minimize = true;
+    
+    // Set maxParallelWorkers to prevent worker issues
+    if (config.optimization.minimizer) {
+      config.optimization.minimizer = config.optimization.minimizer.map((minimizer: any) => {
+        if (minimizer && typeof minimizer === 'object' && minimizer.constructor) {
+          // Ensure minimizers don't use workers
+          if (minimizer.options) {
+            minimizer.options.parallel = false;
+          }
+        }
+        return minimizer;
+      });
+    }
+
     return config;
   },
 
