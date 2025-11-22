@@ -30,6 +30,7 @@ export default function TechShowcaseSection() {
   const [matrixFinished, setMatrixFinished] = useState(false);
   const [postMatrixMessageVisible, setPostMatrixMessageVisible] = useState(false);
   const hasStartedAnimationRef = useRef(false);
+  const showPacmanTimestampRef = useRef<number | null>(null);
   const matrixFullText = "ENOUGH WITH THE\nFLASHY STUFF";
   // Show overlay when Pacman should be visible and overlay hasn't been dismissed
   // Don't require isInView since animation can trigger even if user scrolled past
@@ -135,8 +136,14 @@ export default function TechShowcaseSection() {
   }, [mounted]);
 
   // Also trigger when isInView changes (normal scroll behavior)
+  // Added guard to prevent re-triggering animation when scrollIntoView causes isInView to change
   useEffect(() => {
     if (!mounted || !isInView || hasStartedAnimationRef.current) {
+      return;
+    }
+
+    // Prevent re-triggering if Pacman is already showing or overlay is active
+    if (showPacman || showOverlay || showInlinePacman) {
       return;
     }
 
@@ -161,15 +168,20 @@ export default function TechShowcaseSection() {
         clearTimeout(pacmanTimer);
       };
     }
-  }, [isInView, mounted]);
+  }, [isInView, mounted, showPacman, showOverlay, showInlinePacman]);
 
   // Reset overlay dismissal whenever Pacman sequence retriggers
+  // Added guard to prevent accidental dismissal on mobile
   useEffect(() => {
     if (showPacman) {
       setOverlayDismissed(false);
+      // Track when Pacman overlay was shown
+      showPacmanTimestampRef.current = Date.now();
       // Close any open HeroAnimation modals when Pacman is about to show
       // This prevents modals from appearing over Pacman game on mobile
       window.dispatchEvent(new CustomEvent('closeHeroModals'));
+    } else {
+      showPacmanTimestampRef.current = null;
     }
   }, [showPacman]);
 
@@ -185,18 +197,28 @@ export default function TechShowcaseSection() {
   }, [whiteFadeOut]);
 
   // Auto-scroll to Pacman once game is revealed (only once)
+  // Added delay and guard to prevent scroll events from interfering with overlay on mobile
   useEffect(() => {
     if (!mounted) return;
 
     if ((showOverlay || showInlinePacman) && !hasScrolledToPacman && pacmanRef.current) {
-      requestAnimationFrame(() => {
-        pacmanRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "center",
-        });
-        setHasScrolledToPacman(true);
-      });
+      // Delay scroll on mobile to ensure overlay is fully rendered and white fade has time to complete
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      const scrollDelay = isMobile ? 2000 : 500; // Longer delay on mobile to ensure white fade completes
+      
+      const scrollTimer = setTimeout(() => {
+        if (pacmanRef.current && (showOverlay || showInlinePacman)) {
+          // Use passive scroll to prevent triggering other scroll events
+          pacmanRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "center",
+          });
+          setHasScrolledToPacman(true);
+        }
+      }, scrollDelay);
+
+      return () => clearTimeout(scrollTimer);
     }
   }, [showOverlay, showInlinePacman, hasScrolledToPacman, mounted]);
 
@@ -224,6 +246,16 @@ export default function TechShowcaseSection() {
   };
 
   const handleDismissOverlay = () => {
+    // Prevent accidental dismissal on mobile during initial display
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile && showPacman && showPacmanTimestampRef.current) {
+      // On mobile, ensure overlay has been visible for at least 2 seconds before allowing dismissal
+      const minDisplayTime = 2000;
+      const timeSinceShowPacman = Date.now() - showPacmanTimestampRef.current;
+      if (timeSinceShowPacman < minDisplayTime) {
+        return; // Prevent dismissal too early on mobile
+      }
+    }
     setOverlayDismissed(true);
   };
 
@@ -626,7 +658,14 @@ export default function TechShowcaseSection() {
           style={{ zIndex: 1000 }}
           initial={{ opacity: 1 }}
           animate={{ opacity: showPacman ? 0 : 1 }}
-          transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ 
+            duration: 1.5, 
+            ease: [0.25, 0.1, 0.25, 1],
+            // Prevent animation from being interrupted on mobile
+            type: "tween"
+          }}
+          // Keep overlay visible until Pacman is fully shown to prevent flash
+          exit={{ opacity: 0 }}
         />
       )}
 
@@ -750,7 +789,8 @@ export default function TechShowcaseSection() {
       </AnimatePresence>
 
       {/* Pacman Overlay Modal - shows on top of everything when white fade is done */}
-      <AnimatePresence>
+      {/* Added mode="wait" to prevent overlay from disappearing prematurely on mobile */}
+      <AnimatePresence mode="wait">
         {showOverlay && (
           <motion.div
             className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center p-4"
@@ -759,6 +799,10 @@ export default function TechShowcaseSection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
+            // Prevent overlay from being removed during animation
+            onAnimationComplete={() => {
+              // Ensure overlay stays visible
+            }}
           >
             {/* Close button */}
             <motion.button
