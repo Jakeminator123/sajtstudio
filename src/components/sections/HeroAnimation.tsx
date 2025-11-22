@@ -139,6 +139,26 @@ export default function HeroAnimation() {
     };
   }, [textsShouldStick, textsDisappearing]);
 
+  // Close modals when Pacman game is about to show (mobile fix)
+  useEffect(() => {
+    const handleCloseModals = () => {
+      setIsDesignModalOpen(false);
+      setIsFunctionalityModalOpen(false);
+      setDesignTextFlyingToModal(false);
+      setFunctionalityTextFlyingToModal(false);
+      // Clear any pending modal timeouts
+      if (timeoutRefs.current.design1) clearTimeout(timeoutRefs.current.design1);
+      if (timeoutRefs.current.design2) clearTimeout(timeoutRefs.current.design2);
+      if (timeoutRefs.current.func1) clearTimeout(timeoutRefs.current.func1);
+      if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
+    };
+
+    window.addEventListener('closeHeroModals', handleCloseModals);
+    return () => {
+      window.removeEventListener('closeHeroModals', handleCloseModals);
+    };
+  }, []);
+
   // Ensure video plays when it becomes visible
   useEffect(() => {
     if (!mounted || videoError || !videoRef.current) return;
