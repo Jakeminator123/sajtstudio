@@ -141,6 +141,7 @@ export default function HeroAnimation() {
 
   // State to control white overlay visibility (can be forced closed for Pacman)
   const [whiteOverlayForcedClosed, setWhiteOverlayForcedClosed] = useState(false);
+  const [pacmanOverlayActive, setPacmanOverlayActive] = useState(false);
 
   // Close modals when Pacman game is about to show (mobile fix)
   useEffect(() => {
@@ -149,6 +150,7 @@ export default function HeroAnimation() {
       setIsFunctionalityModalOpen(false);
       setDesignTextFlyingToModal(false);
       setFunctionalityTextFlyingToModal(false);
+      setPacmanOverlayActive(true);
       // Clear any pending modal timeouts
       if (timeoutRefs.current.design1) clearTimeout(timeoutRefs.current.design1);
       if (timeoutRefs.current.design2) clearTimeout(timeoutRefs.current.design2);
@@ -160,11 +162,18 @@ export default function HeroAnimation() {
       setWhiteOverlayForcedClosed(true);
     };
 
+    // Listen for when Pacman overlay is dismissed
+    const handlePacmanDismissed = () => {
+      setPacmanOverlayActive(false);
+    };
+
     window.addEventListener('closeHeroModals', handleCloseModals);
     window.addEventListener('closeHeroWhiteOverlay', handleCloseWhiteOverlay);
+    window.addEventListener('pacmanOverlayDismissed', handlePacmanDismissed);
     return () => {
       window.removeEventListener('closeHeroModals', handleCloseModals);
       window.removeEventListener('closeHeroWhiteOverlay', handleCloseWhiteOverlay);
+      window.removeEventListener('pacmanOverlayDismissed', handlePacmanDismissed);
     };
   }, []);
 
@@ -1975,6 +1984,9 @@ export default function HeroAnimation() {
                 : designTextRotate,
             }}
             onClick={() => {
+              // CRITICAL FIX: Don't open modal if Pacman overlay is active (mobile fix)
+              if (pacmanOverlayActive) return;
+              
               // Clear any existing timeouts
               if (timeoutRefs.current.design1)
                 clearTimeout(timeoutRefs.current.design1);
@@ -2065,6 +2077,9 @@ export default function HeroAnimation() {
                 : functionalityTextRotate,
             }}
             onClick={() => {
+              // CRITICAL FIX: Don't open modal if Pacman overlay is active (mobile fix)
+              if (pacmanOverlayActive) return;
+              
               // Clear any existing timeouts
               if (timeoutRefs.current.func1)
                 clearTimeout(timeoutRefs.current.func1);
