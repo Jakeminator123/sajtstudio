@@ -139,6 +139,9 @@ export default function HeroAnimation() {
     };
   }, [textsShouldStick, textsDisappearing]);
 
+  // State to control white overlay visibility (can be forced closed for Pacman)
+  const [whiteOverlayForcedClosed, setWhiteOverlayForcedClosed] = useState(false);
+
   // Close modals when Pacman game is about to show (mobile fix)
   useEffect(() => {
     const handleCloseModals = () => {
@@ -153,9 +156,15 @@ export default function HeroAnimation() {
       if (timeoutRefs.current.func2) clearTimeout(timeoutRefs.current.func2);
     };
 
+    const handleCloseWhiteOverlay = () => {
+      setWhiteOverlayForcedClosed(true);
+    };
+
     window.addEventListener('closeHeroModals', handleCloseModals);
+    window.addEventListener('closeHeroWhiteOverlay', handleCloseWhiteOverlay);
     return () => {
       window.removeEventListener('closeHeroModals', handleCloseModals);
+      window.removeEventListener('closeHeroWhiteOverlay', handleCloseWhiteOverlay);
     };
   }, []);
 
@@ -2424,7 +2433,8 @@ export default function HeroAnimation() {
 
       {/* White fade overlay - fades in then OUT to reveal Matrix text */}
       {/* Shows white briefly then fades back to transparent */}
-      {!hasExploded && (
+      {/* CRITICAL FIX: Force close when Pacman is about to show to prevent overlay conflicts on mobile */}
+      {!hasExploded && !whiteOverlayForcedClosed && (
         <motion.div
           className="fixed inset-0 bg-white pointer-events-none z-[100]"
           style={{

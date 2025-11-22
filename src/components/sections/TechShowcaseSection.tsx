@@ -29,6 +29,7 @@ export default function TechShowcaseSection() {
   const [matrixText, setMatrixText] = useState("");
   const [matrixFinished, setMatrixFinished] = useState(false);
   const [postMatrixMessageVisible, setPostMatrixMessageVisible] = useState(false);
+  const [whiteFadeComplete, setWhiteFadeComplete] = useState(false);
   const hasStartedAnimationRef = useRef(false);
   const matrixFullText = "ENOUGH WITH THE\nFLASHY STUFF";
   // Show overlay when Pacman should be visible and overlay hasn't been dismissed
@@ -167,18 +168,22 @@ export default function TechShowcaseSection() {
   useEffect(() => {
     if (showPacman) {
       setOverlayDismissed(false);
+      setWhiteFadeComplete(false);
       // Close any open HeroAnimation modals when Pacman is about to show
       // This prevents modals from appearing over Pacman game on mobile
       window.dispatchEvent(new CustomEvent('closeHeroModals'));
+      // Also dispatch event to close HeroAnimation white overlay
+      window.dispatchEvent(new CustomEvent('closeHeroWhiteOverlay'));
     }
   }, [showPacman]);
 
-  // Close HeroAnimation modals when white fade starts (mobile safety)
+  // Close HeroAnimation modals and white overlay when white fade starts (mobile safety)
   useEffect(() => {
     if (whiteFadeOut) {
       // Small delay to ensure modals are closed before white fade appears
       const timer = setTimeout(() => {
         window.dispatchEvent(new CustomEvent('closeHeroModals'));
+        window.dispatchEvent(new CustomEvent('closeHeroWhiteOverlay'));
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -620,13 +625,20 @@ export default function TechShowcaseSection() {
       {/* This white overlay stays white while Matrix text is visible */}
       {/* Only fades out after Matrix text and message are done */}
       {/* Much higher z-index (1000) to be above HeroAnimation's white overlay (z-index 100) and modals (z-index 60) */}
-      {whiteFadeOut && (
+      {/* CRITICAL FIX: Fade out immediately when Pacman should show, and ensure it's completely gone before Pacman renders */}
+      {whiteFadeOut && !whiteFadeComplete && (
         <motion.div
           className="fixed inset-0 bg-white pointer-events-none"
           style={{ zIndex: 1000 }}
           initial={{ opacity: 1 }}
           animate={{ opacity: showPacman ? 0 : 1 }}
-          transition={{ duration: 1.5, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          onAnimationComplete={() => {
+            if (showPacman) {
+              // Mark fade as complete after animation finishes
+              setTimeout(() => setWhiteFadeComplete(true), 100);
+            }
+          }}
         />
       )}
 
@@ -750,15 +762,16 @@ export default function TechShowcaseSection() {
       </AnimatePresence>
 
       {/* Pacman Overlay Modal - shows on top of everything when white fade is done */}
+      {/* CRITICAL FIX: Only show when white fade is complete to prevent overlay conflicts on mobile */}
       <AnimatePresence>
-        {showOverlay && (
+        {showOverlay && (whiteFadeComplete || !whiteFadeOut) && (
           <motion.div
             className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
+            style={{ zIndex: 99999 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: whiteFadeOut && !whiteFadeComplete ? 0.7 : 0 }}
           >
             {/* Close button */}
             <motion.button
