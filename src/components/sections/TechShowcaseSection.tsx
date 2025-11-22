@@ -29,6 +29,7 @@ export default function TechShowcaseSection() {
   const [matrixText, setMatrixText] = useState("");
   const [matrixFinished, setMatrixFinished] = useState(false);
   const [postMatrixMessageVisible, setPostMatrixMessageVisible] = useState(false);
+  const [whiteFadeComplete, setWhiteFadeComplete] = useState(false);
   const hasStartedAnimationRef = useRef(false);
   const showPacmanTimestampRef = useRef<number | null>(null);
   const matrixFullText = "ENOUGH WITH THE\nFLASHY STUFF";
@@ -175,22 +176,35 @@ export default function TechShowcaseSection() {
   useEffect(() => {
     if (showPacman) {
       setOverlayDismissed(false);
-      // Track when Pacman overlay was shown
-      showPacmanTimestampRef.current = Date.now();
+      setWhiteFadeComplete(false);
       // Close any open HeroAnimation modals when Pacman is about to show
       // This prevents modals from appearing over Pacman game on mobile
       window.dispatchEvent(new CustomEvent('closeHeroModals'));
+      // Also dispatch event to close HeroAnimation white overlay
+      window.dispatchEvent(new CustomEvent('closeHeroWhiteOverlay'));
+      // Hide D-ID chatbot when Pacman overlay is active (mobile fix)
+      const chatbot = document.querySelector('[data-name="did-agent"]') as HTMLElement;
+      if (chatbot) {
+        chatbot.style.display = 'none';
+        chatbot.style.zIndex = '1';
+      }
     } else {
-      showPacmanTimestampRef.current = null;
+      // Show chatbot again when Pacman is dismissed
+      const chatbot = document.querySelector('[data-name="did-agent"]') as HTMLElement;
+      if (chatbot) {
+        chatbot.style.display = '';
+        chatbot.style.zIndex = '';
+      }
     }
   }, [showPacman]);
 
-  // Close HeroAnimation modals when white fade starts (mobile safety)
+  // Close HeroAnimation modals and white overlay when white fade starts (mobile safety)
   useEffect(() => {
     if (whiteFadeOut) {
       // Small delay to ensure modals are closed before white fade appears
       const timer = setTimeout(() => {
         window.dispatchEvent(new CustomEvent('closeHeroModals'));
+        window.dispatchEvent(new CustomEvent('closeHeroWhiteOverlay'));
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -257,6 +271,16 @@ export default function TechShowcaseSection() {
       }
     }
     setOverlayDismissed(true);
+    // Dispatch event to notify HeroAnimation that Pacman overlay is dismissed
+    window.dispatchEvent(new CustomEvent('pacmanOverlayDismissed'));
+    // Show chatbot again when overlay is dismissed
+    setTimeout(() => {
+      const chatbot = document.querySelector('[data-name="did-agent"]') as HTMLElement;
+      if (chatbot) {
+        chatbot.style.display = '';
+        chatbot.style.zIndex = '';
+      }
+    }, 500);
   };
 
   const renderPacmanExperience = (variant: "overlay" | "inline") => {
@@ -652,20 +676,20 @@ export default function TechShowcaseSection() {
       {/* This white overlay stays white while Matrix text is visible */}
       {/* Only fades out after Matrix text and message are done */}
       {/* Much higher z-index (1000) to be above HeroAnimation's white overlay (z-index 100) and modals (z-index 60) */}
-      {whiteFadeOut && (
+      {/* CRITICAL FIX: Fade out immediately when Pacman should show, and ensure it's completely gone before Pacman renders */}
+      {whiteFadeOut && !whiteFadeComplete && (
         <motion.div
           className="fixed inset-0 bg-white pointer-events-none"
           style={{ zIndex: 1000 }}
           initial={{ opacity: 1 }}
           animate={{ opacity: showPacman ? 0 : 1 }}
-          transition={{ 
-            duration: 1.5, 
-            ease: [0.25, 0.1, 0.25, 1],
-            // Prevent animation from being interrupted on mobile
-            type: "tween"
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          onAnimationComplete={() => {
+            if (showPacman) {
+              // Mark fade as complete after animation finishes
+              setTimeout(() => setWhiteFadeComplete(true), 100);
+            }
           }}
-          // Keep overlay visible until Pacman is fully shown to prevent flash
-          exit={{ opacity: 0 }}
         />
       )}
 
@@ -789,19 +813,32 @@ export default function TechShowcaseSection() {
       </AnimatePresence>
 
       {/* Pacman Overlay Modal - shows on top of everything when white fade is done */}
-      {/* Added mode="wait" to prevent overlay from disappearing prematurely on mobile */}
-      <AnimatePresence mode="wait">
-        {showOverlay && (
+      {/* CRITICAL FIX: Only show when white fade is complete to prevent overlay conflicts on mobile */}
+      {/* Also hide D-ID chatbot and ensure it doesn't cover the game */}
+      <AnimatePresence>
+        {showOverlay && (whiteFadeComplete || !whiteFadeOut) && (
           <motion.div
             className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center p-4"
-            style={{ zIndex: 9999 }}
+            style={{ zIndex: 99999 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            // Prevent overlay from being removed during animation
+            transition={{ duration: 0.5, delay: whiteFadeOut && !whiteFadeComplete ? 0.7 : 0 }}
+            onAnimationStart={() => {
+              // Hide chatbot when overlay starts animating in
+              const chatbot = document.querySelector('[data-name="did-agent"]') as HTMLElement;
+              if (chatbot) {
+                chatbot.style.display = 'none';
+                chatbot.style.zIndex = '1';
+              }
+            }}
             onAnimationComplete={() => {
-              // Ensure overlay stays visible
+              // Ensure chatbot stays hidden while overlay is active
+              const chatbot = document.querySelector('[data-name="did-agent"]') as HTMLElement;
+              if (chatbot) {
+                chatbot.style.display = 'none';
+                chatbot.style.zIndex = '1';
+              }
             }}
           >
             {/* Close button */}
@@ -833,6 +870,8 @@ export default function TechShowcaseSection() {
         {/* Tech vs Design labels are now inside renderPacmanExperience for both overlay and inline variants */}
 
         {/* Animation capabilities section - improved design */}
+        {/* CRITICAL FIX: Hide these white modules when Pacman overlay is active to prevent them covering the game on mobile */}
+        {!showOverlay && (
         <motion.div
           className="mt-32 mb-16 px-6 md:px-8 max-w-6xl mx-auto text-center"
           initial={{ opacity: 0, y: 50 }}
@@ -935,6 +974,7 @@ export default function TechShowcaseSection() {
             </div>
           </motion.div>
         </motion.div>
+        )}
       </div>
     </motion.section>
   );
