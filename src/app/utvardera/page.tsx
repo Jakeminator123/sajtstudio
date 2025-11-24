@@ -114,8 +114,8 @@ function UtvarderaPageContent() {
         // Keep only last 5 results
         const updatedResults = [newResult, ...savedResults].slice(0, 5);
         localStorage.setItem("audit-results", JSON.stringify(updatedResults));
-      } catch (error) {
-        console.error("Failed to save result to localStorage:", error);
+      } catch {
+        // Silently fail if localStorage is not available
       }
     }
   }, [result]);
@@ -441,8 +441,7 @@ function UtvarderaPageContent() {
         .catch(() => {
           showToast("Kunde inte kopiera länk", "error");
         });
-    } catch (error) {
-      console.error("Failed to copy link:", error);
+    } catch {
       showToast("Kunde inte kopiera länk", "error");
     }
   }, [result, showToast]);
@@ -455,7 +454,6 @@ function UtvarderaPageContent() {
 
     // Validate result structure before downloading
     if (!result.audit_type || !result.cost) {
-      console.error("Invalid result structure for JSON download:", result);
       setError("Resultatet är ogiltigt och kan inte laddas ner");
       return;
     }
@@ -503,7 +501,6 @@ function UtvarderaPageContent() {
 
       showToast("JSON-fil nedladdad! 💾", "success");
     } catch (error) {
-      console.error("Failed to download JSON:", error);
       const errorMsg =
         error instanceof Error
           ? `Kunde inte ladda ner JSON-filen: ${error.message}`
@@ -521,7 +518,6 @@ function UtvarderaPageContent() {
 
     // Validate result structure before requesting PDF
     if (!result.audit_type || !result.cost) {
-      console.error("Invalid result structure for PDF download:", result);
       setError("Resultatet är ogiltigt och kan inte laddas ner som PDF");
       return;
     }
@@ -594,7 +590,6 @@ function UtvarderaPageContent() {
 
       showToast("PDF nedladdad! 📄", "success");
     } catch (error) {
-      console.error("Failed to download PDF:", error);
       let errorMsg = "Kunde inte ladda ner PDF-fil";
       if (error instanceof Error) {
         if (error.name === "AbortError") {
@@ -720,10 +715,10 @@ function UtvarderaPageContent() {
           {mode === "choice" && (
             <motion.section
               key="choice"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-4xl">
@@ -735,10 +730,11 @@ function UtvarderaPageContent() {
                 >
                   <motion.div
                     animate={{
-                      y: [0, -10, 0],
+                      y: [0, -15, 0],
+                      scale: [1, 1.02, 1],
                     }}
                     transition={{
-                      duration: 6,
+                      duration: 8,
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
@@ -750,7 +746,7 @@ function UtvarderaPageContent() {
                           backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                         }}
                         transition={{
-                          duration: 5,
+                          duration: 4,
                           repeat: Infinity,
                           ease: "linear",
                         }}
@@ -907,16 +903,16 @@ function UtvarderaPageContent() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 perspective-1000">
                   <motion.div
-                    initial={{ opacity: 0, x: -50, rotateY: -30 }}
-                    animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                    transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
+                    initial={{ opacity: 0, x: -50, rotateY: -30, scale: 0.9 }}
+                    animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.8, type: "spring", stiffness: 100, damping: 15 }}
                   >
                     <Card3D intensity={18} className="w-full">
                       <motion.button
                         onClick={() => setMode("audit")}
                         className="group relative p-8 backdrop-blur-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-400/30 rounded-3xl hover:border-blue-400/60 transition-all duration-300 w-full"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.97 }}
                         style={{
                           boxShadow:
                             "0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)",
@@ -955,10 +951,10 @@ function UtvarderaPageContent() {
                             className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
                             animate={{
                               scaleX: [0, 1, 0],
-                              opacity: [0, 1, 0],
+                              opacity: [0, 0.8, 0],
                             }}
                             transition={{
-                              duration: 3,
+                              duration: 2.5,
                               repeat: Infinity,
                               ease: "easeInOut",
                             }}
@@ -969,16 +965,16 @@ function UtvarderaPageContent() {
                   </motion.div>
 
                   <motion.div
-                    initial={{ opacity: 0, x: 50, rotateY: 30 }}
-                    animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                    transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+                    initial={{ opacity: 0, x: 50, rotateY: 30, scale: 0.9 }}
+                    animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
+                    transition={{ delay: 0.3, duration: 0.8, type: "spring", stiffness: 100, damping: 15 }}
                   >
                     <Card3D intensity={18} className="w-full">
                       <motion.button
                         onClick={() => setMode("questions")}
                         className="group relative p-8 backdrop-blur-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-3xl hover:border-purple-400/60 transition-all duration-300 w-full"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.97 }}
                         style={{
                           boxShadow:
                             "0 0 30px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1)",
@@ -1024,10 +1020,10 @@ function UtvarderaPageContent() {
                             className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent"
                             animate={{
                               scaleX: [0, 1, 0],
-                              opacity: [0, 1, 0],
+                              opacity: [0, 0.8, 0],
                             }}
                             transition={{
-                              duration: 3,
+                              duration: 2.5,
                               repeat: Infinity,
                               ease: "easeInOut",
                               delay: 1.5,
@@ -1045,10 +1041,10 @@ function UtvarderaPageContent() {
           {mode === "audit" && !isLoading && (
             <motion.section
               key="audit"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, x: 50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -50, scale: 0.95 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-2xl">
@@ -1269,12 +1265,12 @@ function UtvarderaPageContent() {
           {mode === "questions" && !isLoading && (
             <motion.section
               key="questions"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: -50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{
-                duration: 0.3,
-                ease: "easeOut"
+                duration: 0.5,
+                ease: [0.25, 0.1, 0.25, 1]
               }}
               style={{ willChange: "transform, opacity" }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
@@ -1304,9 +1300,9 @@ function UtvarderaPageContent() {
                   </div>
 
                   <div className="mb-8">
-                    <div className="w-full bg-white/10 rounded-full h-2">
+                    <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden backdrop-blur-sm">
                       <motion.div
-                        className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full"
+                        className="bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 h-full rounded-full relative"
                         initial={{ width: "0%" }}
                         animate={{
                           width: `${
@@ -1314,23 +1310,35 @@ function UtvarderaPageContent() {
                           }%`,
                         }}
                         transition={{
-                          duration: 0.3,
-                          ease: "easeOut"
+                          duration: 0.5,
+                          ease: [0.25, 0.1, 0.25, 1]
                         }}
                         style={{ willChange: "width" }}
-                      />
+                      >
+                        <motion.div
+                          animate={{ x: ['-100%', '100%'] }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
+                          style={{ width: '40%' }}
+                        />
+                        <motion.div
+                          animate={{ opacity: [0.3, 0.6, 0.3] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-full"
+                        />
+                      </motion.div>
                     </div>
                   </div>
 
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentQuestion}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -50 }}
+                      initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
                       transition={{
-                        duration: 0.2,
-                        ease: "easeOut"
+                        duration: 0.4,
+                        ease: [0.25, 0.1, 0.25, 1]
                       }}
                       style={{ willChange: "transform, opacity" }}
                     >
@@ -1566,10 +1574,10 @@ function UtvarderaPageContent() {
           {mode === "results" && result && (
             <motion.section
               key="results"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0, y: 30, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.98 }}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden"
             >
               <div className="container mx-auto px-6 relative z-10">
@@ -1615,13 +1623,24 @@ function UtvarderaPageContent() {
                   {/* 3D Visualization with enhanced effects */}
                   {result.audit_scores && (
                     <motion.div
-                      initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 1, delay: 0.2, type: "spring" }}
+                      initial={{ opacity: 0, y: 30, scale: 0.95, rotateX: -10 }}
+                      animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                      transition={{ duration: 1.2, delay: 0.2, type: "spring", stiffness: 100, damping: 15 }}
                       className="mb-12 relative"
                     >
                       {/* Background glow effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 blur-3xl" />
+                      <motion.div 
+                        className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"
+                        animate={{
+                          opacity: [0.3, 0.5, 0.3],
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      />
 
                       <div className="relative text-center mb-8">
                         <motion.h2
@@ -1660,10 +1679,11 @@ function UtvarderaPageContent() {
 
                       <motion.div
                         animate={{
-                          y: [0, -10, 0],
+                          y: [0, -15, 0],
+                          scale: [1, 1.02, 1],
                         }}
                         transition={{
-                          duration: 4,
+                          duration: 5,
                           repeat: Infinity,
                           ease: "easeInOut",
                         }}

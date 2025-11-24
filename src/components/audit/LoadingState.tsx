@@ -57,26 +57,35 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       {/* Animated Icon */}
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", damping: 10 }}
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: "spring", damping: 12, stiffness: 200 }}
         className="relative mb-8"
       >
         <motion.div
           animate={{
             rotate: 360,
-            scale: [1, 1.1, 1]
+            scale: [1, 1.15, 1],
+            opacity: [0.3, 0.5, 0.3]
           }}
           transition={{
-            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-            scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            rotate: { duration: 15, repeat: Infinity, ease: "linear" },
+            scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+            opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
           }}
           className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/20 to-tertiary/20 blur-3xl"
           style={{ width: 150, height: 150, margin: -25 }}
         />
         <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ 
+            y: [0, -12, 0],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
           className="relative text-7xl"
         >
           {currentStage.icon}
@@ -107,21 +116,26 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
             )}
           </div>
         </div>
-        <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="relative h-3 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             style={{ willChange: "width" }}
-            className={`absolute left-0 top-0 h-full bg-gradient-to-r ${colorMap[currentStage.color]}`}
+            className={`absolute left-0 top-0 h-full bg-gradient-to-r ${colorMap[currentStage.color]} rounded-full`}
           >
             <motion.div
               animate={{ x: ['-100%', '100%'] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              style={{ width: '50%' }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
+              style={{ width: '40%' }}
             />
           </motion.div>
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-full"
+          />
         </div>
       </div>
 
@@ -139,18 +153,33 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
           return (
             <motion.div
               key={key}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: index * 0.1 }}
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: index * 0.1, type: "spring", stiffness: 200, damping: 15 }}
               className={`flex flex-col items-center transition-all ${
                 isActive ? 'opacity-100' : isPast ? 'opacity-60' : 'opacity-30'
               }`}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 ${
-                isActive ? 'bg-accent' : isPast ? 'bg-green-500' : 'bg-white/10'
-              }`}>
+              <motion.div 
+                className={`w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 ${
+                  isActive ? 'bg-accent' : isPast ? 'bg-green-500' : 'bg-white/10'
+                }`}
+                animate={isActive ? {
+                  scale: [1, 1.15, 1],
+                  boxShadow: [
+                    "0 0 0px rgba(59, 130, 246, 0)",
+                    "0 0 20px rgba(59, 130, 246, 0.5)",
+                    "0 0 0px rgba(59, 130, 246, 0)"
+                  ]
+                } : {}}
+                transition={isActive ? {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                } : {}}
+              >
                 {isPast ? '✓' : stageInfo.icon}
-              </div>
+              </motion.div>
               <span className="text-xs text-gray-400 text-center max-w-[80px]">
                 {stageInfo.title.split(' ')[0]}
               </span>
@@ -162,11 +191,13 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
       {/* Cancel Button */}
       {onCancel && (
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
+          whileHover={{ scale: 1.05, borderColor: "rgba(255, 255, 255, 0.3)" }}
+          whileTap={{ scale: 0.95 }}
           onClick={onCancel}
-          className="mt-8 px-6 py-2 text-sm text-gray-400 hover:text-white transition-colors border border-white/10 hover:border-white/20 rounded-lg"
+          className="mt-8 px-6 py-2 text-sm text-gray-400 hover:text-white transition-colors border border-white/10 hover:border-white/20 rounded-lg backdrop-blur-sm"
         >
           Avbryt
         </motion.button>
