@@ -108,19 +108,19 @@ export default function ServicesSection() {
   // Combine base values with mounted value
   const finalAccentOpacity = useTransform(
     [accentGradientOpacity, mountedValue],
-    (values: number[]) => (values[1] === 0 ? 0.3 : values[0])
+    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.3 : opacityVal)
   )
   const finalGridOpacity = useTransform(
     [gridOpacity, mountedValue],
-    (values: number[]) => (values[1] === 0 ? 0.05 : values[0])
+    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.05 : opacityVal)
   )
   const finalVideoOpacity = useTransform(
     [videoOpacity, mountedValue],
-    (values: number[]) => (values[1] === 0 ? 0 : values[0])
+    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0 : opacityVal)
   )
   const finalVideoScale = useTransform(
     [videoScale, mountedValue],
-    (values: number[]) => (values[1] === 0 ? 1 : values[0])
+    ([scaleVal, mountedVal]: number[]) => (mountedVal === 0 ? 1 : scaleVal)
   )
 
   // Ensure video plays when mounted
