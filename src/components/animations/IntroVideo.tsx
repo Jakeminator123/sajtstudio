@@ -30,9 +30,6 @@ export default function IntroVideo() {
         requestAnimationFrame(() => {
           setIsVisible(true);
         });
-      } else {
-        // Debug: log if video was skipped due to localStorage
-        console.log("Intro video skipped - already seen (localStorage key exists)");
       }
     }
   }, []);
@@ -86,9 +83,8 @@ export default function IntroVideo() {
       } catch {
         // If autoplay is blocked, try again when video is ready
         if (video.readyState >= 2 && !hasEndedRef.current) {
-          video.play().catch((err) => {
+          video.play().catch(() => {
             // Autoplay blocked - will try again on user interaction
-            console.log("Video play failed:", err);
           });
         }
       }
@@ -205,14 +201,12 @@ export default function IntroVideo() {
               if (hasEndedRef.current) return;
               const video = e.currentTarget;
               if (video.paused) {
-                video.play().catch((error) => {
+                video.play().catch(() => {
                   // Autoplay blocked, will try again in useEffect
-                  console.log("Video autoplay blocked:", error);
                 });
               }
             }}
-            onError={(e) => {
-              console.error("Video loading error:", e);
+            onError={() => {
               setVideoError(true);
               // Hide video if it fails to load after delay
               setTimeout(() => {

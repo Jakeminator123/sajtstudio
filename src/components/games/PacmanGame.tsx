@@ -137,10 +137,8 @@ export default function PacmanGame() {
       touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     };
 
-    const handleTouchMove = (event: TouchEvent) => {
-      if (touchStartRef.current) {
-        event.preventDefault();
-      }
+    const handleTouchMove = () => {
+      // Touch move tracking - no need to prevent default for swipe detection
     };
 
     const handleTouchEnd = (event: TouchEvent) => {
@@ -171,7 +169,7 @@ export default function PacmanGame() {
     };
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchmove", handleTouchMove, { passive: true });
     container.addEventListener("touchend", handleTouchEnd, { passive: true });
     container.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 

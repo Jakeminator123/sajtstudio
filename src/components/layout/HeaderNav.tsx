@@ -420,10 +420,9 @@ export default function HeaderNav() {
       {/* ============================================
          MOBILE MENU
          ============================================ */}
-      < MobileMenu
+      <MobileMenu
         isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)
-        }
+        onClose={() => setMenuOpen(false)}
         navLinks={navLinks}
       />
     </>

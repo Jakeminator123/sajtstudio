@@ -25,8 +25,7 @@ import IntroVideo from "@/components/animations/IntroVideo";
 
 const ProcessSection = dynamic(
   () =>
-    import("@/components/sections/ProcessSection").catch((err) => {
-      console.error("Failed to load ProcessSection:", err);
+    import("@/components/sections/ProcessSection").catch(() => {
       return { default: () => <SectionSkeleton /> };
     }),
   {
@@ -37,8 +36,7 @@ const ProcessSection = dynamic(
 
 const TestimonialsSection = dynamic(
   () =>
-    import("@/components/sections/TestimonialsSection").catch((err) => {
-      console.error("Failed to load TestimonialsSection:", err);
+    import("@/components/sections/TestimonialsSection").catch(() => {
       return { default: () => <SectionSkeleton /> };
     }),
   {
@@ -49,8 +47,7 @@ const TestimonialsSection = dynamic(
 
 const BigCTA = dynamic(
   () =>
-    import("@/components/sections/BigCTA").catch((err) => {
-      console.error("Failed to load BigCTA:", err);
+    import("@/components/sections/BigCTA").catch(() => {
       return { default: () => <SectionSkeleton /> };
     }),
   {
@@ -61,8 +58,7 @@ const BigCTA = dynamic(
 
 const OpticScrollShowcase = dynamic(
   () =>
-    import("@/components/sections/OpticScrollShowcase").catch((err) => {
-      console.error("Failed to load OpticScrollShowcase:", err);
+    import("@/components/sections/OpticScrollShowcase").catch(() => {
       return { default: () => <SectionSkeleton /> };
     }),
   {

@@ -224,7 +224,6 @@ export default function RootLayout({
                   try {
                     // Safety check - don't load in Cursor preview or development
                     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                      console.log('D-ID chatbot disabled in development');
                       return;
                     }
 

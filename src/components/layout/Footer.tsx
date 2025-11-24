@@ -1,10 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function Footer() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
-    <footer className="bg-black text-white py-12 relative overflow-hidden">
+    <footer className="bg-black text-white py-12 relative overflow-hidden" role="contentinfo">
       {/* Subtle background glow */}
       <div className="absolute inset-0 bg-gradient-to-t from-accent/5 via-transparent to-transparent pointer-events-none" />
 
@@ -17,7 +24,7 @@ export default function Footer() {
             <p className="text-gray-400">Modern webbdesign för framgångsrika företag</p>
           </div>
 
-          <nav className="flex flex-col md:flex-row gap-6 md:gap-8">
+          <nav aria-label="Footer navigation" className="flex flex-col md:flex-row gap-6 md:gap-8">
             {[
               { href: "/", label: "Hem" },
               { href: "/portfolio", label: "Portfolio" },
@@ -36,7 +43,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} Sajtstudio. Alla rättigheter förbehållna.</p>
+          <p suppressHydrationWarning>
+            © {currentYear ?? new Date().getFullYear()} Sajtstudio. Alla rättigheter förbehållna.
+          </p>
         </div>
       </div>
     </footer>

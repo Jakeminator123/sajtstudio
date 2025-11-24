@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import SmokeEffect from '@/components/animations/SmokeEffect'
@@ -46,11 +45,11 @@ function FloatingParticle({
   // Multiply base values by mounted value
   const opacity = useTransform(
     [baseOpacity, mountedValue],
-    (values: number[]) => values[0] * values[1]
+    ([opacityVal, mountedVal]: number[]) => opacityVal * mountedVal
   )
   const scale = useTransform(
     [baseScale, mountedValue],
-    (values: number[]) => values[0] * values[1]
+    ([scaleVal, mountedVal]: number[]) => scaleVal * mountedVal
   )
 
   return (

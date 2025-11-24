@@ -23,11 +23,14 @@ export function LoadingSpinner({ className = '', size = 'md' }: LoadingSpinnerPr
                 repeat: Infinity,
                 ease: 'linear',
             }}
+            role="status"
+            aria-label="Laddar"
         >
             <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 className="w-full h-full"
+                aria-hidden="true"
             >
                 <circle
                     cx="12"
