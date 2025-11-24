@@ -160,7 +160,7 @@ export default function ServicesSection(): JSX.Element {
   }
 
   // Generate particles array - simplified to avoid TypeScript issues
-  const particleIndexes = Array.from({ length: 20 }, (_, i) => i)
+  const particleIndexes: number[] = Array.from({ length: 20 }, (_, i) => i)
 
   return (
     <section
