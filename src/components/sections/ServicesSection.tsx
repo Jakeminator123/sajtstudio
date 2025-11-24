@@ -14,6 +14,7 @@ import {
   useMotionValue,
   useScroll,
   useTransform,
+  type MotionValue as MotionValueType,
 } from 'framer-motion'
 import React, { useEffect, useRef } from 'react'
 
@@ -43,11 +44,11 @@ function FloatingParticle({
   }, [mounted, mountedValue])
 
   // Multiply base values by mounted value
-  const opacity = useTransform(
+  const opacity: MotionValueType<number> = useTransform(
     [baseOpacity, mountedValue],
     ([opacityVal, mountedVal]: number[]) => opacityVal * mountedVal
   )
-  const scale = useTransform(
+  const scale: MotionValueType<number> = useTransform(
     [baseScale, mountedValue],
     ([scaleVal, mountedVal]: number[]) => scaleVal * mountedVal
   )
@@ -106,19 +107,19 @@ export default function ServicesSection() {
   }, [mounted, mountedValue])
 
   // Combine base values with mounted value
-  const finalAccentOpacity = useTransform(
+  const finalAccentOpacity: MotionValueType<number> = useTransform(
     [accentGradientOpacity, mountedValue],
     ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.3 : opacityVal)
   )
-  const finalGridOpacity = useTransform(
+  const finalGridOpacity: MotionValueType<number> = useTransform(
     [gridOpacity, mountedValue],
     ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.05 : opacityVal)
   )
-  const finalVideoOpacity = useTransform(
+  const finalVideoOpacity: MotionValueType<number> = useTransform(
     [videoOpacity, mountedValue],
     ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0 : opacityVal)
   )
-  const finalVideoScale = useTransform(
+  const finalVideoScale: MotionValueType<number> = useTransform(
     [videoScale, mountedValue],
     ([scaleVal, mountedVal]: number[]) => (mountedVal === 0 ? 1 : scaleVal)
   )
