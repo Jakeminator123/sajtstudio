@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const CELL_SIZE = 24;
@@ -34,6 +34,15 @@ const MAZE = [
 const COLS = MAZE[0]?.length || 28;
 const ROWS = MAZE.length;
 
+type Direction = "up" | "right" | "down" | "left";
+
+const detectTouchDevice = () => {
+  if (typeof window === "undefined") return false;
+  if ("ontouchstart" in window) return true;
+  if (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) return true;
+  return window.matchMedia ? window.matchMedia("(pointer: coarse)").matches : false;
+};
+
 interface Position {
   x: number;
   y: number;
@@ -41,12 +50,15 @@ interface Position {
 
 export default function PacmanGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const lastUpdateRef = useRef<number>(0);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const pelletsRef = useRef<Set<string>>(new Set());
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Game speed: update every 150ms (slower than before)
   const GAME_SPEED = 150;
@@ -60,6 +72,116 @@ export default function PacmanGame() {
   const ghostsRef = useRef<Array<Position & { dx: number; dy: number; color: string }>>([
     { x: 13, y: 10, dx: 1, dy: 0, color: "#ff6b9d" }
   ]);
+
+  const changeDirection = useCallback((direction: Direction) => {
+    const pacman = pacmanRef.current;
+    switch (direction) {
+      case "up":
+        pacman.dx = 0;
+        pacman.dy = -1;
+        pacman.dir = 3;
+        break;
+      case "right":
+        pacman.dx = 1;
+        pacman.dy = 0;
+        pacman.dir = 0;
+        break;
+      case "down":
+        pacman.dx = 0;
+        pacman.dy = 1;
+        pacman.dir = 1;
+        break;
+      case "left":
+        pacman.dx = -1;
+        pacman.dy = 0;
+        pacman.dir = 2;
+        break;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let frameId = requestAnimationFrame(() => {
+      setIsTouchDevice(detectTouchDevice());
+    });
+
+    if (!window.matchMedia) {
+      return () => {
+        cancelAnimationFrame(frameId);
+      };
+    }
+
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsTouchDevice(event.matches);
+    };
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isTouchDevice) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (touchStartRef.current) {
+        event.preventDefault();
+      }
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (!touchStartRef.current) return;
+      const touch = event.changedTouches[0];
+      if (!touch) {
+        touchStartRef.current = null;
+        return;
+      }
+
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaY = touch.clientY - touchStartRef.current.y;
+      touchStartRef.current = null;
+
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      const swipeThreshold = 30;
+
+      if (Math.max(absX, absY) < swipeThreshold) {
+        return;
+      }
+
+      if (absX > absY) {
+        changeDirection(deltaX > 0 ? "right" : "left");
+      } else {
+        changeDirection(deltaY > 0 ? "down" : "up");
+      }
+    };
+
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchend", handleTouchEnd, { passive: true });
+    container.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+      container.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, [isTouchDevice, changeDirection]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -280,31 +402,22 @@ export default function PacmanGame() {
 
     // Keyboard controls
     const handleKeyDown = (e: KeyboardEvent) => {
-      const pacman = pacmanRef.current;
       switch (e.key) {
         case "ArrowUp":
         case "w":
-          pacman.dx = 0;
-          pacman.dy = -1;
-          pacman.dir = 3;
+          changeDirection("up");
           break;
         case "ArrowRight":
         case "d":
-          pacman.dx = 1;
-          pacman.dy = 0;
-          pacman.dir = 0;
+          changeDirection("right");
           break;
         case "ArrowDown":
         case "s":
-          pacman.dx = 0;
-          pacman.dy = 1;
-          pacman.dir = 1;
+          changeDirection("down");
           break;
         case "ArrowLeft":
         case "a":
-          pacman.dx = -1;
-          pacman.dy = 0;
-          pacman.dir = 2;
+          changeDirection("left");
           break;
       }
     };
@@ -320,7 +433,7 @@ export default function PacmanGame() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameOver, gameWon]);
+  }, [gameOver, gameWon, changeDirection]);
 
   const resetGame = () => {
     setScore(0);
@@ -332,17 +445,28 @@ export default function PacmanGame() {
     ghostsRef.current = [{ x: 13, y: 10, dx: 1, dy: 0, color: "#ff6b9d" }];
   };
 
+  const controlHint = isTouchDevice
+    ? "Swipe across the game area or tap the arrows to move"
+    : "Use arrow keys or WASD to move";
+
+  const controlButtonClass =
+    "rounded-2xl bg-white/15 border border-white/30 text-white text-2xl h-14 w-14 flex items-center justify-center shadow-lg active:scale-95 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 backdrop-blur";
+
   return (
     <div className="relative flex flex-col items-center justify-center">
       {/* Score display */}
       <div className="mb-4 text-center">
         <h3 className="text-2xl font-bold text-white mb-2">PACMAN</h3>
         <p className="text-xl text-white">Score: {score}</p>
-        <p className="text-sm text-white/70 mt-2">Use arrow keys or WASD to move</p>
+        <p className="text-sm text-white/70 mt-2 text-center">{controlHint}</p>
       </div>
 
       {/* Game canvas */}
-      <div className="relative">
+      <div
+        className="relative"
+        ref={containerRef}
+        style={{ touchAction: isTouchDevice ? "none" : "auto" }}
+      >
         <canvas
           ref={canvasRef}
           width={COLS * CELL_SIZE}
@@ -374,6 +498,62 @@ export default function PacmanGame() {
           </motion.div>
         )}
       </div>
+
+      {isTouchDevice && (
+        <div className="mt-6 flex flex-col items-center gap-3 text-white/80 w-full">
+          <div className="grid grid-cols-3 gap-3 w-full max-w-[220px] select-none">
+            <span />
+            <button
+              type="button"
+              className={controlButtonClass}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                changeDirection("up");
+              }}
+              aria-label="Move up"
+            >
+              ↑
+            </button>
+            <span />
+            <button
+              type="button"
+              className={controlButtonClass}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                changeDirection("left");
+              }}
+              aria-label="Move left"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              className={controlButtonClass}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                changeDirection("down");
+              }}
+              aria-label="Move down"
+            >
+              ↓
+            </button>
+            <button
+              type="button"
+              className={controlButtonClass}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                changeDirection("right");
+              }}
+              aria-label="Move right"
+            >
+              →
+            </button>
+          </div>
+          <p className="text-xs text-white/60 text-center px-4">
+            Quick swipes across the game area also change direction instantly.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

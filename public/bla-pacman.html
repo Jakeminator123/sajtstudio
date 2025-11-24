@@ -46,6 +46,7 @@
           rgba(21, 59, 129, 0.25),
           rgba(4, 12, 26, 0.7)
         );
+        touch-action: none;
       }
       canvas {
         width: 100%;
@@ -85,6 +86,48 @@
         margin: 6px 0;
         color: #c7dbff;
       }
+      .overlay .mobile-hint {
+        display: none;
+        font-size: 0.9rem;
+        color: #9fbaff;
+      }
+      .overlay .mobile-hint.active {
+        display: block;
+      }
+      .mobile-controls {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        pointer-events: auto;
+        z-index: 10;
+      }
+      .mobile-controls.active {
+        display: flex;
+      }
+      .mobile-controls .btn-row {
+        display: flex;
+        gap: 12px;
+      }
+      .mobile-controls button {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background: rgba(10, 23, 48, 0.9);
+        color: #e6f0ff;
+        font-size: 26px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+        touch-action: manipulation;
+      }
+      .mobile-controls button:active {
+        transform: scale(0.95);
+      }
     </style>
   </head>
   <body>
@@ -94,6 +137,17 @@
         <div class="box">
           <h2>🟦 Pac-Man Demo</h2>
           <p>Use arrow keys or WASD</p>
+          <p class="mobile-hint" id="mobileHint">Svep eller använd pilarna på mobilen</p>
+        </div>
+      </div>
+      <div class="mobile-controls" id="mobileControls" aria-hidden="true">
+        <div class="btn-row">
+          <button data-dir="up" aria-label="Move up">↑</button>
+        </div>
+        <div class="btn-row">
+          <button data-dir="left" aria-label="Move left">←</button>
+          <button data-dir="down" aria-label="Move down">↓</button>
+          <button data-dir="right" aria-label="Move right">→</button>
         </div>
       </div>
     </div>
@@ -135,8 +189,21 @@
 
       const canvas = document.getElementById("c");
       const ctx = canvas.getContext("2d");
+      const stage = document.querySelector(".stage");
+      const mobileControls = document.getElementById("mobileControls");
+      const mobileHint = document.getElementById("mobileHint");
+      const isTouchDevice =
+        "ontouchstart" in window ||
+        (navigator && navigator.maxTouchPoints > 0) ||
+        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
       canvas.width = cols * cs;
       canvas.height = rows * cs;
+
+      if (isTouchDevice) {
+        mobileControls?.classList.add("active");
+        mobileControls?.setAttribute("aria-hidden", "false");
+        mobileHint?.classList.add("active");
+      }
 
       // Count pellets
       map.forEach((row) => {
@@ -296,6 +363,31 @@
         }
       }
 
+      function setDirection(dir) {
+        switch (dir) {
+          case "up":
+            pacman.dx = 0;
+            pacman.dy = -1;
+            pacman.dir = 3;
+            break;
+          case "right":
+            pacman.dx = 1;
+            pacman.dy = 0;
+            pacman.dir = 0;
+            break;
+          case "down":
+            pacman.dx = 0;
+            pacman.dy = 1;
+            pacman.dir = 1;
+            break;
+          case "left":
+            pacman.dx = -1;
+            pacman.dy = 0;
+            pacman.dir = 2;
+            break;
+        }
+      }
+
       // Controls
       document.addEventListener("keydown", (e) => {
         if (gameOver) return;
@@ -304,30 +396,22 @@
           case "ArrowUp":
           case "w":
           case "W":
-            pacman.dx = 0;
-            pacman.dy = -1;
-            pacman.dir = 3;
+            setDirection("up");
             break;
           case "ArrowRight":
           case "d":
           case "D":
-            pacman.dx = 1;
-            pacman.dy = 0;
-            pacman.dir = 0;
+            setDirection("right");
             break;
           case "ArrowDown":
           case "s":
           case "S":
-            pacman.dx = 0;
-            pacman.dy = 1;
-            pacman.dir = 1;
+            setDirection("down");
             break;
           case "ArrowLeft":
           case "a":
           case "A":
-            pacman.dx = -1;
-            pacman.dy = 0;
-            pacman.dir = 2;
+            setDirection("left");
             break;
         }
 
@@ -335,6 +419,70 @@
           document.getElementById("msg").style.display = "none";
         }
       });
+
+      if (mobileControls) {
+        mobileControls.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            const dir = button.getAttribute("data-dir");
+            if (dir) {
+              setDirection(dir);
+            }
+          });
+        });
+      }
+
+      if (stage && isTouchDevice) {
+        let touchStart = null;
+
+        stage.addEventListener(
+          "touchstart",
+          (event) => {
+            const touch = event.touches[0];
+            if (!touch) return;
+            touchStart = { x: touch.clientX, y: touch.clientY };
+          },
+          { passive: true }
+        );
+
+        stage.addEventListener(
+          "touchmove",
+          (event) => {
+            if (touchStart) {
+              event.preventDefault();
+            }
+          },
+          { passive: false }
+        );
+
+        const handleTouchEnd = (event) => {
+          if (!touchStart) return;
+          const touch = event.changedTouches[0];
+          if (!touch) {
+            touchStart = null;
+            return;
+          }
+          const deltaX = touch.clientX - touchStart.x;
+          const deltaY = touch.clientY - touchStart.y;
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+          const threshold = 30;
+          touchStart = null;
+
+          if (Math.max(absX, absY) < threshold) {
+            return;
+          }
+
+          if (absX > absY) {
+            setDirection(deltaX > 0 ? "right" : "left");
+          } else {
+            setDirection(deltaY > 0 ? "down" : "up");
+          }
+        };
+
+        stage.addEventListener("touchend", handleTouchEnd, { passive: true });
+        stage.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+      }
 
       // Game loop
       setInterval(() => {
