@@ -98,29 +98,23 @@ export default function ServicesSection() {
     [0.05, 0.15, 0.05]
   )
 
-  // Create mounted MotionValue to use in transforms
-  const mountedValue = useMotionValue(mounted ? 1 : 0)
-
-  useEffect(() => {
-    mountedValue.set(mounted ? 1 : 0)
-  }, [mounted, mountedValue])
-
-  // Combine base values with mounted value
-  const finalAccentOpacity: MotionValue<number> = useTransform(
-    [accentGradientOpacity, mountedValue],
-    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.3 : opacityVal)
+  // Combine base values with mounted state
+  // Use simple transforms without array arguments to avoid TypeScript issues
+  const finalAccentOpacity = useTransform(
+    accentGradientOpacity,
+    (val: number) => mounted ? val : 0.3
   )
-  const finalGridOpacity: MotionValue<number> = useTransform(
-    [gridOpacity, mountedValue],
-    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0.05 : opacityVal)
+  const finalGridOpacity = useTransform(
+    gridOpacity,
+    (val: number) => mounted ? val : 0.05
   )
-  const finalVideoOpacity: MotionValue<number> = useTransform(
-    [videoOpacity, mountedValue],
-    ([opacityVal, mountedVal]: number[]) => (mountedVal === 0 ? 0 : opacityVal)
+  const finalVideoOpacity = useTransform(
+    videoOpacity,
+    (val: number) => mounted ? val : 0
   )
-  const finalVideoScale: MotionValue<number> = useTransform(
-    [videoScale, mountedValue],
-    ([scaleVal, mountedVal]: number[]) => (mountedVal === 0 ? 1 : scaleVal)
+  const finalVideoScale = useTransform(
+    videoScale,
+    (val: number) => mounted ? val : 1
   )
 
   // Ensure video plays when mounted
