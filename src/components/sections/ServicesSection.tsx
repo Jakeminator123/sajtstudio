@@ -93,23 +93,43 @@ export default function ServicesSection() {
   )
 
   // Combine base values with mounted state
-  // Use simple transforms without array arguments to avoid TypeScript issues
-  const finalAccentOpacity: MotionValue<number> = useTransform(
-    accentGradientOpacity,
-    (val: number) => mounted ? val : 0.3
-  )
-  const finalGridOpacity: MotionValue<number> = useTransform(
-    gridOpacity,
-    (val: number) => mounted ? val : 0.05
-  )
-  const finalVideoOpacity: MotionValue<number> = useTransform(
-    videoOpacity,
-    (val: number) => mounted ? val : 0
-  )
-  const finalVideoScale: MotionValue<number> = useTransform(
-    videoScale,
-    (val: number) => mounted ? val : 1
-  )
+  // Create MotionValues that will be updated based on mounted state
+  const finalAccentOpacity = useMotionValue(0.3)
+  const finalGridOpacity = useMotionValue(0.05)
+  const finalVideoOpacity = useMotionValue(0)
+  const finalVideoScale = useMotionValue(1)
+
+  // Update values when mounted changes or when scroll values change
+  useEffect(() => {
+    if (!mounted) {
+      finalAccentOpacity.set(0.3)
+      finalGridOpacity.set(0.05)
+      finalVideoOpacity.set(0)
+      finalVideoScale.set(1)
+      return
+    }
+
+    // Subscribe to scroll-based values when mounted
+    const unsubscribeAccent = accentGradientOpacity.on('change', (val) => {
+      finalAccentOpacity.set(val)
+    })
+    const unsubscribeGrid = gridOpacity.on('change', (val) => {
+      finalGridOpacity.set(val)
+    })
+    const unsubscribeVideo = videoOpacity.on('change', (val) => {
+      finalVideoOpacity.set(val)
+    })
+    const unsubscribeScale = videoScale.on('change', (val) => {
+      finalVideoScale.set(val)
+    })
+
+    return () => {
+      unsubscribeAccent()
+      unsubscribeGrid()
+      unsubscribeVideo()
+      unsubscribeScale()
+    }
+  }, [mounted, accentGradientOpacity, gridOpacity, videoOpacity, videoScale, finalAccentOpacity, finalGridOpacity, finalVideoOpacity, finalVideoScale])
 
   // Ensure video plays when mounted
   useEffect(() => {
