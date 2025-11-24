@@ -8,14 +8,12 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      // Use window.scrollY for better compatibility (pageYOffset is deprecated)
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      setIsVisible(scrollY > 300);
     };
 
-    window.addEventListener('scroll', toggleVisibility);
+    window.addEventListener('scroll', toggleVisibility, { passive: true });
 
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
@@ -39,6 +37,7 @@ export default function ScrollToTop() {
           className="fixed bottom-8 right-8 z-40 w-12 h-12 bg-accent hover:bg-accent-hover text-white rounded-full shadow-lg flex items-center justify-center group"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+          aria-label="Scrolla till toppen"
         >
           <svg
             className="w-6 h-6 transform group-hover:-translate-y-1 transition-transform"

@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-// import { designTokens } from "@/config/designTokens"; // Temporarily unused
 import { trapFocus } from "@/lib/focusUtils";
 
 interface ModalProps {
