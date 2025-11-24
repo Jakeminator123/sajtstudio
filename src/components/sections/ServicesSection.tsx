@@ -26,7 +26,7 @@ function FloatingParticle({
   index: number
   scrollYProgress: MotionValue<number>
   mounted: boolean
-}) {
+}): JSX.Element {
   // Always call hooks - never conditionally
   const baseOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
@@ -75,7 +75,7 @@ function FloatingParticle({
   )
 }
 
-export default function ServicesSection() {
+export default function ServicesSection(): JSX.Element {
   const { isOpen, modalId, data, openModal, closeModal } = useModalManager()
   const mounted = useMounted()
   const sectionRef = useRef<HTMLElement>(null)
