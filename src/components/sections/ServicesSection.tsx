@@ -35,16 +35,31 @@ function FloatingParticle({
   )
   const baseScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0])
 
-  // Multiply base values by mounted state
-  // Use simple transforms without array arguments to avoid TypeScript issues
-  const opacity: MotionValue<number> = useTransform(
-    baseOpacity,
-    (val: number) => mounted ? val : 0
-  )
-  const scale: MotionValue<number> = useTransform(
-    baseScale,
-    (val: number) => mounted ? val : 0
-  )
+  // Create MotionValues that will be updated based on mounted state
+  const opacity = useMotionValue(0)
+  const scale = useMotionValue(0)
+
+  // Update values when mounted changes or when scroll values change
+  useEffect(() => {
+    if (!mounted) {
+      opacity.set(0)
+      scale.set(0)
+      return
+    }
+
+    // Subscribe to scroll-based values when mounted
+    const unsubscribeOpacity = baseOpacity.on('change', (val) => {
+      opacity.set(val)
+    })
+    const unsubscribeScale = baseScale.on('change', (val) => {
+      scale.set(val)
+    })
+
+    return () => {
+      unsubscribeOpacity()
+      unsubscribeScale()
+    }
+  }, [mounted, baseOpacity, baseScale, opacity, scale])
 
   return (
     <motion.div
