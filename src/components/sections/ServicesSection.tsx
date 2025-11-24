@@ -28,20 +28,20 @@ function FloatingParticle({
   mounted: boolean
 }) {
   // Always call hooks - never conditionally
-  const baseOpacity = useTransform(
+  const baseOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.3 + index * 0.02, 0.7 + index * 0.02, 1],
     [0, 1, 1, 0]
   )
-  const baseScale = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0])
+  const baseScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0])
 
   // Multiply base values by mounted state
   // Use simple transforms without array arguments to avoid TypeScript issues
-  const opacity = useTransform(
+  const opacity: MotionValue<number> = useTransform(
     baseOpacity,
     (val: number) => mounted ? val : 0
   )
-  const scale = useTransform(
+  const scale: MotionValue<number> = useTransform(
     baseScale,
     (val: number) => mounted ? val : 0
   )
@@ -72,21 +72,21 @@ export default function ServicesSection() {
     offset: ['start end', 'end start'],
   })
 
-  const videoOpacity = useTransform(
+  const videoOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.3, 0.7, 1],
     [0.4, 0.6, 0.5, 0.3]
   )
-  const videoScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05])
-  const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50])
+  const videoScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05])
+  const textY: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5], [0, -50])
 
   // Always call hooks - never conditionally
-  const accentGradientOpacity = useTransform(
+  const accentGradientOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
     [0.3, 0.5, 0.3]
   )
-  const gridOpacity = useTransform(
+  const gridOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
     [0.05, 0.15, 0.05]
@@ -94,19 +94,19 @@ export default function ServicesSection() {
 
   // Combine base values with mounted state
   // Use simple transforms without array arguments to avoid TypeScript issues
-  const finalAccentOpacity = useTransform(
+  const finalAccentOpacity: MotionValue<number> = useTransform(
     accentGradientOpacity,
     (val: number) => mounted ? val : 0.3
   )
-  const finalGridOpacity = useTransform(
+  const finalGridOpacity: MotionValue<number> = useTransform(
     gridOpacity,
     (val: number) => mounted ? val : 0.05
   )
-  const finalVideoOpacity = useTransform(
+  const finalVideoOpacity: MotionValue<number> = useTransform(
     videoOpacity,
     (val: number) => mounted ? val : 0
   )
-  const finalVideoScale = useTransform(
+  const finalVideoScale: MotionValue<number> = useTransform(
     videoScale,
     (val: number) => mounted ? val : 1
   )
