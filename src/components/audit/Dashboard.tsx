@@ -65,14 +65,35 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
       {/* Header with Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">
-            {result.audit_type === 'website_audit' ? 'Analysresultat' : 'Rekommendationer'}
-          </h1>
+          <motion.h1 
+            className="text-4xl md:text-5xl lg:text-6xl font-black mb-3"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+              {result.audit_type === 'website_audit' ? 'Analysresultat' : 'Rekommendationer'}
+            </span>
+          </motion.h1>
           {result.company && (
-            <p className="text-xl text-gray-400">{result.company}</p>
+            <motion.p 
+              className="text-xl md:text-2xl text-gray-300 font-semibold"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {result.company}
+            </motion.p>
           )}
           {result.domain && (
-            <p className="text-lg text-gray-500">{result.domain}</p>
+            <motion.p 
+              className="text-lg text-gray-400 mt-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {result.domain}
+            </motion.p>
           )}
         </div>
 
@@ -195,8 +216,16 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   animate={{ opacity: 1, y: 0 }}
                   className="backdrop-blur-xl bg-green-500/10 border border-green-500/20 rounded-2xl p-6"
                 >
-                  <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
-                    <span>✅</span> Styrkor
+                  <h3 className="text-2xl md:text-3xl font-black text-green-400 mb-6 flex items-center gap-3">
+                    <motion.span
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      ✅
+                    </motion.span>
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-500">
+                      Styrkor
+                    </span>
                   </h3>
                   <ul className="space-y-2">
                     {result.strengths.slice(0, 5).map((strength: string, index: number) => (
@@ -227,8 +256,16 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   transition={{ delay: 0.1 }}
                   className="backdrop-blur-xl bg-red-500/10 border border-red-500/20 rounded-2xl p-6"
                 >
-                  <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center gap-2">
-                    <span>⚠️</span> Problem att åtgärda
+                  <h3 className="text-2xl md:text-3xl font-black text-red-400 mb-6 flex items-center gap-3">
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      ⚠️
+                    </motion.span>
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-500">
+                      Problem att åtgärda
+                    </span>
                   </h3>
                   <ul className="space-y-2">
                     {result.issues.slice(0, 5).map((issue: string, index: number) => (
@@ -273,8 +310,16 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                 animate={{ opacity: 1, y: 0 }}
                 className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6"
               >
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <span>🎯</span> Förväntade resultat
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-6 flex items-center gap-3">
+                  <motion.span
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  >
+                    🎯
+                  </motion.span>
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">
+                    Förväntade resultat
+                  </span>
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {result.expected_outcomes.map((outcome: string, index: number) => (
@@ -323,11 +368,18 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                 animate={{ opacity: 1, y: 0 }}
                 className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6"
               >
-                <h3 className="text-xl font-bold text-white mb-6">Teknisk arkitektur</h3>
+                <h3 className="text-2xl md:text-3xl font-black mb-6">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+                    Teknisk arkitektur
+                  </span>
+                </h3>
                 <div className="space-y-4">
                   {result.technical_architecture.recommended_stack && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-300 mb-3">Rekommenderad stack</h4>
+                      <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-blue-400">⚙️</span>
+                        <span>Rekommenderad stack</span>
+                      </h4>
                       <div className="grid md:grid-cols-2 gap-4">
                         {Object.entries(result.technical_architecture.recommended_stack).map(([key, value]) => (
                           <div key={key} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
@@ -340,7 +392,10 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   )}
                   {result.technical_architecture.integrations && result.technical_architecture.integrations.length > 0 && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-300 mb-3">Integrationer</h4>
+                      <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-purple-400">🔌</span>
+                        <span>Integrationer</span>
+                      </h4>
                       <ul className="grid sm:grid-cols-2 gap-2 text-gray-300 text-sm">
                         {result.technical_architecture.integrations.map((integration: string) => (
                           <li key={integration} className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
@@ -353,7 +408,10 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   )}
                   {result.technical_architecture.security_measures && result.technical_architecture.security_measures.length > 0 && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-300 mb-3">Säkerhetsåtgärder</h4>
+                      <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-green-400">🔒</span>
+                        <span>Säkerhetsåtgärder</span>
+                      </h4>
                       <ul className="space-y-2 text-gray-300 text-sm">
                         {result.technical_architecture.security_measures.map((measure: string) => (
                           <li key={measure} className="flex items-start gap-2">
@@ -401,11 +459,15 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                 animate={{ opacity: 1, y: 0 }}
                 className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6"
               >
-                <h3 className="text-xl font-bold text-white mb-6">Målgruppsanalys</h3>
+                <h3 className="text-2xl md:text-3xl font-black mb-6">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-rose-500">
+                    Målgruppsanalys
+                  </span>
+                </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   {Object.entries(result.target_audience_analysis).map(([key, value]) => (
                     <div key={key}>
-                      <h4 className="text-lg font-semibold text-gray-300 mb-2 capitalize">
+                      <h4 className="text-lg font-bold text-white mb-3 capitalize">
                         {key.replace('_', ' ')}
                       </h4>
                       <p className="text-gray-400">{value as string}</p>

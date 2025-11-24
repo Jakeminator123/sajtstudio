@@ -45,6 +45,16 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
       animate={{ opacity: 1, y: 0 }}
       className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8"
     >
+      <motion.h2
+        className="text-2xl md:text-3xl font-black mb-6 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+          📊 Poängöversikt
+        </span>
+      </motion.h2>
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Average Score Circle */}
         <div className="flex flex-col items-center justify-center">
