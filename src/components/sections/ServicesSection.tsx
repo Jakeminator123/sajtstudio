@@ -36,8 +36,8 @@ function FloatingParticle({
   const baseScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0])
 
   // Create MotionValues that will be updated based on mounted state
-  const opacity = useMotionValue(0)
-  const scale = useMotionValue(0)
+  const opacity: MotionValue<number> = useMotionValue(0)
+  const scale: MotionValue<number> = useMotionValue(0)
 
   // Update values when mounted changes or when scroll values change
   useEffect(() => {
@@ -109,10 +109,10 @@ export default function ServicesSection() {
 
   // Combine base values with mounted state
   // Create MotionValues that will be updated based on mounted state
-  const finalAccentOpacity = useMotionValue(0.3)
-  const finalGridOpacity = useMotionValue(0.05)
-  const finalVideoOpacity = useMotionValue(0)
-  const finalVideoScale = useMotionValue(1)
+  const finalAccentOpacity: MotionValue<number> = useMotionValue(0.3)
+  const finalGridOpacity: MotionValue<number> = useMotionValue(0.05)
+  const finalVideoOpacity: MotionValue<number> = useMotionValue(0)
+  const finalVideoScale: MotionValue<number> = useMotionValue(1)
 
   // Update values when mounted changes or when scroll values change
   useEffect(() => {
