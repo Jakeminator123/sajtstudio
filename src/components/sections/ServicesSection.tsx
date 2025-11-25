@@ -274,7 +274,7 @@ export default function ServicesSection(): JSX.Element {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          {services.map((service, index) => (
+          {services.map((service: Service, index: number): ReactNode => (
             <motion.div
               key={service.id}
               initial={{ opacity: 0, y: 50 }}
