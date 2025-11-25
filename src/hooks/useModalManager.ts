@@ -2,14 +2,14 @@
 
 import { useEffect, useCallback, useState } from 'react'
 
-interface ModalState {
+interface ModalState<TData extends Record<string, unknown>> {
   isOpen: boolean
   modalId: string | null
-  data?: Record<string, unknown>
+  data?: TData
 }
 
-export function useModalManager() {
-  const [modalState, setModalState] = useState<ModalState>({
+export function useModalManager<TData extends Record<string, unknown> = Record<string, unknown>>() {
+  const [modalState, setModalState] = useState<ModalState<TData>>({
     isOpen: false,
     modalId: null,
     data: undefined,
@@ -17,7 +17,7 @@ export function useModalManager() {
 
   // Define modal functions first so they can be used in useEffect
   const openModal = useCallback(
-    (modalId: string, data?: Record<string, unknown>) => {
+    (modalId: string, data?: TData) => {
       setModalState({
         isOpen: true,
         modalId,

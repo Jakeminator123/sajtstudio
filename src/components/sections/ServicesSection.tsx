@@ -17,6 +17,11 @@ import {
 } from 'framer-motion'
 import React, { useEffect, useRef, type ReactNode } from 'react'
 
+type ServiceModalPayload = {
+  service: Service
+  index: number
+}
+
 // Particle component to avoid hooks in map
 function FloatingParticle({
   index,
@@ -76,7 +81,8 @@ function FloatingParticle({
 }
 
 export default function ServicesSection() {
-  const { isOpen, modalId, data, openModal, closeModal } = useModalManager()
+  const { isOpen, modalId, data, openModal, closeModal } =
+    useModalManager<ServiceModalPayload>()
   const mounted = useMounted()
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -161,6 +167,21 @@ export default function ServicesSection() {
 
   // Generate particles array - simplified to avoid TypeScript issues
   const particleIndexes: number[] = Array.from({ length: 20 }, (_, i) => i)
+
+  let serviceModal: ReactNode = null
+
+  if (isOpen && modalId?.startsWith('service-') && data) {
+    const direction = data.index % 2 === 0 ? 'left' : 'right'
+
+    serviceModal = (
+      <ServiceModal
+        isOpen
+        onClose={closeModal}
+        service={data.service}
+        direction={direction}
+      />
+    )
+  }
 
   return (
     <section
@@ -297,16 +318,7 @@ export default function ServicesSection() {
       </div>
 
       {/* Service Modal */}
-      {data?.service && (
-        <ServiceModal
-          isOpen={!!(isOpen && modalId?.startsWith('service-'))}
-          onClose={closeModal}
-          service={data.service}
-          direction={
-            data?.index !== undefined && data.index % 2 === 0 ? 'left' : 'right'
-          }
-        />
-      )}
+      {serviceModal}
     </section>
   )
 }
