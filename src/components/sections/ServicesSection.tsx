@@ -15,7 +15,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, type ReactNode } from 'react'
 
 // Particle component to avoid hooks in map
 function FloatingParticle({
@@ -216,7 +216,7 @@ export default function ServicesSection(): JSX.Element {
 
       <SmokeEffect count={6} speed={20} opacity={0.15} />
       <div className="absolute inset-0 z-10 pointer-events-none">
-        {particleIndexes.map(i => (
+        {particleIndexes.map((i: number): ReactNode => (
           <FloatingParticle
             key={i}
             index={i}
