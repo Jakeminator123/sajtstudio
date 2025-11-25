@@ -168,20 +168,20 @@ export default function ServicesSection() {
   // Generate particles array - simplified to avoid TypeScript issues
   const particleIndexes: number[] = Array.from({ length: 20 }, (_, i) => i)
 
-  let serviceModal: ReactNode = null
+  const serviceModalData: ServiceModalPayload | null =
+    isOpen && modalId?.startsWith('service-') && data
+      ? (data as ServiceModalPayload)
+      : null
 
-  if (isOpen && modalId?.startsWith('service-') && data) {
-    const direction = data.index % 2 === 0 ? 'left' : 'right'
-
-    serviceModal = (
+  const serviceModal: ReactNode =
+    serviceModalData !== null ? (
       <ServiceModal
         isOpen
         onClose={closeModal}
-        service={data.service}
-        direction={direction}
+        service={serviceModalData.service}
+        direction={serviceModalData.index % 2 === 0 ? 'left' : 'right'}
       />
-    )
-  }
+    ) : null
 
   return (
     <section
