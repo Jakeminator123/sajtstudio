@@ -59,7 +59,7 @@ Skapa `.vscode/launch.json`:
       "name": "Next.js: debug client-side",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:1337",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true
     },

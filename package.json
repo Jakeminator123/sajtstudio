@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "ci": "npm ci",
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 1337",
     "dev:safe": "node scripts/safe-dev-start.js",
     "dev:mobile": "node scripts/safe-dev-start-mobile.js",
-    "dev:turbo": "next dev --turbopack",
+    "dev:turbo": "next dev --turbopack --port 1337",
     "kill": "node scripts/kill-node-processes.js",
     "kill:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/kill-node-processes.ps1",
     "build": "next build",

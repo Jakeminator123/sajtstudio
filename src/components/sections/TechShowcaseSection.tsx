@@ -303,10 +303,10 @@ export default function TechShowcaseSection() {
             {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
             <PacmanGame />
 
-            {/* Play button - positioned above DEMO KLAR text, slightly to the left */}
+            {/* Play button - centered in the game area */}
             {!isPlaying && (
               <motion.div
-                className="absolute top-[25%] left-[42%] -translate-x-1/2 -translate-y-1/2 z-40"
+                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
@@ -431,8 +431,8 @@ export default function TechShowcaseSection() {
             </AnimatePresence>
           </div>
 
-          {/* TECHNICAL column - positioned relative to game container, further left */}
-          <div className="absolute left-0 -translate-x-full -translate-y-1/2 top-1/2 pr-16 md:pr-24 lg:pr-32 text-right space-y-3 z-30 whitespace-nowrap">
+          {/* TECHNICAL column - positioned relative to game container, hidden on mobile */}
+          <div className="hidden md:block absolute left-0 -translate-x-full -translate-y-1/2 top-1/2 pr-16 md:pr-24 lg:pr-32 text-right space-y-3 z-30 whitespace-nowrap">
           <p
             className="text-lg md:text-xl font-black mb-3"
             style={{
@@ -493,8 +493,8 @@ export default function TechShowcaseSection() {
           </p>
           </div>
 
-          {/* CREATIVE column - positioned relative to game container, further right */}
-          <div className="absolute right-0 translate-x-full -translate-y-1/2 top-1/2 pl-20 md:pl-28 lg:pl-36 space-y-3 z-30 whitespace-nowrap">
+          {/* CREATIVE column - positioned relative to game container, hidden on mobile */}
+          <div className="hidden md:block absolute right-0 translate-x-full -translate-y-1/2 top-1/2 pl-20 md:pl-28 lg:pl-36 space-y-3 z-30 whitespace-nowrap">
           <p
             className="text-lg md:text-xl font-black mb-3"
             style={{
@@ -564,42 +564,12 @@ export default function TechShowcaseSection() {
       <section
         className="relative min-h-screen overflow-hidden"
         style={{
-          // Removed background image in SSR version too
           backgroundColor: "#0a0a0a",
         }}
       >
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-white/4 to-white/12" />
-          <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-br from-gray-100/40 to-gray-200/30" />
-          <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-bl from-purple-200/40 via-pink-100/30 to-blue-200/30" />
-        </div>
-        {/* Match main component structure exactly - must match mounted version */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[200vh] p-8 pt-32 md:pt-40">
-          <div className="mt-32 mb-16 px-6 md:px-8 max-w-6xl mx-auto text-center">
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-20 leading-tight">
-              <span className="text-gray-800">Så skapar vi </span>
-              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-                animationer som betyder något
-              </span>
-            </h3>
-            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-              <div className="p-6 bg-white/50 rounded-xl">
-                <div className="text-3xl mb-4">🎮</div>
-                <h4 className="text-lg font-bold mb-2 text-gray-800">Interaktivt</h4>
-                <p className="text-sm text-gray-600">Engagerar användare</p>
-              </div>
-              <div className="p-6 bg-white/50 rounded-xl">
-                <div className="text-3xl mb-4">⚡</div>
-                <h4 className="text-lg font-bold mb-2 text-gray-800">Snabbt</h4>
-                <p className="text-sm text-gray-600">Optimerad prestanda</p>
-              </div>
-              <div className="p-6 bg-white/50 rounded-xl">
-                <div className="text-3xl mb-4">✨</div>
-                <h4 className="text-lg font-bold mb-2 text-gray-800">Elegant</h4>
-                <p className="text-sm text-gray-600">Snygg design</p>
-              </div>
-            </div>
-          </div>
+        {/* Simple loading placeholder for SSR */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
+          <div className="text-white text-center">Loading...</div>
         </div>
       </section>
     );
@@ -786,111 +756,6 @@ export default function TechShowcaseSection() {
           {showInlinePacman && renderPacmanExperience("inline")}
         </AnimatePresence>
 
-        {/* Tech vs Design labels are now inside renderPacmanExperience for both overlay and inline variants */}
-
-        {/* Animation capabilities section - improved design */}
-        <motion.div
-          className="mt-32 mb-16 px-6 md:px-8 max-w-6xl mx-auto text-center"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-center mb-20 leading-tight">
-            <span className="text-gray-800">Så skapar vi </span>
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              animationer som betyder något
-            </span>
-          </h3>
-
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {/* Motion Design */}
-            <motion.div
-              className="bg-white/90 backdrop-blur-sm border border-purple-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ y: -5 }}
-            >
-              <div className="text-5xl mb-6">🎭</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Motion Design</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
-                Vi använder Framer Motion för flytande, prestanda-optimerade animationer som reagerar på användarinteraktion.
-              </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-2 rounded-lg font-mono font-semibold block">useScroll, useTransform, useSpring</code>
-            </motion.div>
-
-            {/* 3D & WebGL */}
-            <motion.div
-              className="bg-white/90 backdrop-blur-sm border border-blue-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ y: -5 }}
-            >
-              <div className="text-5xl mb-6">🌐</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">3D & WebGL</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
-                Three.js och React Three Fiber för immersiva 3D-upplevelser direkt i webbläsaren.
-              </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 px-3 py-2 rounded-lg font-mono font-semibold block">@react-three/fiber, drei</code>
-            </motion.div>
-
-            {/* Interactive Storytelling */}
-            <motion.div
-              className="bg-white/90 backdrop-blur-sm border border-green-200/50 shadow-xl p-8 md:p-10 rounded-3xl hover:shadow-2xl transition-all"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              whileHover={{ y: -5 }}
-            >
-              <div className="text-5xl mb-6">📖</div>
-              <h4 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">Scrollytelling</h4>
-              <p className="text-gray-700 mb-6 text-base md:text-lg leading-relaxed">
-                Scroll-drivna narrativ som guidar besökaren genom er story med visuell magi.
-              </p>
-              <code className="text-xs md:text-sm bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-3 py-2 rounded-lg font-mono font-semibold block">Intersection Observer, GSAP</code>
-            </motion.div>
-          </div>
-
-          {/* Tech stack - improved design */}
-          <motion.div
-            className="mt-20 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            <p className="text-xl md:text-2xl text-gray-700 font-semibold mb-6">Vårt animations-arsenal:</p>
-            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-              {[
-                "Framer Motion",
-                "Three.js",
-                "GSAP",
-                "Lottie",
-                "CSS Animations",
-                "SVG Morphing",
-                "WebGL Shaders",
-                "Canvas API"
-              ].map((tech, index) => (
-                <motion.span
-                  key={tech}
-                  className="px-5 py-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full text-sm md:text-base font-semibold text-gray-800 shadow-md hover:shadow-lg transition-all"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 + index * 0.05 }}
-                  whileHover={{ scale: 1.1, backgroundColor: "#f3f4f6", borderColor: "#d1d5db" }}
-                >
-                  {tech}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
-        </motion.div>
       </div>
     </motion.section>
   );

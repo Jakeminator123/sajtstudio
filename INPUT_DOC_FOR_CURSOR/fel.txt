@@ -13,8 +13,8 @@ PS C:\Users\Propietario\Desktop\sajtstudio> npm run dev
 > next dev --turbopack
 
    ▲ Next.js 16.0.1 (Turbopack)
-   - Local:        http://localhost:3000
-   - Network:      http://192.168.68.201:3000
+   - Local:        http://localhost:1337
+   - Network:      http://192.168.68.201:1337
    - Environments: .env.local
 
  ✓ Starting...
@@ -27,7 +27,7 @@ Browser error logged: {
   stack: null,
   source: null,
   timestamp: '2025-11-20T08:35:27.177Z',
-  url: 'http://localhost:3000/',
+  url: 'http://localhost:1337/',
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
 }
  POST /api/errors 200 in 312ms (compile: 243ms, render: 68ms)

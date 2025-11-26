@@ -437,9 +437,17 @@ export default function PacmanGame() {
     setScore(0);
     setGameOver(false);
     setGameWon(false);
+    // Re-initialize pellets from MAZE
     pelletsRef.current.clear();
+    MAZE.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        if (row[x] === "." || row[x] === "o") {
+          pelletsRef.current.add(`${x},${y}`);
+        }
+      }
+    });
     lastUpdateRef.current = performance.now();
-    pacmanRef.current = { x: 13, y: 16, dx: 0, dy: 0, mouth: 0, dir: 1 };
+    pacmanRef.current = { x: 13, y: 16, dx: 0, dy: 0, mouth: 0, dir: 0 }; // dir: 0 = right (matches dx: 0)
     ghostsRef.current = [{ x: 13, y: 10, dx: 1, dy: 0, color: "#ff6b9d" }];
   };
 
@@ -469,7 +477,8 @@ export default function PacmanGame() {
           ref={canvasRef}
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
-          className="shadow-2xl"
+          className="shadow-2xl rounded-lg max-w-full h-auto"
+          style={{ maxHeight: '60vh' }}
         />
 
         {/* Game over / Win overlay */}
