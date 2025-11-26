@@ -8,12 +8,11 @@ import LoadingState from "@/components/audit/LoadingState";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { ToastContainer, type ToastType } from "@/components/ui/Toast";
 import Audit3DVisualization from "@/components/audit/Audit3DVisualization";
-import AnimatedBackground from "@/components/effects/AnimatedBackground";
+import NeuralBackground from "@/components/effects/NeuralBackground";
 import TypewriterText from "@/components/effects/TypewriterText";
 import Card3D from "@/components/effects/Card3D";
 import NeonButton from "@/components/effects/NeonButton";
-import FloatingIcons from "@/components/effects/FloatingIcons";
-import WaveVisualizer from "@/components/effects/WaveVisualizer";
+import AnimatedEmoji from "@/components/effects/AnimatedEmoji";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -703,14 +702,13 @@ function UtvarderaPageContent() {
     <>
       <HeaderNav />
       <main className="relative min-h-screen overflow-hidden bg-black">
-        {/* Immersive animated background - Always visible for maximum impact */}
-        <AnimatedBackground variant="aurora" />
-        <div className="fixed inset-0 -z-[5] pointer-events-none">
-          <FloatingIcons count={14} />
-        </div>
-        <div className="fixed inset-x-0 bottom-0 -z-10 pointer-events-none">
-          <WaveVisualizer variant="sound" color="#60a5fa" height={140} />
-        </div>
+        {/* NeuralLink-inspired background with 70% dimming */}
+        <NeuralBackground
+          dimOpacity={0.7}
+          nodeCount={35}
+          primaryColor="#3b82f6"
+          secondaryColor="#8b5cf6"
+        />
         <AnimatePresence mode="wait">
           {mode === "choice" && (
             <motion.section
@@ -728,18 +726,8 @@ function UtvarderaPageContent() {
                   transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                   className="text-center mb-16"
                 >
-                  <motion.div
-                    animate={{
-                      y: [0, -15, 0],
-                      scale: [1, 1.02, 1],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  >
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6">
+                  <div className="mb-6">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black">
                       <motion.span
                         className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"
                         animate={{
@@ -756,149 +744,210 @@ function UtvarderaPageContent() {
                       >
                         AI-driven
                       </motion.span>
-                      <TypewriterText
-                        texts={[
-                          "Sajtutvärdering",
-                          "Site valuation experience",
-                          "Digitala rekommendationer",
-                        ]}
-                        className="block text-white mt-2 text-4xl md:text-5xl"
-                        speed={110}
-                        deleteSpeed={60}
-                        pauseTime={1500}
-                      />
+                      {/* Fixed height container for typewriter to prevent layout shifts */}
+                      <span className="block text-white mt-2 text-4xl md:text-5xl h-[1.2em]">
+                        <TypewriterText
+                          texts={[
+                            "Sajtutvärdering",
+                            "Webbplatsanalys",
+                            "Rekommendationer",
+                          ]}
+                          speed={110}
+                          deleteSpeed={60}
+                          pauseTime={1500}
+                        />
+                      </span>
                     </h1>
-                  </motion.div>
-                  <motion.p
-                    className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                  >
+                  </div>
+                  {/* Fixed height container for description */}
+                  <div className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto h-[3em] md:h-[2em]">
                     <TypewriterText
                       texts={[
-                        "Få en professionell analys av din befintliga sajt eller beställ en helt ny.",
-                        "AI hjälper dig att prioritera, budgetera och imponera på dina kunder.",
-                        "Vi kombinerar showiga effekter med konkreta affärsinsikter.",
+                        "Professionell analys av din sajt eller helt nya rekommendationer.",
+                        "AI hjälper dig att prioritera och budgetera smart.",
+                        "Showiga effekter kombinerat med affärsinsikter.",
                       ]}
-                      className="block text-gray-300"
-                      speed={85}
-                      deleteSpeed={45}
-                      pauseTime={2000}
+                      className="text-gray-300"
+                      speed={70}
+                      deleteSpeed={40}
+                      pauseTime={2500}
                     />
-                  </motion.p>
+                  </div>
 
-                  {/* Animated dots */}
-                  <motion.div className="flex justify-center gap-2 mt-8">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-2 h-2 bg-white rounded-full"
-                        animate={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0.3, 1, 0.3],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: i * 0.3,
-                        }}
-                      />
-                    ))}
-                  </motion.div>
                 </motion.div>
 
-                {/* Model Selection with Glow */}
+                {/* Model Selection - Clean Card Grid */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
-                  className="mb-12 max-w-md mx-auto"
+                  className="mb-12 max-w-3xl mx-auto"
                 >
-                  <motion.label
-                    className="block text-sm text-gray-400 mb-3 text-center uppercase tracking-wider"
-                    animate={{
-                      opacity: [0.5, 1, 0.5],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
+                  <motion.h3
+                    className="text-sm text-gray-400 mb-4 text-center uppercase tracking-wider font-medium"
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   >
                     Välj analysnivå
-                  </motion.label>
-                  <div className="relative">
-                    <motion.select
-                      value={selectedModel}
-                      onChange={(e) => setSelectedModel(e.target.value)}
-                      className="w-full px-6 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white appearance-none cursor-pointer hover:bg-white/20 transition-all backdrop-blur-xl text-center"
-                      whileHover={{
-                        scale: 1.02,
-                        borderColor: "rgba(255, 255, 255, 0.4)",
-                      }}
-                      style={{
-                        boxShadow: "0 0 20px rgba(59, 130, 246, 0.2)",
-                      }}
-                    >
-                      {MODEL_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id} className="bg-gray-900 text-white">
-                          {option.label} · ≈{" "}
-                          {option.approxCostSek.toLocaleString("sv-SE", {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                          })}{" "}
-                          SEK
-                        </option>
-                      ))}
-                    </motion.select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="mt-3 text-center">
-                    {selectedModelMeta.recommended && (
-                      <p className="text-[11px] text-green-300 uppercase tracking-wider">Rekommenderad</p>
-                    )}
-                    <p className="text-xs text-gray-400">
-                      {selectedModelMeta.description} · ≈{" "}
-                      {selectedModelMeta.approxCostSek.toLocaleString("sv-SE", {
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      })}{" "}
-                      SEK / körning
-                    </p>
+                  </motion.h3>
+
+                  {/* Model Cards Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {MODEL_OPTIONS.map((option, index) => {
+                      const isSelected = selectedModel === option.id;
+                      const tierColors: Record<string, { border: string; bg: string; glow: string }> = {
+                        fast: { border: "border-emerald-400/50", bg: "from-emerald-500/10 to-emerald-600/5", glow: "rgba(52, 211, 153, 0.3)" },
+                        balanced: { border: "border-blue-400/50", bg: "from-blue-500/10 to-blue-600/5", glow: "rgba(59, 130, 246, 0.3)" },
+                        premium: { border: "border-purple-400/50", bg: "from-purple-500/10 to-purple-600/5", glow: "rgba(168, 85, 247, 0.3)" },
+                        expert: { border: "border-amber-400/50", bg: "from-amber-500/10 to-amber-600/5", glow: "rgba(251, 191, 36, 0.3)" },
+                      };
+                      const colors = tierColors[option.tier] || tierColors.balanced;
+
+                      // Map tier to emoji and animation
+                      const emojiConfig: Record<string, { emoji: string; animation: "pulse" | "bounce" | "glow" | "rocket" | "brain" }> = {
+                        fast: { emoji: "⚡", animation: "pulse" },
+                        balanced: { emoji: "✨", animation: "glow" },
+                        premium: { emoji: "🚀", animation: "rocket" },
+                        expert: { emoji: "🧠", animation: "brain" },
+                      };
+                      const { emoji, animation } = emojiConfig[option.tier] || emojiConfig.balanced;
+
+                      return (
+                        <motion.button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setSelectedModel(option.id)}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`relative p-4 rounded-xl border-2 transition-all duration-300 text-left backdrop-blur-sm ${
+                            isSelected
+                              ? `${colors.border} bg-gradient-to-br ${colors.bg}`
+                              : "border-white/10 bg-white/5 hover:border-white/30"
+                          }`}
+                          style={{
+                            boxShadow: isSelected ? `0 0 25px ${colors.glow}` : "none",
+                          }}
+                        >
+                          {/* Recommended Badge */}
+                          {option.recommended && (
+                            <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-green-500 text-[10px] font-bold rounded-full text-white shadow-lg">
+                              REKOMMENDERAD
+                            </span>
+                          )}
+
+                          {/* Selection indicator */}
+                          <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 transition-all ${
+                            isSelected
+                              ? "bg-white border-white"
+                              : "border-white/30"
+                          }`}>
+                            {isSelected && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="w-full h-full flex items-center justify-center"
+                              >
+                                <span className="text-black text-[10px]">✓</span>
+                              </motion.div>
+                            )}
+                          </div>
+
+                          {/* Animated Emoji + Label */}
+                          <div className="flex items-center gap-2 mb-1">
+                            <AnimatedEmoji emoji={emoji} animation={animation} size="lg" />
+                            <span className="text-lg font-bold text-white">
+                              {option.label.replace(/^[^\s]+\s/, '')}
+                            </span>
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-sm text-gray-400 mb-2">
+                            ~{option.approxCostSek.toFixed(1)} SEK
+                          </div>
+
+                          {/* Speed & Reasoning indicators */}
+                          <div className="flex gap-1 flex-wrap">
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                              option.speed === "snabb" ? "bg-green-500/20 text-green-300" :
+                              option.speed === "medium" ? "bg-blue-500/20 text-blue-300" :
+                              "bg-orange-500/20 text-orange-300"
+                            }`}>
+                              {option.speed}
+                            </span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                              option.reasoning === "minimal" ? "bg-gray-500/20 text-gray-300" :
+                              option.reasoning === "standard" ? "bg-blue-500/20 text-blue-300" :
+                              option.reasoning === "avancerad" ? "bg-purple-500/20 text-purple-300" :
+                              "bg-amber-500/20 text-amber-300"
+                            }`}>
+                              {option.reasoning}
+                            </span>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
                   </div>
 
-                  <div className="mt-6 flex flex-col items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setUseWebSearch((prev) => !prev)}
-                      className={`px-5 py-2 rounded-full border transition-all text-sm ${
-                        useWebSearch
-                          ? "bg-green-500/20 border-green-400 text-green-200"
-                          : "bg-white/5 border-white/20 text-gray-200 hover:border-white/40"
-                      }`}
-                      aria-pressed={useWebSearch}
-                    >
-                      {useWebSearch ? "WebSearch aktiverat" : "WebSearch av (standard)"}
-                    </button>
-                    <p className="text-[11px] text-gray-500 text-center">
-                      {useWebSearch
-                        ? "Live-data via Responses API + web_search enligt ALLA.txt. Använd när aktuell fakta krävs."
-                        : "Följer standardinställningen i ALLA.txt – ingen extern webbsök förrän du aktiverar det."}
-                    </p>
-                  </div>
+                  {/* Selected Model Description */}
+                  <motion.div
+                    key={selectedModel}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 text-center"
+                  >
+                    <p className="text-sm text-gray-300">{selectedModelMeta.description}</p>
+                    <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                      {selectedModelMeta.capabilities?.map((cap, i) => (
+                        <span key={i} className="text-[11px] px-2 py-1 bg-white/10 rounded-full text-gray-400">
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* WebSearch Toggle - Simplified */}
+                  <motion.div
+                    className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-white">🌐 WebSearch</span>
+                          <span className="text-[10px] px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded-full">
+                            Live-data
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {useWebSearch
+                            ? "Hämtar aktuell information från webben för mer uppdaterade svar"
+                            : "Av som standard. Aktivera för nyheter, priser eller aktuella händelser"}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setUseWebSearch((prev) => !prev)}
+                        className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
+                          useWebSearch
+                            ? "bg-green-500"
+                            : "bg-gray-700"
+                        }`}
+                        aria-pressed={useWebSearch}
+                        role="switch"
+                      >
+                        <motion.div
+                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
+                          animate={{ left: useWebSearch ? "calc(100% - 24px)" : "4px" }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      </button>
+                    </div>
+                  </motion.div>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 perspective-1000">
@@ -1629,7 +1678,7 @@ function UtvarderaPageContent() {
                       className="mb-12 relative"
                     >
                       {/* Background glow effect */}
-                      <motion.div 
+                      <motion.div
                         className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"
                         animate={{
                           opacity: [0.3, 0.5, 0.3],

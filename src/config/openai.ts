@@ -1,70 +1,87 @@
 export interface ModelOption {
   id: string;
   label: string;
-  tier: "standard" | "premium" | "reasoning";
+  tier: "fast" | "balanced" | "premium" | "expert";
   description: string;
   approxCostSek: number;
   recommended?: boolean;
-  supportsWebSearch?: boolean;
+  supportsWebSearch: boolean;
+  capabilities: string[];
+  speed: "snabb" | "medium" | "långsam";
+  reasoning: "minimal" | "standard" | "avancerad" | "djup";
 }
 
+/**
+ * Simplified model options based on OpenAI documentation.
+ *
+ * According to the docs:
+ * - GPT-5 family: gpt-5, gpt-5-mini, gpt-5-nano (best for complex reasoning)
+ * - GPT-4o family: gpt-4o, gpt-4o-mini (reliable, fast, definitely available)
+ * - GPT-4.1 family: gpt-4.1, gpt-4.1-mini (upgrade from 4o)
+ *
+ * We keep it simple with 4 clear tiers based on use case.
+ */
 export const MODEL_OPTIONS: ModelOption[] = [
   {
+    id: "gpt-4o-mini",
+    label: "⚡ Snabb",
+    tier: "fast",
+    description: "Snabbast och billigast. Perfekt för enklare analyser.",
+    approxCostSek: 0.2,
+    supportsWebSearch: true,
+    capabilities: ["Snabb respons", "Låg kostnad", "Grundläggande analys"],
+    speed: "snabb",
+    reasoning: "minimal",
+  },
+  {
     id: "gpt-4o",
-    label: "Premium (GPT-4o)",
-    tier: "premium",
-    description:
-      "Toppmodell med utmärkt kvalitet och definitivt stöd för web_search i Responses API.",
-    approxCostSek: 3.0,
+    label: "✨ Standard",
+    tier: "balanced",
+    description: "Bästa balans mellan kvalitet och kostnad. Rekommenderas.",
+    approxCostSek: 2.5,
     recommended: true,
     supportsWebSearch: true,
+    capabilities: ["Hög kvalitet", "Detaljerad analys", "Pålitlig"],
+    speed: "medium",
+    reasoning: "standard",
   },
   {
-    id: "gpt-4o-mini",
-    label: "Snabb (GPT-4o-mini)",
-    tier: "standard",
-    description:
-      "Kostnadseffektiv modell med definitivt stöd för web_search. Rekommenderad för de flesta användningsfall.",
-    approxCostSek: 0.2,
-    supportsWebSearch: true,
-  },
-  {
-    id: "gpt-5.1-mini",
-    label: "Premium (GPT-5.1-mini) - Experimentell",
+    id: "gpt-5-mini",
+    label: "🚀 Premium",
     tier: "premium",
-    description:
-      "Nyare modell med tyngre resonemang. Kan saknas i API:et ännu - fallback till gpt-4o om den inte finns.",
-    approxCostSek: 1.2,
+    description: "Avancerad analys med bättre resonemang och djupare insikter.",
+    approxCostSek: 4.0,
     supportsWebSearch: true,
+    capabilities: ["Avancerad reasoning", "Djupare insikter", "Kodexpertis"],
+    speed: "medium",
+    reasoning: "avancerad",
   },
   {
-    id: "gpt-5.1",
-    label: "Expert (GPT-5.1) - Experimentell",
-    tier: "premium",
-    description:
-      "Maximal kvalitet. Kan saknas i API:et ännu - fallback till gpt-4o om den inte finns.",
-    approxCostSek: 6.5,
+    id: "gpt-5",
+    label: "🧠 Expert",
+    tier: "expert",
+    description: "Maximal kvalitet för komplexa analyser. Tar längre tid.",
+    approxCostSek: 8.0,
     supportsWebSearch: true,
-  },
-  {
-    id: "gpt-4.1",
-    label: "Avancerad (GPT-4.1) - Experimentell",
-    tier: "standard",
-    description: "Stabil toppmodell enligt ALLA.txt. Kan saknas i API:et ännu.",
-    approxCostSek: 3.0,
-    supportsWebSearch: true,
-  },
-  {
-    id: "gpt-4.1-mini",
-    label: "Snabb (GPT-4.1-mini) - Experimentell",
-    tier: "standard",
-    description:
-      "Standardval från ALLA.txt. Kan saknas i API:et ännu - fallback till gpt-4o-mini om den inte finns.",
-    approxCostSek: 0.2,
-    supportsWebSearch: true,
+    capabilities: ["Djup reasoning", "Komplex problemlösning", "Bäst kvalitet"],
+    speed: "långsam",
+    reasoning: "djup",
   },
 ];
+
+// Fallback chain: If a model doesn't exist, try the next one
+export const MODEL_FALLBACK_CHAIN: Record<string, string> = {
+  "gpt-5": "gpt-4o",
+  "gpt-5-mini": "gpt-4o",
+  "gpt-4.1": "gpt-4o",
+  "gpt-4.1-mini": "gpt-4o-mini",
+};
 
 // Default model: Use gpt-4o which definitely exists and supports web_search
 export const DEFAULT_MODEL = "gpt-4o";
 export const ALLOWED_MODEL_IDS = MODEL_OPTIONS.map((option) => option.id);
+
+// Helper to get fallback model
+export function getFallbackModel(model: string): string {
+  return MODEL_FALLBACK_CHAIN[model] || "gpt-4o";
+}

@@ -279,7 +279,7 @@ export default function ServicesSection() {
             transition={{ delay: 0.5, duration: 0.8 }}
           >
             <WordReveal
-              text="Vi erbjuder kompletta lösningar för moderna företag som vill växa online"
+              text="Vi försöker blanda design med ny teknik... mot bättre vetande"
               delay={0.3}
               staggerDelay={0.03}
               className="text-gray-200"

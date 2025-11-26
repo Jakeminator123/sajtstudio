@@ -68,7 +68,7 @@ const OpticScrollShowcase = dynamic(
 );
 
 export default function Home() {
-  // Prefetch links on hover for faster navigation
+  // Prefetch links on hover for faster navigation - updated buttons v2
   usePrefetch();
   // Prefetch components as user scrolls near them - delayed to avoid blocking navigation
   usePrefetchOnScroll();

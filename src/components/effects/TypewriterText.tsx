@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface TypewriterTextProps {
   texts: string[];
@@ -9,6 +9,8 @@ interface TypewriterTextProps {
   speed?: number;
   deleteSpeed?: number;
   pauseTime?: number;
+  /** If true, reserves space for the longest text to prevent layout shifts */
+  reserveSpace?: boolean;
 }
 
 export default function TypewriterText({
@@ -17,10 +19,16 @@ export default function TypewriterText({
   speed = 100,
   deleteSpeed = 50,
   pauseTime = 2000,
+  reserveSpace = false,
 }: TypewriterTextProps) {
   const [displayText, setDisplayText] = useState("");
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Find the longest text to reserve space
+  const longestText = useMemo(() => {
+    return texts.reduce((a, b) => (a.length > b.length ? a : b), "");
+  }, [texts]);
 
   useEffect(() => {
     const currentFullText = texts[currentTextIndex];
@@ -58,6 +66,28 @@ export default function TypewriterText({
     deleteSpeed,
     pauseTime,
   ]);
+
+  if (reserveSpace) {
+    return (
+      <span className={`relative inline-block ${className}`}>
+        {/* Invisible text to reserve space */}
+        <span className="invisible" aria-hidden="true">
+          {longestText}
+        </span>
+        {/* Actual displayed text positioned absolutely */}
+        <span className="absolute inset-0">
+          {displayText}
+          <motion.span
+            animate={{ opacity: [1, 0] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+            className="inline-block ml-1"
+          >
+            |
+          </motion.span>
+        </span>
+      </span>
+    );
+  }
 
   return (
     <span className={className}>

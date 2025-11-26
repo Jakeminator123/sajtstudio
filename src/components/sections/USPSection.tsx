@@ -299,22 +299,88 @@ export default function USPSection() {
             {uspContent.tagline}
           </motion.p>
           <motion.div
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="relative inline-block"
           >
+            {/* Glow effect behind button */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-accent via-tertiary to-accent rounded-xl blur-xl opacity-40"
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
             <Link
               href={uspContent.cta.href}
-              className="inline-block px-10 py-5 bg-black text-white text-lg font-semibold hover:bg-accent transition-all duration-300 transform relative overflow-hidden group"
+              className="relative inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-accent via-blue-500 to-accent text-white text-lg font-bold rounded-xl shadow-2xl shadow-accent/30 hover:shadow-accent/50 transition-all duration-300 group overflow-hidden"
             >
+              {/* Animated gradient background */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-accent via-tertiary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ backgroundSize: "200% 100%" }}
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+
               {/* Shimmer effect */}
               <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                 initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
+                animate={{ x: ["100%", "-100%"] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                  ease: "easeInOut",
+                }}
               />
-              <span className="relative z-10">{uspContent.cta.buttonText}</span>
+
+              {/* Rocket icon */}
+              <motion.span
+                className="relative z-10 text-xl"
+                animate={{
+                  y: [0, -3, 0],
+                  rotate: [0, 5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                🚀
+              </motion.span>
+
+              <span className="relative z-10 tracking-wide">{uspContent.cta.buttonText}</span>
+
+              {/* Animated particles on hover */}
+              <motion.div
+                className="absolute right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                animate={{
+                  x: [0, 5, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <span className="text-white/80">✨</span>
+              </motion.div>
             </Link>
           </motion.div>
         </motion.div>

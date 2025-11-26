@@ -1,15 +1,15 @@
 /**
  * USP Content - Unikt Värdeerbjudande
- * 
+ *
  * Texter och beskrivningar för USP-sektionen som förklarar
  * Sajtstudios unika värdeerbjudande med AI-driven hemsidebyggning.
  */
 
 export const uspContent = {
   title: 'AI-drivet. Data-baserat. Resultatfokuserat.',
-  subtitle: 'Vi bygger hemsidor som faktiskt genererar affärer',
-  description: 'Våra hemsidor skräddarsys inte bara utifrån vad du tycker är snyggt – utan utifrån vad som faktiskt fungerar för ditt företag och dina kunder.',
-  
+  subtitle: 'Hemsidor som faktiskt genererar affärer',
+  description: 'Vi bygger sajter utifrån vad som fungerar – inte bara vad som ser snyggt ut. Din hemsida ska jobba för dig.',
+
   features: [
     {
       number: '01',
@@ -32,13 +32,13 @@ export const uspContent = {
       description: 'Du behöver inte vara låst. Våra hemsidor är byggda så att du enkelt kan uppdatera innehåll, lägga till sidor eller ändra design när behovet uppstår.',
     },
   ],
-  
+
   cta: {
     text: 'Låt oss bygga din nästa hemsida',
-    buttonText: 'Boka konsultation',
+    buttonText: 'Starta ditt projekt →',
     href: '/contact',
   },
-  
-  tagline: 'Hemsidor som betyder något. Byggda med data, designade för resultat.',
+
+  tagline: 'Sajter som levererar. Byggda med data, formade för resultat.',
 } as const;
 

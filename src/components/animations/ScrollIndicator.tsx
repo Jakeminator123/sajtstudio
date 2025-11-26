@@ -40,7 +40,7 @@ export default function ScrollIndicator() {
         }}
         className="flex flex-col items-center gap-2 text-white/60 text-xs uppercase tracking-widest"
       >
-        <span className="font-medium">Scroll</span>
+        <span className="font-medium">Scrolla</span>
         <svg
           className="w-4 h-4"
           fill="none"

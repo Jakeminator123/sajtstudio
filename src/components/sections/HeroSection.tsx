@@ -951,40 +951,71 @@ export default function HeroSection() {
             }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            {/* Primary CTA: Website evaluation service */}
+            {/* Primary CTA: Website evaluation - Blue with cool animations */}
             <MagneticButton
               href="/utvardera"
-              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-none hover:bg-accent-hover transition-all duration-300 shadow-lg shadow-accent/50 relative overflow-hidden group"
+              className="px-10 py-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg rounded-lg hover:from-blue-500 hover:via-cyan-500 hover:to-blue-600 transition-all duration-500 shadow-[0_0_30px_rgba(0,102,255,0.5)] hover:shadow-[0_0_50px_rgba(0,102,255,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
             >
+              {/* Animated gradient overlay */}
               {!shouldReduceMotion && (
                 <motion.span
-                  className="absolute inset-0 bg-white/20"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                   animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.5, 0, 0.5],
+                    x: ["-200%", "200%"],
                   }}
                   transition={{
                     duration: 2,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+              )}
+              {/* Pulsing glow ring */}
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 rounded-lg border-2 border-cyan-400/50"
+                  animate={{
+                    opacity: [0.3, 0.8, 0.3],
+                    scale: [1, 1.02, 1],
+                  }}
+                  transition={{
+                    duration: 1.5,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                 />
               )}
-              <motion.span
-                className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10 flex items-center gap-2">
-                Utvärdera sin sajt idag
+              {/* Electric spark effect */}
+              {!shouldReduceMotion && (
                 <motion.span
-                  animate={{ x: [0, 5, 0] }}
+                  className="absolute top-0 left-1/2 w-1 h-full bg-gradient-to-b from-transparent via-cyan-300 to-transparent opacity-60"
+                  animate={{
+                    x: ["-100px", "100px"],
+                    opacity: [0, 0.8, 0],
+                  }}
                   transition={{
-                    duration: 1.5,
+                    duration: 1.2,
+                    repeat: Infinity,
+                    repeatDelay: 0.5,
+                  }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-3 font-black tracking-wide">
+                <motion.span
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                >
+                  🔍
+                </motion.span>
+                Utvärdera din sajt
+                <motion.span
+                  className="text-xl"
+                  animate={{ x: [0, 8, 0], scale: [1, 1.2, 1] }}
+                  transition={{
+                    duration: 1,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
@@ -993,26 +1024,64 @@ export default function HeroSection() {
                 </motion.span>
               </span>
             </MagneticButton>
-            {/* Secondary CTA: Portfolio showcase */}
+
+            {/* Secondary CTA: Build website - Red/Tertiary bold */}
             <MagneticButton
-              href="/portfolio"
-              className="px-10 py-5 border-2 border-white text-white font-bold text-lg rounded-none hover:bg-white hover:text-black transition-all duration-300 relative overflow-hidden group"
+              href="/contact"
+              className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
             >
-              <motion.span
-                className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10 flex items-center gap-2">
-                Se våra arbeten
+              {/* Fire/heat wave effect */}
+              {!shouldReduceMotion && (
                 <motion.span
-                  animate={{ rotate: [0, 15, 0] }}
+                  className="absolute inset-0 bg-gradient-to-t from-orange-600/40 via-transparent to-transparent"
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    repeat: Infinity,
+                  }}
+                />
+              )}
+              {/* Shimmer effect */}
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                  animate={{
+                    x: ["-200%", "200%"],
+                  }}
                   transition={{
                     duration: 1.5,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                  }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-3">
+                <motion.span
+                  animate={{ 
+                    rotate: [0, -10, 10, 0],
+                    scale: [1, 1.2, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    repeat: Infinity,
+                    repeatDelay: 1.5,
+                  }}
+                >
+                  🚀
+                </motion.span>
+                BYGG DIN SAJT NU!
+                <motion.span
+                  animate={{ 
+                    y: [0, -3, 0],
+                    rotate: [0, 20, 0],
+                  }}
+                  transition={{
+                    duration: 0.8,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
@@ -1037,38 +1106,6 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Modern scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.8, duration: 0.8 }}
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 text-white/60"
-        >
-          <span className="text-xs font-medium tracking-wider uppercase">
-            Scrolla
-          </span>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            className="text-current"
-          >
-            <path
-              d="M10 4v10m0 0l-3-3m3 3l3-3"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </motion.div>
-      </motion.div>
     </motion.section>
   );
 }

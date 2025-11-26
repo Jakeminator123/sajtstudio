@@ -3,7 +3,11 @@ import {
   buildRecommendationPrompt,
   type PromptMessage,
 } from "@/lib/openai-client";
-import { ALLOWED_MODEL_IDS, DEFAULT_MODEL } from "@/config/openai";
+import {
+  ALLOWED_MODEL_IDS,
+  DEFAULT_MODEL,
+  getFallbackModel,
+} from "@/config/openai";
 import { scrapeWebsite } from "@/lib/webscraper";
 import { promises as fs } from "fs";
 import { NextRequest, NextResponse } from "next/server";
@@ -25,7 +29,7 @@ function getOpenAIClient(): OpenAI {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not set in environment variables");
   }
-  
+
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     timeout: 300000, // 5 minute timeout for all models (increased from 4 minutes)
@@ -889,18 +893,19 @@ export async function POST(request: NextRequest) {
             err.message?.toLowerCase().includes("not found"));
 
         if (isModelNotFound && model !== "gpt-4o" && model !== "gpt-4o-mini") {
+          const fallbackModel = getFallbackModel(model);
           console.warn(
-            `[${requestId}] Model ${model} not found, falling back to gpt-4o`,
+            `[${requestId}] Model ${model} not found, falling back to ${fallbackModel}`,
             {
               originalModel: model,
-              fallbackModel: "gpt-4o",
+              fallbackModel,
             }
           );
 
           // Retry with fallback model
           const fallbackPayload = {
             ...requestPayload,
-            model: "gpt-4o",
+            model: fallbackModel,
           };
 
           try {
@@ -909,7 +914,7 @@ export async function POST(request: NextRequest) {
               timeout: 300000,
             });
             console.log(
-              `[${requestId}] Fallback to gpt-4o succeeded after ${
+              `[${requestId}] Fallback to ${fallbackModel} succeeded after ${
                 Date.now() - startTime
               }ms`
             );

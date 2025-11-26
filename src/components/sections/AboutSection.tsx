@@ -404,20 +404,20 @@ export default function AboutSection() {
               suppressHydrationWarning
             >
               <WordReveal
-                text="Den kreativa partnern bakom framtidens digitala upplevelser"
+                text="Din kreativa partner bakom framtidens digitala upplevelser"
                 delay={0.3}
                 staggerDelay={0.04}
                 className="text-white"
               />
             </motion.p>
 
-            {/* Description - sharper, better readability */}
+            {/* Main description */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.6 }}
-              className="text-base md:text-lg lg:text-xl text-gray-200 leading-relaxed max-w-4xl mx-auto"
+              className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed max-w-4xl mx-auto font-medium"
               style={mounted ? {
                 opacity: textOpacity,
                 scale: textScale,
@@ -435,24 +435,78 @@ export default function AboutSection() {
               }}
               suppressHydrationWarning
             >
-              Vi kombinerar världsklass design, forskning och teknologi för att skapa
-              hemsidor som inte bara ser bra ut - utan som gör skillnad för ditt företag.
+              Vi hjälper företag att få riktigt vassa hemsidor – snabbare och smartare.
             </motion.p>
 
-            {/* Enhanced stats grid */}
+            {/* Extended description */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1, duration: 0.6 }}
+              className="text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto space-y-6"
+              style={mounted ? {
+                opacity: textOpacity,
+                scale: textScale,
+                filter: textBlur,
+              } : {
+                opacity: 1,
+                scale: 1,
+                filter: "blur(0px)",
+              }}
+              suppressHydrationWarning
+            >
+              <p>
+                Genom att kombinera <span className="text-accent font-semibold">artificiell intelligens</span>,
+                genomtänkt design och modern webbutveckling (React, Next, Vite) bygger vi skräddarsydda sajter
+                som både känns rätt för ditt varumärke och fungerar för dina kunder på riktigt.
+              </p>
+
+              <p className="text-white font-medium">Vi utgår alltid från ditt företag och dina kunder:</p>
+
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-center gap-3">
+                  <span className="text-accent">•</span>
+                  vilken känsla ni vill förmedla
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-tertiary">•</span>
+                  vilka ni vill nå
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-accent">•</span>
+                  hur sidan faktiskt ska bidra till affären
+                </li>
+              </ul>
+
+              <p className="text-white/80 italic">Resten löser vi med struktur, design och teknik.</p>
+            </motion.div>
+
+            {/* Honest stats header */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+              className="text-lg text-gray-400 text-center pt-8"
+            >
+              Lite ärlig statistik från en nystartad studio:
+            </motion.p>
+
+            {/* Enhanced stats grid - honest version */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 1, duration: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-16"
+              transition={{ delay: 1.3, duration: 0.8 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
               style={mounted ? { y: statsY } : { y: 0 }}
               suppressHydrationWarning
             >
               {[
-                { number: "25+", label: "Nöjda kunder", color: "accent" },
-                { number: "50+", label: "Projekt levererade", color: "tertiary" },
-                { number: "100%", label: "Passion", color: "accent" },
+                { number: "18", label: "nöjda kunder", sublabel: "Som vi fortfarande vågar titta i ögonen.", color: "accent" },
+                { number: "6", label: "fullfjädrade projekt", sublabel: "Från första skiss till färdig, skarp sajt.", color: "tertiary" },
+                { number: "93%", label: "passion, 7% kaffe", sublabel: "Vi tar våra projekt (och vårt kaffe) på stort allvar.", color: "accent" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -539,7 +593,7 @@ export default function AboutSection() {
                         <AnimatedNumber value={stat.number} />
                       </motion.div>
                       <motion.div
-                        className="text-sm md:text-base lg:text-lg text-gray-300 uppercase tracking-widest font-semibold"
+                        className="text-sm md:text-base lg:text-lg text-gray-300 uppercase tracking-widest font-semibold mb-3"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
@@ -547,6 +601,16 @@ export default function AboutSection() {
                       >
                         {stat.label}
                       </motion.div>
+                      {/* Sublabel - the honest description */}
+                      <motion.p
+                        className="text-xs md:text-sm text-gray-500 italic normal-case tracking-normal font-normal"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 1.5 + index * 0.2 }}
+                      >
+                        {stat.sublabel}
+                      </motion.p>
                     </div>
 
                     {/* Decorative corner accent */}
@@ -562,6 +626,17 @@ export default function AboutSection() {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* Final CTA */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.8, duration: 0.6 }}
+              className="text-lg md:text-xl text-center text-accent font-medium pt-8"
+            >
+              Vill du se hur din nästa sajt kan se ut med AI + design i ryggen?
+            </motion.p>
           </div>
         </motion.div>
       </div>

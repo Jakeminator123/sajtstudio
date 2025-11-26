@@ -26,14 +26,19 @@
     "@react-pdf/renderer": "^4.3.1",
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "framer-motion": "^11.0.0",
     "lint": "^1.1.2",
+    "lucide-react": "^0.554.0",
     "next": "16.0.1",
     "openai": "^6.9.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "resend": "^6.4.2"
+    "resend": "^6.4.2",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
