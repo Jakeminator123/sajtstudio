@@ -1062,7 +1062,7 @@ export default function HeroSection() {
               )}
               <span className="relative z-10 flex items-center gap-3">
                 <motion.span
-                  animate={{ 
+                  animate={{
                     rotate: [0, -10, 10, 0],
                     scale: [1, 1.2, 1.2, 1],
                   }}
@@ -1076,7 +1076,7 @@ export default function HeroSection() {
                 </motion.span>
                 BYGG DIN SAJT NU!
                 <motion.span
-                  animate={{ 
+                  animate={{
                     y: [0, -3, 0],
                     rotate: [0, 20, 0],
                   }}

@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.0",
     "@types/cheerio": "^0.22.35",
     "cheerio": "^1.1.0",
     "class-variance-authority": "^0.7.1",
@@ -38,7 +40,8 @@
     "react-dom": "19.2.0",
     "resend": "^6.4.2",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.181.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
