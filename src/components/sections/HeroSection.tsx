@@ -1027,7 +1027,7 @@ export default function HeroSection() {
 
             {/* Secondary CTA: Build website - Red/Tertiary bold */}
             <MagneticButton
-              href="/contact"
+              href="https://vykort.onrender.com/"
               className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}

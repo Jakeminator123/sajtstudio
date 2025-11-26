@@ -432,7 +432,7 @@ export default function BigCTA() {
             transition={{ delay: 1.4, duration: 0.6 }}
             className="mb-16"
           >
-            <MagneticButton href="/contact" />
+            <MagneticButton href="https://vykort.onrender.com/" />
           </motion.div>
 
           {/* Contact methods - modern card style */}

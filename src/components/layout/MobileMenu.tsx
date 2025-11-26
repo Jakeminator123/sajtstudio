@@ -113,7 +113,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
                 onClick={onClose}
               >
                 <Button
-                  href="/contact"
+                  href="https://vykort.onrender.com/"
                   variant="cta"
                   size="md"
                   fullWidth

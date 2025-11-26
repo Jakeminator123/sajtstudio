@@ -368,7 +368,7 @@ export default function HeaderNav() {
               */}
             <div className="cta-button-header hidden lg:block">
               <Button
-                href="/contact"
+                href="https://vykort.onrender.com/"
                 variant="cta"
                 size="sm"
                 ariaLabel="Starta projekt"
