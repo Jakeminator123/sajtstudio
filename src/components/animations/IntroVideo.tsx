@@ -166,7 +166,7 @@ export default function IntroVideo() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center cursor-pointer"
           onClick={handleClick}
           onKeyDown={(e) => {
@@ -178,15 +178,15 @@ export default function IntroVideo() {
           tabIndex={0}
           aria-label="Skip intro video"
         >
-          {/* Video - slides in from the side, starts playing immediately */}
+          {/* Video - fades in smoothly with slight scale */}
           <motion.video
             ref={videoRef}
             className="w-full h-full object-cover"
-            initial={{ opacity: 0, x: '-100%' }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{
-              duration: 1.2,
-              delay: 0,
+              duration: 1.5,
+              delay: 0.2,
               ease: [0.25, 0.1, 0.25, 1]
             }}
             autoPlay

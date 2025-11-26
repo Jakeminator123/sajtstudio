@@ -43,7 +43,6 @@ export default function PortfolioHero() {
             loop
             muted
             playsInline
-            controls
           />
         </motion.div>
       </div>

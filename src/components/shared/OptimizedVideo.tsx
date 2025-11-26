@@ -172,7 +172,8 @@ export default function OptimizedVideo({
     <div ref={containerRef} className={`relative ${className}`}>
       <video
         ref={videoRef}
-        className="w-full h-full object-cover aspect-video"
+        className="w-full h-full object-cover aspect-video transition-opacity duration-1000"
+        style={{ opacity: isPlaying ? 1 : 0.8 }}
         poster={poster}
         playsInline={playsInline}
         muted={muted}
