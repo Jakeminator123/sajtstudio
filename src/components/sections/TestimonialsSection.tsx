@@ -10,24 +10,27 @@ import { designTokens } from "@/config/designTokens";
 const testimonials = [
   {
     quote:
-      "Sajtstudio levererade en hemsida som överträffade alla våra förväntningar. Deras kreativa approach och tekniska expertis är oslagbar.",
-    author: "Anna Svensson",
-    company: "Tech Innovations AB",
+      "De har lyft vår verksamhet med 50-100% på bara sex månader. Helt otrolig investering.",
+    author: "Joakim Hallsten",
+    company: "Raymond Media",
     role: "VD",
+    highlight: "50-100% tillväxt",
   },
   {
     quote:
-      "Professionellt, snabbt och resultatorienterat. Vår nya hemsida har ökat våra konverteringar med 150%.",
-    author: "Erik Johansson",
-    company: "Nordic Design Studio",
-    role: "Grundare",
+      "My sister site just runs flawless. Zero downtime, zero headaches.",
+    author: "PYNN AI",
+    company: "pynn.ai",
+    role: "AI Startup",
+    highlight: "Felfri drift",
   },
   {
     quote:
-      "Det bästa beslutet vi gjorde för vår digitala närvaro. Sajtstudio förstod vår vision och gjorde den verklig.",
-    author: "Maria Andersson",
-    company: "Creative Agency",
-    role: "Creative Director",
+      "Cutting edge data knowledge. They understand what modern tech can do.",
+    author: "Prometheus Team",
+    company: "promethius.com",
+    role: "Tech Company",
+    highlight: "Framkant",
   },
 ];
 
@@ -118,21 +121,15 @@ export default function TestimonialsSection() {
               }}
               className="group relative bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
             >
-              {/* Quote icon */}
+              {/* Highlight badge */}
               <motion.div
-                initial={{ opacity: 0, scale: 0 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="w-14 h-14 bg-gradient-to-br from-accent/30 via-tertiary/20 to-accent/10 flex items-center justify-center mb-6 rounded-lg shadow-[0_0_20px_rgba(0,102,255,0.3)]"
+                className="inline-block px-4 py-2 mb-6 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-accent to-tertiary text-white rounded-full shadow-[0_0_30px_rgba(0,102,255,0.4)]"
               >
-                <svg
-                  className="w-7 h-7 text-accent"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
+                {testimonial.highlight}
               </motion.div>
 
               {/* Quote */}
