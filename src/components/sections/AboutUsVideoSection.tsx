@@ -116,7 +116,6 @@ export default function AboutUsVideoSection() {
   const handleEnded = () => {
     setIsPlaying(false);
     setCurrentTime(0);
-    setCurrentSubtitle("");
   };
 
   return (
