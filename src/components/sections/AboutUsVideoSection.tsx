@@ -3,6 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { usePreloadDuringVideo } from "@/hooks/usePreloadDuringVideo";
 
 // Parse SRT format subtitles
 interface Subtitle {
@@ -67,6 +68,18 @@ export default function AboutUsVideoSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(1); // Default to 1 to avoid division by zero
+
+  // Preload next section resources while user watches the video
+  usePreloadDuringVideo(isPlaying, 'low', {
+    images: [
+      "/images/backgrounds/contact-gradient.webp",
+      "/images/hero/hero-background.webp",
+    ],
+    components: [
+      () => import("@/components/sections/BigCTA"),
+      () => import("@/components/layout/Footer"),
+    ],
+  });
 
   // Calculate current subtitle based on time (derived state, no effect needed)
   const currentSubtitle = subtitlesData.find(
