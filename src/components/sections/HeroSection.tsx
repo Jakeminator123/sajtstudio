@@ -1186,6 +1186,7 @@ export default function HeroSection() {
           {/* CTA buttons with magnetic effect */}
           {/* Primary hero CTAs:
               - Left button: Links to /utvardera (evaluate website service)
+              - Middle button: Links to https://sajtmaskin.onrender.com (sajtmaskin tool)
               - Right button: Links to /portfolio (view portfolio/work) */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1267,6 +1268,73 @@ export default function HeroSection() {
                   }}
                 >
                   →
+                </motion.span>
+              </span>
+            </MagneticButton>
+
+            {/* Middle CTA: Sajtmaskin Tool - Green/Purple with glitch effect */}
+            <MagneticButton
+              href="https://sajtmaskin.onrender.com"
+              className="px-10 py-5 bg-gradient-to-r from-purple-600 via-violet-500 to-fuchsia-500 text-white font-bold text-lg rounded-lg hover:from-fuchsia-500 hover:via-purple-500 hover:to-violet-600 transition-all duration-500 shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_50px_rgba(168,85,247,0.8)] relative overflow-hidden group border border-white/20"
+              shouldReduceMotion={shouldReduceMotion}
+              mousePosition={mousePosition}
+              onHoverChange={setIsHoveringButton}
+            >
+              {/* Glitch effect overlay */}
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"
+                  animate={{
+                    x: ["-150%", "150%"],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    repeatDelay: 0.8,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
+              {/* Pulsing border */}
+              {!shouldReduceMotion && (
+                <motion.span
+                  className="absolute inset-0 rounded-lg border-2 border-fuchsia-400/50"
+                  animate={{
+                    opacity: [0.2, 0.9, 0.2],
+                    scale: [0.98, 1.03, 0.98],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-3 font-black tracking-wide">
+                <motion.span
+                  animate={{ 
+                    scale: [1, 1.3, 1],
+                    rotate: [0, 360, 0],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  ⚡
+                </motion.span>
+                Nu J)/&%R!
+                <motion.span
+                  className="text-xl"
+                  animate={{ 
+                    x: [0, 5, -5, 0],
+                    y: [0, -3, 3, 0],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  ✨
                 </motion.span>
               </span>
             </MagneticButton>
