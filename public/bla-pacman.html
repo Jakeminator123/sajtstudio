@@ -396,21 +396,25 @@
           case "ArrowUp":
           case "w":
           case "W":
+            e.preventDefault();
             setDirection("up");
             break;
           case "ArrowRight":
           case "d":
           case "D":
+            e.preventDefault();
             setDirection("right");
             break;
           case "ArrowDown":
           case "s":
           case "S":
+            e.preventDefault();
             setDirection("down");
             break;
           case "ArrowLeft":
           case "a":
           case "A":
+            e.preventDefault();
             setDirection("left");
             break;
         }
@@ -420,15 +424,27 @@
         }
       });
 
+      // Mobile button controls
       if (mobileControls) {
         mobileControls.querySelectorAll("button").forEach((button) => {
-          button.addEventListener("pointerdown", (event) => {
+          // Handle both touch and mouse events
+          const handlePress = (event) => {
             event.preventDefault();
+            event.stopPropagation();
             const dir = button.getAttribute("data-dir");
-            if (dir) {
+            if (dir && !gameOver) {
               setDirection(dir);
+              
+              // Hide overlay on first interaction
+              if (document.getElementById("msg").style.display !== "none") {
+                document.getElementById("msg").style.display = "none";
+              }
             }
-          });
+          };
+
+          button.addEventListener("touchstart", handlePress, { passive: false });
+          button.addEventListener("mousedown", handlePress);
+          button.addEventListener("click", handlePress);
         });
       }
 
