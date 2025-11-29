@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 
 // Parse SRT format subtitles
@@ -66,20 +66,24 @@ export default function AboutUsVideoSection() {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [currentSubtitle, setCurrentSubtitle] = useState<string>("");
+  const [videoDuration, setVideoDuration] = useState(1); // Default to 1 to avoid division by zero
 
-  // Update subtitle based on current time
-  useEffect(() => {
-    const subtitle = subtitlesData.find(
-      (sub) => currentTime >= sub.start && currentTime <= sub.end
-    );
-    setCurrentSubtitle(subtitle?.text || "");
-  }, [currentTime]);
+  // Calculate current subtitle based on time (derived state, no effect needed)
+  const currentSubtitle = subtitlesData.find(
+    (sub) => currentTime >= sub.start && currentTime <= sub.end
+  )?.text || "";
 
   // Handle time update
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  // Handle loaded metadata to get duration
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setVideoDuration(videoRef.current.duration);
     }
   };
 
@@ -179,6 +183,7 @@ export default function AboutUsVideoSection() {
               preload="metadata"
               playsInline
               onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
               onEnded={handleEnded}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
@@ -262,7 +267,7 @@ export default function AboutUsVideoSection() {
           </div>
 
           {/* Video progress bar */}
-          {isPlaying && videoRef.current && (
+          {isPlaying && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -273,7 +278,7 @@ export default function AboutUsVideoSection() {
               <div
                 className="h-full bg-gradient-to-r from-accent to-tertiary transition-all duration-100"
                 style={{
-                  width: `${(currentTime / (videoRef.current.duration || 1)) * 100}%`,
+                  width: `${(currentTime / videoDuration) * 100}%`,
                 }}
               />
             </motion.div>
