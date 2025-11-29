@@ -262,11 +262,19 @@ export default function TechShowcaseSection() {
   // Overlay dismissal removed - users scroll past if not interested
 
   const renderPacmanExperience = (variant: "overlay" | "inline") => {
-    // Larger dimensions for 4K screens - uses viewport units with larger max values
+    // Responsive dimensions that work better on mobile
     const containerDimensions =
       variant === "overlay"
-        ? { width: "min(92vw, 1400px)", height: "min(88vh, 1000px)" }
-        : { width: "min(95vw, 1200px)", height: "min(85vh, 950px)" };
+        ? { 
+            width: "min(92vw, 1400px)", 
+            height: "min(88vh, 1000px)",
+            maxHeight: "900px" // Prevent too tall on mobile
+          }
+        : { 
+            width: "min(95vw, 1200px)", 
+            height: "min(85vh, 950px)",
+            maxHeight: "850px" // Prevent too tall on mobile
+          };
 
     return (
       <motion.div
@@ -331,7 +339,7 @@ export default function TechShowcaseSection() {
         </motion.div>
 
         <motion.div
-          className="relative mx-auto"
+          className="relative mx-auto mb-8"
           style={containerDimensions}
           animate={{
             rotate: countdown === 0 && !isPlaying ? [0, -5, 5, -5, 0] : 0,
@@ -354,21 +362,21 @@ export default function TechShowcaseSection() {
           />
 
           <div
-            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-8 z-10"
+            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-4 md:p-8 z-10"
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.75)",
               backdropFilter: "blur(4px)",
             }}
           >
             {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
-            <div className="relative z-20 pointer-events-auto">
+            <div className="relative z-20 pointer-events-auto w-full flex flex-col items-center">
               <PacmanGame />
             </div>
 
-            {/* Play button - centered in the game area */}
+            {/* Play button - positioned better for mobile */}
             {!isPlaying && (
               <motion.div
-                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto"
+                className="absolute inset-0 flex items-center justify-center z-50 pointer-events-auto"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
@@ -376,14 +384,14 @@ export default function TechShowcaseSection() {
               >
                 <motion.button
                   onClick={handlePlayGame}
-                  className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold hover:scale-105 transition-transform shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold hover:scale-105 transition-transform shadow-lg text-xs md:text-base disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white"
                   style={{
                     fontFamily:
                       "var(--font-pixel), 'Press Start 2P', monospace",
                     textShadow:
                       "2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000",
                     imageRendering: "pixelated",
-                    letterSpacing: "2px",
+                    letterSpacing: "1px",
                     borderRadius: "0",
                     boxShadow: "4px 4px 0px #000, -2px -2px 0px #000",
                   }}

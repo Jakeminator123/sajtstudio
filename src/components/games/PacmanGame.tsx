@@ -506,17 +506,17 @@ export default function PacmanGame() {
     "rounded-2xl bg-white/15 border border-white/30 text-white text-2xl h-14 w-14 flex items-center justify-center shadow-lg active:scale-95 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 backdrop-blur";
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
+    <div className="relative flex flex-col items-center justify-center w-full max-w-full">
       {/* Score display */}
-      <div className="mb-4 text-center">
-        <h3 className="text-2xl font-bold text-white mb-2">PACMAN</h3>
-        <p className="text-xl text-white">Score: {score}</p>
-        <p className="text-sm text-white/70 mt-2 text-center">{controlHint}</p>
+      <div className="mb-4 text-center w-full">
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-2">PACMAN</h3>
+        <p className="text-lg md:text-xl text-white">Score: {score}</p>
+        <p className="text-xs md:text-sm text-white/70 mt-2 text-center px-2">{controlHint}</p>
       </div>
 
       {/* Game canvas */}
       <div
-        className="relative touch-pan-y"
+        className="relative touch-pan-y w-full flex justify-center"
         ref={containerRef}
         style={{ touchAction: "pan-y" }}
       >
@@ -524,8 +524,14 @@ export default function PacmanGame() {
           ref={canvasRef}
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
-          className="shadow-2xl rounded-lg max-w-full h-auto touch-none"
-          style={{ maxHeight: "60vh", touchAction: "none" }}
+          className="shadow-2xl rounded-lg touch-none"
+          style={{ 
+            maxHeight: "50vh",
+            maxWidth: "100%",
+            width: "auto",
+            height: "auto",
+            touchAction: "none" 
+          }}
         />
 
         {/* Game over / Win overlay */}
