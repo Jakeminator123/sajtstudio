@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ServiceModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export default function ServiceModal({
   service,
   direction = "right",
 }: ServiceModalProps) {
+  const { isDark } = useTheme();
   // Focus trap
   useEffect(() => {
     if (!isOpen) return;
@@ -63,7 +65,9 @@ export default function ServiceModal({
             exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.3 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60"
+            className={`fixed inset-0 z-[100] ${
+              isDark ? "bg-black/60" : "bg-black/40"
+            }`}
           />
 
           {/* Modal */}
@@ -89,7 +93,9 @@ export default function ServiceModal({
                 stiffness: 300,
                 damping: 30,
               }}
-              className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none shadow-2xl pointer-events-auto relative"
+              className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none shadow-2xl pointer-events-auto relative ${
+                isDark ? "bg-gray-900" : "bg-white"
+              }`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -97,11 +103,15 @@ export default function ServiceModal({
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="absolute top-6 right-6 z-10 w-12 h-12 flex items-center justify-center bg-black/5 hover:bg-black/10 rounded-full transition-colors"
+                className={`absolute top-6 right-6 z-10 w-12 h-12 flex items-center justify-center rounded-full transition-colors ${
+                  isDark
+                    ? "bg-white/10 hover:bg-white/20"
+                    : "bg-black/5 hover:bg-black/10"
+                }`}
                 aria-label="Stäng modal"
               >
                 <svg
-                  className="w-6 h-6 text-gray-700"
+                  className={`w-6 h-6 ${isDark ? "text-white" : "text-gray-700"}`}
                   fill="none"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -130,7 +140,9 @@ export default function ServiceModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-4xl md:text-5xl font-black mb-6 text-gray-900"
+                  className={`text-4xl md:text-5xl font-black mb-6 ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
                 >
                   {service.title}
                 </motion.h2>
@@ -140,7 +152,9 @@ export default function ServiceModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-lg text-gray-700 mb-8 leading-relaxed"
+                  className={`text-lg mb-8 leading-relaxed ${
+                    isDark ? "text-gray-300" : "text-gray-700"
+                  }`}
                 >
                   {service.longDesc}
                 </motion.p>
@@ -168,13 +182,15 @@ export default function ServiceModal({
                         strokeWidth="2"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                      >
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">{feature}</span>
+                          >
+                            <path d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className={isDark ? "text-gray-300" : "text-gray-700"}>
+                            {feature}
+                          </span>
+                        </motion.div>
+                      ))}
                     </motion.div>
-                  ))}
-                </motion.div>
 
                 {/* CTA */}
                 {/* Service-specific CTA: Links to /contact page */}

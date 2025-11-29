@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 interface CaseStudy {
   id: string;
@@ -36,6 +37,7 @@ export default function CaseStudyModal({
   hasNext = false,
   hasPrev = false,
 }: CaseStudyModalProps) {
+  const { isDark } = useTheme();
   // Track scroll position (currently unused but kept for future use)
   // const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -81,7 +83,9 @@ export default function CaseStudyModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black"
+            className={`fixed inset-0 z-[100] ${
+              isDark ? "bg-black" : "bg-gray-900"
+            }`}
           />
 
           {/* Modal Container */}
@@ -212,7 +216,7 @@ export default function CaseStudyModal({
               </div>
 
               {/* Content sections */}
-              <div className="bg-white text-gray-900">
+              <div className={isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"}>
                 {/* Problem */}
                 <section className="py-16 md:py-24">
                   <div className="max-w-4xl mx-auto px-8">
@@ -229,7 +233,9 @@ export default function CaseStudyModal({
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.1 }}
-                      className="text-lg md:text-xl text-gray-700 leading-relaxed"
+                      className={`text-lg md:text-xl leading-relaxed ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
                       {caseStudy.problem}
                     </motion.p>
@@ -237,7 +243,7 @@ export default function CaseStudyModal({
                 </section>
 
                 {/* Solution */}
-                <section className="py-16 md:py-24 bg-gray-50">
+                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
                   <div className="max-w-4xl mx-auto px-8">
                     <motion.h2
                       initial={{ opacity: 0, y: 20 }}
@@ -252,7 +258,9 @@ export default function CaseStudyModal({
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.1 }}
-                      className="text-lg md:text-xl text-gray-700 leading-relaxed"
+                      className={`text-lg md:text-xl leading-relaxed ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
                       {caseStudy.solution}
                     </motion.p>
@@ -290,7 +298,7 @@ export default function CaseStudyModal({
                 )}
 
                 {/* Results */}
-                <section className="py-16 md:py-24 bg-gray-50">
+                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
                   <div className="max-w-4xl mx-auto px-8">
                     <motion.h2
                       initial={{ opacity: 0, y: 20 }}
@@ -321,7 +329,7 @@ export default function CaseStudyModal({
                           >
                             <path d="M5 13l4 4L19 7" />
                           </svg>
-                          <span className="text-lg text-gray-700">
+                          <span className={`text-lg ${isDark ? "text-gray-300" : "text-gray-700"}`}>
                             {result}
                           </span>
                         </motion.div>
@@ -349,7 +357,11 @@ export default function CaseStudyModal({
                           whileInView={{ opacity: 1, scale: 1 }}
                           viewport={{ once: true }}
                           transition={{ delay: index * 0.05 }}
-                          className="px-6 py-3 bg-gray-100 text-gray-900 font-medium"
+                          className={`px-6 py-3 font-medium ${
+                            isDark
+                              ? "bg-gray-800 text-gray-200"
+                              : "bg-gray-100 text-gray-900"
+                          }`}
                         >
                           {tech}
                         </motion.span>

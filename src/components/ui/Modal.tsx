@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { trapFocus } from "@/lib/focusUtils";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function Modal({
   maxWidth = "lg",
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const { isDark } = useTheme();
 
   // Handle escape key
   useEffect(() => {
@@ -85,11 +87,19 @@ export default function Modal({
             exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-gradient-to-br from-black/90 via-black/85 to-gray-900/90"
+            className={`fixed inset-0 z-50 ${
+              isDark
+                ? "bg-gradient-to-br from-black/90 via-black/85 to-gray-900/90"
+                : "bg-gradient-to-br from-white/80 via-gray-100/70 to-gray-200/80"
+            }`}
           >
             {/* Animated gradient overlay */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-gray-800/20"
+              className={`absolute inset-0 ${
+                isDark
+                  ? "bg-gradient-to-br from-accent/10 via-transparent to-gray-800/20"
+                  : "bg-gradient-to-br from-accent/5 via-transparent to-gray-400/10"
+              }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8 }}
@@ -110,7 +120,11 @@ export default function Modal({
                 stiffness: 300,
                 damping: 30,
               }}
-              className={`relative bg-white w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200`}
+              className={`relative w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl ${
+                isDark
+                  ? "bg-gray-900 border-gray-700"
+                  : "bg-white border-gray-200"
+              } border`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Animated border glow with blue/gray gradient */}
@@ -147,11 +161,15 @@ export default function Modal({
                 whileHover={{
                   scale: 1.1,
                   rotate: 90,
-                  backgroundColor: "#f3f4f6",
+                  backgroundColor: isDark ? "#374151" : "#f3f4f6",
                 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 flex items-center justify-center bg-white hover:bg-gray-50 transition-all duration-300 z-20 rounded-full shadow-lg border border-gray-200 group"
+                className={`absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 flex items-center justify-center transition-all duration-300 z-20 rounded-full shadow-lg group ${
+                  isDark
+                    ? "bg-gray-800 hover:bg-gray-700 border-gray-600"
+                    : "bg-white hover:bg-gray-50 border-gray-200"
+                } border`}
                 aria-label="Stäng modal"
               >
                 {/* Hover glow effect */}
@@ -168,7 +186,9 @@ export default function Modal({
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="relative z-10 text-gray-700 group-hover:text-accent transition-colors duration-300"
+                  className={`relative z-10 transition-colors duration-300 group-hover:text-accent ${
+                    isDark ? "text-gray-300" : "text-gray-700"
+                  }`}
                   initial={{ rotate: 0 }}
                   whileHover={{ rotate: 90 }}
                   transition={{ duration: 0.3 }}
@@ -208,6 +228,8 @@ interface ProjectModalProps {
 }
 
 export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
+  const { isDark } = useTheme();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="xl">
       <div className="relative">
@@ -303,12 +325,14 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
         </motion.div>
 
         {/* Enhanced content section */}
-        <div className="p-8 sm:p-12 md:p-16 lg:p-20 bg-white relative">
+        <div className={`p-8 sm:p-12 md:p-16 lg:p-20 relative ${isDark ? "bg-gray-900" : "bg-white"}`}>
           {/* Blue gradient accent */}
           <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/5 to-transparent opacity-50 pointer-events-none" />
 
           {/* Gray gradient accent */}
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gray-900/3 to-transparent opacity-50 pointer-events-none" />
+          <div className={`absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l opacity-50 pointer-events-none ${
+            isDark ? "from-gray-700/30 to-transparent" : "from-gray-900/3 to-transparent"
+          }`} />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -322,7 +346,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
           >
             {/* Description */}
             <motion.h2
-              className="text-h2 font-black mb-6 text-black"
+              className={`text-h2 font-black mb-6 ${isDark ? "text-white" : "text-black"}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
@@ -330,7 +354,9 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
               Om projektet
             </motion.h2>
             <motion.p
-              className="text-lg text-gray-600 leading-relaxed mb-12"
+              className={`text-lg leading-relaxed mb-12 ${
+                isDark ? "text-gray-300" : "text-gray-600"
+              }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -346,7 +372,9 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
               >
-                <h3 className="text-h3 font-bold mb-6 text-black">Tekniker</h3>
+                <h3 className={`text-h3 font-bold mb-6 ${isDark ? "text-white" : "text-black"}`}>
+                  Tekniker
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {project.technologies.map((tech, index) => (
                     <motion.span
@@ -359,7 +387,11 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                         ease: [0.34, 1.56, 0.64, 1],
                       }}
                       whileHover={{ scale: 1.05, y: -2 }}
-                      className="px-4 py-2 bg-gray-100 hover:bg-accent/10 text-gray-700 hover:text-accent font-medium transition-colors duration-300 border border-gray-200 hover:border-accent/30"
+                      className={`px-4 py-2 font-medium transition-colors duration-300 border ${
+                        isDark
+                          ? "bg-gray-800 hover:bg-accent/10 text-gray-200 hover:text-accent border-gray-700 hover:border-accent/30"
+                          : "bg-gray-100 hover:bg-accent/10 text-gray-700 hover:text-accent border-gray-200 hover:border-accent/30"
+                      }`}
                     >
                       {tech}
                     </motion.span>
@@ -384,7 +416,11 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                     boxShadow: "0 0 30px rgba(0, 102, 255, 0.3)",
                   }}
                   whileTap={{ scale: 0.95 }}
-                  className="inline-block px-8 py-4 bg-black text-white font-semibold hover:bg-accent transition-all duration-300 relative overflow-hidden group shadow-lg"
+                  className={`inline-block px-8 py-4 font-semibold transition-all duration-300 relative overflow-hidden group shadow-lg ${
+                    isDark
+                      ? "bg-accent text-white hover:bg-accent/80"
+                      : "bg-black text-white hover:bg-accent"
+                  }`}
                 >
                   {/* Shimmer effect */}
                   <motion.span
