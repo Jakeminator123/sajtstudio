@@ -47,11 +47,16 @@
           rgba(4, 12, 26, 0.7)
         );
         touch-action: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       canvas {
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
         display: block;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
       }
 
       .overlay {
@@ -196,8 +201,31 @@
         "ontouchstart" in window ||
         (navigator && navigator.maxTouchPoints > 0) ||
         (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      
+      // Set canvas internal resolution
       canvas.width = cols * cs;
       canvas.height = rows * cs;
+
+      // Responsive canvas sizing
+      function resizeCanvas() {
+        const maxWidth = window.innerWidth;
+        const maxHeight = window.innerHeight - (isTouchDevice ? 160 : 0); // Leave space for mobile controls
+        const aspectRatio = canvas.width / canvas.height;
+        
+        let displayWidth = Math.min(maxWidth * 0.95, canvas.width);
+        let displayHeight = displayWidth / aspectRatio;
+        
+        if (displayHeight > maxHeight) {
+          displayHeight = maxHeight;
+          displayWidth = displayHeight * aspectRatio;
+        }
+        
+        canvas.style.width = displayWidth + "px";
+        canvas.style.height = displayHeight + "px";
+      }
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
 
       if (isTouchDevice) {
         mobileControls?.classList.add("active");
