@@ -57,6 +57,17 @@ const BigCTA = dynamic(
   }
 );
 
+const AboutUsVideoSection = dynamic(
+  () =>
+    import("@/components/sections/AboutUsVideoSection").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Prevent hydration mismatch
+  }
+);
+
 const OpticScrollShowcase = dynamic(
   () =>
     import("@/components/sections/OpticScrollShowcase").catch(() => {
@@ -131,6 +142,11 @@ export default function Home() {
         {/* Testimonials */}
         <div id="omdomen" className="content-visibility-auto">
           <TestimonialsSection />
+        </div>
+
+        {/* About Us Video Section */}
+        <div className="content-visibility-auto">
+          <AboutUsVideoSection />
         </div>
 
         {/* Big CTA - Fantasy style */}

@@ -224,7 +224,15 @@ export default function AboutSection() {
   const blobBlurString = useTransform(blobBlur, (val) => `blur(${val}px)`);
 
   // Smoke-like blob shape - more wispy and organic, less defined edges
+  // Default path for initial render to prevent SVG errors
+  const defaultPath = "M 100 100 L 100 100 Z";
+
   const blobPath = useTransform(morphProgress, (progress) => {
+    // Handle undefined/NaN progress values
+    if (progress === undefined || progress === null || isNaN(progress)) {
+      return defaultPath;
+    }
+
     // Create a wispy, smoke-like path that morphs and dissipates
     const t = progress;
     const w = 200;

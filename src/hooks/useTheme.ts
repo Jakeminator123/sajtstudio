@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 
 export type Theme = "light" | "dark";
 
-// Get theme from localStorage or system preference
+// Get theme from localStorage - default to dark (ignore system preference)
 function getThemeSnapshot(): Theme {
   if (typeof window === "undefined") return "dark";
 
@@ -13,11 +13,7 @@ function getThemeSnapshot(): Theme {
     return savedTheme;
   }
 
-  // Fall back to system preference
-  if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-    return "light";
-  }
-
+  // Default to dark (ignore system preference)
   return "dark";
 }
 

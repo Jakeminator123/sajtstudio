@@ -11,7 +11,7 @@
     "kill": "node scripts/kill-node-processes.js",
     "kill:ps1": "pwsh -ExecutionPolicy Bypass -File scripts/kill-node-processes.ps1",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 1337",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "clean": "node scripts/clean.js",

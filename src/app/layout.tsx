@@ -135,19 +135,10 @@ export default function RootLayout({
                   if (theme === 'light') {
                     document.documentElement.classList.remove('dark');
                     document.documentElement.classList.add('light');
-                  } else if (theme === 'dark') {
+                  } else {
+                    // Default to dark (ignore system preference - dark is always default)
                     document.documentElement.classList.remove('light');
                     document.documentElement.classList.add('dark');
-                  } else {
-                    // No saved theme - check system preference
-                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                      document.documentElement.classList.remove('dark');
-                      document.documentElement.classList.add('light');
-                    } else {
-                      // Default to dark
-                      document.documentElement.classList.remove('light');
-                      document.documentElement.classList.add('dark');
-                    }
                   }
                 } catch (e) {}
               })();

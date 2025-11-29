@@ -20,7 +20,8 @@ export default function Skeleton({
   count = 1,
   animation = true,
 }: SkeletonProps) {
-  const baseClasses = "bg-gray-200 rounded";
+  // Dark mode compatible skeleton colors
+  const baseClasses = "bg-gray-200 dark:bg-gray-800 rounded";
 
   const variantClasses = {
     text: "h-4 w-full rounded",
@@ -146,7 +147,7 @@ export function SectionSkeleton() {
 // Skeleton for card loading
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+    <div className="bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-sm dark:shadow-gray-900/50">
       <Skeleton variant="rectangular" height="200px" animation={false} />
       <div className="p-6 space-y-3">
         <Skeleton variant="text" width="80%" height="1.5rem" />
@@ -171,7 +172,7 @@ export function PortfolioGridSkeleton() {
 // Hero section skeleton
 export function HeroSkeleton() {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gray-50">
+    <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <Skeleton
