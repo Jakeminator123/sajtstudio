@@ -65,6 +65,8 @@ export default function HeaderNav() {
   const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { scrollY } = useScroll({
     layoutEffect: false,
+    // Using window as scroll container to fix Framer Motion warning
+    // about non-static position containers
   });
 
   // Ensure hydration safety - only track scroll after mount
@@ -318,7 +320,7 @@ export default function HeaderNav() {
                           }
                           // Allow normal Next.js navigation for regular page links
                         }}
-                        className={`nav-link-shimmer px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
+                        className={`nav-link-shimmer block px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
                           isActive
                             ? "text-white"
                             : "text-gray-400 hover:text-white"

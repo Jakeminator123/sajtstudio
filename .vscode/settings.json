@@ -4,6 +4,7 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.disableAutomaticTypeAcquisition": false,
   "eslint.enable": true,
   "eslint.workingDirectories": ["."],
   "eslint.validate": [

@@ -3,9 +3,9 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next",
     "eamodio.gitlens",
     "usernamehw.errorlens",
     "christian-kohler.path-intellisense"
-  ]
+  ],
+  "unwantedRecommendations": ["ms-vscode.vscode-typescript-next"]
 }
