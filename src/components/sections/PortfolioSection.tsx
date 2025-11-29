@@ -5,11 +5,13 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { featuredProjects } from "@/data/projects";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function PortfolioSection() {
   const sectionRef = useRef(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const { isLight } = useTheme();
 
   // Scroll-based animations for heading
   const { scrollYProgress } = useScroll({
@@ -40,11 +42,27 @@ export default function PortfolioSection() {
   return (
     <section
       ref={sectionRef}
-      className="py-16 sm:py-24 md:py-32 lg:py-48 bg-black relative overflow-hidden"
+      className={`py-16 sm:py-24 md:py-32 lg:py-48 relative overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50"
+          : "bg-black"
+      }`}
       style={{ position: "relative" }}
     >
       {/* Dynamic background with multiple gradients */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-950 to-black pointer-events-none z-0" />
+      <div className={`absolute inset-0 pointer-events-none z-0 ${
+        isLight
+          ? "bg-gradient-to-b from-sky-100/30 via-transparent to-rose-100/30"
+          : "bg-gradient-to-b from-black via-gray-950 to-black"
+      }`} />
+
+      {/* Light mode decorative elements */}
+      {isLight && (
+        <>
+          <div className="absolute top-20 right-10 w-80 h-80 bg-gradient-to-bl from-blue-200/40 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute bottom-20 left-10 w-72 h-72 bg-gradient-to-tr from-amber-200/30 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+        </>
+      )}
 
       {/* Animated blue glow */}
       <motion.div

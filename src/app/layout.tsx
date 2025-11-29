@@ -120,10 +120,40 @@ export default function RootLayout({
   return (
     <html
       lang="sv"
-      className={`${inter.variable} ${dancingScript.variable} ${pressStart2P.variable} overflow-x-hidden w-full`}
+      className={`${inter.variable} ${dancingScript.variable} ${pressStart2P.variable} overflow-x-hidden w-full dark`}
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
       <head>
+        {/* Theme initialization script - runs before render to prevent flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                  } else if (theme === 'dark') {
+                    document.documentElement.classList.remove('light');
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    // No saved theme - check system preference
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                      document.documentElement.classList.remove('dark');
+                      document.documentElement.classList.add('light');
+                    } else {
+                      // Default to dark
+                      document.documentElement.classList.remove('light');
+                      document.documentElement.classList.add('dark');
+                    }
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         {/* Fix for passive touchstart listeners - MUST be first to intercept all listeners */}
         <script
           dangerouslySetInnerHTML={{

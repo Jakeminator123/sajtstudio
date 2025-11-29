@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -28,12 +29,26 @@ const MatrixContactForm = dynamic(
  */
 export default function BigCTA() {
   const sectionRef = useRef(null);
+  const { isLight } = useTheme();
 
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen flex flex-col bg-black text-white relative overflow-hidden"
+      className={`min-h-screen flex flex-col relative overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-sky-100 via-amber-50 to-rose-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
     >
+      {/* Light mode decorative elements */}
+      {isLight && (
+        <>
+          <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-sky-200/40 to-transparent pointer-events-none z-0" />
+          <div className="absolute top-1/4 right-10 w-80 h-80 bg-gradient-to-bl from-blue-200/30 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute bottom-1/4 left-10 w-72 h-72 bg-gradient-to-tr from-rose-200/25 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-amber-100/30 to-transparent pointer-events-none z-0" />
+        </>
+      )}
       {/* Top content area - Title and description */}
       <div className="relative z-20 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -60,7 +75,13 @@ export default function BigCTA() {
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <span className="bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
+            <span
+              className={`bg-gradient-to-r bg-clip-text text-transparent ${
+                isLight
+                  ? "from-gray-800 via-gray-700 to-gray-600"
+                  : "from-white via-white to-gray-400"
+              }`}
+            >
               Låt oss
             </span>
             <br />
@@ -78,7 +99,11 @@ export default function BigCTA() {
             transition={{ delay: 0.5, duration: 0.6 }}
           >
             <span className="w-8 h-[1px] bg-accent/50" />
-            <p className="text-lg sm:text-xl text-white/70 font-light tracking-wide uppercase">
+            <p
+              className={`text-lg sm:text-xl font-light tracking-wide uppercase ${
+                isLight ? "text-gray-600" : "text-white/70"
+              }`}
+            >
               Vi vill höra från dig
             </p>
             <span className="w-8 h-[1px] bg-accent/50" />
@@ -90,7 +115,9 @@ export default function BigCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.7, duration: 0.6 }}
-            className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto"
+            className={`text-base sm:text-lg max-w-2xl mx-auto ${
+              isLight ? "text-gray-500" : "text-white/50"
+            }`}
           >
             Klicka på tangenterna nedan för att skriva ditt meddelande, eller
             aktivera ditt eget tangentbord.
@@ -105,9 +132,21 @@ export default function BigCTA() {
           <Keyboard3DBackground />
         </div>
 
-        {/* Dark gradient overlays for better readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/70 pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 pointer-events-none z-10" />
+        {/* Gradient overlays for better readability - adapts to theme */}
+        <div
+          className={`absolute inset-0 pointer-events-none z-10 ${
+            isLight
+              ? "bg-gradient-to-t from-[#fef9e7]/90 via-transparent to-sky-100/60"
+              : "bg-gradient-to-t from-black/90 via-transparent to-black/70"
+          }`}
+        />
+        <div
+          className={`absolute inset-0 pointer-events-none z-10 ${
+            isLight
+              ? "bg-gradient-to-r from-[#fff5e6]/50 via-transparent to-[#fff5e6]/50"
+              : "bg-gradient-to-r from-black/50 via-transparent to-black/50"
+          }`}
+        />
 
         {/* Clickable Phone - positioned to the left (desktop only) */}
         <a
@@ -126,8 +165,8 @@ export default function BigCTA() {
             <Image
               src="/images/contact_phone.webp"
               alt="Ring oss"
-              width={180}
-              height={220}
+              width={240}
+              height={300}
               className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(0,102,255,0.5)]"
             />
             {/* Hover tooltip */}
@@ -174,7 +213,13 @@ export default function BigCTA() {
       </div>
 
       {/* Bottom contact info */}
-      <div className="relative z-20 py-8 px-4 bg-gradient-to-t from-black to-transparent">
+      <div
+        className={`relative z-20 py-8 px-4 ${
+          isLight
+            ? "bg-gradient-to-t from-amber-100/80 to-transparent"
+            : "bg-gradient-to-t from-black to-transparent"
+        }`}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -185,7 +230,9 @@ export default function BigCTA() {
           {/* Email */}
           <motion.a
             href="mailto:hej@dg97.se"
-            className="group flex items-center gap-3 text-white/60 hover:text-accent transition-colors"
+            className={`group flex items-center gap-3 hover:text-accent transition-colors ${
+              isLight ? "text-gray-600" : "text-white/60"
+            }`}
             whileHover={{ scale: 1.05 }}
           >
             <svg
@@ -203,12 +250,18 @@ export default function BigCTA() {
           </motion.a>
 
           {/* Divider */}
-          <span className="hidden sm:block w-px h-6 bg-white/20" />
+          <span
+            className={`hidden sm:block w-px h-6 ${
+              isLight ? "bg-gray-300" : "bg-white/20"
+            }`}
+          />
 
           {/* Phone */}
           <motion.a
             href="tel:+34654161231"
-            className="group flex items-center gap-3 text-white/60 hover:text-accent transition-colors"
+            className={`group flex items-center gap-3 hover:text-accent transition-colors ${
+              isLight ? "text-gray-600" : "text-white/60"
+            }`}
             whileHover={{ scale: 1.05 }}
           >
             <svg
@@ -226,10 +279,18 @@ export default function BigCTA() {
           </motion.a>
 
           {/* Divider */}
-          <span className="hidden sm:block w-px h-6 bg-white/20" />
+          <span
+            className={`hidden sm:block w-px h-6 ${
+              isLight ? "bg-gray-300" : "bg-white/20"
+            }`}
+          />
 
           {/* Fun note */}
-          <span className="text-white/30 text-xs italic">
+          <span
+            className={`text-xs italic ${
+              isLight ? "text-gray-400" : "text-white/30"
+            }`}
+          >
             😎 På semester i Spanien
           </span>
         </motion.div>

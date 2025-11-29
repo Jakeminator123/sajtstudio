@@ -18,6 +18,7 @@ import TechShowcaseSection from "@/components/sections/TechShowcaseSection";
 import { SectionSkeleton } from "@/components/ui/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
 import { usePrefetchOnScroll } from "@/hooks/usePrefetchOnScroll";
+import { useTheme } from "@/hooks/useTheme";
 import IntroVideo from "@/components/animations/IntroVideo";
 
 // Lazy load sections that appear later - prefetched via usePrefetchOnScroll for smooth scrolling
@@ -72,6 +73,7 @@ export default function Home() {
   usePrefetch();
   // Prefetch components as user scrolls near them - delayed to avoid blocking navigation
   usePrefetchOnScroll();
+  const { isLight } = useTheme();
 
   return (
     <>
@@ -79,7 +81,11 @@ export default function Home() {
       <IntroVideo />
 
       <HeaderNav />
-      <main id="main-content" tabIndex={-1} className="relative z-10 bg-black">
+      <main id="main-content" tabIndex={-1} className={`relative z-10 transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-b from-amber-50 via-orange-50/30 to-sky-50"
+          : "bg-black"
+      }`}>
         {/* Hero with rain, lightning, and text animations */}
         <HeroSection />
 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { useMounted } from "@/hooks/useMounted";
+import { useTheme } from "@/hooks/useTheme";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
@@ -38,6 +39,7 @@ const processSteps = [
 export default function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
+  const { isLight } = useTheme();
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -52,7 +54,11 @@ export default function ProcessSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="section-spacing-md bg-black text-white relative overflow-hidden"
+      className={`section-spacing-md relative overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-sky-50 via-amber-50 to-rose-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
       style={mounted ? {
         opacity,
         scale,
@@ -66,37 +72,53 @@ export default function ProcessSection() {
       }}
       suppressHydrationWarning
     >
-      {/* Background layers - much darker */}
+      {/* Background layers */}
       <div className="absolute inset-0 z-0 min-h-full">
-        {/* Main background image */}
-        <Image
-          src="/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp"
-          alt=""
-          fill
-          className="object-cover"
-          style={{ opacity: 0.15 }}
-          sizes="100vw"
-          priority={false}
-        />
+        {/* Main background image - hidden in light mode */}
+        {!isLight && (
+          <>
+            <Image
+              src="/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp"
+              alt=""
+              fill
+              className="object-cover"
+              style={{ opacity: 0.15 }}
+              sizes="100vw"
+              priority={false}
+            />
 
-        {/* GIF overlay for subtle animation */}
-        <Image
-          src="/images/animations/hero-animation.gif"
-          alt=""
-          fill
-          className="object-cover"
-          style={{ opacity: 0.1, mixBlendMode: 'screen' }}
-          sizes="100vw"
-          loading="lazy"
-          unoptimized
-        />
+            {/* GIF overlay for subtle animation */}
+            <Image
+              src="/images/animations/hero-animation.gif"
+              alt=""
+              fill
+              className="object-cover"
+              style={{ opacity: 0.1, mixBlendMode: 'screen' }}
+              sizes="100vw"
+              loading="lazy"
+              unoptimized
+            />
+          </>
+        )}
 
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/85" />
+        {/* Overlay for readability */}
+        <div className={`absolute inset-0 ${
+          isLight
+            ? "bg-gradient-to-br from-blue-100/40 via-transparent to-amber-100/40"
+            : "bg-black/85"
+        }`} />
+
+        {/* Light mode decorative elements */}
+        {isLight && (
+          <>
+            <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-sky-200/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-tl from-rose-200/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+          </>
+        )}
       </div>
 
-      {/* Smoke effect */}
-      <SmokeEffect count={3} speed={30} opacity={0.08} />
+      {/* Smoke effect - only in dark mode */}
+      {!isLight && <SmokeEffect count={3} speed={30} opacity={0.08} />}
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Section header */}

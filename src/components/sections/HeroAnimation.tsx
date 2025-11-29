@@ -1,6 +1,7 @@
 "use client";
 
 import { useVideoLoader } from "@/hooks/useVideoLoader";
+import { useTheme } from "@/hooks/useTheme";
 import { prefersReducedMotion } from "@/lib/performance";
 import {
   motion,
@@ -68,6 +69,7 @@ export default function HeroAnimation() {
     skewY: number;
   }> | null>(null);
   const { videoRef, videoError, mounted } = useVideoLoader();
+  const { isLight } = useTheme();
 
   const scrollToTechSection = useCallback(() => {
     if (hasAutoScrolledRef.current) return;
@@ -1644,7 +1646,11 @@ export default function HeroAnimation() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 bg-black text-white overflow-hidden"
+      className={`relative py-32 md:py-48 overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-sky-50 via-amber-50 to-rose-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
       style={{
         position: "relative",
         scrollSnapAlign: "start" as const,
@@ -1655,17 +1661,25 @@ export default function HeroAnimation() {
       {/* BACKGROUND LAYER - All decorative elements */}
       {/* ============================================ */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Base solid black background - ensures consistent background */}
-        <div className="absolute inset-0 bg-black" />
+        {/* Base solid background - ensures consistent background */}
+        <div className={`absolute inset-0 ${
+          isLight
+            ? "bg-gradient-to-br from-sky-100/50 via-amber-50/30 to-rose-100/50"
+            : "bg-black"
+        }`} />
 
         {/* Base background pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(0,102,255,0.3),transparent_60%)]" />
+        <div className={`absolute inset-0 ${isLight ? "opacity-30" : "opacity-20"}`}>
+          <div className={`absolute inset-0 ${
+            isLight
+              ? "bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.2),transparent_60%)]"
+              : "bg-[radial-gradient(circle_at_30%_50%,rgba(0,102,255,0.3),transparent_60%)]"
+          }`} />
           <Image
-            src="/images/backgrounds/section-background.webp"
+            src={isLight ? "/images/backgrounds/section-background-sunny.webp" : "/images/backgrounds/section-background.webp"}
             alt=""
             fill
-            className="object-cover opacity-20"
+            className={`object-cover ${isLight ? "opacity-40" : "opacity-20"}`}
             loading="lazy"
             sizes="100vw"
           />
@@ -1673,19 +1687,35 @@ export default function HeroAnimation() {
 
         {/* Left side blue gradient accent */}
         <motion.div
-          className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/10 via-accent/5 to-transparent opacity-60"
+          className={`absolute top-0 left-0 w-1/3 h-full opacity-60 ${
+            isLight
+              ? "bg-gradient-to-r from-sky-200/40 via-sky-100/20 to-transparent"
+              : "bg-gradient-to-r from-accent/10 via-accent/5 to-transparent"
+          }`}
           initial={{ x: "-100%" }}
           animate={{ x: 0 }}
           transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
         />
 
-        {/* Right side gray gradient accent */}
+        {/* Right side gradient accent */}
         <motion.div
-          className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-gray-900/8 via-gray-800/4 to-transparent opacity-50"
+          className={`absolute top-0 right-0 w-1/3 h-full opacity-50 ${
+            isLight
+              ? "bg-gradient-to-l from-rose-200/40 via-amber-100/20 to-transparent"
+              : "bg-gradient-to-l from-gray-900/8 via-gray-800/4 to-transparent"
+          }`}
           initial={{ x: "100%" }}
           animate={{ x: 0 }}
           transition={{ duration: 1.2, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
         />
+
+        {/* Light mode decorative orbs */}
+        {isLight && (
+          <>
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-to-tl from-amber-200/25 to-transparent rounded-full blur-3xl" />
+          </>
+        )}
       </div>
 
       {/* ============================================ */}
@@ -1702,8 +1732,8 @@ export default function HeroAnimation() {
           <motion.h2
             style={
               mounted
-                ? { color: headingColor }
-                : { color: "rgba(255, 255, 255, 1)" }
+                ? { color: isLight ? "rgba(31, 41, 55, 1)" : headingColor }
+                : { color: isLight ? "rgba(31, 41, 55, 1)" : "rgba(255, 255, 255, 1)" }
             }
             className="text-hero md:text-display font-black mb-8 leading-[0.9] text-center"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -1715,7 +1745,9 @@ export default function HeroAnimation() {
             Video & Bild Explosion
           </motion.h2>
           <motion.p
-            className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto"
+            className={`text-xl md:text-2xl max-w-3xl mx-auto ${
+              isLight ? "text-gray-600" : "text-gray-300"
+            }`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

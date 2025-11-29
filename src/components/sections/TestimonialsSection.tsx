@@ -6,6 +6,7 @@ import { useRef } from "react";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
+import { useTheme } from "@/hooks/useTheme";
 
 const testimonials = [
   {
@@ -36,6 +37,7 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const { isLight } = useTheme();
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -49,28 +51,46 @@ export default function TestimonialsSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="section-spacing-md bg-black text-white relative overflow-hidden"
+      className={`section-spacing-md relative overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-amber-50 via-sky-50 to-rose-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
       style={{
         opacity,
         scale
       }}
     >
-      {/* Background layers - much darker */}
+      {/* Background layers */}
       <div className="absolute inset-0 min-h-full">
-        {/* GIF background only */}
-        <Image
-          src="/images/animations/hero-animation.gif"
-          alt=""
-          fill
-          className="object-cover"
-          style={{ opacity: 0.15 }}
-          sizes="100vw"
-          loading="lazy"
-          unoptimized
-        />
+        {/* GIF background only - hidden in light mode */}
+        {!isLight && (
+          <Image
+            src="/images/animations/hero-animation.gif"
+            alt=""
+            fill
+            className="object-cover"
+            style={{ opacity: 0.15 }}
+            sizes="100vw"
+            loading="lazy"
+            unoptimized
+          />
+        )}
 
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/85" />
+        {/* Overlay for readability */}
+        <div className={`absolute inset-0 ${
+          isLight
+            ? "bg-gradient-to-br from-sky-100/50 via-transparent to-rose-100/50"
+            : "bg-black/85"
+        }`} />
+
+        {/* Light mode decorative elements */}
+        {isLight && (
+          <>
+            <div className="absolute top-10 right-20 w-80 h-80 bg-gradient-to-bl from-blue-200/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 left-20 w-72 h-72 bg-gradient-to-tr from-amber-200/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+          </>
+        )}
       </div>
 
       {/* Smoke effect */}

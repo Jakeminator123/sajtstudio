@@ -4,6 +4,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 import { useMounted } from "@/hooks/useMounted";
+import { useTheme } from "@/hooks/useTheme";
 import { uspContent } from "@/config/content/usps";
 
 interface USPFeatureProps {
@@ -156,6 +157,7 @@ function USPFeature({
 export default function USPSection() {
   const sectionRef = useRef(null);
   const mounted = useMounted();
+  const { isLight } = useTheme();
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   // Scroll-based animations for title
@@ -179,10 +181,27 @@ export default function USPSection() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 md:py-48 bg-black overflow-hidden relative"
+      className={`py-32 md:py-48 overflow-hidden relative transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-orange-50 via-amber-50 to-rose-50"
+          : "bg-black"
+      }`}
     >
       {/* Dynamic background with multiple gradients */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black pointer-events-none z-0" />
+      <div className={`absolute inset-0 pointer-events-none z-0 ${
+        isLight
+          ? "bg-gradient-to-br from-sky-100/30 via-transparent to-rose-100/30"
+          : "bg-gradient-to-br from-black via-gray-950 to-black"
+      }`} />
+
+      {/* Light mode decorative orbs */}
+      {isLight && (
+        <>
+          <div className="absolute top-10 right-20 w-80 h-80 bg-gradient-to-bl from-blue-200/40 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute bottom-10 left-20 w-72 h-72 bg-gradient-to-tr from-rose-200/30 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-r from-amber-200/25 to-transparent rounded-full blur-2xl pointer-events-none z-0" />
+        </>
+      )}
 
       {/* Animated large blue glow */}
       <motion.div

@@ -40,7 +40,9 @@
  */
 
 import Button from "@/components/ui/Button";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { siteConfig } from "@/config/siteConfig";
+import { useTheme } from "@/hooks/useTheme";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -59,6 +61,7 @@ export default function HeaderNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { isLight } = useTheme();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
@@ -193,7 +196,9 @@ export default function HeaderNav() {
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           mounted && isScrolled
-            ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
+            ? isLight
+              ? "bg-gradient-to-r from-[#fef9e7]/95 via-[#fff5e6]/95 to-[#f0f7ff]/95 backdrop-blur-2xl border-b border-amber-200/40 shadow-xl shadow-amber-100/30"
+              : "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
             : "bg-transparent"
         }`}
         suppressHydrationWarning
@@ -262,7 +267,11 @@ export default function HeaderNav() {
 
                 {/* Text logo */}
                 <div className="relative">
-                  <span className="text-xl font-black text-white">
+                  <span
+                    className={`text-xl font-black ${
+                      isLight ? "text-gray-900" : "text-white"
+                    }`}
+                  >
                     Sajtstudio
                   </span>
                   <motion.span
@@ -322,7 +331,11 @@ export default function HeaderNav() {
                         }}
                         className={`nav-link-shimmer block px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
                           isActive
-                            ? "text-white"
+                            ? isLight
+                              ? "text-gray-900"
+                              : "text-white"
+                            : isLight
+                            ? "text-gray-600 hover:text-gray-900"
                             : "text-gray-400 hover:text-white"
                         } ${shimmeringIndex === index ? "shimmer-active" : ""}`}
                         suppressHydrationWarning
@@ -356,22 +369,25 @@ export default function HeaderNav() {
             </nav>
 
             {/* ============================================
-                 DESKTOP CTA BUTTON
+                 DESKTOP CTA BUTTON + THEME TOGGLE
                  ============================================
                  Visible on desktop, hidden on mobile (mobile CTA is in MobileMenu)
 
                  CTA Destination: /contact (start project CTA)
                  This is the primary conversion button in the header navigation
               */}
-            <div className="cta-button-header hidden lg:block">
-              <Button
-                href="/contact"
-                variant="cta"
-                size="sm"
-                ariaLabel="Starta projekt"
-              >
-                Starta projekt
-              </Button>
+            <div className="hidden lg:flex items-center gap-3">
+              <ThemeToggle />
+              <div className="cta-button-header">
+                <Button
+                  href="/contact"
+                  variant="cta"
+                  size="sm"
+                  ariaLabel="Starta projekt"
+                >
+                  Starta projekt
+                </Button>
+              </div>
             </div>
 
             {/* ============================================
@@ -392,21 +408,27 @@ export default function HeaderNav() {
                     rotate: menuOpen ? 45 : 0,
                     y: menuOpen ? 8 : 0,
                   }}
-                  className="w-full h-0.5 bg-white origin-left"
+                  className={`w-full h-0.5 origin-left ${
+                    isLight ? "bg-gray-900" : "bg-white"
+                  }`}
                 />
                 <motion.span
                   animate={{
                     opacity: menuOpen ? 0 : 1,
                     scaleX: menuOpen ? 0 : 1,
                   }}
-                  className="w-full h-0.5 bg-white"
+                  className={`w-full h-0.5 ${
+                    isLight ? "bg-gray-900" : "bg-white"
+                  }`}
                 />
                 <motion.span
                   animate={{
                     rotate: menuOpen ? -45 : 0,
                     y: menuOpen ? -8 : 0,
                   }}
-                  className="w-full h-0.5 bg-white origin-left"
+                  className={`w-full h-0.5 origin-left ${
+                    isLight ? "bg-gray-900" : "bg-white"
+                  }`}
                 />
               </div>
             </motion.button>

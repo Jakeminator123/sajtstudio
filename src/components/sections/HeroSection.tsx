@@ -2,6 +2,7 @@
 
 import HemsidorWords from "@/components/animations/HemsidorWords";
 import NattenWords from "@/components/animations/NattenWords";
+import { useTheme } from "@/hooks/useTheme";
 import { prefersReducedMotion } from "@/lib/performance";
 import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
@@ -209,6 +210,160 @@ function LightningFlash() {
   );
 }
 
+// Window flash/reflection component for light mode (sun reflecting off windows)
+function WindowFlash() {
+  const [flashes, setFlashes] = useState<
+    Array<{ id: number; x: number; y: number; delay: number }>
+  >([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let flashCounter = 0;
+    let timeoutId: NodeJS.Timeout;
+
+    const createFlash = () => {
+      if (!isMounted) return;
+
+      // Random position on the screen (simulating different windows)
+      const seed = flashCounter * 0.618033988749895;
+      const x = 10 + ((seed * 80) % 80); // 10-90% of width
+      const y = 20 + ((seed * 1.618 * 60) % 60); // 20-80% of height
+
+      const newFlash = {
+        id: Date.now() + flashCounter,
+        x,
+        y,
+        delay: 0,
+      };
+
+      setFlashes((prev) => [...prev.slice(-4), newFlash]); // Keep max 5 flashes
+      flashCounter++;
+
+      // Schedule next flash (2-6 seconds)
+      const delay = 2000 + ((seed * 4000) % 4000);
+      timeoutId = setTimeout(createFlash, delay);
+    };
+
+    // Start after a short delay
+    timeoutId = setTimeout(createFlash, 1000);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
+  return (
+    <>
+      {flashes.map((flash) => (
+        <motion.div
+          key={flash.id}
+          className="absolute pointer-events-none z-10"
+          style={{
+            left: `${flash.x}%`,
+            top: `${flash.y}%`,
+            width: "60px",
+            height: "80px",
+          }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{
+            opacity: [0, 0.9, 0.4, 0.8, 0],
+            scale: [0.5, 1, 0.9, 1.1, 0.8],
+          }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          onAnimationComplete={() => {
+            setFlashes((prev) => prev.filter((f) => f.id !== flash.id));
+          }}
+        >
+          {/* Window reflection glint */}
+          <div
+            className="w-full h-full rounded-sm"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,245,200,0.6) 30%, transparent 60%)",
+              boxShadow:
+                "0 0 30px rgba(255,255,200,0.8), 0 0 60px rgba(255,200,100,0.4)",
+            }}
+          />
+        </motion.div>
+      ))}
+    </>
+  );
+}
+
+// Flying bird component for light mode
+function FlyingBird({
+  delay = 0,
+  startY = 30,
+}: {
+  delay?: number;
+  startY?: number;
+}) {
+  return (
+    <motion.div
+      className="absolute pointer-events-none z-[15]"
+      style={{ top: `${startY}%`, left: "-30px" }}
+      initial={{ x: -30, y: 0, opacity: 0 }}
+      animate={{
+        x: ["0vw", "25vw", "50vw", "75vw", "110vw"],
+        y: [0, -20, 15, -10, 5],
+        opacity: [0, 1, 1, 1, 0],
+      }}
+      transition={{
+        duration: 12 + delay * 2,
+        delay: delay,
+        ease: "linear",
+        repeat: Infinity,
+        repeatDelay: 8 + delay * 3,
+      }}
+    >
+      {/* Simple bird silhouette using CSS */}
+      <div className="relative">
+        {/* Bird body */}
+        <motion.div
+          className="relative"
+          animate={{ scaleY: [1, 0.7, 1] }}
+          transition={{ duration: 0.3, repeat: Infinity }}
+        >
+          <svg
+            width="24"
+            height="12"
+            viewBox="0 0 24 12"
+            className="fill-gray-700/70"
+          >
+            {/* Left wing */}
+            <motion.path
+              d="M12 6 Q8 2 2 4 Q6 6 12 6"
+              animate={{
+                d: [
+                  "M12 6 Q8 2 2 4 Q6 6 12 6",
+                  "M12 6 Q8 8 2 6 Q6 6 12 6",
+                  "M12 6 Q8 2 2 4 Q6 6 12 6",
+                ],
+              }}
+              transition={{ duration: 0.25, repeat: Infinity }}
+            />
+            {/* Right wing */}
+            <motion.path
+              d="M12 6 Q16 2 22 4 Q18 6 12 6"
+              animate={{
+                d: [
+                  "M12 6 Q16 2 22 4 Q18 6 12 6",
+                  "M12 6 Q16 8 22 6 Q18 6 12 6",
+                  "M12 6 Q16 2 22 4 Q18 6 12 6",
+                ],
+              }}
+              transition={{ duration: 0.25, repeat: Infinity }}
+            />
+            {/* Body */}
+            <ellipse cx="12" cy="6" rx="3" ry="2" />
+          </svg>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
 // Optimized text animation - animates whole block instead of individual letters
 // Uses transform/opacity for GPU-accelerated animations without layout thrashing
 function AnimatedText({
@@ -312,6 +467,9 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
+
+  // Theme hook for light/dark mode
+  const { isLight } = useTheme();
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
@@ -510,7 +668,9 @@ export default function HeroSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
+      className={`min-h-screen flex items-center justify-center relative overflow-hidden z-10 transition-colors duration-500 ${
+        isLight ? "bg-amber-50" : "bg-black"
+      }`}
       style={{
         position: "relative",
         transform: shouldReduceMotion
@@ -642,6 +802,14 @@ export default function HeroSection() {
               animate={
                 shouldReduceMotion
                   ? {}
+                  : isLight
+                  ? {
+                      filter: [
+                        "brightness(1.1) contrast(1) saturate(1.1)",
+                        "brightness(1.15) contrast(1.05) saturate(1.15)",
+                        "brightness(1.1) contrast(1) saturate(1.1)",
+                      ],
+                    }
                   : {
                       filter: [
                         "brightness(0.9) contrast(1)",
@@ -657,7 +825,11 @@ export default function HeroSection() {
               }}
             >
               <Image
-                src="/images/hero/hero-background.webp"
+                src={
+                  isLight
+                    ? "/images/backgrounds/city-background-sunny.webp"
+                    : "/images/hero/hero-background.webp"
+                }
                 alt=""
                 fill
                 sizes="(max-width: 1920px) 100vw, 1920px"
@@ -679,15 +851,21 @@ export default function HeroSection() {
                 ease: "easeInOut",
               }}
             />
-            {/* Lightning flash effect - random intervals */}
-            {!shouldReduceMotion && <LightningFlash />}
+            {/* Lightning flash effect - random intervals (dark mode only) */}
+            {!shouldReduceMotion && !isLight && <LightningFlash />}
           </motion.div>
 
-          {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
+          {/* Elegant overlay with gradient - adapts to theme */}
+          <div
+            className={`absolute inset-0 ${
+              isLight
+                ? "bg-gradient-to-b from-[#fef9e7]/30 via-transparent to-[#fff5e6]/40"
+                : "bg-gradient-to-b from-black/40 via-black/30 to-black/40"
+            }`}
+          />
 
-          {/* Rain effect - only render when mounted to avoid hydration mismatch */}
-          {mounted && !shouldReduceMotion && (
+          {/* Rain effect - only in dark mode */}
+          {mounted && !shouldReduceMotion && !isLight && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
               {rainDrops.map((drop, i) => (
                 <div
@@ -702,6 +880,18 @@ export default function HeroSection() {
                 />
               ))}
             </div>
+          )}
+
+          {/* Window flash effect - only in light mode */}
+          {mounted && !shouldReduceMotion && isLight && <WindowFlash />}
+
+          {/* Flying birds - only in light mode */}
+          {mounted && !shouldReduceMotion && isLight && (
+            <>
+              <FlyingBird delay={0} startY={15} />
+              <FlyingBird delay={5} startY={25} />
+              <FlyingBird delay={10} startY={20} />
+            </>
           )}
         </motion.div>
       )}

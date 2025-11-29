@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import HeaderNav from '@/components/layout/HeaderNav';
 import ContactForm from '@/components/ui/ContactForm';
 import { useMounted } from '@/hooks/useMounted';
+import { useTheme } from '@/hooks/useTheme';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 
@@ -88,6 +89,7 @@ function Clock() {
 
 export default function ContactPage() {
   const sectionRef = useRef<HTMLElement>(null);
+  const { isLight } = useTheme();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"]
@@ -99,7 +101,11 @@ export default function ContactPage() {
   return (
     <>
       <HeaderNav />
-      <main className="relative min-h-screen overflow-hidden bg-black">
+      <main className={`relative min-h-screen overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-[#fef9e7] via-[#fff5e6] to-[#f0f7ff]"
+          : "bg-black"
+      }`}>
         <section ref={sectionRef} className="relative min-h-screen py-24 md:py-32 overflow-hidden">
           {/* Stunning gradient background with parallax */}
           <motion.div
@@ -110,15 +116,27 @@ export default function ContactPage() {
             }}
           >
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-black"
+              className={`absolute inset-0 bg-cover bg-center bg-no-repeat ${
+                isLight ? "bg-[#fef9e7]" : "bg-black"
+              }`}
               style={{
                 backgroundImage: 'url(/images/backgrounds/contact-gradient.webp)',
-                filter: 'grayscale(100%) brightness(0.5) contrast(1.3)',
+                filter: isLight
+                  ? 'grayscale(30%) brightness(1.1) contrast(0.9) sepia(20%)'
+                  : 'grayscale(100%) brightness(0.5) contrast(1.3)',
               }}
             />
-            {/* Overlay gradients for depth - svart-vit tema */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10" />
+            {/* Overlay gradients for depth - adapts to theme */}
+            <div className={`absolute inset-0 ${
+              isLight
+                ? "bg-gradient-to-b from-[#fef9e7]/40 via-transparent to-[#fff5e6]/50"
+                : "bg-gradient-to-b from-black/20 via-transparent to-black/30"
+            }`} />
+            <div className={`absolute inset-0 ${
+              isLight
+                ? "bg-gradient-to-r from-amber-100/20 via-transparent to-sky-100/20"
+                : "bg-gradient-to-r from-white/10 via-transparent to-white/10"
+            }`} />
           </motion.div>
 
           {/* Floating orbs animation */}
@@ -128,7 +146,9 @@ export default function ContactPage() {
                 key={i}
                 className="absolute w-32 h-32 md:w-48 md:h-48 rounded-full"
                 style={{
-                  background: `radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                  background: isLight
+                    ? `radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)`
+                    : `radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)`,
                   left: `${20 + i * 15}%`,
                   top: `${10 + i * 12}%`,
                 }}
@@ -166,24 +186,34 @@ export default function ContactPage() {
                 }}
               >
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-black drop-shadow-2xl">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-400 to-white">
+                  <span className={`bg-clip-text text-transparent bg-gradient-to-r ${
+                    isLight
+                      ? "from-gray-800 via-blue-500 to-gray-800"
+                      : "from-white via-blue-400 to-white"
+                  }`}>
                     Kontakt
                   </span>
                 </h1>
               </motion.div>
 
               <motion.p
-                className="text-xl md:text-2xl text-white max-w-3xl mx-auto font-light"
+                className={`text-xl md:text-2xl max-w-3xl mx-auto font-light ${
+                  isLight ? "text-gray-700" : "text-white"
+                }`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
               >
-                Låt oss skapa något <span className="text-blue-400 font-semibold">extraordinärt</span> tillsammans
+                Låt oss skapa något <span className="text-blue-500 font-semibold">extraordinärt</span> tillsammans
               </motion.p>
 
               {/* Decorative line animation */}
               <motion.div
-                className="mt-8 mx-auto w-32 h-1 bg-gradient-to-r from-transparent via-white to-transparent"
+                className={`mt-8 mx-auto w-32 h-1 bg-gradient-to-r ${
+                  isLight
+                    ? "from-transparent via-gray-800 to-transparent"
+                    : "from-transparent via-white to-transparent"
+                }`}
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
@@ -196,7 +226,11 @@ export default function ContactPage() {
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
-                className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 md:p-10 shadow-2xl"
+                className={`backdrop-blur-xl border rounded-3xl p-8 md:p-10 shadow-2xl ${
+                  isLight
+                    ? "bg-white/60 border-amber-200/50 shadow-amber-100/30"
+                    : "bg-white/10 border-white/20"
+                }`}
                 whileHover={{ scale: 1.02 }}
               >
                 <motion.h2
@@ -205,8 +239,8 @@ export default function ContactPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <span className="text-white">Låt oss </span>
-                  <span className="text-blue-400">connecta</span>
+                  <span className={isLight ? "text-gray-800" : "text-white"}>Låt oss </span>
+                  <span className="text-blue-500">connecta</span>
                 </motion.h2>
 
                 <div className="space-y-6">
@@ -214,14 +248,18 @@ export default function ContactPage() {
                     whileHover={{ x: 10 }}
                     className="group"
                   >
-                    <p className="text-sm text-white/70 mb-2 uppercase tracking-wider">E-post</p>
+                    <p className={`text-sm mb-2 uppercase tracking-wider ${
+                      isLight ? "text-gray-500" : "text-white/70"
+                    }`}>E-post</p>
                     <a
                       href="mailto:hello@sajtstudio.se"
-                      className="text-xl md:text-2xl text-white group-hover:text-blue-400 transition-all duration-300 flex items-center gap-2"
+                      className={`text-xl md:text-2xl group-hover:text-blue-500 transition-all duration-300 flex items-center gap-2 ${
+                        isLight ? "text-gray-800" : "text-white"
+                      }`}
                     >
                       hello@sajtstudio.se
                       <motion.span
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-400"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500"
                         initial={{ x: -10 }}
                         whileHover={{ x: 0 }}
                       >
@@ -234,14 +272,18 @@ export default function ContactPage() {
                     whileHover={{ x: 10 }}
                     className="group"
                   >
-                    <p className="text-sm text-white/70 mb-2 uppercase tracking-wider">Telefon</p>
+                    <p className={`text-sm mb-2 uppercase tracking-wider ${
+                      isLight ? "text-gray-500" : "text-white/70"
+                    }`}>Telefon</p>
                     <a
                       href="tel:+46701234567"
-                      className="text-xl md:text-2xl text-white group-hover:text-blue-400 transition-all duration-300 flex items-center gap-2"
+                      className={`text-xl md:text-2xl group-hover:text-blue-500 transition-all duration-300 flex items-center gap-2 ${
+                        isLight ? "text-gray-800" : "text-white"
+                      }`}
                     >
                       +46 70 123 45 67
                       <motion.span
-                        className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-400"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500"
                         initial={{ x: -10 }}
                         whileHover={{ x: 0 }}
                       >
@@ -254,16 +296,22 @@ export default function ContactPage() {
                     whileHover={{ x: 10 }}
                     className="group"
                   >
-                    <p className="text-sm text-white/70 mb-2 uppercase tracking-wider">Kontor</p>
-                    <p className="text-xl md:text-2xl text-white">
-                      <span className="text-white">Stockholm</span>, <span className="text-red-500">Sverige</span>
+                    <p className={`text-sm mb-2 uppercase tracking-wider ${
+                      isLight ? "text-gray-500" : "text-white/70"
+                    }`}>Kontor</p>
+                    <p className={`text-xl md:text-2xl ${isLight ? "text-gray-800" : "text-white"}`}>
+                      <span className={isLight ? "text-gray-800" : "text-white"}>Stockholm</span>, <span className="text-red-500">Sverige</span>
                     </p>
                   </motion.div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-white/20">
+                <div className={`mt-12 pt-8 border-t ${
+                  isLight ? "border-gray-300/50" : "border-white/20"
+                }`}>
                   <motion.div
-                    className="backdrop-blur-sm bg-white/5 rounded-2xl p-6"
+                    className={`backdrop-blur-sm rounded-2xl p-6 ${
+                      isLight ? "bg-amber-50/50" : "bg-white/5"
+                    }`}
                     whileHover={{ scale: 1.05 }}
                   >
                     <Clock />
@@ -275,15 +323,17 @@ export default function ContactPage() {
                   {[
                     { name: 'LinkedIn', color: 'blue' },
                     { name: 'Instagram', color: 'red' },
-                    { name: 'GitHub', color: 'white' }
+                    { name: 'GitHub', color: 'neutral' }
                   ].map((social, i) => (
                     <motion.button
                       key={social.name}
                       className={`px-4 py-2 backdrop-blur-sm border rounded-full transition-all ${
                         social.color === 'blue'
-                          ? 'bg-blue-500/20 border-blue-400/30 text-blue-300 hover:bg-blue-500/30 hover:text-blue-200'
+                          ? 'bg-blue-500/20 border-blue-400/30 text-blue-600 hover:bg-blue-500/30 hover:text-blue-500'
                           : social.color === 'red'
-                          ? 'bg-red-500/20 border-red-400/30 text-red-300 hover:bg-red-500/30 hover:text-red-200'
+                          ? 'bg-red-500/20 border-red-400/30 text-red-600 hover:bg-red-500/30 hover:text-red-500'
+                          : isLight
+                          ? 'bg-gray-500/10 border-gray-400/30 text-gray-700 hover:bg-gray-500/20 hover:text-gray-900'
                           : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20 hover:text-white'
                       }`}
                       whileHover={{ scale: 1.1 }}
@@ -303,7 +353,11 @@ export default function ContactPage() {
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 md:p-10 shadow-2xl"
+                className={`backdrop-blur-xl border rounded-3xl p-8 md:p-10 shadow-2xl ${
+                  isLight
+                    ? "bg-white/60 border-amber-200/50 shadow-amber-100/30"
+                    : "bg-white/10 border-white/20"
+                }`}
                 whileHover={{ scale: 1.02 }}
               >
                 <motion.h2
@@ -312,8 +366,8 @@ export default function ContactPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <span className="text-white">Skicka </span>
-                  <span className="text-blue-400">meddelande</span>
+                  <span className={isLight ? "text-gray-800" : "text-white"}>Skicka </span>
+                  <span className="text-blue-500">meddelande</span>
                 </motion.h2>
 
                 <ContactForm />

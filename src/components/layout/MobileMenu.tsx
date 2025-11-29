@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import { useTheme } from "@/hooks/useTheme";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export default function MobileMenu({
   onClose,
   navLinks,
 }: MobileMenuProps) {
+  const { isLight } = useTheme();
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -46,7 +49,9 @@ export default function MobileMenu({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+            className={`fixed inset-0 backdrop-blur-sm z-40 lg:hidden ${
+              isLight ? "bg-amber-900/30" : "bg-black/80"
+            }`}
           />
 
           {/* Menu Content */}
@@ -55,10 +60,20 @@ export default function MobileMenu({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 20 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 z-50 lg:hidden overflow-y-auto"
+            className={`fixed right-0 top-0 bottom-0 w-full max-w-sm border-l z-50 lg:hidden overflow-y-auto ${
+              isLight
+                ? "bg-gradient-to-br from-[#fef9e7] via-[#fff5e6] to-[#f0f7ff] border-amber-200/50"
+                : "bg-black border-white/10"
+            }`}
           >
             {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black opacity-90" />
+            <div
+              className={`absolute inset-0 opacity-90 ${
+                isLight
+                  ? "bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50"
+                  : "bg-gradient-to-br from-black via-gray-950 to-black"
+              }`}
+            />
 
             {/* Content */}
             <div className="relative p-8 pt-20">
@@ -66,11 +81,15 @@ export default function MobileMenu({
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                className={`absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                  isLight
+                    ? "bg-gray-900/10 hover:bg-gray-900/20"
+                    : "bg-white/10 hover:bg-white/20"
+                }`}
                 aria-label="Stäng meny"
               >
                 <svg
-                  className="w-5 h-5 text-white"
+                  className={`w-5 h-5 ${isLight ? "text-gray-900" : "text-white"}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -105,7 +124,9 @@ export default function MobileMenu({
                           window.location.href = link.href;
                         }
                       }}
-                      className="block py-3 px-4 text-lg font-semibold text-white hover:text-accent transition-colors relative group overflow-hidden rounded-lg"
+                      className={`block py-3 px-4 text-lg font-semibold hover:text-accent transition-colors relative group overflow-hidden rounded-lg ${
+                        isLight ? "text-gray-900" : "text-white"
+                      }`}
                     >
                       {/* Hover background */}
                       <motion.div
@@ -141,7 +162,9 @@ export default function MobileMenu({
 
               {/* Decorative elements */}
               <motion.div
-                className="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl"
+                className={`absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-3xl ${
+                  isLight ? "bg-sky-300/30" : "bg-accent/20"
+                }`}
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.3, 0.5, 0.3],
@@ -153,7 +176,9 @@ export default function MobileMenu({
                 }}
               />
               <motion.div
-                className="absolute -top-20 -left-20 w-40 h-40 bg-tertiary/20 rounded-full blur-3xl"
+                className={`absolute -top-20 -left-20 w-40 h-40 rounded-full blur-3xl ${
+                  isLight ? "bg-amber-200/40" : "bg-tertiary/20"
+                }`}
                 animate={{
                   scale: [1.2, 1, 1.2],
                   opacity: [0.3, 0.5, 0.3],

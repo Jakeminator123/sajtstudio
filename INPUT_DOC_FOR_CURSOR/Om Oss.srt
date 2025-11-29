@@ -1,0 +1,172 @@
+0
+00:00:00,079 --> 00:00:00,389
+Hej.
+
+1
+00:00:00,839 --> 00:00:01,840
+Vi är sajtstudio,
+
+2
+00:00:01,960 --> 00:00:03,640
+tre personer som brinner för design.
+
+3
+00:00:03,960 --> 00:00:05,659
+AI och riktigt vassa hemsidor.
+
+4
+00:00:06,119 --> 00:00:09,560
+Vi hjälper företag som vill ha mer än bara en snygg digital fasad.
+
+5
+00:00:10,039 --> 00:00:11,840
+Din hemsida ska generera leads,
+
+6
+00:00:12,159 --> 00:00:14,199
+kunder och förtroende och den ska vara byggd
+
+7
+00:00:14,199 --> 00:00:16,430
+för hur webben fungerar idag och imorgon.
+
+8
+00:00:16,879 --> 00:00:18,360
+Vår grej är att märja design,
+
+9
+00:00:18,600 --> 00:00:19,549
+AI och teknik.
+
+10
+00:00:20,049 --> 00:00:22,180
+Vi använder AI för att förstå din bransch,
+
+11
+00:00:22,569 --> 00:00:24,250
+dina kunder och vad de söker efter.
+
+12
+00:00:24,690 --> 00:00:26,579
+Utifrån det bygger vi sajter som är
+
+13
+00:00:27,010 --> 00:00:27,680
+snabba
+
+14
+00:00:27,969 --> 00:00:29,530
+och tidligt strukturerade.
+
+15
+00:00:29,930 --> 00:00:31,510
+OSC o optimerade
+
+16
+00:00:31,809 --> 00:00:34,209
+och redan nu anpassade för en framtid där AI
+
+17
+00:00:34,209 --> 00:00:36,450
+kommer påverka hur man hittar och tolkar innehåll.
+
+18
+00:00:36,860 --> 00:00:38,319
+Vi erbjuder tre saker.
+
+19
+00:00:38,810 --> 00:00:39,490
+För det första,
+
+20
+00:00:40,250 --> 00:00:42,169
+möjlighet att ötogenerera sidor.
+
+21
+00:00:42,569 --> 00:00:44,250
+Perfekt om du vill komma igång snabbt,
+
+22
+00:00:44,650 --> 00:00:47,090
+eller bygga ut din befintliga sajt steg för steg.
+
+23
+00:00:47,529 --> 00:00:48,159
+För det andra,
+
+24
+00:00:48,759 --> 00:00:51,639
+Fullskaliga projekt där vi tar ansvar för hela resan.
+
+25
+00:00:52,099 --> 00:00:53,040
+Från första ide,
+
+26
+00:00:53,400 --> 00:00:55,779
+via design och utveckling i reakt och Next.
+
+27
+00:00:56,159 --> 00:00:58,319
+T lansering och löpande optimering.
+
+28
+00:00:58,759 --> 00:00:59,599
+Och för det tredje,
+
+29
+00:01:00,150 --> 00:01:01,360
+Tidliga edits.
+
+30
+00:01:01,759 --> 00:01:03,720
+Vi går igenom din nuvarande hemsida,
+
+31
+00:01:04,120 --> 00:01:05,309
+hittar flaskhalsar
+
+32
+00:01:05,599 --> 00:01:08,529
+och ger en konkret plan för hur den kan börja prestera bättre.
+
+33
+00:01:08,959 --> 00:01:09,959
+För både besökare,
+
+34
+00:01:10,319 --> 00:01:12,319
+Google och framtidens AI verktyg.
+
+35
+00:01:12,839 --> 00:01:14,360
+Bakom sajtstudio står jag,
+
+36
+00:01:14,680 --> 00:01:15,639
+Jakob Eberg,
+
+37
+00:01:16,010 --> 00:01:18,790
+tillsammans med Oskar Gudits och Joakim Hallsten.
+
+38
+00:01:19,239 --> 00:01:20,120
+Vi är i uppstart,
+
+39
+00:01:20,239 --> 00:01:21,599
+men långt ifrån nya på det här.
+
+40
+00:01:22,040 --> 00:01:24,069
+Vill du se vad vi kan göra för ditt företag?
+
+41
+00:01:24,519 --> 00:01:25,080
+Hör av dig,
+
+42
+00:01:25,559 --> 00:01:28,389
+så tar vi ett rakt och konkret samtal om din nästa hemsida.
+

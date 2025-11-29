@@ -174,6 +174,7 @@
     clip: auto;
     white-space: normal;
   }
+  /* Dark mode (default) */
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
@@ -200,7 +201,39 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    /* Theme mode indicator */
+    --theme-mode: dark;
   }
+
+  /* Light mode */
+  .light {
+    --background: 45 30% 96%;
+    --foreground: 220 20% 20%;
+    --card: 45 40% 97%;
+    --card-foreground: 220 20% 20%;
+    --popover: 45 35% 98%;
+    --popover-foreground: 220 20% 20%;
+    --primary: 220 20% 20%;
+    --primary-foreground: 45 40% 97%;
+    --secondary: 45 25% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 45 20% 88%;
+    --muted-foreground: 220 10% 40%;
+    --accent: 200 100% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 20% 88%;
+    --input: 45 25% 92%;
+    --ring: 200 100% 45%;
+    --chart-1: 200 100% 45%;
+    --chart-2: 350 100% 50%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --theme-mode: light;
+  }
+
   .dark {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
@@ -226,6 +259,7 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --theme-mode: dark;
   }
 }
 
@@ -469,6 +503,205 @@ main > section:first-child {
   50% {
     opacity: 0.3;
   }
+}
+
+/* Window flash/reflection animation for light mode */
+@keyframes windowFlash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  20% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0;
+  }
+}
+
+/* Bird flying animation for light mode */
+@keyframes birdFly {
+  0% {
+    transform: translateX(-50px) translateY(0) scaleX(1);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(25vw) translateY(-20px) scaleX(1);
+  }
+  50% {
+    transform: translateX(50vw) translateY(10px) scaleX(1);
+  }
+  75% {
+    transform: translateX(75vw) translateY(-15px) scaleX(1);
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 50px)) translateY(0) scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* Bird wing flap animation */
+@keyframes wingFlap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.6);
+  }
+}
+
+/* Subtle breathing animation for light mode backgrounds */
+@keyframes lightBreathing {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.02);
+  }
+}
+
+/* Soft shimmer animation for light mode cards */
+@keyframes lightShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Warm gradient pulse for light mode */
+@keyframes warmPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Light mode body styles - bright, fresh, and warm */
+html.light {
+  background: linear-gradient(
+    135deg,
+    #fffef8 0%,
+    #fff9f0 20%,
+    #f0f9ff 40%,
+    #fff5f5 60%,
+    #fffef8 80%,
+    #f5faff 100%
+  ) !important;
+  background-size: 400% 400%;
+  animation: lightBreathing 25s ease-in-out infinite;
+}
+
+html.light body {
+  background: linear-gradient(
+    135deg,
+    #fffef8 0%,
+    #fff9f0 20%,
+    #f0f9ff 40%,
+    #fff5f5 60%,
+    #fffef8 80%,
+    #f5faff 100%
+  ) !important;
+  background-size: 400% 400%;
+  animation: lightBreathing 25s ease-in-out infinite;
+  color: #1a202c !important;
+}
+
+/* Light mode section backgrounds with warm colors */
+html.light section {
+  position: relative;
+}
+
+/* Light mode card styling - bright and clean */
+html.light .bg-card,
+html.light [class*="bg-white"],
+html.light .bg-background {
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #fffef8 30%,
+    #fafcff 70%,
+    #ffffff 100%
+  ) !important;
+  position: relative;
+}
+
+/* Add subtle shimmer overlay to cards in light mode */
+html.light .bg-card::before,
+html.light [class*="rounded-lg"][class*="bg-"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 250, 235, 0.4) 25%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 250, 235, 0.4) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: lightShimmer 8s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.5;
+}
+
+/* Warm glow effect for interactive elements in light mode */
+html.light button:hover,
+html.light a:hover {
+  filter: brightness(1.02);
+}
+
+/* Light mode header scrolled state enhancement */
+html.light header[class*="bg-gradient"] {
+  background: linear-gradient(
+    to right,
+    hsl(45, 50%, 96%),
+    hsl(35, 45%, 97%),
+    hsl(200, 30%, 97%)
+  ) !important;
+}
+
+/* Ensure text colors adapt in light mode */
+html.light .text-white {
+  color: #1a202c;
+}
+
+html.light .text-gray-300,
+html.light .text-gray-400 {
+  color: #4a5568;
+}
+
+/* Light mode shadows with warm tint */
+html.light [class*="shadow"] {
+  --tw-shadow-color: rgba(180, 150, 100, 0.1);
 }
 
 /* Skeleton component dynamic sizing via CSS custom properties */

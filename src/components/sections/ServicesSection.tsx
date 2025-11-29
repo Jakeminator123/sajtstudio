@@ -8,6 +8,7 @@ import type { Service } from '@/data/services'
 import { services } from '@/data/services'
 import { useModalManager } from '@/hooks/useModalManager'
 import { useMounted } from '@/hooks/useMounted'
+import { useTheme } from '@/hooks/useTheme'
 import {
   MotionValue,
   motion,
@@ -84,6 +85,7 @@ export default function ServicesSection() {
   const { isOpen, modalId, data, openModal, closeModal } =
     useModalManager<ServiceModalPayload>()
   const mounted = useMounted()
+  const { isLight } = useTheme()
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -186,8 +188,20 @@ export default function ServicesSection() {
   return (
     <section
       ref={sectionRef}
-      className="section-spacing-md bg-black text-white relative overflow-hidden min-h-screen flex items-center"
+      className={`section-spacing-md relative overflow-hidden min-h-screen flex items-center transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
     >
+      {/* Light mode decorative elements */}
+      {isLight && (
+        <>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-20 right-10 w-64 h-64 bg-gradient-to-tl from-rose-200/25 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-amber-100/20 via-transparent to-sky-100/20 rounded-full blur-3xl pointer-events-none" />
+        </>
+      )}
       {/* Video background */}
       <div className="absolute inset-0 z-0">
         <motion.video
