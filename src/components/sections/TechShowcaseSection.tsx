@@ -342,7 +342,7 @@ export default function TechShowcaseSection() {
           }}
         >
           <div
-            className="absolute inset-0 -m-4 border-8 border-black rounded-lg pointer-events-none"
+            className="absolute inset-0 -m-4 border-8 border-black rounded-lg pointer-events-none z-0"
             style={{
               imageRendering: "pixelated",
               boxShadow: `
@@ -354,19 +354,21 @@ export default function TechShowcaseSection() {
           />
 
           <div
-            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-8"
+            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-8 z-10"
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.75)",
               backdropFilter: "blur(4px)",
             }}
           >
             {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
-            <PacmanGame />
+            <div className="relative z-20 pointer-events-auto">
+              <PacmanGame />
+            </div>
 
             {/* Play button - centered in the game area */}
             {!isPlaying && (
               <motion.div
-                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40"
+                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-auto"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}

@@ -516,16 +516,16 @@ export default function PacmanGame() {
 
       {/* Game canvas */}
       <div
-        className="relative"
+        className="relative touch-pan-y"
         ref={containerRef}
-        style={{ touchAction: isTouchDevice ? "none" : "auto" }}
+        style={{ touchAction: "pan-y" }}
       >
         <canvas
           ref={canvasRef}
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
-          className="shadow-2xl rounded-lg max-w-full h-auto"
-          style={{ maxHeight: "60vh" }}
+          className="shadow-2xl rounded-lg max-w-full h-auto touch-none"
+          style={{ maxHeight: "60vh", touchAction: "none" }}
         />
 
         {/* Game over / Win overlay */}
@@ -576,12 +576,16 @@ export default function PacmanGame() {
       </div>
 
       {isTouchDevice && (
-        <div className="mt-6 flex flex-col items-center gap-3 text-white/80 w-full">
-          <div className="grid grid-cols-3 gap-3 w-full max-w-[220px] select-none">
+        <div className="mt-6 flex flex-col items-center gap-3 text-white/80 w-full touch-none">
+          <div className="grid grid-cols-3 gap-3 w-full max-w-[220px] select-none touch-none">
             <span />
             <button
               type="button"
               className={controlButtonClass}
+              onTouchStart={(event) => {
+                event.preventDefault();
+                changeDirection("up");
+              }}
               onPointerDown={(event) => {
                 event.preventDefault();
                 changeDirection("up");
@@ -594,6 +598,10 @@ export default function PacmanGame() {
             <button
               type="button"
               className={controlButtonClass}
+              onTouchStart={(event) => {
+                event.preventDefault();
+                changeDirection("left");
+              }}
               onPointerDown={(event) => {
                 event.preventDefault();
                 changeDirection("left");
@@ -605,6 +613,10 @@ export default function PacmanGame() {
             <button
               type="button"
               className={controlButtonClass}
+              onTouchStart={(event) => {
+                event.preventDefault();
+                changeDirection("down");
+              }}
               onPointerDown={(event) => {
                 event.preventDefault();
                 changeDirection("down");
@@ -616,6 +628,10 @@ export default function PacmanGame() {
             <button
               type="button"
               className={controlButtonClass}
+              onTouchStart={(event) => {
+                event.preventDefault();
+                changeDirection("right");
+              }}
               onPointerDown={(event) => {
                 event.preventDefault();
                 changeDirection("right");
@@ -626,7 +642,7 @@ export default function PacmanGame() {
             </button>
           </div>
           <p className="text-xs text-white/60 text-center px-4">
-            Quick swipes across the game area also change direction instantly.
+            Swipe över spelet eller tryck på pilarna för att styra
           </p>
         </div>
       )}
