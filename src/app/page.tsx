@@ -11,6 +11,7 @@ import ScrollIndicator from "@/components/animations/ScrollIndicator";
 import AboutSection from "@/components/sections/AboutSection";
 import ServicesSection from "@/components/sections/ServicesSection";
 import USPSection from "@/components/sections/USPSection";
+import RotatingCubeSection from "@/components/sections/RotatingCubeSection";
 // CRITICAL: HeroAnimation must be ready when user scrolls - contains video explosion and Pacman game
 import HeroAnimation from "@/components/sections/HeroAnimation";
 import TechShowcaseSection from "@/components/sections/TechShowcaseSection";
@@ -111,6 +112,11 @@ export default function Home() {
         {/* USP Section - Numrerade punkter som beskriver företaget */}
         <div className="content-visibility-auto">
           <USPSection />
+        </div>
+
+        {/* Rotating Cube Section - Interactive 3D showcase */}
+        <div className="content-visibility-auto">
+          <RotatingCubeSection />
         </div>
 
         {/* Services with modals */}
