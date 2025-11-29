@@ -18,6 +18,7 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
     // Preload critical videos that will be needed soon
     const criticalVideos = [
       "/videos/telephone_ringin.mp4", // Used in HeroAnimation - CRITICAL
+      "/videos/matrix_code.mp4", // Used in TechShowcaseSection transition - CRITICAL
       "/videos/background.mp4", // Used in HeroSection
       "/videos/background_vid.mp4", // Used in ServicesSection
       "/videos/noir_hero.mp4", // Used in PortfolioHero

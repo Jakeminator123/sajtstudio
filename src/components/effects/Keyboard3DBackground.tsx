@@ -2,7 +2,7 @@
 
 import { Canvas, useThree, useFrame } from "@react-three/fiber"
 import { Environment, PerspectiveCamera, ContactShadows, Text } from "@react-three/drei"
-import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from "react"
+import { Suspense, useState, useEffect, useRef, useCallback } from "react"
 import * as THREE from "three"
 
 // Types

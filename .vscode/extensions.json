@@ -4,15 +4,8 @@
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
     "ms-vscode.vscode-typescript-next",
-    "unifiedjs.vscode-mdx",
-    "styled-components.vscode-styled-components",
-    "formulahendry.auto-rename-tag",
-    "formulahendry.auto-close-tag",
-    "streetsidesoftware.code-spell-checker",
-    "wix.vscode-import-cost",
-    "christian-kohler.path-intellisense",
-    "prisma.prisma",
-    "mikestead.dotenv",
-    "csstools.postcss"
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense"
   ]
 }

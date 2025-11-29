@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
 
 interface NeuralBackgroundProps {
   /** Opacity of the dark overlay (0-1), default 0.7 */
@@ -32,61 +31,61 @@ interface Connection {
   delay: number;
 }
 
+// Helper to generate seeded random values (deterministic based on seed)
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+}
+
+function generateNodes(count: number): Node[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: seededRandom(i * 4 + 1) * 100,
+    y: seededRandom(i * 4 + 2) * 100,
+    size: seededRandom(i * 4 + 3) * 4 + 2,
+    delay: seededRandom(i * 4 + 4) * 5,
+    duration: seededRandom(i * 4 + 5) * 3 + 2,
+  }));
+}
+
+function generateConnections(nodeList: Node[]): Connection[] {
+  const conns: Connection[] = [];
+  const maxDistance = 25;
+
+  for (let i = 0; i < nodeList.length; i++) {
+    for (let j = i + 1; j < nodeList.length; j++) {
+      const dx = nodeList[i].x - nodeList[j].x;
+      const dy = nodeList[i].y - nodeList[j].y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < maxDistance && conns.length < 50) {
+        conns.push({
+          id: conns.length,
+          x1: nodeList[i].x,
+          y1: nodeList[i].y,
+          x2: nodeList[j].x,
+          y2: nodeList[j].y,
+          delay: seededRandom(i * 100 + j) * 3,
+        });
+      }
+    }
+  }
+  return conns;
+}
+
+// Pre-generate data outside of component (stable across renders)
+const INITIAL_NODES = generateNodes(30);
+const INITIAL_CONNECTIONS = generateConnections(INITIAL_NODES);
+
 export default function NeuralBackground({
   dimOpacity = 0.7,
   nodeCount = 30,
   primaryColor = "#3b82f6",
   secondaryColor = "#8b5cf6",
 }: NeuralBackgroundProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Generate nodes
-  const nodes: Node[] = useMemo(() => {
-    return Array.from({ length: nodeCount }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 4 + 2,
-      delay: Math.random() * 5,
-      duration: Math.random() * 3 + 2,
-    }));
-  }, [nodeCount]);
-
-  // Generate connections between nearby nodes
-  const connections: Connection[] = useMemo(() => {
-    const conns: Connection[] = [];
-    const maxDistance = 25;
-
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[i].x - nodes[j].x;
-        const dy = nodes[i].y - nodes[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < maxDistance && conns.length < 50) {
-          conns.push({
-            id: conns.length,
-            x1: nodes[i].x,
-            y1: nodes[i].y,
-            x2: nodes[j].x,
-            y2: nodes[j].y,
-            delay: Math.random() * 3,
-          });
-        }
-      }
-    }
-    return conns;
-  }, [nodes]);
-
-  if (!mounted) {
-    return (
-      <div className="fixed inset-0 -z-20 bg-black" />
-    );
-  }
+  // Use static pre-generated data (nodeCount prop is ignored to maintain purity)
+  const nodes = nodeCount === 30 ? INITIAL_NODES : INITIAL_NODES.slice(0, nodeCount);
+  const connections = INITIAL_CONNECTIONS;
 
   return (
     <div className="fixed inset-0 -z-20 overflow-hidden">

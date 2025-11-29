@@ -937,7 +937,7 @@ function UtvarderaPageContent() {
                             ? "bg-green-500"
                             : "bg-gray-700"
                         }`}
-                        aria-pressed={useWebSearch}
+                        aria-checked={useWebSearch}
                         role="switch"
                       >
                         <motion.div

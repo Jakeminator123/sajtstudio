@@ -38,9 +38,13 @@ export default function WordReveal({
   const initialPos = getInitialPosition();
 
   return (
-    <span className={className}>
+    <span className={className} suppressHydrationWarning>
       {words.map((word, index) => (
-        <span key={index} className="inline-block overflow-hidden">
+        <span
+          key={index}
+          className="inline-block overflow-hidden"
+          suppressHydrationWarning
+        >
           <motion.span
             initial={{ opacity: 0, ...initialPos }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
@@ -51,6 +55,7 @@ export default function WordReveal({
               ease: [0.25, 0.1, 0.25, 1],
             }}
             className="inline-block mr-[0.25em]"
+            suppressHydrationWarning
           >
             {word}
           </motion.span>
@@ -59,4 +64,3 @@ export default function WordReveal({
     </span>
   );
 }
-

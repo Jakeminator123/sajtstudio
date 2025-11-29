@@ -37,7 +37,6 @@ function ParticleBurst({ isHovered }: { isHovered: boolean }) {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-visible">
       {particles.map((particle, i) => {
-
         return (
           <motion.div
             key={i}
@@ -46,19 +45,23 @@ function ParticleBurst({ isHovered }: { isHovered: boolean }) {
               x: 0,
               y: 0,
               opacity: 0,
-              scale: 0
-            }}
-            animate={isHovered ? {
-              x: particle.x,
-              y: particle.y,
-              opacity: [1, 0.8, 0],
-              scale: [0, 1.5, 0],
-            } : {
-              x: 0,
-              y: 0,
-              opacity: 0,
               scale: 0,
             }}
+            animate={
+              isHovered
+                ? {
+                    x: particle.x,
+                    y: particle.y,
+                    opacity: [1, 0.8, 0],
+                    scale: [0, 1.5, 0],
+                  }
+                : {
+                    x: 0,
+                    y: 0,
+                    opacity: 0,
+                    scale: 0,
+                  }
+            }
             transition={{
               duration: 0.8,
               delay: i * 0.02,
@@ -84,15 +87,13 @@ function ParticleBurst({ isHovered }: { isHovered: boolean }) {
  * - HeroSection: Links to /utvardera and /portfolio (primary hero CTAs)
  * - ServiceModal: Links to /contact (service-specific CTA)
  */
-function MagneticButton({
-  href
-}: {
-  href: string;
-}) {
+function MagneticButton({ href }: { href: string }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
-  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [ripples, setRipples] = useState<
+    Array<{ id: number; x: number; y: number }>
+  >([]);
   const rippleTimeoutsRef = useRef<Map<number, NodeJS.Timeout>>(new Map());
   const shouldReduceMotion = prefersReducedMotion();
 
@@ -198,7 +199,8 @@ function MagneticButton({
           <motion.div
             className="absolute inset-0 rounded-sm"
             style={{
-              background: "linear-gradient(45deg, transparent 30%, rgba(0, 102, 255, 0.5) 50%, transparent 70%)",
+              background:
+                "linear-gradient(45deg, transparent 30%, rgba(0, 102, 255, 0.5) 50%, transparent 70%)",
               backgroundSize: "200% 200%",
             }}
             animate={{
@@ -374,10 +376,12 @@ export default function BigCTA() {
             className="max-w-3xl mx-auto mb-12 p-8 rounded-2xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 backdrop-blur-sm"
           >
             <p className="text-lg sm:text-xl text-white/80 leading-relaxed mb-4">
-              Har du ett projekt på gång, en idé som behöver formas – eller undrar du bara hur vi kan hjälpa ditt företag digitalt?
+              Har du ett projekt på gång, en idé som behöver formas – eller
+              undrar du bara hur vi kan hjälpa ditt företag digitalt?
             </p>
             <p className="text-base sm:text-lg text-white/50 leading-relaxed">
-              Oavsett om du är i idéstadiet eller redo att trycka på startknappen tar vi gärna ett förutsättningslöst samtal.
+              Oavsett om du är i idéstadiet eller redo att trycka på
+              startknappen tar vi gärna ett förutsättningslöst samtal.
             </p>
           </motion.div>
 
@@ -396,7 +400,7 @@ export default function BigCTA() {
               {[
                 { icon: "🚀", text: "Bygga din nya sajt" },
                 { icon: "⚡", text: "Uppgradera befintlig hemsida" },
-                { icon: "🤖", text: "Integrera AI & smart design" }
+                { icon: "🤖", text: "Integrera AI & smart design" },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -432,7 +436,7 @@ export default function BigCTA() {
             transition={{ delay: 1.4, duration: 0.6 }}
             className="mb-16"
           >
-            <MagneticButton href="https://vykort.onrender.com/" />
+            <MagneticButton href="/contact" />
           </motion.div>
 
           {/* Contact methods - modern card style */}
@@ -462,7 +466,9 @@ export default function BigCTA() {
                 </svg>
               </div>
               <div className="text-left">
-                <p className="text-xs text-white/50 uppercase tracking-wider">Email</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">
+                  Email
+                </p>
                 <p className="text-white font-semibold">hej@dg97.se</p>
               </div>
             </motion.a>
@@ -486,9 +492,13 @@ export default function BigCTA() {
                 </svg>
               </div>
               <div className="text-left">
-                <p className="text-xs text-white/50 uppercase tracking-wider">Telefon</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">
+                  Telefon
+                </p>
                 <p className="text-white font-semibold">+34 654 161 231</p>
-                <p className="text-xs text-white/40 italic mt-1">😎 Vi är bara på en liten semester i Spanien</p>
+                <p className="text-xs text-white/40 italic mt-1">
+                  😎 Vi är bara på en liten semester i Spanien
+                </p>
               </div>
             </motion.a>
           </motion.div>
@@ -497,4 +507,3 @@ export default function BigCTA() {
     </section>
   );
 }
-

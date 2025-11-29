@@ -1,53 +1,71 @@
 {
   "folders": [
     {
-      "path": ".",
-    },
+      "path": "."
+    }
   ],
   "settings": {
-    // Use workspace settings
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
-
-    // ESLint
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
     "eslint.enable": true,
     "eslint.workingDirectories": ["."],
-
-    // Editor
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact"
+    ],
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.quickSuggestions": {
+      "strings": true
+    },
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
-
-    // Tailwind CSS
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
     "tailwindCSS.experimental.classRegex": [
       ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
       ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"],
+      ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
     ],
-
-    // Files
     "files.exclude": {
-      "**/.next": true,
-      "**/out": true,
-      "**/dist": true,
-      "**/.turbo": true,
-    },
-
-    // Search
-    "search.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
       "**/node_modules": true,
       "**/.next": true,
       "**/out": true,
       "**/dist": true,
-      "**/.turbo": true,
+      "**/.turbo": true
     },
-
-    // Disable Microsoft Edge Tools warnings
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/bower_components": true,
+      "**/*.code-search": true,
+      "**/.next": true,
+      "**/out": true,
+      "**/dist": true,
+      "**/.turbo": true
+    },
+    "css.validate": false,
+    "emmet.includeLanguages": {
+      "javascript": "javascriptreact",
+      "typescript": "typescriptreact"
+    },
     "webhint.enable": false,
     "edgeTools.webhint.enable": false,
     "edgeTools.webhint.diagnostics": false,
     "edgeTools.webhint.problems": false,
+    "terminal.integrated.cwd": "${workspaceFolder}"
   },
   "extensions": {
     "recommendations": [
@@ -57,7 +75,7 @@
       "ms-vscode.vscode-typescript-next",
       "eamodio.gitlens",
       "usernamehw.errorlens",
-      "christian-kohler.path-intellisense",
-    ],
-  },
+      "christian-kohler.path-intellisense"
+    ]
+  }
 }

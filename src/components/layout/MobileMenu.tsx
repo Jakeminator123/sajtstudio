@@ -7,7 +7,9 @@ import Button from "@/components/ui/Button";
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  navLinks: readonly { href: string; label: string }[] | Array<{ href: string; label: string }>;
+  navLinks:
+    | readonly { href: string; label: string }[]
+    | Array<{ href: string; label: string }>;
 }
 
 /**
@@ -29,7 +31,11 @@ interface MobileMenuProps {
  * Slide-in mobile menu that appears on mobile devices.
  * Contains navigation links and CTA button.
  */
-export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
+export default function MobileMenu({
+  isOpen,
+  onClose,
+  navLinks,
+}: MobileMenuProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -63,8 +69,18 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
                 className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                 aria-label="Stäng meny"
               >
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </motion.button>
 
@@ -113,7 +129,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
                 onClick={onClose}
               >
                 <Button
-                  href="https://vykort.onrender.com/"
+                  href="/contact"
                   variant="cta"
                   size="md"
                   fullWidth
@@ -156,4 +172,3 @@ export default function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProp
     </AnimatePresence>
   );
 }
-

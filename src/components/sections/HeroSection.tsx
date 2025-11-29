@@ -48,7 +48,7 @@ function MagneticButton({
       }
       lastUpdateTime = currentTime;
 
-      if (!buttonRef.current || typeof window === 'undefined') {
+      if (!buttonRef.current || typeof window === "undefined") {
         rafId = requestAnimationFrame(updatePosition);
         return;
       }
@@ -57,8 +57,10 @@ function MagneticButton({
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const mouseX = mousePosition.x * (window.innerWidth / 2) + (window.innerWidth / 2);
-      const mouseY = mousePosition.y * (window.innerHeight / 2) + (window.innerHeight / 2);
+      const mouseX =
+        mousePosition.x * (window.innerWidth / 2) + window.innerWidth / 2;
+      const mouseY =
+        mousePosition.y * (window.innerHeight / 2) + window.innerHeight / 2;
 
       const distanceX = mouseX - centerX;
       const distanceY = mouseY - centerY;
@@ -125,7 +127,11 @@ function LightningFlash() {
     let flashCounter = 0;
 
     // Deterministic seed function using golden ratio for better distribution
-    const getDeterministicValue = (counter: number, range: number, offset: number = 0) => {
+    const getDeterministicValue = (
+      counter: number,
+      range: number,
+      offset: number = 0
+    ) => {
       const seed = (counter * 0.618033988749895) % 1; // Golden ratio
       return offset + seed * range;
     };
@@ -153,7 +159,8 @@ function LightningFlash() {
             setFlash(0);
             flashCount++;
             if (flashCount < flashes) {
-              const nextDelay = 50 + getDeterministicValue(flashCounter + flashCount, 100);
+              const nextDelay =
+                50 + getDeterministicValue(flashCounter + flashCount, 100);
               flashTimeoutId = setTimeout(() => doFlash(), nextDelay);
             } else {
               flashCounter++;
@@ -209,7 +216,7 @@ function AnimatedText({
   className,
   scrollProgress,
   shouldReduceMotion,
-  mounted
+  mounted,
 }: {
   text: string;
   className?: string;
@@ -218,21 +225,9 @@ function AnimatedText({
   mounted: boolean;
 }) {
   // Use transform and opacity only - GPU-composited, no layout work
-  const y = useTransform(
-    scrollProgress,
-    [0, 0.5, 1],
-    [0, -50, -100]
-  );
-  const opacity = useTransform(
-    scrollProgress,
-    [0, 0.5, 0.9],
-    [1, 1, 0]
-  );
-  const scale = useTransform(
-    scrollProgress,
-    [0, 0.5, 0.95],
-    [1, 1, 0.8]
-  );
+  const y = useTransform(scrollProgress, [0, 0.5, 1], [0, -50, -100]);
+  const opacity = useTransform(scrollProgress, [0, 0.5, 0.9], [1, 1, 0]);
+  const scale = useTransform(scrollProgress, [0, 0.5, 0.95], [1, 1, 0.8]);
 
   // Only apply animations when mounted to prevent hydration mismatch
   if (!mounted || shouldReduceMotion) {
@@ -246,9 +241,9 @@ function AnimatedText({
         y: y ?? 0,
         opacity: opacity ?? 1,
         scale: scale ?? 1,
-        display: 'inline-block',
+        display: "inline-block",
         // Only use will-change when animating to avoid unnecessary repaints
-        willChange: shouldReduceMotion ? 'auto' : 'transform, opacity',
+        willChange: shouldReduceMotion ? "auto" : "transform, opacity",
       }}
     >
       {text}
@@ -257,7 +252,11 @@ function AnimatedText({
 }
 
 // Optimized cursor trail component
-function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number } }) {
+function CursorTrail({
+  mousePosition,
+}: {
+  mousePosition: { x: number; y: number };
+}) {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -266,18 +265,18 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize, { passive: true });
-    return () => window.removeEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize, { passive: true });
+    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   const particles = useMemo(() => Array.from({ length: 15 }), []);
   const baseX = useMemo(() => {
     if (windowSize.width === 0) return 0;
-    return mousePosition.x * (windowSize.width / 2) + (windowSize.width / 2);
+    return mousePosition.x * (windowSize.width / 2) + windowSize.width / 2;
   }, [mousePosition.x, windowSize.width]);
   const baseY = useMemo(() => {
     if (windowSize.height === 0) return 0;
-    return mousePosition.y * (windowSize.height / 2) + (windowSize.height / 2);
+    return mousePosition.y * (windowSize.height / 2) + windowSize.height / 2;
   }, [mousePosition.y, windowSize.height]);
 
   return (
@@ -362,7 +361,10 @@ export default function HeroSection() {
       // Only update if values have changed significantly (reduces unnecessary re-renders)
       const currentPos = mousePositionRef.current;
       const threshold = 0.01;
-      if (Math.abs(x - currentPos.x) > threshold || Math.abs(y - currentPos.y) > threshold) {
+      if (
+        Math.abs(x - currentPos.x) > threshold ||
+        Math.abs(y - currentPos.y) > threshold
+      ) {
         mousePositionRef.current = { x, y };
         isUpdatingRef.current = true;
 
@@ -374,8 +376,10 @@ export default function HeroSection() {
             pendingUpdateRef.current = null;
 
             // Use pending update if it's significantly different
-            if (Math.abs(pending.x - mousePositionRef.current.x) > threshold ||
-              Math.abs(pending.y - mousePositionRef.current.y) > threshold) {
+            if (
+              Math.abs(pending.x - mousePositionRef.current.x) > threshold ||
+              Math.abs(pending.y - mousePositionRef.current.y) > threshold
+            ) {
               mousePositionRef.current = pending;
               setMousePosition(pending);
             } else {
@@ -386,8 +390,10 @@ export default function HeroSection() {
             // Use functional update to avoid creating new objects unnecessarily
             setMousePosition((prev) => {
               // Only update if values actually changed
-              if (Math.abs(prev.x - mousePositionRef.current.x) > threshold ||
-                Math.abs(prev.y - mousePositionRef.current.y) > threshold) {
+              if (
+                Math.abs(prev.x - mousePositionRef.current.x) > threshold ||
+                Math.abs(prev.y - mousePositionRef.current.y) > threshold
+              ) {
                 return mousePositionRef.current;
               }
               return prev;
@@ -400,9 +406,9 @@ export default function HeroSection() {
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
@@ -486,7 +492,9 @@ export default function HeroSection() {
       // Video metadata already loaded
       handleLoadedMetadata();
     } else {
-      video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+      video.addEventListener("loadedmetadata", handleLoadedMetadata, {
+        once: true,
+      });
     }
 
     // Try to play video
@@ -495,7 +503,7 @@ export default function HeroSection() {
     });
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [shouldReduceMotion]);
 
@@ -504,11 +512,11 @@ export default function HeroSection() {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black z-10"
       style={{
-        position: 'relative',
+        position: "relative",
         transform: shouldReduceMotion
           ? undefined
           : `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-        transformStyle: 'preserve-3d',
+        transformStyle: "preserve-3d",
       }}
     >
       {/* Floating geometric shapes */}
@@ -517,7 +525,7 @@ export default function HeroSection() {
           {Array.from({ length: 6 }).map((_, i) => {
             const size = 100 + (i % 3) * 50;
             const left = (i * 137.5) % 100;
-            const top = ((i * 1.618) * 100) % 100;
+            const top = (i * 1.618 * 100) % 100;
             const delay = i * 0.5;
             const duration = 8 + (i % 3) * 2;
 
@@ -572,7 +580,10 @@ export default function HeroSection() {
       {/* Dynamic background with image overlays - only render on client */}
       {/* Fixed positioning with z-[1] - video at bottom, image on top */}
       {mounted && (
-        <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
+        <motion.div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{ y }}
+        >
           {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
           {!shouldReduceMotion && (
             <div className="absolute inset-0 opacity-50 z-0">
@@ -585,7 +596,7 @@ export default function HeroSection() {
                 preload="auto"
                 poster="/images/hero/hero-background.webp"
                 className="w-full h-full object-cover"
-                style={{ filter: 'brightness(0.8) contrast(0.9)' }}
+                style={{ filter: "brightness(0.8) contrast(0.9)" }}
               >
                 <source src="/videos/background.mp4" type="video/mp4" />
               </video>
@@ -602,34 +613,42 @@ export default function HeroSection() {
               shouldReduceMotion
                 ? { opacity: 1, scale: 1 }
                 : {
-                  opacity: [0.9, 1, 0.9],
-                  scale: [1, 1.01, 1],
-                }
+                    opacity: [0.9, 1, 0.9],
+                    scale: [1, 1.01, 1],
+                  }
             }
             transition={
               shouldReduceMotion
                 ? {}
                 : {
-                  opacity: { duration: 8, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-                  initial: { duration: 2, ease: "easeOut" },
-                }
+                    opacity: {
+                      duration: 8,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
+                    scale: {
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
+                    initial: { duration: 2, ease: "easeOut" },
+                  }
             }
-            style={{ y: imageY1, height: '100vh', width: '100%' }}
+            style={{ y: imageY1, height: "100vh", width: "100%" }}
           >
             <motion.div
               className="relative w-full h-full"
-              style={{ height: '100vh', width: '100%' }}
+              style={{ height: "100vh", width: "100%" }}
               animate={
                 shouldReduceMotion
                   ? {}
                   : {
-                    filter: [
-                      'brightness(0.9) contrast(1)',
-                      'brightness(1) contrast(1.05)',
-                      'brightness(0.9) contrast(1)',
-                    ],
-                  }
+                      filter: [
+                        "brightness(0.9) contrast(1)",
+                        "brightness(1) contrast(1.05)",
+                        "brightness(0.9) contrast(1)",
+                      ],
+                    }
               }
               transition={{
                 duration: 4,
@@ -661,9 +680,7 @@ export default function HeroSection() {
               }}
             />
             {/* Lightning flash effect - random intervals */}
-            {!shouldReduceMotion && (
-              <LightningFlash />
-            )}
+            {!shouldReduceMotion && <LightningFlash />}
           </motion.div>
 
           {/* Elegant dark overlay with gradient - lighter so image is visible but still dimmed */}
@@ -678,7 +695,7 @@ export default function HeroSection() {
                   className="absolute w-[1px] h-[20px] bg-white/40"
                   style={{
                     left: `${drop.left}%`,
-                    top: '-20px',
+                    top: "-20px",
                     animation: `rain ${drop.duration}s linear infinite`,
                     animationDelay: `${drop.delay}s`,
                   }}
@@ -712,18 +729,18 @@ export default function HeroSection() {
               shouldReduceMotion
                 ? { scale: 1, opacity: 0.125 }
                 : {
-                  scale: [1, 1.05, 1],
-                  opacity: [0.1, 0.15, 0.1],
-                }
+                    scale: [1, 1.05, 1],
+                    opacity: [0.1, 0.15, 0.1],
+                  }
             }
             transition={
               shouldReduceMotion
                 ? {}
                 : {
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
             }
           />
         </motion.div>
@@ -744,18 +761,18 @@ export default function HeroSection() {
                 shouldReduceMotion
                   ? { y: 0, opacity: 0.35 }
                   : {
-                    y: [0, -30, 0],
-                    opacity: [0.2, 0.5, 0.2],
-                  }
+                      y: [0, -30, 0],
+                      opacity: [0.2, 0.5, 0.2],
+                    }
               }
               transition={
                 shouldReduceMotion
                   ? {}
                   : {
-                    duration: particle.duration,
-                    repeat: Infinity,
-                    delay: particle.delay,
-                  }
+                      duration: particle.duration,
+                      repeat: Infinity,
+                      delay: particle.delay,
+                    }
               }
             />
           ))}
@@ -764,21 +781,42 @@ export default function HeroSection() {
 
       {/* Main content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 max-w-6xl overflow-visible">
-        <motion.div style={mounted ? {
-          opacity: typeof opacity === 'number' ? opacity : (opacity?.get?.() ?? 1)
-        } : { opacity: 1 }} className="overflow-visible" suppressHydrationWarning>
+        <motion.div
+          style={
+            mounted
+              ? {
+                  opacity:
+                    typeof opacity === "number"
+                      ? opacity
+                      : opacity?.get?.() ?? 1,
+                }
+              : { opacity: 1 }
+          }
+          className="overflow-visible"
+          suppressHydrationWarning
+        >
           {/* Main heading with massive impact */}
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-            style={mounted ? {
-              opacity: typeof headingOpacity === 'number' ? headingOpacity : (headingOpacity?.get?.() ?? 1),
-              x: typeof headingX === 'number' ? headingX : (headingX?.get?.() ?? 0),
-            } : {
-              opacity: 1,
-              x: 0,
-            }}
+            style={
+              mounted
+                ? {
+                    opacity:
+                      typeof headingOpacity === "number"
+                        ? headingOpacity
+                        : headingOpacity?.get?.() ?? 1,
+                    x:
+                      typeof headingX === "number"
+                        ? headingX
+                        : headingX?.get?.() ?? 0,
+                  }
+                : {
+                    opacity: 1,
+                    x: 0,
+                  }
+            }
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
             suppressHydrationWarning
           >
@@ -862,7 +900,13 @@ export default function HeroSection() {
               <motion.span
                 className="inline-block ml-0"
                 animate={{
-                  color: ["#ffffff", "#ffffff", "#ff0033", "#ff0033", "#ffffff"],
+                  color: [
+                    "#ffffff",
+                    "#ffffff",
+                    "#ff0033",
+                    "#ff0033",
+                    "#ffffff",
+                  ],
                 }}
                 transition={{
                   duration: 4,
@@ -887,13 +931,23 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-            style={mounted ? {
-              opacity: typeof subtitleOpacity === 'number' ? subtitleOpacity : (subtitleOpacity?.get?.() ?? 1),
-              x: typeof subtitleX === 'number' ? subtitleX : (subtitleX?.get?.() ?? 0),
-            } : {
-              opacity: 1,
-              x: 0,
-            }}
+            style={
+              mounted
+                ? {
+                    opacity:
+                      typeof subtitleOpacity === "number"
+                        ? subtitleOpacity
+                        : subtitleOpacity?.get?.() ?? 1,
+                    x:
+                      typeof subtitleX === "number"
+                        ? subtitleX
+                        : subtitleX?.get?.() ?? 0,
+                  }
+                : {
+                    opacity: 1,
+                    x: 0,
+                  }
+            }
             className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group"
             suppressHydrationWarning
           >
@@ -908,8 +962,7 @@ export default function HeroSection() {
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
               />
-            </motion.span>
-            {" "}
+            </motion.span>{" "}
             <motion.span
               className="inline-block text-accent font-semibold"
               whileHover={{ scale: 1.05 }}
@@ -921,8 +974,7 @@ export default function HeroSection() {
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
               />
-            </motion.span>
-            {" "}
+            </motion.span>{" "}
             <motion.span
               className="inline-block"
               whileHover={{ scale: 1.05, color: "#FFFFFF" }}
@@ -1027,7 +1079,7 @@ export default function HeroSection() {
 
             {/* Secondary CTA: Build website - Red/Tertiary bold */}
             <MagneticButton
-              href="https://vykort.onrender.com/"
+              href="/contact"
               className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
@@ -1105,7 +1157,6 @@ export default function HeroSection() {
           />
         </motion.div>
       </div>
-
     </motion.section>
   );
 }

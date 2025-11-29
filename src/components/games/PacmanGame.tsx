@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import Leaderboard from "./Leaderboard";
 
-const CELL_SIZE = 24;
+const CELL_SIZE = 30; // Larger cells for bigger game
 
 // Maze layout - # = wall, . = pellet, o = power pellet, P = pacman start, - = empty
 const MAZE = [
@@ -39,8 +40,11 @@ type Direction = "up" | "right" | "down" | "left";
 const detectTouchDevice = () => {
   if (typeof window === "undefined") return false;
   if ("ontouchstart" in window) return true;
-  if (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) return true;
-  return window.matchMedia ? window.matchMedia("(pointer: coarse)").matches : false;
+  if (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0)
+    return true;
+  return window.matchMedia
+    ? window.matchMedia("(pointer: coarse)").matches
+    : false;
 };
 
 interface Position {
@@ -60,17 +64,29 @@ export default function PacmanGame() {
   const pelletsRef = useRef<Set<string>>(new Set());
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  // Game speed: update every 150ms (slower than before)
-  const GAME_SPEED = 150;
+  // Game speed: update every 120ms (faster for more challenge)
+  const GAME_SPEED = 120;
 
   // Pacman state
-  const pacmanRef = useRef<Position & { dx: number; dy: number; mouth: number; dir: number }>({
-    x: 13, y: 16, dx: 0, dy: 0, mouth: 0, dir: 1
+  const pacmanRef = useRef<
+    Position & { dx: number; dy: number; mouth: number; dir: number }
+  >({
+    x: 13,
+    y: 16,
+    dx: 0,
+    dy: 0,
+    mouth: 0,
+    dir: 1,
   });
 
-  // Ghost state
-  const ghostsRef = useRef<Array<Position & { dx: number; dy: number; color: string }>>([
-    { x: 13, y: 10, dx: 1, dy: 0, color: "#ff6b9d" }
+  // Ghost state - 4 aggressive ghosts with different colors
+  const ghostsRef = useRef<
+    Array<Position & { dx: number; dy: number; color: string }>
+  >([
+    { x: 13, y: 10, dx: 1, dy: 0, color: "#ff0000" }, // Red - Blinky (aggressive)
+    { x: 12, y: 10, dx: -1, dy: 0, color: "#ffb8ff" }, // Pink - Pinky
+    { x: 14, y: 10, dx: 1, dy: 0, color: "#00ffff" }, // Cyan - Inky
+    { x: 13, y: 11, dx: 0, dy: 1, color: "#ffb852" }, // Orange - Clyde
   ]);
 
   const changeDirection = useCallback((direction: Direction) => {
@@ -168,10 +184,14 @@ export default function PacmanGame() {
       }
     };
 
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });
     container.addEventListener("touchend", handleTouchEnd, { passive: true });
-    container.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+    container.addEventListener("touchcancel", handleTouchEnd, {
+      passive: true,
+    });
 
     return () => {
       container.removeEventListener("touchstart", handleTouchStart);
@@ -224,7 +244,13 @@ export default function PacmanGame() {
               // Regular pellet
               ctx.fillStyle = "#e9f2ff";
               ctx.beginPath();
-              ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 3, 0, Math.PI * 2);
+              ctx.arc(
+                px + CELL_SIZE / 2,
+                py + CELL_SIZE / 2,
+                3,
+                0,
+                Math.PI * 2
+              );
               ctx.fill();
             } else if (cell === "o") {
               // Power pellet
@@ -232,7 +258,13 @@ export default function PacmanGame() {
               ctx.shadowColor = "#69a7ff";
               ctx.shadowBlur = 10;
               ctx.beginPath();
-              ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 6, 0, Math.PI * 2);
+              ctx.arc(
+                px + CELL_SIZE / 2,
+                py + CELL_SIZE / 2,
+                6,
+                0,
+                Math.PI * 2
+              );
               ctx.fill();
               ctx.shadowBlur = 0;
             }
@@ -265,7 +297,7 @@ export default function PacmanGame() {
     };
 
     const drawGhosts = () => {
-      ghostsRef.current.forEach(ghost => {
+      ghostsRef.current.forEach((ghost) => {
         const px = ghost.x * CELL_SIZE + CELL_SIZE / 2;
         const py = ghost.y * CELL_SIZE + CELL_SIZE / 2;
 
@@ -292,7 +324,7 @@ export default function PacmanGame() {
         const pelletKey = `${pacman.x},${pacman.y}`;
         if (pelletsRef.current.has(pelletKey)) {
           pelletsRef.current.delete(pelletKey);
-          setScore(prev => prev + 10);
+          setScore((prev) => prev + 10);
 
           if (pelletsRef.current.size === 0) {
             setGameWon(true);
@@ -304,18 +336,18 @@ export default function PacmanGame() {
       pacman.mouth = (pacman.mouth + 0.3) % 1;
 
       // Move ghosts with improved AI - aggressive chase
-      ghostsRef.current.forEach(ghost => {
+      ghostsRef.current.forEach((ghost) => {
         // Smart AI - chase Pacman aggressively
         const dirs = [
           { dx: 0, dy: -1 }, // Up
-          { dx: 1, dy: 0 },  // Right
-          { dx: 0, dy: 1 },  // Down
-          { dx: -1, dy: 0 }  // Left
+          { dx: 1, dy: 0 }, // Right
+          { dx: 0, dy: 1 }, // Down
+          { dx: -1, dy: 0 }, // Left
         ];
 
         // Calculate distance to Pacman for each possible direction
         const possibleMoves = dirs
-          .map(dir => {
+          .map((dir) => {
             const nx = ghost.x + dir.dx;
             const ny = ghost.y + dir.dy;
 
@@ -331,19 +363,26 @@ export default function PacmanGame() {
 
             return { ...dir, distance, nx, ny };
           })
-          .filter(move => move !== null) as Array<{ dx: number; dy: number; distance: number; nx: number; ny: number }>;
+          .filter((move) => move !== null) as Array<{
+          dx: number;
+          dy: number;
+          distance: number;
+          nx: number;
+          ny: number;
+        }>;
 
         if (possibleMoves.length > 0) {
-          // Always choose the direction that gets closest to Pacman (90% chase, 10% random for unpredictability)
+          // Always choose the direction that gets closest to Pacman (95% chase, 5% random for slight unpredictability)
           let chosenMove;
-          if (Math.random() < 0.9) {
-            // Aggressive chase mode: choose closest to Pacman
+          if (Math.random() < 0.95) {
+            // Super aggressive chase mode: always choose closest to Pacman
             chosenMove = possibleMoves.reduce((best, current) =>
               current.distance < best.distance ? current : best
             );
           } else {
-            // Small chance for random move to add unpredictability
-            chosenMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+            // Tiny chance for random move to add slight unpredictability
+            chosenMove =
+              possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
           }
 
           // Update ghost direction
@@ -364,14 +403,17 @@ export default function PacmanGame() {
           ghost.y = ny;
         } else {
           // If can't move in current direction, try to find any valid direction
-          const validDirs = dirs.filter(dir => {
+          const validDirs = dirs.filter((dir) => {
             const testX = ghost.x + dir.dx;
             const testY = ghost.y + dir.dy;
-            return MAZE[testY] && MAZE[testY][testX] && MAZE[testY][testX] !== "#";
+            return (
+              MAZE[testY] && MAZE[testY][testX] && MAZE[testY][testX] !== "#"
+            );
           });
 
           if (validDirs.length > 0) {
-            const randomDir = validDirs[Math.floor(Math.random() * validDirs.length)];
+            const randomDir =
+              validDirs[Math.floor(Math.random() * validDirs.length)];
             ghost.dx = randomDir.dx;
             ghost.dy = randomDir.dy;
           }
@@ -448,7 +490,12 @@ export default function PacmanGame() {
     });
     lastUpdateRef.current = performance.now();
     pacmanRef.current = { x: 13, y: 16, dx: 0, dy: 0, mouth: 0, dir: 0 }; // dir: 0 = right (matches dx: 0)
-    ghostsRef.current = [{ x: 13, y: 10, dx: 1, dy: 0, color: "#ff6b9d" }];
+    ghostsRef.current = [
+      { x: 13, y: 10, dx: 1, dy: 0, color: "#ff0000" }, // Red - Blinky
+      { x: 12, y: 10, dx: -1, dy: 0, color: "#ffb8ff" }, // Pink - Pinky
+      { x: 14, y: 10, dx: 1, dy: 0, color: "#00ffff" }, // Cyan - Inky
+      { x: 13, y: 11, dx: 0, dy: 1, color: "#ffb852" }, // Orange - Clyde
+    ];
   };
 
   const controlHint = isTouchDevice
@@ -478,7 +525,7 @@ export default function PacmanGame() {
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
           className="shadow-2xl rounded-lg max-w-full h-auto"
-          style={{ maxHeight: '60vh' }}
+          style={{ maxHeight: "60vh" }}
         />
 
         {/* Game over / Win overlay */}
@@ -486,20 +533,42 @@ export default function PacmanGame() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg"
+            className="absolute inset-0 bg-black/90 flex items-center justify-center rounded-lg overflow-y-auto p-4"
           >
-            <div className="text-center">
-              <h3 className="text-4xl font-bold text-white mb-4">
-                {gameWon ? "🎉 YOU WIN!" : "💀 GAME OVER"}
+            <div className="text-center w-full max-w-md">
+              <h3
+                className="text-2xl md:text-3xl font-bold text-white mb-2"
+                style={{
+                  fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                  textShadow: "2px 2px 0px #000",
+                }}
+              >
+                {gameWon ? "🎉 DU VANN!" : "💀 GAME OVER"}
               </h3>
-              <p className="text-xl text-white mb-6">
-                Final Score: {score}
+              <p
+                className="text-lg text-yellow-400 mb-4"
+                style={{
+                  fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                }}
+              >
+                Poäng: {score}
               </p>
+
+              {/* Leaderboard with submit form */}
+              <Leaderboard
+                currentScore={score}
+                showSubmitForm={true}
+                onScoreSubmitted={() => {}}
+              />
+
               <button
                 onClick={resetGame}
-                className="px-6 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition"
+                className="mt-4 px-6 py-3 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 transition"
+                style={{
+                  fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                }}
               >
-                Play Again
+                SPELA IGEN
               </button>
             </div>
           </motion.div>

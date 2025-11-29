@@ -41,11 +41,7 @@
 
 import Button from "@/components/ui/Button";
 import { siteConfig } from "@/config/siteConfig";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-} from "framer-motion";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -85,7 +81,7 @@ export default function HeaderNav() {
 
   // Track current hash - only after mount to prevent hydration mismatch
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const updateHash = () => {
       setCurrentHash(window.location.hash);
@@ -93,10 +89,9 @@ export default function HeaderNav() {
 
     // Set initial hash after mount
     updateHash();
-    window.addEventListener('hashchange', updateHash);
-    return () => window.removeEventListener('hashchange', updateHash);
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
   }, []);
-
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -194,10 +189,11 @@ export default function HeaderNav() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${mounted && isScrolled
-          ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
-          : "bg-transparent"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          mounted && isScrolled
+            ? "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
+            : "bg-transparent"
+        }`}
         suppressHydrationWarning
       >
         {/* Animated gradient line at top */}
@@ -230,11 +226,7 @@ export default function HeaderNav() {
                ============================================
                Visible on both mobile and desktop
             */}
-            <Link
-              href="/"
-              className="group relative"
-              prefetch={true}
-            >
+            <Link href="/" className="group relative" prefetch={true}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -293,7 +285,9 @@ export default function HeaderNav() {
                   const isAnchorLink = Boolean(link.hash);
                   const isActive =
                     (!isAnchorLink && pathname === link.href) ||
-                    (isAnchorLink && pathname === "/" && currentHash === link.hash);
+                    (isAnchorLink &&
+                      pathname === "/" &&
+                      currentHash === link.hash);
 
                   return (
                     <motion.div
@@ -324,10 +318,11 @@ export default function HeaderNav() {
                           }
                           // Allow normal Next.js navigation for regular page links
                         }}
-                        className={`nav-link-shimmer px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${isActive
-                          ? "text-white"
-                          : "text-gray-400 hover:text-white"
-                          } ${shimmeringIndex === index ? 'shimmer-active' : ''}`}
+                        className={`nav-link-shimmer px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
+                          isActive
+                            ? "text-white"
+                            : "text-gray-400 hover:text-white"
+                        } ${shimmeringIndex === index ? "shimmer-active" : ""}`}
                         suppressHydrationWarning
                       >
                         {link.label}
@@ -368,7 +363,7 @@ export default function HeaderNav() {
               */}
             <div className="cta-button-header hidden lg:block">
               <Button
-                href="https://vykort.onrender.com/"
+                href="/contact"
                 variant="cta"
                 size="sm"
                 ariaLabel="Starta projekt"
@@ -415,7 +410,7 @@ export default function HeaderNav() {
             </motion.button>
           </div>
         </nav>
-      </motion.header >
+      </motion.header>
 
       {/* ============================================
          MOBILE MENU
