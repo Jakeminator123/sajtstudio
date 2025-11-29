@@ -216,7 +216,7 @@ export default function CaseStudyModal({
               </div>
 
               {/* Content sections */}
-              <div className={isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"}>
+              <div className={isDark ? "bg-gray-900 text-white" : "bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-50 text-gray-800"}>
                 {/* Problem */}
                 <section className="py-16 md:py-24">
                   <div className="max-w-4xl mx-auto px-8">
@@ -224,7 +224,7 @@ export default function CaseStudyModal({
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      className="text-3xl md:text-5xl font-black mb-8"
+                      className={`text-3xl md:text-5xl font-black mb-8 ${isDark ? "text-white" : "text-gray-800"}`}
                     >
                       Utmaningen
                     </motion.h2>
@@ -243,13 +243,13 @@ export default function CaseStudyModal({
                 </section>
 
                 {/* Solution */}
-                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-orange-100/40"}`}>
                   <div className="max-w-4xl mx-auto px-8">
                     <motion.h2
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      className="text-3xl md:text-5xl font-black mb-8"
+                      className={`text-3xl md:text-5xl font-black mb-8 ${isDark ? "text-white" : "text-gray-800"}`}
                     >
                       Lösningen
                     </motion.h2>
@@ -298,13 +298,13 @@ export default function CaseStudyModal({
                 )}
 
                 {/* Results */}
-                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-gray-50"}`}>
+                <section className={`py-16 md:py-24 ${isDark ? "bg-gray-800" : "bg-orange-100/40"}`}>
                   <div className="max-w-4xl mx-auto px-8">
                     <motion.h2
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      className="text-3xl md:text-5xl font-black mb-8"
+                      className={`text-3xl md:text-5xl font-black mb-8 ${isDark ? "text-white" : "text-gray-800"}`}
                     >
                       Resultat
                     </motion.h2>
@@ -345,7 +345,7 @@ export default function CaseStudyModal({
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      className="text-3xl md:text-5xl font-black mb-8"
+                      className={`text-3xl md:text-5xl font-black mb-8 ${isDark ? "text-white" : "text-gray-800"}`}
                     >
                       Teknologi
                     </motion.h2>
@@ -360,7 +360,7 @@ export default function CaseStudyModal({
                           className={`px-6 py-3 font-medium ${
                             isDark
                               ? "bg-gray-800 text-gray-200"
-                              : "bg-gray-100 text-gray-900"
+                              : "bg-amber-100 text-gray-800"
                           }`}
                         >
                           {tech}

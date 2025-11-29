@@ -1007,7 +1007,9 @@ export default function HeroSection() {
                     x: 0,
                   }
             }
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
+            className={`text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-center relative overflow-visible ${
+              isLight ? "text-gray-900" : "text-white"
+            }`}
             suppressHydrationWarning
           >
             {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
@@ -1138,7 +1140,9 @@ export default function HeroSection() {
                     x: 0,
                   }
             }
-            className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group"
+            className={`text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group ${
+              isLight ? "text-gray-800" : "text-gray-200"
+            }`}
             suppressHydrationWarning
           >
             <motion.span

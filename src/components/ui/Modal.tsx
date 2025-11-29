@@ -123,7 +123,7 @@ export default function Modal({
               className={`relative w-full ${maxWidthClasses[maxWidth]} max-h-[90vh] overflow-hidden shadow-2xl ${
                 isDark
                   ? "bg-gray-900 border-gray-700"
-                  : "bg-white border-gray-200"
+                  : "bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-50 border-amber-200"
               } border`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -325,13 +325,13 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
         </motion.div>
 
         {/* Enhanced content section */}
-        <div className={`p-8 sm:p-12 md:p-16 lg:p-20 relative ${isDark ? "bg-gray-900" : "bg-white"}`}>
+        <div className={`p-8 sm:p-12 md:p-16 lg:p-20 relative ${isDark ? "bg-gray-900" : "bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-50"}`}>
           {/* Blue gradient accent */}
           <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-accent/5 to-transparent opacity-50 pointer-events-none" />
 
           {/* Gray gradient accent */}
           <div className={`absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l opacity-50 pointer-events-none ${
-            isDark ? "from-gray-700/30 to-transparent" : "from-gray-900/3 to-transparent"
+            isDark ? "from-gray-700/30 to-transparent" : "from-orange-200/30 to-transparent"
           }`} />
 
           <motion.div
@@ -346,7 +346,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
           >
             {/* Description */}
             <motion.h2
-              className={`text-h2 font-black mb-6 ${isDark ? "text-white" : "text-black"}`}
+              className={`text-h2 font-black mb-6 ${isDark ? "text-white" : "text-gray-800"}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
@@ -355,7 +355,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
             </motion.h2>
             <motion.p
               className={`text-lg leading-relaxed mb-12 ${
-                isDark ? "text-gray-300" : "text-gray-600"
+                isDark ? "text-gray-300" : "text-gray-700"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -372,7 +372,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
               >
-                <h3 className={`text-h3 font-bold mb-6 ${isDark ? "text-white" : "text-black"}`}>
+                <h3 className={`text-h3 font-bold mb-6 ${isDark ? "text-white" : "text-gray-800"}`}>
                   Tekniker
                 </h3>
                 <div className="flex flex-wrap gap-3">
@@ -390,7 +390,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                       className={`px-4 py-2 font-medium transition-colors duration-300 border ${
                         isDark
                           ? "bg-gray-800 hover:bg-accent/10 text-gray-200 hover:text-accent border-gray-700 hover:border-accent/30"
-                          : "bg-gray-100 hover:bg-accent/10 text-gray-700 hover:text-accent border-gray-200 hover:border-accent/30"
+                          : "bg-amber-100 hover:bg-accent/10 text-gray-800 hover:text-accent border-amber-200 hover:border-accent/30"
                       }`}
                     >
                       {tech}

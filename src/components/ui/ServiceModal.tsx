@@ -94,7 +94,7 @@ export default function ServiceModal({
                 damping: 30,
               }}
               className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-none shadow-2xl pointer-events-auto relative ${
-                isDark ? "bg-gray-900" : "bg-white"
+                isDark ? "bg-gray-900" : "bg-gradient-to-br from-amber-50 via-orange-50/80 to-amber-50"
               }`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -141,7 +141,7 @@ export default function ServiceModal({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   className={`text-4xl md:text-5xl font-black mb-6 ${
-                    isDark ? "text-white" : "text-gray-900"
+                    isDark ? "text-white" : "text-gray-800"
                   }`}
                 >
                   {service.title}
@@ -153,7 +153,7 @@ export default function ServiceModal({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   className={`text-lg mb-8 leading-relaxed ${
-                    isDark ? "text-gray-300" : "text-gray-700"
+                    isDark ? "text-gray-300" : "text-gray-800"
                   }`}
                 >
                   {service.longDesc}
@@ -185,7 +185,7 @@ export default function ServiceModal({
                           >
                             <path d="M5 13l4 4L19 7" />
                           </svg>
-                          <span className={isDark ? "text-gray-300" : "text-gray-700"}>
+                          <span className={isDark ? "text-gray-300" : "text-gray-800"}>
                             {feature}
                           </span>
                         </motion.div>
