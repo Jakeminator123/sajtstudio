@@ -168,6 +168,7 @@ export default function IntroVideo() {
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center cursor-pointer"
+          style={{ pointerEvents: isVisible ? "auto" : "none" }}
           onClick={handleClick}
           onKeyDown={(e) => {
             if (e.key === "Escape" || e.key === " ") {
@@ -187,7 +188,7 @@ export default function IntroVideo() {
             transition={{
               duration: 1.5,
               delay: 0.2,
-              ease: [0.25, 0.1, 0.25, 1]
+              ease: [0.25, 0.1, 0.25, 1],
             }}
             autoPlay
             muted
@@ -259,7 +260,9 @@ export default function IntroVideo() {
                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                   </svg>
                 </div>
-                <p className="text-white text-lg font-semibold mb-2">Tryck för att spela</p>
+                <p className="text-white text-lg font-semibold mb-2">
+                  Tryck för att spela
+                </p>
                 <p className="text-white/70 text-sm">Intro-video</p>
               </div>
             </motion.button>
@@ -273,7 +276,9 @@ export default function IntroVideo() {
               className="absolute inset-0 flex items-center justify-center bg-black/90 z-10"
             >
               <div className="text-center px-4">
-                <p className="text-white text-lg mb-4">Kunde inte ladda videon</p>
+                <p className="text-white text-lg mb-4">
+                  Kunde inte ladda videon
+                </p>
                 <button
                   onClick={handleClick}
                   className="px-6 py-2 bg-white text-black rounded-lg font-semibold"
@@ -303,4 +308,3 @@ export default function IntroVideo() {
     </AnimatePresence>
   );
 }
-

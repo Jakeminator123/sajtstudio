@@ -465,7 +465,7 @@ function CursorTrail({
 }
 
 export default function HeroSection() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = true; // Always mounted immediately for LCP optimization - hero image loads right away
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -477,12 +477,8 @@ export default function HeroSection() {
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
-  useEffect(() => {
-    // Use requestAnimationFrame to avoid setState in effect warning
-    requestAnimationFrame(() => {
-      setMounted(true);
-    });
-  }, []);
+  // Removed useEffect - mounted is now true immediately for LCP optimization
+  // Hero section renders immediately so LCP image can load right away
 
   // Track mouse position for 3D tilt and cursor effects with throttling
   const mousePositionRef = useRef({ x: 0, y: 0 });
