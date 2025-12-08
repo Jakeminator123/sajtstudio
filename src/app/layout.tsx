@@ -15,18 +15,22 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap", // Optimize font loading
+  preload: true, // Preload critical font
 });
 
 const dancingScript = Dancing_Script({
   subsets: ["latin"],
   variable: "--font-handwriting",
   weight: ["400", "500", "600", "700"],
+  display: "swap", // Optimize font loading
 });
 
 const pressStart2P = Press_Start_2P({
   subsets: ["latin"],
   variable: "--font-pixel",
   weight: "400",
+  display: "swap", // Optimize font loading
 });
 
 export const metadata: Metadata = {
@@ -179,14 +183,34 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Preconnect for Google Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* Preconnect for Google Fonts - with proper crossorigin */}
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+          crossOrigin="anonymous"
+        />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <link rel="dns-prefetch" href="https://agent.d-id.com" />
+        {/* Preconnect for D-ID chatbot resources */}
+        <link
+          rel="preconnect"
+          href="https://agent.d-id.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://agents-results.d-id.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://create-images-results.d-id.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://api.d-id.com" />
         {/* Preload LCP image for faster rendering */}
         <link
           rel="preload"
@@ -345,19 +369,20 @@ export default function RootLayout({
                     const introSeen = localStorage.getItem('intro_video_seen');
                     // If intro video is done OR if it's been more than 10 seconds (intro timeout), load chatbot
                     if (introSeen === 'true' || document.readyState === 'complete') {
-                      setTimeout(loadChatbot, 500);
+                      // Delay chatbot loading to prioritize page content
+                      setTimeout(loadChatbot, 3000); // Increased delay to improve LCP
                     } else {
                       // Wait a bit and check again
                       setTimeout(checkAndLoadChatbot, 500);
                     }
                   };
 
-                  // Start checking after page load
+                  // Start checking after page load - delay to improve initial page load
                   if (document.readyState === 'complete') {
-                    setTimeout(checkAndLoadChatbot, 2000);
+                    setTimeout(checkAndLoadChatbot, 4000); // Increased delay for better LCP
                   } else {
                     window.addEventListener('load', function() {
-                      setTimeout(checkAndLoadChatbot, 2000);
+                      setTimeout(checkAndLoadChatbot, 4000); // Increased delay for better LCP
                     });
                   }
                 } catch (error) {

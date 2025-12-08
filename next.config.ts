@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
 
     // Target modern browsers to reduce legacy JavaScript polyfills
     if (!isServer) {
-      config.target = ['web', 'es2020'];
+      config.target = ['web', 'es2022']; // Updated to ES2022 for better optimization
     }
 
     return config;
@@ -75,9 +75,69 @@ const nextConfig: NextConfig = {
   // Compression
   compress: true,
 
-  // Headers for better caching
+  // Headers for security and caching
   async headers() {
+    const securityHeaders = [
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=31536000; includeSubDomains; preload",
+      },
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "X-Frame-Options",
+        value: "SAMEORIGIN",
+      },
+      {
+        key: "X-XSS-Protection",
+        value: "1; mode=block",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+      {
+        key: "Cross-Origin-Opener-Policy",
+        value: "same-origin-allow-popups",
+      },
+      {
+        key: "Cross-Origin-Embedder-Policy",
+        value: "unsafe-none", // Required for D-ID chatbot to work
+      },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      },
+      {
+        key: "Content-Security-Policy",
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com", // unsafe-eval needed for D-ID, unsafe-inline for Next.js inline scripts
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // unsafe-inline needed for Next.js
+          "img-src 'self' data: https: blob:", // Allow images from anywhere (needed for D-ID and external content)
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com wss://agent.d-id.com", // WebSocket for D-ID
+          "media-src 'self' https://agents-results.d-id.com blob:",
+          "frame-src 'self' https://agent.d-id.com",
+          "worker-src 'self' blob:",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
+          "upgrade-insecure-requests",
+        ].join("; "),
+      },
+    ];
+
     return [
+      // Security headers for all routes
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+      // Cache headers for static assets
       {
         source: "/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)",
         headers: [

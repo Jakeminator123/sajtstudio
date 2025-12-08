@@ -13,6 +13,7 @@ const RESERVED_ROUTES = [
   "sajtgranskning",
   "utvardera",
   "sajtmaskin",
+  "engine",
   "_next",
   "favicon.ico",
 ];
