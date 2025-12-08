@@ -38,7 +38,7 @@ export default function GeneratedPage() {
 
       // Redirect to the slug route
       router.push(`/${data.slug}`);
-    } catch (err) {
+    } catch {
       setError("Något gick fel. Försök igen senare.");
       setLoading(false);
     }

@@ -27,10 +27,10 @@ const RESERVED_ROUTES = [
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string; path?: string[] } }
+  { params }: { params: Promise<{ slug: string; path?: string[] }> }
 ) {
   try {
-    const { slug, path } = params;
+    const { slug, path } = await params;
 
     // Validate slug format
     if (!slug || typeof slug !== "string") {
@@ -135,10 +135,10 @@ export async function GET(
 // Handle POST requests
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string; path?: string[] } }
+  { params }: { params: Promise<{ slug: string; path?: string[] }> }
 ) {
   try {
-    const { slug, path } = params;
+    const { slug, path } = await params;
 
     if (!slug || typeof slug !== "string") {
       return new NextResponse("Invalid slug", { status: 400 });

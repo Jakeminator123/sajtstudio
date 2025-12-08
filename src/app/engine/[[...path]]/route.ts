@@ -4,11 +4,12 @@ const SAJTMASKIN_URL = "https://sajtmaskin-1.onrender.com";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path?: string[] } }
+  { params }: { params: Promise<{ path?: string[] }> }
 ) {
   try {
     // Build the path to proxy
-    const path = params?.path ? `/${params.path.join("/")}` : "/";
+    const resolvedParams = await params;
+    const path = resolvedParams?.path ? `/${resolvedParams.path.join("/")}` : "/";
     const searchParams = request.nextUrl.searchParams.toString();
     const targetUrl = `${SAJTMASKIN_URL}${path}${searchParams ? `?${searchParams}` : ""}`;
 
@@ -76,10 +77,11 @@ export async function GET(
 // Handle POST requests (for forms, etc.)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path?: string[] } }
+  { params }: { params: Promise<{ path?: string[] }> }
 ) {
   try {
-    const path = params?.path ? `/${params.path.join("/")}` : "/";
+    const resolvedParams = await params;
+    const path = resolvedParams?.path ? `/${resolvedParams.path.join("/")}` : "/";
     const searchParams = request.nextUrl.searchParams.toString();
     const targetUrl = `${SAJTMASKIN_URL}${path}${searchParams ? `?${searchParams}` : ""}`;
 
