@@ -192,6 +192,8 @@ export default function OptimizedVideo({
         {srcH264 && <source src={srcH264} type="video/mp4" />}
         {/* Default fallback */}
         <source src={src} type="video/mp4" />
+        {/* Captions track for accessibility */}
+        <track kind="captions" srcLang="sv" label="Svenska" default />
         Din webbläsare stödjer inte video-taggen.
       </video>
     </div>

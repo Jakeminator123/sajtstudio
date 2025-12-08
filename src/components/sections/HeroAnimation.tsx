@@ -2016,6 +2016,7 @@ export default function HeroAnimation() {
                         src="/videos/unclear_md.mp4"
                         type="video/mp4"
                       />
+                      <track kind="captions" srcLang="sv" label="Svenska" />
                     </video>
                   )}
                   {(!mounted || videoError) && (

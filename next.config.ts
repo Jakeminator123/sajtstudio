@@ -29,10 +29,10 @@ const nextConfig: NextConfig = {
     if (!config.optimization) {
       config.optimization = {};
     }
-    
+
     // Disable parallel processing to prevent worker null errors
     config.optimization.minimize = true;
-    
+
     // Set maxParallelWorkers to prevent worker issues
     if (config.optimization.minimizer) {
       config.optimization.minimizer = config.optimization.minimizer.map((minimizer: any) => {
@@ -75,6 +75,24 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/:all*(mp4|webm|mov|avi)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/:all*(woff|woff2|ttf|otf|eot)",
         headers: [
           {
             key: "Cache-Control",

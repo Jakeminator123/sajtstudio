@@ -384,7 +384,9 @@ export default function OpticScrollShowcase() {
                   loop
                   playsInline
                   src="/videos/telephone_ringin.mp4"
-                />
+                >
+                  <track kind="captions" srcLang="sv" label="Svenska" />
+                </video>
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80"
                   style={mounted ? {

@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data, error } = await resend.emails.send({
         from: "Sajtstudio Kontaktformulär <onboarding@resend.dev>", // You'll need to verify your domain with Resend
-        to: ["jakob@dg97.se"],
+        to: ["hello@sajtstudio.se"],
         subject: `Nytt meddelande från ${trimmedName} - Sajtstudio`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

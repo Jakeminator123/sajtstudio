@@ -228,6 +228,7 @@ export default function IntroVideo() {
             }}
           >
             <source src="/videos/intro_vid.mp4" type="video/mp4" />
+            <track kind="captions" srcLang="sv" label="Svenska" />
             Din webbläsare stödjer inte video-taggen.
           </motion.video>
 

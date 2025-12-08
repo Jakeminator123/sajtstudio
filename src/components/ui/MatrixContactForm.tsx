@@ -78,7 +78,7 @@ function BlinkingCursor() {
 
 export default function MatrixContactForm({
   onKeyboardModeChange,
-  email = "hej@dg97.se",
+  email = "hello@sajtstudio.se",
 }: MatrixContactFormProps) {
   const [message, setMessage] = useState("");
   const [senderEmail, setSenderEmail] = useState("");

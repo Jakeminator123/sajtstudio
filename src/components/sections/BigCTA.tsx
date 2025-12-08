@@ -164,10 +164,11 @@ export default function BigCTA() {
           >
             <Image
               src="/images/contact_phone.webp"
-              alt="Ring oss"
+              alt=""
               width={240}
               height={300}
               className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(0,102,255,0.5)]"
+              loading="lazy"
             />
             {/* Hover tooltip */}
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-accent/90 px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -184,12 +185,12 @@ export default function BigCTA() {
 
         {/* Matrix Contact Form - positioned to the right (desktop) */}
         <div className="absolute z-20 right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 hidden md:block">
-          <MatrixContactForm email="hej@dg97.se" />
+          <MatrixContactForm email="hello@sajtstudio.se" />
         </div>
 
         {/* Mobile: Form and Phone button */}
         <div className="absolute z-20 bottom-4 left-4 right-4 md:hidden space-y-4">
-          <MatrixContactForm email="hej@dg97.se" />
+          <MatrixContactForm email="hello@sajtstudio.se" />
 
           {/* Mobile phone call button */}
           <motion.a
@@ -202,10 +203,11 @@ export default function BigCTA() {
           >
             <Image
               src="/images/contact_phone.webp"
-              alt="Ring"
+              alt=""
               width={40}
               height={50}
               className="object-contain"
+              loading="lazy"
             />
             <span className="text-lg">Ring oss direkt!</span>
           </motion.a>
@@ -229,7 +231,7 @@ export default function BigCTA() {
         >
           {/* Email */}
           <motion.a
-            href="mailto:hej@dg97.se"
+            href="mailto:hello@sajtstudio.se"
             className={`group flex items-center gap-3 hover:text-accent transition-colors ${
               isLight ? "text-gray-600" : "text-white/60"
             }`}
@@ -246,7 +248,7 @@ export default function BigCTA() {
             >
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span className="font-mono text-sm">hej@dg97.se</span>
+            <span className="font-mono text-sm">hello@sajtstudio.se</span>
           </motion.a>
 
           {/* Divider */}

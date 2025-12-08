@@ -16,6 +16,7 @@ function MagneticButton({
   shouldReduceMotion,
   mousePosition,
   onHoverChange,
+  external = false,
 }: {
   href: string;
   children: React.ReactNode;
@@ -23,6 +24,7 @@ function MagneticButton({
   shouldReduceMotion: boolean;
   mousePosition: { x: number; y: number };
   onHoverChange?: (hovering: boolean) => void;
+  external?: boolean;
 }) {
   const buttonRef = useRef<HTMLAnchorElement>(null);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
@@ -91,6 +93,7 @@ function MagneticButton({
     <motion.a
       ref={buttonRef}
       href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       onMouseEnter={() => {
         setIsHovered(true);
         onHoverChange?.(true);
@@ -1195,7 +1198,8 @@ export default function HeroSection() {
           >
             {/* Primary CTA: Website evaluation - Blue with cool animations */}
             <MagneticButton
-              href="/utvardera"
+              href="https://sajtmaskin-1.onrender.com/"
+              external={true}
               className="px-10 py-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg rounded-lg hover:from-blue-500 hover:via-cyan-500 hover:to-blue-600 transition-all duration-500 shadow-[0_0_30px_rgba(0,102,255,0.5)] hover:shadow-[0_0_50px_rgba(0,102,255,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
@@ -1269,7 +1273,8 @@ export default function HeroSection() {
 
             {/* Secondary CTA: Build website - Red/Tertiary bold */}
             <MagneticButton
-              href="/contact"
+              href="https://sajtmaskin-1.onrender.com/"
+              external={true}
               className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}

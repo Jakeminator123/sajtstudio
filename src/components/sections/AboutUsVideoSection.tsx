@@ -184,6 +184,7 @@ export default function AboutUsVideoSection() {
               onPause={() => setIsPlaying(false)}
             >
               <source src="/videos/om_oss.mp4" type="video/mp4" />
+              <track kind="captions" srcLang="sv" label="Svenska" default />
               Din webbläsare stöder inte videouppspelning.
             </video>
 
