@@ -114,11 +114,11 @@ const nextConfig: NextConfig = {
         key: "Content-Security-Policy",
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com", // unsafe-eval needed for D-ID, unsafe-inline for Next.js inline scripts
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com https://*.launchdarkly.com https://app.launchdarkly.com", // unsafe-eval needed for D-ID, unsafe-inline for Next.js inline scripts, LaunchDarkly
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // unsafe-inline needed for Next.js
           "img-src 'self' data: https: blob:", // Allow images from anywhere (needed for D-ID and external content)
           "font-src 'self' data: https://fonts.gstatic.com",
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://raw.githack.com wss://agent.d-id.com", // WebSocket for D-ID, raw.githack.com for Three.js HDR files
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://raw.githack.com wss://agent.d-id.com https://*.datadoghq.com https://browser-intake-us1-datadoghq.com https://browser-intake-us3-datadoghq.com https://browser-intake-us5-datadoghq.com https://browser-intake-eu1-datadoghq.com https://browser-intake-ap1-datadoghq.com https://*.launchdarkly.com https://app.launchdarkly.com https://clientsdk.launchdarkly.com", // WebSocket for D-ID, raw.githack.com for Three.js HDR files, Datadog RUM (all regions), LaunchDarkly
           "media-src 'self' https://agents-results.d-id.com blob:",
           "frame-src 'self' https://agent.d-id.com",
           "worker-src 'self' blob:",

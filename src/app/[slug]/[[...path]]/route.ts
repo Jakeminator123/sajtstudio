@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Runtime configuration - use nodejs for better compatibility with AbortSignal.timeout
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 // Base URL pattern for external sites
 const EXTERNAL_BASE_URL = "https://";
 const EXTERNAL_DOMAIN_SUFFIX = ".vusercontent.net";
@@ -30,11 +34,12 @@ export async function GET(
   { params }: { params: Promise<{ slug: string; path?: string[] }> }
 ) {
   try {
-    const { slug, path } = await params;
+    const resolvedParams = await params;
+    const { slug, path } = resolvedParams;
 
-    // Validate slug format
-    if (!slug || typeof slug !== "string") {
-      return new NextResponse("Invalid slug", { status: 400 });
+    // Early validation - return 404 if slug is missing or invalid
+    if (!slug || typeof slug !== "string" || slug.trim() === "") {
+      return new NextResponse("Not Found", { status: 404 });
     }
 
     // Check if slug is a reserved route
@@ -124,10 +129,18 @@ export async function GET(
   } catch (error) {
     console.error("Proxy error:", error);
 
-    if (error instanceof Error && error.name === "AbortError") {
-      return new NextResponse("Request timeout", { status: 504 });
+    // Handle timeout errors
+    if (error instanceof Error) {
+      if (error.name === "AbortError" || error.message.includes("timeout")) {
+        return new NextResponse("Request timeout", { status: 504 });
+      }
+      // Handle fetch errors (network issues, DNS failures, etc.)
+      if (error.message.includes("fetch") || error.message.includes("network")) {
+        return new NextResponse("External site unavailable", { status: 503 });
+      }
     }
 
+    // Return generic error to prevent blocking deployment
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
@@ -138,10 +151,12 @@ export async function POST(
   { params }: { params: Promise<{ slug: string; path?: string[] }> }
 ) {
   try {
-    const { slug, path } = await params;
+    const resolvedParams = await params;
+    const { slug, path } = resolvedParams;
 
-    if (!slug || typeof slug !== "string") {
-      return new NextResponse("Invalid slug", { status: 400 });
+    // Early validation - return 404 if slug is missing or invalid
+    if (!slug || typeof slug !== "string" || slug.trim() === "") {
+      return new NextResponse("Not Found", { status: 404 });
     }
 
     if (RESERVED_ROUTES.includes(slug.toLowerCase())) {
@@ -185,10 +200,18 @@ export async function POST(
   } catch (error) {
     console.error("Proxy POST error:", error);
 
-    if (error instanceof Error && error.name === "AbortError") {
-      return new NextResponse("Request timeout", { status: 504 });
+    // Handle timeout errors
+    if (error instanceof Error) {
+      if (error.name === "AbortError" || error.message.includes("timeout")) {
+        return new NextResponse("Request timeout", { status: 504 });
+      }
+      // Handle fetch errors (network issues, DNS failures, etc.)
+      if (error.message.includes("fetch") || error.message.includes("network")) {
+        return new NextResponse("External site unavailable", { status: 503 });
+      }
     }
 
+    // Return generic error to prevent blocking deployment
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
