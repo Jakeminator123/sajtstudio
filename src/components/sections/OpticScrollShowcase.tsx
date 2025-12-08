@@ -408,6 +408,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
+                      loading="lazy"
                     />
                   </motion.div>
                   <motion.div
@@ -421,6 +422,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
+                      loading="lazy"
                     />
                   </motion.div>
                   <motion.div
@@ -434,6 +436,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 128px, 128px"
                       className="object-cover rounded-lg shadow-lg"
+                      loading="lazy"
                     />
                   </motion.div>
                 </motion.div>

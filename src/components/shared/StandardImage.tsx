@@ -139,6 +139,7 @@ export function StandardImage({
           fill
           sizes={imageSizes}
           priority={priority}
+          loading={priority ? undefined : "lazy"}
           onLoadingComplete={handleLoadingComplete}
           className={`${objectFitClass} transition-opacity duration-300 ${
             isLoading ? "opacity-0" : "opacity-100"
@@ -156,6 +157,7 @@ export function StandardImage({
           alt={props.alt || ""}
           sizes={imageSizes}
           priority={priority}
+          loading={priority ? undefined : "lazy"}
           onLoadingComplete={handleLoadingComplete}
           className={`w-full h-auto ${objectFitClass} transition-opacity duration-300 ${
             isLoading ? "opacity-0" : "opacity-100"

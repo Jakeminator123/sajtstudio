@@ -84,7 +84,7 @@ export default function ProcessSection() {
               className="object-cover"
               style={{ opacity: 0.15 }}
               sizes="100vw"
-              priority={false}
+              loading="lazy"
             />
 
             {/* GIF overlay for subtle animation */}

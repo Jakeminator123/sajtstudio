@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
       });
     }
 
+    // Target modern browsers to reduce legacy JavaScript polyfills
+    if (!isServer) {
+      config.target = ['web', 'es2020'];
+    }
+
     return config;
   },
 
@@ -59,7 +64,7 @@ const nextConfig: NextConfig = {
 
   // Performance optimizations
   experimental: {
-    // optimizeCss: true, // Temporarily disabled until stable
+    optimizeCss: true, // Enable CSS optimization to reduce render blocking
     // Temporarily disabled optimizePackageImports to avoid webpack module loading issues
     // optimizePackageImports: [
     //   "framer-motion",
