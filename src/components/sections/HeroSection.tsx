@@ -1150,7 +1150,7 @@ export default function HeroSection() {
               transition={{ duration: 0.2 }}
             >
               <AnimatedText
-                text="Vi skapar skräddarsydda, toppmoderna webbplatser"
+                text="Vi skapar skräddarsydda webbplatser och AI-genererade sajter"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
@@ -1162,7 +1162,7 @@ export default function HeroSection() {
               transition={{ duration: 0.2 }}
             >
               <AnimatedText
-                text="för företag som vill sticka ut"
+                text="för företag som vill sticka ut eller snabbt komma igång"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}

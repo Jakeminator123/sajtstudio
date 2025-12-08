@@ -31,15 +31,20 @@ const pressStart2P = Press_Start_2P({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sajtstudio – Modern webbdesign för framgångsrika företag",
+    default: "Sajtstudio – Modern webbdesign och AI-generering av webbplatser",
     template: "%s | Sajtstudio",
   },
   description:
-    "Skräddarsydda, toppmoderna hemsidor för utvalda företag som vill leda inom sin bransch. Vi bygger hemsidor som betyder något.",
+    "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling med React och Next.js, samt AI-drivna verktyg för att skapa professionella sajter på minuter. Perfekt för företag som vill ha en unik hemsida eller snabbt generera en webbplats med vår AI-plattform SajtMaskin.",
   keywords: [
     "webbdesign",
     "hemsidor",
     "webbutveckling",
+    "AI-generering",
+    "AI webbplatser",
+    "SajtMaskin",
+    "artificiell intelligens",
+    "automatisk webbplatsgenerering",
     "Sverige",
     "Stockholm",
     "Next.js",
@@ -47,6 +52,8 @@ export const metadata: Metadata = {
     "modern design",
     "företagshemsidor",
     "responsiv design",
+    "AI templates",
+    "webbplatsgenerator",
   ],
   authors: [{ name: "Sajtstudio", url: "https://www.sajtstudio.se" }],
   creator: "Sajtstudio",
@@ -180,6 +187,19 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://agent.d-id.com" />
+        {/* Preload LCP image for faster rendering */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/hero/hero-background.webp"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/backgrounds/city-background-sunny.webp"
+          fetchPriority="high"
+        />
         {/* Prefetch assets that appear later without forcing preload warnings */}
         <link rel="prefetch" href="/logo.svg" />
         <link rel="prefetch" href="/videos/background.mp4" />

@@ -7,13 +7,9 @@ import dynamic from "next/dynamic";
 
 // Critical components loaded immediately for smooth scrolling
 import ScrollIndicator from "@/components/animations/ScrollIndicator";
-// Load first 3-4 sections immediately - they appear early and need smooth scrolling
-import AboutSection from "@/components/sections/AboutSection";
-import ServicesSection from "@/components/sections/ServicesSection";
+// Only load USPSection immediately - others can be lazy loaded for better LCP
 import USPSection from "@/components/sections/USPSection";
-// CRITICAL: HeroAnimation must be ready when user scrolls - contains video explosion and Pacman game
-import HeroAnimation from "@/components/sections/HeroAnimation";
-import TechShowcaseSection from "@/components/sections/TechShowcaseSection";
+// Defer heavy components that appear later - lazy load for better LCP
 
 import { SectionSkeleton } from "@/components/ui/Skeleton";
 import { usePrefetch } from "@/hooks/usePrefetch";
@@ -23,6 +19,28 @@ import IntroVideo from "@/components/animations/IntroVideo";
 
 // Lazy load sections that appear later - prefetched via usePrefetchOnScroll for smooth scrolling
 // Using explicit error handling to prevent webpack module loading issues
+
+const AboutSection = dynamic(
+  () =>
+    import("@/components/sections/AboutSection").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Defer loading for better LCP
+  }
+);
+
+const ServicesSection = dynamic(
+  () =>
+    import("@/components/sections/ServicesSection").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Defer loading for better LCP
+  }
+);
 
 const ProcessSection = dynamic(
   () =>
@@ -65,6 +83,28 @@ const AboutUsVideoSection = dynamic(
   {
     loading: () => <SectionSkeleton />,
     ssr: false, // Prevent hydration mismatch
+  }
+);
+
+const HeroAnimation = dynamic(
+  () =>
+    import("@/components/sections/HeroAnimation").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Heavy component with video - defer loading
+  }
+);
+
+const TechShowcaseSection = dynamic(
+  () =>
+    import("@/components/sections/TechShowcaseSection").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Heavy component with Pacman game - defer loading
   }
 );
 
@@ -118,13 +158,11 @@ export default function Home() {
           <ServicesSection />
         </div>
 
-        {/* Portfolio animation - behåll nuvarande explosion */}
-        {/* CRITICAL: HeroAnimation loaded directly - video explosion must be ready */}
+        {/* Portfolio animation - lazy loaded for better LCP */}
         <div className="content-visibility-auto">
           <HeroAnimation />
         </div>
-        {/* Tech vs Design showcase - interactive Pacman demo */}
-        {/* CRITICAL: TechShowcaseSection loaded directly - Pacman game must be ready */}
+        {/* Tech vs Design showcase - lazy loaded for better LCP */}
         <div className="content-visibility-auto">
           <TechShowcaseSection />
         </div>

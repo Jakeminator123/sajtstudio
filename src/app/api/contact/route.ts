@@ -20,20 +20,27 @@ export async function POST(request: NextRequest) {
     const trimmedEmail = typeof email === "string" ? email.trim() : "";
     const trimmedMessage = typeof message === "string" ? message.trim() : "";
 
-    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+    // Message is required, but name and email can be optional (use defaults)
+    if (!trimmedMessage) {
       return NextResponse.json(
-        { error: "Alla fält är obligatoriska" },
+        { error: "Meddelandet är obligatoriskt" },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      return NextResponse.json(
-        { error: "Ogiltig e-postadress" },
-        { status: 400 }
-      );
+    // Use defaults if name or email is missing
+    const finalName = trimmedName || "Anonym besökare";
+    const finalEmail = trimmedEmail || "anonym@sajtstudio.se";
+
+    // Validate email format (only if email is provided and not anonymous)
+    if (trimmedEmail && finalEmail !== "anonym@sajtstudio.se") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        return NextResponse.json(
+          { error: "Ogiltig e-postadress" },
+          { status: 400 }
+        );
+      }
     }
 
     // Send email using Resend
@@ -42,8 +49,8 @@ export async function POST(request: NextRequest) {
       // In development/build, log and return success if API key is missing
       if (process.env.NODE_ENV !== "production") {
         console.log("Contact form submission (no API key):", {
-          name: trimmedName,
-          email: trimmedEmail,
+          name: finalName,
+          email: finalEmail,
           message: trimmedMessage,
         });
         return NextResponse.json(
@@ -58,15 +65,15 @@ export async function POST(request: NextRequest) {
       const { data, error } = await resend.emails.send({
         from: "Sajtstudio Kontaktformulär <onboarding@resend.dev>", // You'll need to verify your domain with Resend
         to: ["hello@sajtstudio.se"],
-        subject: `Nytt meddelande från ${trimmedName} - Sajtstudio`,
+        subject: `Nytt meddelande från ${finalName} - Sajtstudio`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #000; border-bottom: 2px solid #0066FF; padding-bottom: 10px;">
               Nytt meddelande från kontaktformuläret
             </h2>
             <div style="margin-top: 20px;">
-              <p><strong>Från:</strong> ${trimmedName}</p>
-              <p><strong>E-post:</strong> <a href="mailto:${trimmedEmail}">${trimmedEmail}</a></p>
+              <p><strong>Från:</strong> ${finalName}</p>
+              <p><strong>E-post:</strong> <a href="mailto:${finalEmail}">${finalEmail}</a></p>
             </div>
             <div style="margin-top: 30px; padding: 20px; background-color: #f5f5f5; border-left: 4px solid #0066FF;">
               <h3 style="color: #000; margin-top: 0;">Meddelande:</h3>
@@ -80,7 +87,7 @@ export async function POST(request: NextRequest) {
             </div>
           </div>
         `,
-        replyTo: trimmedEmail, // So you can reply directly to the sender
+        replyTo: finalEmail !== "anonym@sajtstudio.se" ? finalEmail : undefined, // So you can reply directly to the sender
       });
 
       if (error) {
@@ -88,8 +95,8 @@ export async function POST(request: NextRequest) {
         // In development, still log and return success
         if (process.env.NODE_ENV === "development") {
           console.log("Contact form submission (email failed):", {
-            name: trimmedName,
-            email: trimmedEmail,
+            name: finalName,
+            email: finalEmail,
             message: trimmedMessage,
           });
           return NextResponse.json(
@@ -104,8 +111,8 @@ export async function POST(request: NextRequest) {
       if (process.env.NODE_ENV === "development") {
         console.log("Email sent successfully:", data);
         console.log("Contact form submission:", {
-          name: trimmedName,
-          email: trimmedEmail,
+          name: finalName,
+          email: finalEmail,
           message: trimmedMessage,
         });
       }
@@ -120,8 +127,8 @@ export async function POST(request: NextRequest) {
       // In development, still return success even if email fails
       if (process.env.NODE_ENV === "development") {
         console.log("Contact form submission (email failed, dev mode):", {
-          name: trimmedName,
-          email: trimmedEmail,
+          name: finalName,
+          email: finalEmail,
           message: trimmedMessage,
         });
         return NextResponse.json(

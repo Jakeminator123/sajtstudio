@@ -2,11 +2,26 @@
 
 import WordReveal from "@/components/animations/WordReveal";
 import { useMounted } from "@/hooks/useMounted";
-import { MotionValue, motion, useInView, useMotionValue, useScroll, useTransform } from "framer-motion";
+import {
+  MotionValue,
+  motion,
+  useInView,
+  useMotionValue,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 // Animated counter component
-function AnimatedNumber({ value, suffix = "", duration = 2 }: { value: string; suffix?: string; duration?: number }) {
+function AnimatedNumber({
+  value,
+  suffix = "",
+  duration = 2,
+}: {
+  value: string;
+  suffix?: string;
+  duration?: number;
+}) {
   const [displayValue, setDisplayValue] = useState("0");
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
@@ -34,7 +49,9 @@ function AnimatedNumber({ value, suffix = "", duration = 2 }: { value: string; s
 
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const current = Math.floor(startValue + (endValue - startValue) * easeOutQuart);
+      const current = Math.floor(
+        startValue + (endValue - startValue) * easeOutQuart
+      );
 
       setDisplayValue(`${current}${suffix}`);
 
@@ -74,7 +91,11 @@ function FloatingParticle({
     [0, 1, 1, 0]
   );
   const baseScale = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0]);
-  const baseY = useTransform(scrollYProgress, [0, 1], [0, -50 - particle.id * 2]);
+  const baseY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, -50 - particle.id * 2]
+  );
 
   // Create mounted MotionValue to use in transforms
   const mountedValue = useMotionValue(mounted ? 1 : 0);
@@ -84,9 +105,18 @@ function FloatingParticle({
   }, [mounted, mountedValue]);
 
   // Multiply base values by mounted value
-  const opacity = useTransform([baseOpacity, mountedValue], (values: number[]) => values[0] * values[1]);
-  const scale = useTransform([baseScale, mountedValue], (values: number[]) => values[0] * values[1]);
-  const y = useTransform([baseY, mountedValue], (values: number[]) => values[0] * values[1]);
+  const opacity = useTransform(
+    [baseOpacity, mountedValue],
+    (values: number[]) => values[0] * values[1]
+  );
+  const scale = useTransform(
+    [baseScale, mountedValue],
+    (values: number[]) => values[0] * values[1]
+  );
+  const y = useTransform(
+    [baseY, mountedValue],
+    (values: number[]) => values[0] * values[1]
+  );
 
   return (
     <motion.div
@@ -99,12 +129,16 @@ function FloatingParticle({
         opacity,
         scale,
         y,
-        pointerEvents: mounted ? 'auto' : 'none',
+        pointerEvents: mounted ? "auto" : "none",
       }}
-      animate={mounted ? {
-        x: [0, Math.sin(particle.id) * 20, 0],
-        y: [0, Math.cos(particle.id) * 20, 0],
-      } : {}}
+      animate={
+        mounted
+          ? {
+              x: [0, Math.sin(particle.id) * 20, 0],
+              y: [0, Math.cos(particle.id) * 20, 0],
+            }
+          : {}
+      }
       transition={{
         duration: 3 + particle.id * 0.1,
         repeat: Infinity,
@@ -132,7 +166,11 @@ function GlowingOrb({
   duration: number;
 }) {
   // Always call hooks - never conditionally
-  const baseOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.2, 0.4, 0.2]);
+  const baseOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.2, 0.4, 0.2]
+  );
   const baseScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 1]);
 
   // Create mounted MotionValue to use in transforms
@@ -143,8 +181,9 @@ function GlowingOrb({
   }, [mounted, mountedValue]);
 
   // Combine base values with mounted value
-  const opacity = useTransform([baseOpacity, mountedValue], (values: number[]) =>
-    values[1] === 0 ? 0.2 : values[0]
+  const opacity = useTransform(
+    [baseOpacity, mountedValue],
+    (values: number[]) => (values[1] === 0 ? 0.2 : values[0])
   );
   const scale = useTransform([baseScale, mountedValue], (values: number[]) =>
     values[1] === 0 ? 1 : values[0]
@@ -157,10 +196,14 @@ function GlowingOrb({
         opacity,
         scale,
       }}
-      animate={mounted ? {
-        x: animateX,
-        y: animateY,
-      } : {}}
+      animate={
+        mounted
+          ? {
+              x: animateX,
+              y: animateY,
+            }
+          : {}
+      }
       transition={{
         duration,
         repeat: Infinity,
@@ -182,15 +225,31 @@ export default function AboutSection() {
   // Morphing effects - text becomes smoke-like blob that disappears earlier
   // Smoke appears and disappears within first 60% of scroll
   const morphProgress = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.4, 0.6, 0.8, 1], [1, 1, 0.5, 0, 0]);
-  const textScale = useTransform(scrollYProgress, [0, 0.4, 0.6, 0.8, 1], [1, 1, 0.5, 0.2, 0]);
+  const textOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.6, 0.8, 1],
+    [1, 1, 0.5, 0, 0]
+  );
+  const textScale = useTransform(
+    scrollYProgress,
+    [0, 0.4, 0.6, 0.8, 1],
+    [1, 1, 0.5, 0.2, 0]
+  );
   // Reduced blur for sharper text - max 5px instead of 30px
   const textBlurValue = useTransform(scrollYProgress, [0.4, 0.7], [0, 5]);
   const textBlur = useTransform(textBlurValue, (val) => `blur(${val}px)`);
 
   // Additional transforms that must always be called, never conditional
-  const accentGradientOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.6, 0.3]);
-  const gridOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.03, 0.1, 0.03]);
+  const accentGradientOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.3, 0.6, 0.3]
+  );
+  const gridOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.03, 0.1, 0.03]
+  );
 
   // Smoke-like blob - drifts around and fades away like smoke
   // More organic, wispy movement
@@ -217,7 +276,11 @@ export default function AboutSection() {
     { clamp: false }
   );
   // Fades away like smoke - appears quickly, disappears gradually
-  const blobOpacity = useTransform(morphProgress, [0, 0.2, 0.5, 0.8, 1], [0, 0.7, 0.9, 0.4, 0]);
+  const blobOpacity = useTransform(
+    morphProgress,
+    [0, 0.2, 0.5, 0.8, 1],
+    [0, 0.7, 0.9, 0.4, 0]
+  );
 
   // Blur increases as smoke dissipates (becomes more wispy)
   const blobBlur = useTransform(morphProgress, [0, 0.5, 1], [30, 50, 80]);
@@ -244,19 +307,34 @@ export default function AboutSection() {
     const irregularity = 0.6 + t * 0.4; // More irregular as it fades
     const wispiness = t * 0.5; // Becomes wispier
 
-    let path = `M ${w / 2 + Math.cos(0) * baseRadius * (1 + t * 0.5) * (1 + Math.sin(0 * 3) * wispiness)} ${h / 2 + Math.sin(0) * baseRadius * (1 + t * 0.5) * (1 + Math.cos(0 * 3) * wispiness)}`;
+    let path = `M ${
+      w / 2 +
+      Math.cos(0) *
+        baseRadius *
+        (1 + t * 0.5) *
+        (1 + Math.sin(0 * 3) * wispiness)
+    } ${
+      h / 2 +
+      Math.sin(0) *
+        baseRadius *
+        (1 + t * 0.5) *
+        (1 + Math.cos(0 * 3) * wispiness)
+    }`;
 
     for (let i = 1; i <= complexity; i++) {
       const angle = (i / complexity) * Math.PI * 2;
       // More variation for smoke-like wispiness
-      const radiusVariation = Math.sin(angle * 6 + t * Math.PI * 4) * irregularity * 0.5;
-      const wispyVariation = Math.sin(angle * 8 + t * Math.PI * 5) * wispiness * 0.3;
-      const radius = baseRadius * (1 + t * 0.5 + radiusVariation + wispyVariation);
+      const radiusVariation =
+        Math.sin(angle * 6 + t * Math.PI * 4) * irregularity * 0.5;
+      const wispyVariation =
+        Math.sin(angle * 8 + t * Math.PI * 5) * wispiness * 0.3;
+      const radius =
+        baseRadius * (1 + t * 0.5 + radiusVariation + wispyVariation);
       const x = w / 2 + Math.cos(angle) * radius;
       const y = h / 2 + Math.sin(angle) * radius;
       path += ` L ${x} ${y}`;
     }
-    path += ' Z';
+    path += " Z";
     return path;
   });
 
@@ -272,7 +350,10 @@ export default function AboutSection() {
   }, [mounted, mountedValue]);
 
   // Combine blob opacity with mounted value
-  const finalBlobOpacity = useTransform([blobOpacity, mountedValue], (values: number[]) => values[0] * values[1]);
+  const finalBlobOpacity = useTransform(
+    [blobOpacity, mountedValue],
+    (values: number[]) => values[0] * values[1]
+  );
 
   // Parallax effects
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 100]);
@@ -362,22 +443,28 @@ export default function AboutSection() {
           {/* Main heading with enhanced styling - sharper, more focused */}
           <motion.h2
             className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-12 leading-none"
-            style={mounted ? {
-              // Reduced glow for sharper text - smaller, more focused shadows
-              textShadow: "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
-              opacity: textOpacity,
-              scale: textScale,
-              filter: textBlur,
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
-            } : {
-              textShadow: "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
-              opacity: 1,
-              scale: 1,
-              filter: "blur(0px)",
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
-            }}
+            style={
+              mounted
+                ? {
+                    // Reduced glow for sharper text - smaller, more focused shadows
+                    textShadow:
+                      "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
+                    opacity: textOpacity,
+                    scale: textScale,
+                    filter: textBlur,
+                    WebkitFontSmoothing: "antialiased",
+                    MozOsxFontSmoothing: "grayscale",
+                  }
+                : {
+                    textShadow:
+                      "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
+                    opacity: 1,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    WebkitFontSmoothing: "antialiased",
+                    MozOsxFontSmoothing: "grayscale",
+                  }
+            }
             suppressHydrationWarning
           >
             <WordReveal
@@ -394,21 +481,25 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              style={mounted ? {
-                opacity: textOpacity,
-                scale: textScale,
-                filter: textBlur,
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-                textRendering: "optimizeLegibility",
-              } : {
-                opacity: 1,
-                scale: 1,
-                filter: "blur(0px)",
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-                textRendering: "optimizeLegibility",
-              }}
+              style={
+                mounted
+                  ? {
+                      opacity: textOpacity,
+                      scale: textScale,
+                      filter: textBlur,
+                      WebkitFontSmoothing: "antialiased",
+                      MozOsxFontSmoothing: "grayscale",
+                      textRendering: "optimizeLegibility",
+                    }
+                  : {
+                      opacity: 1,
+                      scale: 1,
+                      filter: "blur(0px)",
+                      WebkitFontSmoothing: "antialiased",
+                      MozOsxFontSmoothing: "grayscale",
+                      textRendering: "optimizeLegibility",
+                    }
+              }
               suppressHydrationWarning
             >
               <WordReveal
@@ -426,24 +517,29 @@ export default function AboutSection() {
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.6 }}
               className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed max-w-4xl mx-auto font-medium"
-              style={mounted ? {
-                opacity: textOpacity,
-                scale: textScale,
-                filter: textBlur,
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-                textRendering: "optimizeLegibility",
-              } : {
-                opacity: 1,
-                scale: 1,
-                filter: "blur(0px)",
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-                textRendering: "optimizeLegibility",
-              }}
+              style={
+                mounted
+                  ? {
+                      opacity: textOpacity,
+                      scale: textScale,
+                      filter: textBlur,
+                      WebkitFontSmoothing: "antialiased",
+                      MozOsxFontSmoothing: "grayscale",
+                      textRendering: "optimizeLegibility",
+                    }
+                  : {
+                      opacity: 1,
+                      scale: 1,
+                      filter: "blur(0px)",
+                      WebkitFontSmoothing: "antialiased",
+                      MozOsxFontSmoothing: "grayscale",
+                      textRendering: "optimizeLegibility",
+                    }
+              }
               suppressHydrationWarning
             >
-              Vi hjälper företag att få riktigt vassa hemsidor – snabbare och smartare.
+              Vi hjälper företag att få riktigt vassa hemsidor – snabbare och
+              smartare.
             </motion.p>
 
             {/* Extended description */}
@@ -453,26 +549,63 @@ export default function AboutSection() {
               viewport={{ once: true }}
               transition={{ delay: 1, duration: 0.6 }}
               className="text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto space-y-6"
-              style={mounted ? {
-                opacity: textOpacity,
-                scale: textScale,
-                filter: textBlur,
-              } : {
-                opacity: 1,
-                scale: 1,
-                filter: "blur(0px)",
-              }}
+              style={
+                mounted
+                  ? {
+                      opacity: textOpacity,
+                      scale: textScale,
+                      filter: textBlur,
+                    }
+                  : {
+                      opacity: 1,
+                      scale: 1,
+                      filter: "blur(0px)",
+                    }
+              }
               suppressHydrationWarning
             >
               <p>
-                Genom att kombinera <span className="text-accent font-semibold">artificiell intelligens</span>,
-                genomtänkt design och modern webbutveckling (React, Next, Vite) bygger vi skräddarsydda sajter
-                som både känns rätt för ditt varumärke och fungerar för dina kunder på riktigt.
+                Genom att kombinera{" "}
+                <span className="text-accent font-semibold">
+                  artificiell intelligens
+                </span>
+                , genomtänkt design och modern webbutveckling (React, Next,
+                Vite) bygger vi skräddarsydda sajter som både känns rätt för
+                ditt varumärke och fungerar för dina kunder på riktigt.
               </p>
 
-              <p className="text-white font-medium">Vi utgår alltid från ditt företag och dina kunder:</p>
+              <p className="text-white font-medium mt-4">
+                Vi erbjuder två sätt att få din hemsida:
+              </p>
 
-              <ul className="space-y-2 text-gray-300">
+              <div className="space-y-3 text-gray-300 mt-3">
+                <p>
+                  <span className="text-accent font-semibold">
+                    AI-generering:
+                  </span>{" "}
+                  Vår plattform SajtMaskin låter dig skapa professionella
+                  webbplatser på minuter. Beskriv vad du vill bygga, välj från
+                  hundratals templates och komponenter, och få en färdig sajt
+                  med produktionsklar kod som du kan ladda ner direkt. Perfekt
+                  för snabb lansering eller när du vill ha kontroll över
+                  processen själv.
+                </p>
+                <p>
+                  <span className="text-tertiary font-semibold">
+                    Skräddarsydd utveckling:
+                  </span>{" "}
+                  Vi bygger kompletta, unika hemsidor från grunden med
+                  AI-assisterad design och utveckling. Varje projekt är anpassat
+                  efter ditt företag, dina mål och din målgrupp. Vi tar hand om
+                  allt från analys och design till utveckling och lansering.
+                </p>
+              </div>
+
+              <p className="text-white font-medium mt-6">
+                Vi utgår alltid från ditt företag och dina kunder:
+              </p>
+
+              <ul className="space-y-2 text-gray-300 mt-2">
                 <li className="flex items-center gap-3">
                   <span className="text-accent">•</span>
                   vilken känsla ni vill förmedla
@@ -487,7 +620,9 @@ export default function AboutSection() {
                 </li>
               </ul>
 
-              <p className="text-white/80 italic">Resten löser vi med struktur, design och teknik.</p>
+              <p className="text-white/80 italic mt-4">
+                Resten löser vi med AI, struktur, design och teknik.
+              </p>
             </motion.div>
 
             {/* Honest stats header */}
@@ -512,9 +647,25 @@ export default function AboutSection() {
               suppressHydrationWarning
             >
               {[
-                { number: "18", label: "nöjda kunder", sublabel: "Som vi fortfarande vågar titta i ögonen.", color: "accent" },
-                { number: "6", label: "fullfjädrade projekt", sublabel: "Från första skiss till färdig, skarp sajt.", color: "tertiary" },
-                { number: "93%", label: "passion, 7% kaffe", sublabel: "Vi tar våra projekt (och vårt kaffe) på stort allvar.", color: "accent" },
+                {
+                  number: "18",
+                  label: "nöjda kunder",
+                  sublabel: "Som vi fortfarande vågar titta i ögonen.",
+                  color: "accent",
+                },
+                {
+                  number: "6",
+                  label: "fullfjädrade projekt",
+                  sublabel: "Från första skiss till färdig, skarp sajt.",
+                  color: "tertiary",
+                },
+                {
+                  number: "93%",
+                  label: "passion, 7% kaffe",
+                  sublabel:
+                    "Vi tar våra projekt (och vårt kaffe) på stort allvar.",
+                  color: "accent",
+                },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -531,7 +682,7 @@ export default function AboutSection() {
                   whileHover={{
                     scale: 1.05,
                     y: -10,
-                    transition: { duration: 0.3 }
+                    transition: { duration: 0.3 },
                   }}
                   className="group relative"
                 >
@@ -542,9 +693,10 @@ export default function AboutSection() {
                       <div
                         className="absolute inset-0 rounded-2xl"
                         style={{
-                          background: stat.color === 'accent'
-                            ? 'linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent, rgba(0, 102, 255, 0.2))'
-                            : 'linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent, rgba(255, 0, 51, 0.2))'
+                          background:
+                            stat.color === "accent"
+                              ? "linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent, rgba(0, 102, 255, 0.2))"
+                              : "linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent, rgba(255, 0, 51, 0.2))",
                         }}
                       />
                       <div className="absolute inset-[1px] bg-black/50 backdrop-blur-xl rounded-2xl" />
@@ -554,9 +706,10 @@ export default function AboutSection() {
                     <motion.div
                       className="absolute inset-0 opacity-0 group-hover:opacity-60 blur-xl transition-opacity duration-500 rounded-2xl"
                       style={{
-                        backgroundColor: stat.color === 'accent'
-                          ? 'rgba(0, 102, 255, 0.15)'
-                          : 'rgba(255, 0, 51, 0.15)'
+                        backgroundColor:
+                          stat.color === "accent"
+                            ? "rgba(0, 102, 255, 0.15)"
+                            : "rgba(255, 0, 51, 0.15)",
                       }}
                       animate={{
                         scale: [1, 1.1, 1],
@@ -572,30 +725,47 @@ export default function AboutSection() {
                     <div className="relative z-10 text-center">
                       <motion.div
                         className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 bg-clip-text text-transparent"
-                        style={mounted ? {
-                          backgroundImage: stat.color === 'accent'
-                            ? 'linear-gradient(to right, #0066FF, #FF0033)'
-                            : 'linear-gradient(to right, #FF0033, #0066FF)',
-                          // Reduced glow for sharper text
-                          textShadow: '0 0 20px rgba(0, 102, 255, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.5)',
-                          opacity: typeof textOpacity === 'number' ? textOpacity : (textOpacity?.get?.() ?? 1),
-                          scale: typeof textScale === 'number' ? textScale : (textScale?.get?.() ?? 1),
-                          filter: typeof textBlur === 'string' ? textBlur : (textBlur?.get?.() ?? 'blur(0px)'),
-                          WebkitFontSmoothing: "antialiased",
-                          MozOsxFontSmoothing: "grayscale",
-                          textRendering: "optimizeLegibility",
-                        } : {
-                          backgroundImage: stat.color === 'accent'
-                            ? 'linear-gradient(to right, #0066FF, #FF0033)'
-                            : 'linear-gradient(to right, #FF0033, #0066FF)',
-                          textShadow: '0 0 20px rgba(0, 102, 255, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.5)',
-                          opacity: 1,
-                          scale: 1,
-                          filter: 'blur(0px)',
-                          WebkitFontSmoothing: "antialiased",
-                          MozOsxFontSmoothing: "grayscale",
-                          textRendering: "optimizeLegibility",
-                        }}
+                        style={
+                          mounted
+                            ? {
+                                backgroundImage:
+                                  stat.color === "accent"
+                                    ? "linear-gradient(to right, #0066FF, #FF0033)"
+                                    : "linear-gradient(to right, #FF0033, #0066FF)",
+                                // Reduced glow for sharper text
+                                textShadow:
+                                  "0 0 20px rgba(0, 102, 255, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.5)",
+                                opacity:
+                                  typeof textOpacity === "number"
+                                    ? textOpacity
+                                    : textOpacity?.get?.() ?? 1,
+                                scale:
+                                  typeof textScale === "number"
+                                    ? textScale
+                                    : textScale?.get?.() ?? 1,
+                                filter:
+                                  typeof textBlur === "string"
+                                    ? textBlur
+                                    : textBlur?.get?.() ?? "blur(0px)",
+                                WebkitFontSmoothing: "antialiased",
+                                MozOsxFontSmoothing: "grayscale",
+                                textRendering: "optimizeLegibility",
+                              }
+                            : {
+                                backgroundImage:
+                                  stat.color === "accent"
+                                    ? "linear-gradient(to right, #0066FF, #FF0033)"
+                                    : "linear-gradient(to right, #FF0033, #0066FF)",
+                                textShadow:
+                                  "0 0 20px rgba(0, 102, 255, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.5)",
+                                opacity: 1,
+                                scale: 1,
+                                filter: "blur(0px)",
+                                WebkitFontSmoothing: "antialiased",
+                                MozOsxFontSmoothing: "grayscale",
+                                textRendering: "optimizeLegibility",
+                              }
+                        }
                         suppressHydrationWarning
                       >
                         <AnimatedNumber value={stat.number} />
@@ -625,9 +795,10 @@ export default function AboutSection() {
                     <div
                       className="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-50"
                       style={{
-                        background: stat.color === 'accent'
-                          ? 'linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent)'
-                          : 'linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent)'
+                        background:
+                          stat.color === "accent"
+                            ? "linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent)"
+                            : "linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent)",
                       }}
                     />
                   </div>
@@ -706,38 +877,51 @@ export default function AboutSection() {
       {/* Floor/ceiling transition to next section */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-[90] overflow-hidden"
-        style={mounted ? {
-          opacity: typeof floorOpacity === 'number' ? floorOpacity : (floorOpacity?.get?.() ?? 0),
-        } : { opacity: 0 }}
+        style={
+          mounted
+            ? {
+                opacity:
+                  typeof floorOpacity === "number"
+                    ? floorOpacity
+                    : floorOpacity?.get?.() ?? 0,
+              }
+            : { opacity: 0 }
+        }
         suppressHydrationWarning
       >
         <motion.div
           className="w-full h-full"
-          style={mounted ? {
-            backgroundImage: `linear-gradient(to top,
+          style={
+            mounted
+              ? {
+                  backgroundImage: `linear-gradient(to top,
               rgba(0, 102, 255, 0.6) 0%,
               rgba(255, 0, 51, 0.5) 30%,
               rgba(0, 102, 255, 0.3) 60%,
               transparent 100%
             )`,
-            scaleY: typeof floorScale === 'number' ? floorScale : (floorScale?.get?.() ?? 0),
-            transformOrigin: 'bottom',
-            filter: 'blur(50px)',
-          } : {
-            backgroundImage: `linear-gradient(to top,
+                  scaleY:
+                    typeof floorScale === "number"
+                      ? floorScale
+                      : floorScale?.get?.() ?? 0,
+                  transformOrigin: "bottom",
+                  filter: "blur(50px)",
+                }
+              : {
+                  backgroundImage: `linear-gradient(to top,
               rgba(0, 102, 255, 0.6) 0%,
               rgba(255, 0, 51, 0.5) 30%,
               rgba(0, 102, 255, 0.3) 60%,
               transparent 100%
             )`,
-            scaleY: 0,
-            transformOrigin: 'bottom',
-            filter: 'blur(50px)',
-          }}
+                  scaleY: 0,
+                  transformOrigin: "bottom",
+                  filter: "blur(50px)",
+                }
+          }
           suppressHydrationWarning
         />
       </motion.div>
     </section>
   );
 }
-

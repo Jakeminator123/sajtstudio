@@ -192,7 +192,7 @@ export default function IntroVideo() {
             autoPlay
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             webkit-playsinline="true"
             x5-playsinline="true"
             onEnded={hideVideo}

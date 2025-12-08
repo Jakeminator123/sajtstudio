@@ -156,34 +156,50 @@ export default function MatrixContactForm({
     [message]
   );
 
-  // Send message
-  const handleSend = useCallback(() => {
+  // Send message via API
+  const handleSend = useCallback(async () => {
     if (!message.trim()) return;
 
     setIsSending(true);
 
-    // Create mailto link with the message
-    const subject = encodeURIComponent("Meddelande från Sajtstudio webbplats");
-    const body = encodeURIComponent(
-      `${message}\n\n---\nSkickat från: ${senderEmail || "Anonym besökare"}`
-    );
-    const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+    try {
+      // Send via API route
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: senderEmail ? senderEmail.split("@")[0] : "Anonym besökare",
+          email: senderEmail || "anonym@sajtstudio.se",
+          message: message,
+        }),
+      });
 
-    // Small delay for animation
-    setTimeout(() => {
-      window.location.href = mailtoLink;
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSending(false);
+        setSent(true);
+
+        // Reset after showing success
+        setTimeout(() => {
+          setSent(false);
+          setMessage("");
+          setSenderEmail("");
+          setShowEmailInput(false);
+        }, 3000);
+      } else {
+        // Error handling
+        setIsSending(false);
+        alert(data.error || "Något gick fel. Försök igen senare.");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
       setIsSending(false);
-      setSent(true);
-
-      // Reset after showing success
-      setTimeout(() => {
-        setSent(false);
-        setMessage("");
-        setSenderEmail("");
-        setShowEmailInput(false);
-      }, 3000);
-    }, 500);
-  }, [message, senderEmail, email]);
+      alert("Något gick fel. Försök igen senare.");
+    }
+  }, [message, senderEmail]);
 
   // Clear message
   const handleClear = useCallback(() => {

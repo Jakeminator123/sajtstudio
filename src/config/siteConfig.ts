@@ -8,8 +8,8 @@
 export const siteConfig = {
   // Grundläggande information
   name: "Sajtstudio",
-  tagline: "Modern webbdesign för framgångsrika företag",
-  description: "Skräddarsydda, toppmoderna hemsidor för utvalda företag",
+  tagline: "Modern webbdesign och AI-generering av webbplatser",
+  description: "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling och AI-drivna verktyg för att skapa professionella sajter på minuter.",
 
   // Kontaktinformation
   contact: {
@@ -21,9 +21,9 @@ export const siteConfig = {
 
   // SEO
   seo: {
-    defaultTitle: "Sajtstudio – Modern webbdesign för framgångsrika företag",
+    defaultTitle: "Sajtstudio – Modern webbdesign och AI-generering av webbplatser",
     defaultDescription:
-      "Skräddarsydda, toppmoderna hemsidor för utvalda företag",
+      "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling med React och Next.js, samt AI-drivna verktyg för att skapa professionella sajter på minuter. Perfekt för företag som vill ha en unik hemsida eller snabbt generera en webbplats med vår AI-plattform SajtMaskin.",
     siteUrl: "https://www.sajtstudio.se",
     ogImage: "/logo.svg",
   },

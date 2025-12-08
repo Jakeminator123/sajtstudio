@@ -293,9 +293,9 @@ export default function ServicesSection() {
             transition={{ delay: 0.5, duration: 0.8 }}
           >
             <WordReveal
-              text="Vi försöker blanda design med ny teknik... mot bättre vetande"
+              text="Vi kombinerar skräddarsydd webbutveckling med AI-generering. Välj mellan att låta oss bygga din unika hemsida eller använda vår AI-plattform SajtMaskin för att skapa professionella webbplatser på minuter."
               delay={0.3}
-              staggerDelay={0.03}
+              staggerDelay={0.02}
               className="text-gray-200"
             />
           </motion.p>
