@@ -218,11 +218,11 @@ export default function RootLayout({
           href="/images/hero/hero-background.webp"
           fetchPriority="high"
         />
+        {/* Prefetch city-background for light mode (not critical for LCP) */}
         <link
-          rel="preload"
+          rel="prefetch"
           as="image"
           href="/images/backgrounds/city-background-sunny.webp"
-          fetchPriority="high"
         />
         {/* Prefetch assets that appear later without forcing preload warnings */}
         <link rel="prefetch" href="/logo.svg" />
