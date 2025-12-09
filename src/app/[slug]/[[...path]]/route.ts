@@ -9,7 +9,6 @@ const RESERVED_ROUTES = [
   "api",
   "contact",
   "portfolio",
-  "generated",
   "sajtgranskning",
   "utvardera",
   "sajtmaskin",
@@ -19,7 +18,7 @@ const RESERVED_ROUTES = [
 ];
 
 /**
- * Optional catch-all route handler for generated sites
+ * Optional catch-all route handler for external sites
  * Handles routes like:
  * - /demo-kzmoqvc0t8a7dxke3a6j (path is undefined)
  * - /demo-kzmoqvc0t8a7dxke3a6j/some/path (path is ['some', 'path'])
