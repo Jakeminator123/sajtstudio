@@ -65,7 +65,13 @@
     "edgeTools.webhint.enable": false,
     "edgeTools.webhint.diagnostics": false,
     "edgeTools.webhint.problems": false,
-    "terminal.integrated.cwd": "${workspaceFolder}"
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/.next/**": true
+    }
   },
   "extensions": {
     "recommendations": [

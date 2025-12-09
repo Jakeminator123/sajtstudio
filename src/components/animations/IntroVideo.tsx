@@ -10,6 +10,7 @@ export default function IntroVideo() {
   const [isVisible, setIsVisible] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [needsUserInteraction, setNeedsUserInteraction] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hasEndedRef = useRef(false);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -17,22 +18,32 @@ export default function IntroVideo() {
   // Preload critical resources while intro video is playing
   usePreloadDuringIntro(isVisible);
 
-  // Check if user has seen intro video before
+  // Mount check to prevent hydration mismatches
+  // Use requestAnimationFrame to avoid setState in effect warning
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const hasSeen = localStorage.getItem(INTRO_VIDEO_SEEN_KEY);
-      // Always show video on first visit (hasSeen is null or not set)
-      // For debugging: uncomment the line below to force show video
-      // localStorage.removeItem(INTRO_VIDEO_SEEN_KEY);
-      if (!hasSeen) {
-        // Show video immediately - this is the first thing when user logs in
-        // Use requestAnimationFrame to avoid setState in effect warning
-        requestAnimationFrame(() => {
-          setIsVisible(true);
-        });
-      }
+      requestAnimationFrame(() => {
+        setMounted(true);
+      });
     }
   }, []);
+
+  // Check if user has seen intro video before
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return;
+
+    const hasSeen = localStorage.getItem(INTRO_VIDEO_SEEN_KEY);
+    // Always show video on first visit (hasSeen is null or not set)
+    // For debugging: uncomment the line below to force show video
+    // localStorage.removeItem(INTRO_VIDEO_SEEN_KEY);
+    if (!hasSeen) {
+      // Show video immediately - this is the first thing when user logs in
+      // Use requestAnimationFrame to avoid setState in effect warning
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    }
+  }, [mounted]);
 
   // Hide video and mark as seen
   const hideVideo = () => {

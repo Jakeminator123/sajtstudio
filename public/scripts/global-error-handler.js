@@ -63,12 +63,22 @@
       message.includes("kis.v2.scr") ||
       message.includes("fd126c42-ebfa-4e12") ||
       message.includes("antivirus") ||
-      message.includes("resizeobserver loop completed with undelivered notifications") ||
+      message.includes(
+        "resizeobserver loop completed with undelivered notifications"
+      ) ||
       message.includes("resizeobserver loop limit exceeded") ||
       message.includes("resizeobserver loop completed") ||
-      message.includes("please ensure that the container has a non-static position") ||
+      message.includes(
+        "please ensure that the container has a non-static position"
+      ) ||
       message.includes("container has a non-static position") ||
       message.includes("scroll offset is calculated correctly") ||
+      // Filter Google widget CSS warnings (from browser extensions or Google services)
+      message.includes("one-google-bar") ||
+      message.includes("google-bar") ||
+      message.includes("@import rule was ignored") ||
+      message.includes("wasn't defined at the top of the stylesheet") ||
+      message.includes("paramsencoded") ||
       // Check if it's a TypeError with fetch and has antivirus/D-ID in context
       (message.includes("typeerror") &&
         message.includes("fetch") &&
@@ -86,16 +96,17 @@
     // Prevent infinite loops - don't log if we're already logging
     if (isLogging) return;
 
-    const messageLower = (message || '').toLowerCase();
-    const stackLower = (stack || '').toLowerCase();
-    const allInfo = (messageLower + ' ' + stackLower);
+    const messageLower = (message || "").toLowerCase();
+    const stackLower = (stack || "").toLowerCase();
+    const allInfo = messageLower + " " + stackLower;
 
     // Don't log errors from the error handler itself
-    if (message && (
-      message.includes("Network request failed") ||
-      message.includes("/api/errors") ||
-      stack?.includes("global-error-handler.js")
-    )) {
+    if (
+      message &&
+      (message.includes("Network request failed") ||
+        message.includes("/api/errors") ||
+        stack?.includes("global-error-handler.js"))
+    ) {
       return;
     }
 
@@ -105,9 +116,13 @@
     }
 
     // Don't log scroll position warnings
-    if (allInfo.includes("please ensure that the container has a non-static position") ||
-        allInfo.includes("container has a non-static position") ||
-        allInfo.includes("scroll offset is calculated correctly")) {
+    if (
+      allInfo.includes(
+        "please ensure that the container has a non-static position"
+      ) ||
+      allInfo.includes("container has a non-static position") ||
+      allInfo.includes("scroll offset is calculated correctly")
+    ) {
       return;
     }
 
@@ -125,11 +140,13 @@
           source: source,
           timestamp: new Date().toISOString(),
         }),
-      }).catch(function () {
-        // Silently fail if API is not available
-      }).finally(function () {
-        isLogging = false;
-      });
+      })
+        .catch(function () {
+          // Silently fail if API is not available
+        })
+        .finally(function () {
+          isLogging = false;
+        });
     } catch (e) {
       // Silently fail if fetch is not available
       isLogging = false;
@@ -442,23 +459,30 @@
           try {
             callback(entries, observer);
           } catch (error) {
-            const errorMessage = error?.message || String(error || '');
-            const errorStack = error?.stack || '';
-            const allErrorInfo = (errorMessage + ' ' + errorStack).toLowerCase();
+            const errorMessage = error?.message || String(error || "");
+            const errorStack = error?.stack || "";
+            const allErrorInfo = (
+              errorMessage +
+              " " +
+              errorStack
+            ).toLowerCase();
 
             // Check if it's a ResizeObserver loop error (common with D-ID chatbot)
             const isResizeObserverLoop =
-              allErrorInfo.includes('resizeobserver loop') ||
-              allErrorInfo.includes('resizeobserver loop limit exceeded') ||
-              allErrorInfo.includes('resizeobserver loop completed');
+              allErrorInfo.includes("resizeobserver loop") ||
+              allErrorInfo.includes("resizeobserver loop limit exceeded") ||
+              allErrorInfo.includes("resizeobserver loop completed");
 
             // Check if error is related to D-ID chatbot
             const isDIDRelated =
-              allErrorInfo.includes('did-agent') ||
-              allErrorInfo.includes('agent.d-id.com') ||
-              allErrorInfo.includes('d-id.com');
+              allErrorInfo.includes("did-agent") ||
+              allErrorInfo.includes("agent.d-id.com") ||
+              allErrorInfo.includes("d-id.com");
 
-            if (isResizeObserverLoop || (isResizeObserverLoop && isDIDRelated)) {
+            if (
+              isResizeObserverLoop ||
+              (isResizeObserverLoop && isDIDRelated)
+            ) {
               // Silently ignore ResizeObserver loop errors (especially from chatbot)
               return;
             }
@@ -513,7 +537,9 @@
       messageStr.includes("resizeobserver loop completed");
 
     const isScrollWarning =
-      messageStr.includes("please ensure that the container has a non-static position") ||
+      messageStr.includes(
+        "please ensure that the container has a non-static position"
+      ) ||
       messageStr.includes("container has a non-static position") ||
       messageStr.includes("scroll offset is calculated correctly");
 

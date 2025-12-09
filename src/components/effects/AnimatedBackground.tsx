@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface AnimatedBackgroundProps {
   variant?: "aurora" | "nebula" | "matrix" | "waves";
@@ -17,14 +17,70 @@ export default function AnimatedBackground({
   variant = "aurora",
 }: AnimatedBackgroundProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  // Mount check to prevent hydration mismatches
+  // Use requestAnimationFrame to avoid setState in effect warning
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => {
+        setMounted(true);
+      });
+    }
+  }, []);
+
+  // Pre-compute all memoized values at the top level (before any early returns)
+  // This ensures hooks are called in the same order every render
+  const floatingOrbs = useMemo(() => {
+    if (!mounted) return [];
+    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
+    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    return [...Array(6)].map((_, i) => {
+      const seed = i * 0.618033988749895; // Golden ratio
+      return {
+        i,
+        seed,
+        width,
+        height,
+      };
+    });
+  }, [mounted]);
+
+  const stars = useMemo(() => {
+    if (!mounted) return [];
+    return [...Array(100)].map((_, i) => {
+      const seed = i * 0.618033988749895; // Golden ratio
+      return { i, seed };
+    });
+  }, [mounted]);
+
+  const matrixRain = useMemo(() => {
+    if (!mounted) return [];
+    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    return [...Array(30)].map((_, i) => {
+      const seed = i * 0.618033988749895; // Golden ratio
+      return { i, seed, height };
+    });
+  }, [mounted]);
+
+  const particles = useMemo(() => {
+    if (!mounted) return [];
+    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
+    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    return [...Array(20)].map((_, i) => {
+      const seed = i * 0.618033988749895; // Golden ratio
+      return { i, seed, width, height };
+    });
+  }, [mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [mounted]);
 
   if (variant === "aurora") {
     return (
@@ -56,51 +112,44 @@ export default function AnimatedBackground({
         </div>
 
         {/* Floating Orbs */}
-        {[...Array(6)].map((_, i) => {
-          const width =
-            typeof window !== "undefined" ? window.innerWidth : 1920;
-          const height =
-            typeof window !== "undefined" ? window.innerHeight : 1080;
-          const seed = i * 0.618033988749895; // Golden ratio
-          return (
-            <motion.div
-              key={i}
-              className="absolute rounded-full blur-3xl"
-              style={{
-                width: seededRandom(seed) * 400 + 200,
-                height: seededRandom(seed + 1) * 400 + 200,
-                background: `radial-gradient(circle, ${
-                  [
-                    "#ff00ff60",
-                    "#00ffff60",
-                    "#ffff0060",
-                    "#ff00aa60",
-                    "#00ff9960",
-                    "#9900ff60",
-                  ][i]
-                }, transparent)`,
-              }}
-              animate={{
-                x: [
-                  seededRandom(seed + 2) * width,
-                  seededRandom(seed + 3) * width,
-                  seededRandom(seed + 4) * width,
-                ],
-                y: [
-                  seededRandom(seed + 5) * height,
-                  seededRandom(seed + 6) * height,
-                  seededRandom(seed + 7) * height,
-                ],
-                scale: [1, 1.5, 1],
-              }}
-              transition={{
-                duration: 20 + i * 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          );
-        })}
+        {floatingOrbs.map(({ i, seed, width, height }) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full blur-3xl"
+            style={{
+              width: seededRandom(seed) * 400 + 200,
+              height: seededRandom(seed + 1) * 400 + 200,
+              background: `radial-gradient(circle, ${
+                [
+                  "#ff00ff60",
+                  "#00ffff60",
+                  "#ffff0060",
+                  "#ff00aa60",
+                  "#00ff9960",
+                  "#9900ff60",
+                ][i]
+              }, transparent)`,
+            }}
+            animate={{
+              x: [
+                seededRandom(seed + 2) * width,
+                seededRandom(seed + 3) * width,
+                seededRandom(seed + 4) * width,
+              ],
+              y: [
+                seededRandom(seed + 5) * height,
+                seededRandom(seed + 6) * height,
+                seededRandom(seed + 7) * height,
+              ],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 20 + i * 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
 
         {/* Grid Pattern */}
         <div
@@ -157,30 +206,27 @@ export default function AnimatedBackground({
         />
 
         {/* Stars */}
-        {[...Array(100)].map((_, i) => {
-          const seed = i * 0.618033988749895; // Golden ratio
-          return (
-            <motion.div
-              key={`star-${i}`}
-              className="absolute rounded-full bg-white"
-              style={{
-                width: seededRandom(seed) * 3,
-                height: seededRandom(seed + 1) * 3,
-                left: `${seededRandom(seed + 2) * 100}%`,
-                top: `${seededRandom(seed + 3) * 100}%`,
-              }}
-              animate={{
-                opacity: [0, 1, 0],
-                scale: [0, 1, 0],
-              }}
-              transition={{
-                duration: seededRandom(seed + 4) * 5 + 2,
-                repeat: Infinity,
-                delay: seededRandom(seed + 5) * 5,
-              }}
-            />
-          );
-        })}
+        {stars.map(({ i, seed }) => (
+          <motion.div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: seededRandom(seed) * 3,
+              height: seededRandom(seed + 1) * 3,
+              left: `${seededRandom(seed + 2) * 100}%`,
+              top: `${seededRandom(seed + 3) * 100}%`,
+            }}
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: seededRandom(seed + 4) * 5 + 2,
+              repeat: Infinity,
+              delay: seededRandom(seed + 5) * 5,
+            }}
+          />
+        ))}
       </div>
     );
   }
@@ -189,37 +235,31 @@ export default function AnimatedBackground({
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden bg-black">
         {/* Matrix Rain */}
-        {[...Array(30)].map((_, i) => {
-          const seed = i * 0.618033988749895; // Golden ratio
-          return (
-            <motion.div
-              key={`matrix-${i}`}
-              className="absolute text-green-500 font-mono text-xs opacity-70"
-              style={{
-                left: `${i * 3.33}%`,
-              }}
-              animate={{
-                y: [
-                  -100,
-                  typeof window !== "undefined" ? window.innerHeight + 100 : 1180,
-                ],
-              }}
-              transition={{
-                duration: seededRandom(seed) * 5 + 5,
-                repeat: Infinity,
-                delay: seededRandom(seed + 1) * 5,
-                ease: "linear",
-              }}
-            >
-              {[...Array(20)].map((_, j) => {
-                const charSeed = seed + j * 0.1;
-                return (
-                  <div key={j}>{seededRandom(charSeed) > 0.5 ? "1" : "0"}</div>
-                );
-              })}
-            </motion.div>
-          );
-        })}
+        {matrixRain.map(({ i, seed, height }) => (
+          <motion.div
+            key={`matrix-${i}`}
+            className="absolute text-green-500 font-mono text-xs opacity-70"
+            style={{
+              left: `${i * 3.33}%`,
+            }}
+            animate={{
+              y: [-100, height + 100],
+            }}
+            transition={{
+              duration: seededRandom(seed) * 5 + 5,
+              repeat: Infinity,
+              delay: seededRandom(seed + 1) * 5,
+              ease: "linear",
+            }}
+          >
+            {[...Array(20)].map((_, j) => {
+              const charSeed = seed + j * 0.1;
+              return (
+                <div key={j}>{seededRandom(charSeed) > 0.5 ? "1" : "0"}</div>
+              );
+            })}
+          </motion.div>
+        ))}
 
         {/* Glow Effect */}
         <motion.div
@@ -264,28 +304,25 @@ export default function AnimatedBackground({
       </svg>
 
       {/* Particles on top */}
-      {[...Array(20)].map((_, i) => {
-        const width = typeof window !== "undefined" ? window.innerWidth : 1920;
-        const height =
-          typeof window !== "undefined" ? window.innerHeight : 1080;
-        const seed = i * 0.618033988749895; // Golden ratio
-        return (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute w-1 h-1 bg-blue-400 rounded-full"
-            animate={{
-              x: [seededRandom(seed) * width, seededRandom(seed + 1) * width],
-              y: [seededRandom(seed + 2) * height, seededRandom(seed + 3) * height],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: seededRandom(seed + 4) * 10 + 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        );
-      })}
+      {particles.map(({ i, seed, width, height }) => (
+        <motion.div
+          key={`particle-${i}`}
+          className="absolute w-1 h-1 bg-blue-400 rounded-full"
+          animate={{
+            x: [seededRandom(seed) * width, seededRandom(seed + 1) * width],
+            y: [
+              seededRandom(seed + 2) * height,
+              seededRandom(seed + 3) * height,
+            ],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: seededRandom(seed + 4) * 10 + 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
     </div>
   );
 }
