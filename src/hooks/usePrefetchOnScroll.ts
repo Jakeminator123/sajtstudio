@@ -31,7 +31,7 @@ export function usePrefetchOnScroll() {
     const prefetchComponent = (selector: string) => {
       if (prefetched.has(selector)) return;
       prefetched.add(selector);
-      
+
       // Prefetch by triggering Next.js link prefetching
       // We'll prefetch resources instead of component chunks directly
       // The dynamic import will handle chunk loading when needed
@@ -51,9 +51,10 @@ export function usePrefetchOnScroll() {
           '/images/animations/hero-animation.gif',
         ];
         images.forEach((src) => {
-          if (!document.querySelector(`link[rel="preload"][href="${src}"]`)) {
+          if (!document.querySelector(`link[rel="prefetch"][href="${src}"]`)) {
             const imageLink = document.createElement('link');
-            imageLink.rel = 'preload';
+            // Use prefetch to avoid preload-not-used warnings
+            imageLink.rel = 'prefetch';
             imageLink.href = src;
             imageLink.as = 'image';
             if (src.endsWith('.webp')) {

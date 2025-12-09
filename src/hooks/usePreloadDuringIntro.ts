@@ -11,7 +11,12 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
   const hasPreloadedRef = useRef(false);
 
   useEffect(() => {
-    if (!isIntroVisible || typeof window === "undefined" || hasPreloadedRef.current) return;
+    if (
+      !isIntroVisible ||
+      typeof window === "undefined" ||
+      hasPreloadedRef.current
+    )
+      return;
 
     hasPreloadedRef.current = true;
 
@@ -58,47 +63,46 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
     criticalVideos.forEach((src, index) => {
       setTimeout(() => {
         const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "video";
+        // Use prefetch to avoid preload warnings for non-immediate videos
+        link.rel = "prefetch";
         link.href = src;
+        link.as = "video";
         link.crossOrigin = "anonymous";
-        // Add fetchpriority for critical videos
         if (index === 0) {
           link.setAttribute("fetchpriority", "high");
         }
         document.head.appendChild(link);
-      }, index * 100); // Stagger video preloads
+      }, index * 100);
     });
 
     // Preload images with priority based on usage order
     criticalImages.forEach((src, index) => {
       setTimeout(() => {
         const link = document.createElement("link");
-        link.rel = "preload";
+        // Use prefetch to avoid preload-not-used warnings for non-LCP images
+        link.rel = "prefetch";
         link.as = "image";
         link.href = src;
-        // High priority for first 4 portfolio images (used in explosion - appear immediately)
-        // High priority for next 6 images (backgrounds and hero images used early)
         if (index < 4) {
           link.setAttribute("fetchpriority", "high");
         } else if (index < 10) {
           link.setAttribute("fetchpriority", "high");
         }
         document.head.appendChild(link);
-      }, index * 30); // Stagger image preloads (reduced delay for faster loading)
+      }, index * 30);
     });
 
     // Preload logo and favicon (used in header immediately)
     setTimeout(() => {
       const logoLink = document.createElement("link");
-      logoLink.rel = "preload";
+      logoLink.rel = "prefetch";
       logoLink.as = "image";
       logoLink.href = "/logo.svg";
       logoLink.setAttribute("fetchpriority", "high");
       document.head.appendChild(logoLink);
 
       const faviconLink = document.createElement("link");
-      faviconLink.rel = "preload";
+      faviconLink.rel = "prefetch";
       faviconLink.as = "image";
       faviconLink.href = "/favicon.svg";
       document.head.appendChild(faviconLink);
@@ -161,7 +165,9 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
 
     externalDomains.forEach((domain) => {
       // Check if preconnect already exists
-      const existing = document.querySelector(`link[rel="preconnect"][href="${domain}"]`);
+      const existing = document.querySelector(
+        `link[rel="preconnect"][href="${domain}"]`
+      );
       if (!existing) {
         const link = document.createElement("link");
         link.rel = "preconnect";
@@ -178,19 +184,21 @@ export function usePreloadDuringIntro(isIntroVisible: boolean) {
     // Trigger a small amount of work to warm up the browser's rendering engine
     // This helps with initial paint performance
     if (typeof requestIdleCallback !== "undefined") {
-      requestIdleCallback(() => {
-        // Warm up: create and immediately remove a small element
-        // This helps the browser prepare for DOM operations
-        const warmup = document.createElement("div");
-        warmup.style.display = "none";
-        document.body.appendChild(warmup);
-        setTimeout(() => {
-          if (warmup.parentNode) {
-            warmup.parentNode.removeChild(warmup);
-          }
-        }, 100);
-      }, { timeout: 2000 });
+      requestIdleCallback(
+        () => {
+          // Warm up: create and immediately remove a small element
+          // This helps the browser prepare for DOM operations
+          const warmup = document.createElement("div");
+          warmup.style.display = "none";
+          document.body.appendChild(warmup);
+          setTimeout(() => {
+            if (warmup.parentNode) {
+              warmup.parentNode.removeChild(warmup);
+            }
+          }, 100);
+        },
+        { timeout: 2000 }
+      );
     }
   }, [isIntroVisible]);
 }
-
