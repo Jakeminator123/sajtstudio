@@ -373,12 +373,19 @@ function FloatingKeyboard({ activeKeys }: { activeKeys: Set<string> }) {
 export default function Keyboard3DBackground() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before rendering Canvas (fixes addEventListener null error)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fade in on mount
   useEffect(() => {
+    if (!mounted) return;
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [mounted]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -403,6 +410,11 @@ export default function Keyboard3DBackground() {
     };
   }, []);
 
+  // Don't render Canvas until mounted to avoid SSR/hydration issues
+  if (!mounted) {
+    return <div className="absolute inset-0 bg-black" />;
+  }
+
   return (
     <div
       className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -410,7 +422,7 @@ export default function Keyboard3DBackground() {
       }`}
       style={{ pointerEvents: "auto" }}
     >
-      <Canvas shadows dpr={[1, 2]}>
+      <Canvas shadows dpr={[1, 2]} eventPrefix="client">
         <PerspectiveCamera makeDefault position={[0, 10, 14]} fov={45} />
         <ResponsiveCamera />
 
