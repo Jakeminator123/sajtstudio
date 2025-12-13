@@ -458,7 +458,7 @@ def wash_prompt(model_id: str, raw_prompt: str) -> str:
     if output_text is None:
         # Fallback: try common alternative attribute names
         output_text = getattr(response, "text", None) or getattr(response, "content", None)
-    
+
     cleaned = (output_text or "").strip()
     if not cleaned:
         print("\n❌ Tomt svar från modellen (eller okänt responsformat).")
