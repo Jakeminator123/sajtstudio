@@ -76,6 +76,11 @@
       // Filter React DevTools instrumentation noise (often seen in development)
       message.includes("react instrumentation encountered an error") ||
       message.includes("not valid semver") ||
+      // Filter Turbopack + Troika worker errors (known incompatibility with web workers)
+      message.includes("turbopack__imported__module") ||
+      message.includes("troika-worker-utils") ||
+      message.includes("registermodule") ||
+      message.includes("@swc/helpers/esm/_instanceof") ||
       // Filter Google widget CSS warnings (from browser extensions or Google services)
       message.includes("one-google-bar") ||
       message.includes("google-bar") ||
