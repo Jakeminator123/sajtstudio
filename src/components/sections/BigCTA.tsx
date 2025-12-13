@@ -168,6 +168,7 @@ export default function BigCTA() {
               width={240}
               height={300}
               className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(0,102,255,0.5)]"
+              style={{ width: "auto", height: "auto" }}
               loading="lazy"
             />
             {/* Hover tooltip */}
@@ -207,6 +208,7 @@ export default function BigCTA() {
               width={40}
               height={50}
               className="object-contain"
+              style={{ width: "auto", height: "auto" }}
               loading="lazy"
             />
             <span className="text-lg">Ring oss direkt!</span>
