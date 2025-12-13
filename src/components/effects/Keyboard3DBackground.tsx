@@ -376,8 +376,12 @@ export default function Keyboard3DBackground() {
   const [mounted, setMounted] = useState(false);
 
   // Ensure component is mounted before rendering Canvas (fixes addEventListener null error)
+  // Using requestAnimationFrame to avoid synchronous setState in effect warning
   useEffect(() => {
-    setMounted(true);
+    const rafId = requestAnimationFrame(() => {
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   // Fade in on mount
