@@ -128,6 +128,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const shouldLoadDidChatbot =
+    process.env.NODE_ENV === "production" ||
+    process.env.NODE_ENV === "development";
+
   return (
     <html
       lang="sv"
@@ -278,8 +282,8 @@ export default function RootLayout({
           strategy="afterInteractive"
           src="/scripts/global-error-handler.js"
         />
-        {/* D-ID Chatbot - Disabled in development/preview to avoid crashes */}
-        {process.env.NODE_ENV === "production" && (
+        {/* D-ID Chatbot */}
+        {shouldLoadDidChatbot && (
           <Script
             id="d-id-chatbot"
             strategy="lazyOnload"
@@ -287,11 +291,6 @@ export default function RootLayout({
               __html: `
                 (function() {
                   try {
-                    // Safety check - don't load in Cursor preview or development
-                    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-                      return;
-                    }
-
                     // Check if script already exists
                     if (document.querySelector('script[data-name="did-agent"]')) {
                       return;

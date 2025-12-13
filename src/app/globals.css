@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure scroll offset calculations have a positioned ancestor (Framer Motion) */
+html,
+body {
+  position: relative;
+}
+
 /* Content visibility optimization - skip layout/paint for offscreen sections */
 @layer utilities {
   .content-visibility-auto {

@@ -73,6 +73,9 @@
       ) ||
       message.includes("container has a non-static position") ||
       message.includes("scroll offset is calculated correctly") ||
+      // Filter React DevTools instrumentation noise (often seen in development)
+      message.includes("react instrumentation encountered an error") ||
+      message.includes("not valid semver") ||
       // Filter Google widget CSS warnings (from browser extensions or Google services)
       message.includes("one-google-bar") ||
       message.includes("google-bar") ||
@@ -346,6 +349,14 @@
         errorString
       ).toLowerCase();
 
+      // Filter known dev-only noise (extensions, Turbopack worker issues, scroll warnings, etc.)
+      if (shouldFilterMessage(errorString, stackString, callStack)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        return false;
+      }
+
       // Check if error message or stack contains D-ID or antivirus references
       const hasDIDInStack =
         allStackInfo.includes("agent.d-id.com") ||
@@ -419,6 +430,15 @@
       const message = event.message || "";
       const filename = event.filename || "";
       const source = event.filename || event.target?.src || "";
+
+      // Filter known dev-only noise (extensions, Turbopack worker issues, scroll warnings, etc.)
+      if (
+        shouldFilterMessage(message, error?.stack || "", filename || source)
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
 
       // Check if it's a fetch-related error from D-ID or antivirus
       const isDIDError =
@@ -513,6 +533,18 @@
     // Combine all context for checking
     const allContext =
       messageStr + " " + sourceStr + " " + errorStr + " " + callStack;
+
+    // Filter known dev-only noise (extensions, Turbopack worker issues, scroll warnings, etc.)
+    if (
+      shouldFilterMessage(
+        String(message || ""),
+        String(source || ""),
+        String(error?.stack || ""),
+        callStack
+      )
+    ) {
+      return true;
+    }
 
     // Check if error is related to D-ID (even if blocked by antivirus)
     const hasDIDInContext =

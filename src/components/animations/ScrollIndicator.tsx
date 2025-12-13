@@ -21,39 +21,41 @@ export default function ScrollIndicator() {
   }, [scrollY, isVisible]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{
-        opacity: isVisible ? 1 : 0,
-        y: isVisible ? 0 : 20,
-      }}
-      transition={{ duration: 0.5, delay: 2 }}
-      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-      aria-hidden="true"
-    >
+    <div className="relative">
       <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.5,
-          ease: "easeInOut",
+        initial={{ opacity: 0, y: -20 }}
+        animate={{
+          opacity: isVisible ? 1 : 0,
+          y: isVisible ? 0 : 20,
         }}
-        className="flex flex-col items-center gap-2 text-white/60 text-xs uppercase tracking-widest"
+        transition={{ duration: 0.5, delay: 2 }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        aria-hidden="true"
       >
-        <span className="font-medium">Scrolla</span>
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-label="Scroll down arrow"
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.5,
+            ease: "easeInOut",
+          }}
+          className="flex flex-col items-center gap-2 text-white/60 text-xs uppercase tracking-widest"
         >
-          <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
+          <span className="font-medium">Scrolla</span>
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-label="Scroll down arrow"
+          >
+            <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

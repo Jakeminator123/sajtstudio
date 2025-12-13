@@ -26,7 +26,7 @@
  *    - Omdömen (/#omdomen) - scrolls to TestimonialsSection on homepage
  *
  * 3. CTA Button:
- *    - Desktop: "Starta projekt" button in header → /contact
+ *    - Desktop: "Starta projekt" button in header → external Sajtmaskin app
  *    - Mobile: Same button inside MobileMenu
  *
  * Anchor Link Behavior:
@@ -43,7 +43,7 @@ import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { siteConfig } from "@/config/siteConfig";
 import { useTheme } from "@/hooks/useTheme";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -66,23 +66,24 @@ export default function HeaderNav() {
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
   const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { scrollY } = useScroll({
-    layoutEffect: false,
-    // Using window as scroll container to fix Framer Motion warning
-    // about non-static position containers
-  });
 
   // Ensure hydration safety - only track scroll after mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    // Only update scroll state after mount to prevent hydration mismatch
-    if (mounted) {
-      setIsScrolled(latest > 50);
-    }
-  });
+  // Track scroll position (avoids Framer Motion scroll container warnings)
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return;
+
+    const update = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [mounted]);
 
   // Track current hash - only after mount to prevent hydration mismatch
   useEffect(() => {
@@ -306,6 +307,7 @@ export default function HeaderNav() {
                       onHoverStart={() => setHoveredIndex(index)}
                       onHoverEnd={() => setHoveredIndex(null)}
                       className="relative"
+                      style={{ position: "relative" }}
                     >
                       <Link
                         href={link.href}
@@ -329,7 +331,7 @@ export default function HeaderNav() {
                           }
                           // Allow normal Next.js navigation for regular page links
                         }}
-                        className={`nav-link-shimmer block px-4 py-2 text-sm font-semibold transition-all duration-300 relative z-10 ${
+                        className={`nav-link-shimmer block px-4 py-2 text-sm font-semibold transition-all duration-300 z-10 relative ${
                           isActive
                             ? isLight
                               ? "text-gray-900"
@@ -373,14 +375,15 @@ export default function HeaderNav() {
                  ============================================
                  Visible on desktop, hidden on mobile (mobile CTA is in MobileMenu)
 
-                 CTA Destination: /contact (start project CTA)
+                 CTA Destination: External Sajtmaskin app
                  This is the primary conversion button in the header navigation
               */}
             <div className="hidden lg:flex items-center gap-3">
               <ThemeToggle />
               <div className="cta-button-header">
                 <Button
-                  href="/contact"
+                  href="https://sajtmaskin-1.onrender.com/"
+                  external={true}
                   variant="cta"
                   size="sm"
                   ariaLabel="Starta projekt"

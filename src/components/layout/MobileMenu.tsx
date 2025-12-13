@@ -89,7 +89,9 @@ export default function MobileMenu({
                 aria-label="Stäng meny"
               >
                 <svg
-                  className={`w-5 h-5 ${isLight ? "text-gray-900" : "text-white"}`}
+                  className={`w-5 h-5 ${
+                    isLight ? "text-gray-900" : "text-white"
+                  }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -150,7 +152,8 @@ export default function MobileMenu({
                 onClick={onClose}
               >
                 <Button
-                  href="/contact"
+                  href="https://sajtmaskin-1.onrender.com/"
+                  external={true}
                   variant="cta"
                   size="md"
                   fullWidth

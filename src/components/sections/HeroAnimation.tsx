@@ -1676,12 +1676,16 @@ export default function HeroAnimation() {
               : "bg-[radial-gradient(circle_at_30%_50%,rgba(0,102,255,0.3),transparent_60%)]"
           }`} />
           <Image
-            src={isLight ? "/images/backgrounds/section-background-sunny.webp" : "/images/backgrounds/section-background.webp"}
+            src={
+              isLight
+                ? "/images/backgrounds/section-background-sunny.webp"
+                : "/images/backgrounds/section-background.webp"
+            }
             alt=""
             fill
             className={`object-cover ${isLight ? "opacity-40" : "opacity-20"}`}
             loading="eager"
-            sizes="100vw"
+            sizes="(min-width: 1280px) 1200px, 100vw"
           />
         </div>
 
