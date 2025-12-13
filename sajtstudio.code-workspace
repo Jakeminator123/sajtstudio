@@ -71,7 +71,13 @@
       "**/.git/subtree-cache/**": true,
       "**/node_modules/**": true,
       "**/.next/**": true
-    }
+    },
+    "json.schemas": [
+      {
+        "fileMatch": ["package.json"],
+        "url": "https://json.schemastore.org/package"
+      }
+    ]
   },
   "extensions": {
     "recommendations": [

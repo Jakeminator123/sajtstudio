@@ -453,9 +453,16 @@ def wash_prompt(model_id: str, raw_prompt: str) -> str:
         print(e)
         sys.exit(1)
 
-    cleaned = (response.output_text or "").strip()
+    # Safely access response attribute - API may return different formats
+    output_text = getattr(response, "output_text", None)
+    if output_text is None:
+        # Fallback: try common alternative attribute names
+        output_text = getattr(response, "text", None) or getattr(response, "content", None)
+    
+    cleaned = (output_text or "").strip()
     if not cleaned:
-        print("\n❌ Tomt svar från modellen.")
+        print("\n❌ Tomt svar från modellen (eller okänt responsformat).")
+        print(f"   Response type: {type(response).__name__}")
         sys.exit(1)
 
     add_history_item("washed_prompt", cleaned)
