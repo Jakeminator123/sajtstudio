@@ -58,6 +58,7 @@ type NavLink = {
 
 export default function HeaderNav() {
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -71,6 +72,43 @@ export default function HeaderNav() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Expose header height as CSS variable so layout can offset fixed header without magic numbers.
+  // Includes safe-area padding (iOS) because we apply it to the header element.
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return;
+
+    const root = document.documentElement;
+
+    const update = () => {
+      const el = headerRef.current;
+      if (!el) return;
+      const next = Math.round(el.getBoundingClientRect().height);
+      if (next > 0) {
+        root.style.setProperty("--header-height", `${next}px`);
+      }
+    };
+
+    update();
+
+    // Prefer ResizeObserver for accurate updates (font swap, breakpoint changes, etc.)
+    // Use `typeof ResizeObserver` instead of `"ResizeObserver" in window` to avoid TS narrowing issues in some setups.
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        // Avoid synchronous layout thrash when ResizeObserver fires frequently
+        requestAnimationFrame(update);
+      });
+      if (headerRef.current) ro.observe(headerRef.current);
+      window.addEventListener("resize", update, { passive: true });
+      return () => {
+        ro.disconnect();
+        window.removeEventListener("resize", update);
+      };
+    }
+
+    window.addEventListener("resize", update, { passive: true });
+    return () => window.removeEventListener("resize", update);
+  }, [mounted]);
 
   // Track scroll position (avoids Framer Motion scroll container warnings)
   useEffect(() => {
@@ -192,6 +230,7 @@ export default function HeaderNav() {
          Works on both mobile and desktop
       */}
       <motion.header
+        ref={headerRef}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
@@ -202,6 +241,10 @@ export default function HeaderNav() {
               : "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
             : "bg-transparent"
         }`}
+        style={{
+          // Keep header content below the device notch/status bar on iOS.
+          paddingTop: "var(--header-safe-top)",
+        }}
         suppressHydrationWarning
       >
         {/* Animated gradient line at top */}

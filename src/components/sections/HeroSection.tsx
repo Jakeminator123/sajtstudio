@@ -470,12 +470,30 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(min-width: 1024px)").matches;
+  });
 
   // Theme hook for light/dark mode
   const { isLight } = useTheme();
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+
+  // Desktop hero timing: start the hero text sequence a bit earlier on larger screens.
+  // This is mount-based (not scroll-triggered), so we scale delays deterministically.
+  const delayScale = useMemo(() => (isDesktop ? 0.6 : 1), [isDesktop]);
+  const d = useMemo(() => (value: number) => value * delayScale, [delayScale]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setIsDesktop(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
 
   // Removed useEffect - mounted is now true immediately for LCP optimization
   // Hero section renders immediately so LCP image can load right away
@@ -667,7 +685,7 @@ export default function HeroSection() {
   return (
     <motion.section
       ref={sectionRef}
-      className={`min-h-screen flex items-center justify-center relative overflow-hidden z-10 transition-colors duration-500 ${
+      className={`min-h-[100svh] flex items-center justify-center relative overflow-hidden z-10 transition-colors duration-500 pt-[var(--header-offset)] lg:pt-0 ${
         isLight ? "bg-amber-50" : "bg-black"
       }`}
       style={{
@@ -1031,7 +1049,7 @@ export default function HeroSection() {
               className="block relative group"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
+              transition={{ delay: d(0.2), duration: 0.8 }}
               whileHover={{ scale: 1.02, x: 5 }}
             >
               <AnimatedText
@@ -1044,14 +1062,14 @@ export default function HeroSection() {
                 className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-accent via-tertiary to-accent"
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
-                transition={{ delay: 1, duration: 0.6 }}
+                transition={{ delay: d(1), duration: 0.6 }}
               />
             </motion.span>
             <motion.span
               className="block relative group whitespace-nowrap"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.8, type: "spring" }}
+              transition={{ delay: d(0.4), duration: 0.8, type: "spring" }}
             >
               <HemsidorWords
                 scrollProgress={sectionScrollProgress}
@@ -1064,7 +1082,7 @@ export default function HeroSection() {
               className="block relative group"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ delay: d(0.6), duration: 0.8 }}
               whileHover={{ scale: 1.02, x: -5 }}
             >
               <AnimatedText
@@ -1078,7 +1096,7 @@ export default function HeroSection() {
               className="block relative group"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
+              transition={{ delay: d(0.8), duration: 0.8 }}
               whileHover={{ scale: 1.02 }}
             >
               <NattenWords
@@ -1119,7 +1137,11 @@ export default function HeroSection() {
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{
+              delay: d(1),
+              duration: 0.8,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
             style={
               mounted
                 ? {
@@ -1186,7 +1208,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: 1.2,
+              delay: d(1.2),
               duration: 0.8,
               ease: [0.25, 0.1, 0.25, 1],
             }}
@@ -1340,7 +1362,7 @@ export default function HeroSection() {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{
-              delay: 1.5,
+              delay: d(1.5),
               duration: 1.2,
               ease: [0.25, 0.1, 0.25, 1],
             }}

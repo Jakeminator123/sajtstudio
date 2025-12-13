@@ -182,6 +182,12 @@ body {
   }
   /* Dark mode (default) */
   :root {
+    /* Header offset (fixed header + iOS safe-area) */
+    --header-safe-top: env(safe-area-inset-top, 0px);
+    /* Default fallback; runtime may overwrite via HeaderNav measurement */
+    --header-height: calc(80px + var(--header-safe-top));
+    --header-offset: var(--header-height);
+
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
     --card: 0 0% 5%;
@@ -433,30 +439,30 @@ body::-webkit-scrollbar {
 
 /* Smooth section transitions */
 section {
-  scroll-margin-top: 80px;
+  scroll-margin-top: var(--header-offset);
   transition: opacity 0.3s ease-in-out;
 }
 
 /* Ensure anchor links work correctly with fixed header */
 [id] {
-  scroll-margin-top: 80px;
+  scroll-margin-top: var(--header-offset);
 }
 
 /* Enhanced scroll behavior */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: var(--header-offset);
 }
 
 /* Compensate for fixed header - ensure main content starts below header */
 /* HeroSection should be fullscreen, so we use negative margin to offset padding */
 main {
-  padding-top: 80px;
+  padding-top: var(--header-offset);
 }
 
 /* HeroSection should be fullscreen with header overlay */
 main > section:first-child {
-  margin-top: -80px;
+  margin-top: calc(-1 * var(--header-offset));
 }
 
 /* Section fade-in on scroll */
