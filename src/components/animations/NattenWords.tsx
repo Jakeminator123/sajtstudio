@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, MotionValue, useTransform, useMotionValue } from "framer-motion";
+import {
+  motion,
+  MotionValue,
+  useTransform,
+  useMotionValue,
+} from "framer-motion";
 import { useMemo } from "react";
 
 interface NattenWordsProps {
@@ -48,7 +53,7 @@ export default function NattenWords({
       className={className}
       style={{
         y: y ?? 0,
-        opacity: typeof opacity === 'number' ? opacity : (opacity?.get?.() ?? 1),
+        opacity: typeof opacity === "number" ? opacity : opacity?.get?.() ?? 1,
         display: "inline-block",
         willChange: "transform, opacity",
       }}

@@ -13,27 +13,19 @@ coverage/
 .nyc_output/
 *.lcov
 
-# Next.js
+# Next.js / build output
 .next/
 out/
 dist/
 build/
 .vercel/
+.turbo/
 
-# Production
-/build
-/dist
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-lerna-debug.log*
+# Cache
+.cache/
+.parcel-cache/
+*.cache
+*.tsbuildinfo
 
 # Local env files
 .env
@@ -43,20 +35,22 @@ lerna-debug.log*
 .env.production.local
 !.env.example
 
-# Vercel
-.vercel
+# Logs
+logs/
+*.log
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
+# Databases (local)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
 
-# Turbo
-.turbo/
-
-# Cache
-.cache/
-.parcel-cache/
-*.cache
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
 
 # IDE (keep important files)
 .vscode/*
@@ -68,14 +62,14 @@ next-env.d.ts
 *.swp
 *.swo
 *~
-
-# Logs
-logs/
-*.log
+*.code-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
 
 # Python (if any scripts use Python)
 __pycache__/
@@ -92,3 +86,6 @@ ENV/
 *.tmp
 *.temp
 .tmp/
+
+# Secrets / certs
+*.pem

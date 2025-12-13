@@ -395,7 +395,8 @@ export default function OpticScrollShowcase() {
                   suppressHydrationWarning
                 />
 
-                {/* Exploding thumbnails */}
+                {/* NOTE: This is NOT the "big portfolio explosion with expanding video" effect.
+                   That main effect lives in HeroAnimation.tsx. This is a smaller thumbnail burst used only in this section. */}
                 <motion.div className="absolute inset-0 pointer-events-none perspective-[800px]">
                   <motion.div
                     className="absolute left-1/3 top-1/3 w-40 h-24"
@@ -408,7 +409,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
-                      loading="lazy"
+                      loading="eager"
                     />
                   </motion.div>
                   <motion.div
@@ -422,7 +423,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
-                      loading="lazy"
+                      loading="eager"
                     />
                   </motion.div>
                   <motion.div
@@ -436,7 +437,7 @@ export default function OpticScrollShowcase() {
                       fill
                       sizes="(max-width: 640px) 128px, 128px"
                       className="object-cover rounded-lg shadow-lg"
-                      loading="lazy"
+                      loading="eager"
                     />
                   </motion.div>
                 </motion.div>

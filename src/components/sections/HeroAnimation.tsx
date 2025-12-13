@@ -1613,7 +1613,7 @@ export default function HeroAnimation() {
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
           className="object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
+          loading="eager"
         />
 
         <motion.div
@@ -1680,7 +1680,7 @@ export default function HeroAnimation() {
             alt=""
             fill
             className={`object-cover ${isLight ? "opacity-40" : "opacity-20"}`}
-            loading="lazy"
+            loading="eager"
             sizes="100vw"
           />
         </div>
@@ -1964,7 +1964,7 @@ export default function HeroAnimation() {
                           fill
                           sizes="150px"
                           className="object-cover"
-                          loading="lazy"
+                          loading="eager"
                         />
                       </motion.div>
                     );
@@ -2134,7 +2134,7 @@ export default function HeroAnimation() {
                           fill
                           sizes="150px"
                           className="object-cover"
-                          loading="lazy"
+                          loading="eager"
                         />
                       </motion.div>
                     );
