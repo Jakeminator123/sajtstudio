@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
   // Temporarily disable React Compiler to fix webpack module loading issues with dynamic imports
   // reactCompiler: true,
 
-  // Add empty turbopack config to silence build errors
-  turbopack: {},
-
   // Disable Turbopack (use webpack instead) - fixes TurbopackInternalError
   // Turbopack is enabled by default in Next.js 16, but has bugs in 16.0.1
   webpack: (config, { isServer }) => {

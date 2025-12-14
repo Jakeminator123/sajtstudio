@@ -8,7 +8,6 @@ build/
 .vercel/
 
 # Logs / temp
-logs/
 *.log
 *.tmp
 *.temp
@@ -53,4 +52,6 @@ Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 .idea/
+cleaner.py
+.preprompt_history.json
 

@@ -128,6 +128,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isProd = process.env.NODE_ENV === "production";
+  // Best practice: make invasive client-side handlers configurable.
+  // Default: enabled in production, disabled in dev unless explicitly turned on.
+  const parseEnvBool = (value: string | undefined): boolean | undefined => {
+    if (!value) return undefined;
+    const v = value.trim().toLowerCase();
+    if (["true", "1", "yes", "y", "on"].includes(v)) return true;
+    if (["false", "0", "no", "n", "off"].includes(v)) return false;
+    return undefined;
+  };
+
+  const globalHandlerFlag = parseEnvBool(
+    process.env.NEXT_PUBLIC_ENABLE_GLOBAL_ERROR_HANDLER
+  );
+  const enableGlobalErrorHandler = globalHandlerFlag ?? (isProd ? true : false);
   const shouldLoadDidChatbot =
     process.env.NODE_ENV === "production" ||
     process.env.NODE_ENV === "development";
@@ -276,12 +291,14 @@ export default function RootLayout({
         ) : (
           <PageTransition>{children}</PageTransition>
         )}
-        {/* Global error handler for unhandled fetch errors (e.g., from D-ID chatbot, antivirus, etc.) */}
-        <Script
-          id="global-error-handler"
-          strategy="afterInteractive"
-          src="/scripts/global-error-handler.js"
-        />
+        {/* Global error handler: keep prod clean from third‑party fetch noise */}
+        {enableGlobalErrorHandler && (
+          <Script
+            id="global-error-handler"
+            strategy="afterInteractive"
+            src="/scripts/global-error-handler.js"
+          />
+        )}
         {/* D-ID Chatbot */}
         {shouldLoadDidChatbot && (
           <Script

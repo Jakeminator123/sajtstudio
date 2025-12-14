@@ -52,17 +52,14 @@ yarn-error.log*
 .pnpm-debug.log*
 lerna-debug.log*
 
-# IDE (keep important files)
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
+# IDE
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
 *.code-workspace
+.preprompt_history.json
 
 # OS
 .DS_Store
@@ -89,3 +86,11 @@ ENV/
 
 # Secrets / certs
 *.pem
+cleaner.py
+.preprompt_history
+.env.local
+
+# Cursor / local scratch (should never be committed)
+INPUT_DOC_FOR_CURSOR/
+*.download
+

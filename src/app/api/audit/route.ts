@@ -24,6 +24,13 @@ import type { WebsiteContent } from "@/lib/openai-client";
 // This is required for long-running AI API calls
 export const maxDuration = 300;
 
+const isProduction = process.env.NODE_ENV === "production";
+function debugLog(...args: unknown[]) {
+  if (!isProduction) {
+    console.log(...args);
+  }
+}
+
 // Initialize OpenAI client lazily to avoid build-time errors
 function getOpenAIClient(): OpenAI {
   if (!process.env.OPENAI_API_KEY) {
@@ -587,7 +594,7 @@ export async function POST(request: NextRequest) {
     let body;
     try {
       body = await request.json();
-      console.log(`[${requestId}] Request received:`, {
+      debugLog(`[${requestId}] Request received:`, {
         mode: body.mode,
         hasUrl: !!body.url,
         hasAnswers: !!body.answers,
@@ -646,14 +653,11 @@ export async function POST(request: NextRequest) {
       try {
         websiteContent = await scrapeWebsite(url);
         const scrapeDuration = Date.now() - scrapeStartTime;
-        console.log(
-          `[${requestId}] Scraping completed in ${scrapeDuration}ms:`,
-          {
-            hasContent: !!websiteContent,
-            title: websiteContent?.title?.substring(0, 50),
-            wordCount: websiteContent?.wordCount || 0,
-          }
-        );
+        debugLog(`[${requestId}] Scraping completed in ${scrapeDuration}ms:`, {
+          hasContent: !!websiteContent,
+          title: websiteContent?.title?.substring(0, 50),
+          wordCount: websiteContent?.wordCount || 0,
+        });
       } catch (error) {
         const scrapeDuration = Date.now() - scrapeStartTime;
         console.error(
@@ -683,7 +687,7 @@ export async function POST(request: NextRequest) {
             : 0)
         );
       }, 0);
-      console.log("Built prompt:", {
+      debugLog("Built prompt:", {
         messageCount: prompt.length,
         actualContentLength,
         promptTextLength,
@@ -710,7 +714,7 @@ export async function POST(request: NextRequest) {
             : 0)
         );
       }, 0);
-      console.log("Built recommendation prompt:", {
+      debugLog("Built recommendation prompt:", {
         messageCount: prompt.length,
         actualContentLength,
         promptTextLength,
@@ -852,7 +856,7 @@ export async function POST(request: NextRequest) {
         );
       }, 0);
 
-      console.log("Calling OpenAI API with payload:", {
+      debugLog("Calling OpenAI API with payload:", {
         model: requestPayload.model,
         hasPrompt: !!prompt,
         promptLength: actualPromptLength,
@@ -870,7 +874,7 @@ export async function POST(request: NextRequest) {
           timeout: 300000, // 5 minutes explicit timeout
         });
         const elapsedTime = Date.now() - startTime;
-        console.log(
+        debugLog(
           `OpenAI API call completed in ${elapsedTime}ms (${(
             elapsedTime / 1000
           ).toFixed(1)}s)`
@@ -913,7 +917,7 @@ export async function POST(request: NextRequest) {
             response = await openai.responses.create(fallbackPayload, {
               timeout: 300000,
             });
-            console.log(
+            debugLog(
               `[${requestId}] Fallback to ${fallbackModel} succeeded after ${
                 Date.now() - startTime
               }ms`
@@ -936,7 +940,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      console.log("OpenAI API response received:", {
+      debugLog("OpenAI API response received:", {
         hasOutput:
           !!(response as { output_text?: string; output?: unknown })
             ?.output_text || !!(response as { output?: unknown })?.output,
@@ -964,7 +968,7 @@ export async function POST(request: NextRequest) {
       const outputText = extractOutputText(
         response as unknown as Record<string, unknown>
       );
-      console.log("Extracted output from responses API:", {
+      debugLog("Extracted output from responses API:", {
         hasContent: !!outputText,
         contentLength: outputText.length,
         preview: outputText.substring(0, 200),
@@ -990,7 +994,7 @@ export async function POST(request: NextRequest) {
       try {
         // Since we're using JSON format, try direct parsing first
         auditResult = JSON.parse(outputText);
-        console.log("Successfully parsed JSON response directly");
+        debugLog("Successfully parsed JSON response directly");
       } catch (parseError) {
         console.warn(
           "Direct JSON parse failed, attempting to extract JSON object:",
@@ -1030,7 +1034,7 @@ export async function POST(request: NextRequest) {
 
         try {
           auditResult = JSON.parse(jsonString);
-          console.log("Successfully parsed JSON after extraction");
+          debugLog("Successfully parsed JSON after extraction");
         } catch (fallbackError) {
           console.error("Failed to parse AI response (fallback failed):", {
             fallbackError:
@@ -1144,7 +1148,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log(`[${requestId}] Result validation passed:`, {
+      debugLog(`[${requestId}] Result validation passed:`, {
         auditType: auditResultWithCost.audit_type,
         hasCompany: !!auditResultWithCost.company,
         improvementsCount: auditResultWithCost.improvements?.length || 0,
@@ -1198,14 +1202,11 @@ export async function POST(request: NextRequest) {
         await fs.writeFile(mdPath, markdown, "utf-8");
 
         const saveDuration = Date.now() - saveStartTime;
-        console.log(
-          `[${requestId}] Saved audit results in ${saveDuration}ms:`,
-          {
-            filePrefix,
-            jsonSize: jsonContent.length,
-            markdownSize: markdown.length,
-          }
-        );
+        debugLog(`[${requestId}] Saved audit results in ${saveDuration}ms:`, {
+          filePrefix,
+          jsonSize: jsonContent.length,
+          markdownSize: markdown.length,
+        });
       } catch (saveError) {
         const saveDuration = Date.now() - saveStartTime;
         console.error(
@@ -1230,7 +1231,7 @@ export async function POST(request: NextRequest) {
       }
 
       const totalDuration = Date.now() - requestStartTime;
-      console.log(
+      debugLog(
         `[${requestId}] Returning successful response after ${totalDuration}ms (${(
           totalDuration / 1000
         ).toFixed(1)}s):`,

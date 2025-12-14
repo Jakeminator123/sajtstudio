@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
+import { tmpdir } from "os";
 import { join } from "path";
 
 interface ErrorLog {
@@ -13,8 +14,25 @@ interface ErrorLog {
   componentStack?: string;
 }
 
-const LOG_DIR = join(process.cwd(), "logs");
+// Keep runtime logs out of the repo; also more compatible with serverless environments.
+const LOG_DIR = join(tmpdir(), "sajtstudio-logs");
 const ERROR_LOG_FILE = join(LOG_DIR, "browser-errors.json");
+
+function parseEnvBool(value: string | undefined): boolean | undefined {
+  if (!value) return undefined;
+  const v = value.trim().toLowerCase();
+  if (["true", "1", "yes", "y", "on"].includes(v)) return true;
+  if (["false", "0", "no", "n", "off"].includes(v)) return false;
+  return undefined;
+}
+
+const enableErrorLogging = (() => {
+  const flag = parseEnvBool(
+    process.env.NEXT_PUBLIC_ENABLE_GLOBAL_ERROR_HANDLER
+  );
+  if (flag !== undefined) return flag;
+  return process.env.NODE_ENV === "production";
+})();
 
 function shouldIgnoreError(error: Partial<ErrorLog>): boolean {
   const message = (error.message || "").toLowerCase();
@@ -81,8 +99,19 @@ async function appendError(error: ErrorLog) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!enableErrorLogging) {
+    return NextResponse.json({ success: false }, { status: 404 });
+  }
+
   try {
     const rawBody = await request.text();
+    // Basic abuse protection: keep payloads bounded.
+    if (rawBody.length > 50_000) {
+      return NextResponse.json(
+        { success: false, error: "Payload too large" },
+        { status: 413 }
+      );
+    }
     let errorData: Partial<ErrorLog> = {};
 
     if (rawBody?.trim()) {
@@ -110,6 +139,17 @@ export async function POST(request: NextRequest) {
     errorData.userAgent =
       request.headers.get("user-agent") || errorData.userAgent;
 
+    // Bound potentially huge fields
+    if (typeof errorData.message === "string") {
+      errorData.message = errorData.message.slice(0, 2000);
+    }
+    if (typeof errorData.stack === "string") {
+      errorData.stack = errorData.stack.slice(0, 8000);
+    }
+    if (typeof errorData.componentStack === "string") {
+      errorData.componentStack = errorData.componentStack.slice(0, 8000);
+    }
+
     // Drop known dev/extension noise so logs stay useful
     if (shouldIgnoreError(errorData)) {
       return NextResponse.json(
@@ -135,6 +175,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+  if (!enableErrorLogging) {
+    return NextResponse.json({ errors: [] }, { status: 404 });
+  }
+
   try {
     const fs = await import("fs/promises");
     const content = await fs.readFile(ERROR_LOG_FILE, "utf-8");
