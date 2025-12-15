@@ -16,7 +16,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion'
-import React, { useEffect, useRef, type ReactNode } from 'react'
+import React, { useEffect, useRef, useState, type ReactNode } from 'react'
 
 type ServiceModalPayload = {
   service: Service
@@ -88,6 +88,7 @@ export default function ServicesSection() {
   const { isLight } = useTheme()
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
 
   // Scroll-based parallax effects
   const { scrollYProgress } = useScroll({
@@ -154,14 +155,38 @@ export default function ServicesSection() {
     }
   }, [mounted, accentGradientOpacity, gridOpacity, videoOpacity, videoScale, finalAccentOpacity, finalGridOpacity, finalVideoOpacity, finalVideoScale])
 
-  // Ensure video plays when mounted
+  // Only load/play background video when the section is near the viewport.
+  // This prevents offscreen videos from dominating network/CPU and hurting Lighthouse.
   useEffect(() => {
-    if (mounted && videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay blocked, that's okay
-      })
-    }
+    if (!mounted) return
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+    if (!sectionRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        setShouldPlayVideo(entry.isIntersecting)
+      },
+      { rootMargin: '300px', threshold: 0.1 }
+    )
+
+    observer.observe(sectionRef.current)
+    return () => observer.disconnect()
   }, [mounted])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (shouldPlayVideo) {
+      video.play().catch(() => {
+        // Autoplay may be blocked; ignore.
+      })
+    } else {
+      video.pause()
+    }
+  }, [shouldPlayVideo])
 
   const handleOpenModal = (service: Service, index: number) => {
     openModal(`service-${service.id}`, { service, index })
@@ -206,11 +231,10 @@ export default function ServicesSection() {
       <div className="absolute inset-0 z-0">
         <motion.video
           ref={videoRef}
-          autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload="none"
           className="absolute inset-0 w-full h-full object-cover"
           style={{
             opacity: finalVideoOpacity,

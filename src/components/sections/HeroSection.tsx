@@ -468,6 +468,7 @@ export default function HeroSection() {
   const mounted = true; // Always mounted immediately for LCP optimization - hero image loads right away
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [enableBackgroundVideo, setEnableBackgroundVideo] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() => {
@@ -480,6 +481,25 @@ export default function HeroSection() {
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+
+  // Delay background video to avoid stealing bandwidth/CPU from LCP.
+  // Keeps the design (poster + animated overlays) while improving Lighthouse.
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    if (typeof window === "undefined") return;
+
+    type NetworkInformation = { saveData?: boolean; effectiveType?: string };
+    const conn = (navigator as unknown as { connection?: NetworkInformation })
+      .connection;
+    const isSaveData = Boolean(conn?.saveData);
+    const effectiveType = conn?.effectiveType ?? "";
+    const isSlowConnection = ["slow-2g", "2g"].includes(effectiveType);
+
+    if (isSaveData || isSlowConnection) return;
+
+    const t = window.setTimeout(() => setEnableBackgroundVideo(true), 2500);
+    return () => window.clearTimeout(t);
+  }, [shouldReduceMotion]);
 
   // Desktop hero timing: start the hero text sequence a bit earlier on larger screens.
   // This is mount-based (not scroll-triggered), so we scale delays deterministically.
@@ -761,8 +781,8 @@ export default function HeroSection() {
           className="absolute inset-0 z-[1] pointer-events-none"
           style={{ y }}
         >
-          {/* Background video - subtle faded layer at 50% opacity, 20% speed - LOWEST LAYER */}
-          {!shouldReduceMotion && (
+          {/* Background video - delayed to prioritize LCP - LOWEST LAYER */}
+          {!shouldReduceMotion && enableBackgroundVideo && (
             <div className="absolute inset-0 opacity-50 z-0">
               <video
                 ref={videoRef}
@@ -770,7 +790,7 @@ export default function HeroSection() {
                 loop
                 muted
                 playsInline
-                preload="auto"
+                preload="none"
                 poster="/images/hero/hero-background.webp"
                 className="w-full h-full object-cover"
                 style={{ filter: "brightness(0.8) contrast(0.9)" }}
@@ -1007,6 +1027,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+            aria-label="Bygger hemsidor som betyder någonting."
             style={
               mounted
                 ? {
@@ -1027,6 +1048,9 @@ export default function HeroSection() {
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
             suppressHydrationWarning
           >
+            {/* Accessibility/SEO: ensure a single readable heading string (avoid letter-by-letter animation output) */}
+            <span className="sr-only">Bygger hemsidor som betyder någonting.</span>
+            <span aria-hidden="true">
             {/* Shimmer effect overlay - only render on client to avoid hydration mismatch */}
             {mounted && !shouldReduceMotion && (
               <motion.div
@@ -1131,6 +1155,7 @@ export default function HeroSection() {
                 transition={{ delay: 1.2, duration: 0.8 }}
               />
             </motion.span>
+            </span>
           </motion.h1>
 
           {/* Subtitle */}

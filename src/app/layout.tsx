@@ -143,9 +143,9 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_GLOBAL_ERROR_HANDLER
   );
   const enableGlobalErrorHandler = globalHandlerFlag ?? (isProd ? true : false);
-  const shouldLoadDidChatbot =
-    process.env.NODE_ENV === "production" ||
-    process.env.NODE_ENV === "development";
+  const didChatbotFlag = parseEnvBool(process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT);
+  // Default: disabled unless explicitly enabled. This keeps Lighthouse clean and avoids heavy third‑party work by default.
+  const shouldLoadDidChatbot = didChatbotFlag ?? false;
 
   return (
     <html
@@ -213,23 +213,27 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Preconnect for D-ID chatbot resources */}
-        <link
-          rel="preconnect"
-          href="https://agent.d-id.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://agents-results.d-id.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://create-images-results.d-id.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="dns-prefetch" href="https://api.d-id.com" />
+        {/* Preconnect for D-ID chatbot resources (only when enabled) */}
+        {shouldLoadDidChatbot && (
+          <>
+            <link
+              rel="preconnect"
+              href="https://agent.d-id.com"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preconnect"
+              href="https://agents-results.d-id.com"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preconnect"
+              href="https://create-images-results.d-id.com"
+              crossOrigin="anonymous"
+            />
+            <link rel="dns-prefetch" href="https://api.d-id.com" />
+          </>
+        )}
         {/* Preload LCP image for faster rendering */}
         <link
           rel="preload"
@@ -237,41 +241,8 @@ export default function RootLayout({
           href="/images/hero/hero-background.webp"
           fetchPriority="high"
         />
-        {/* Prefetch city-background for light mode (not critical for LCP) */}
-        <link
-          rel="prefetch"
-          as="image"
-          href="/images/backgrounds/city-background-sunny.webp"
-        />
-        {/* Prefetch assets that appear later without forcing preload warnings */}
-        <link rel="prefetch" href="/logo.svg" />
-        <link rel="prefetch" href="/videos/background.mp4" />
-        <link rel="prefetch" href="/images/hero/hero-background.webp" />
-        <link rel="prefetch" href="/images/backgrounds/8-bit.webp" />
-        <link rel="prefetch" href="/videos/background_vid.mp4" />
-        <link rel="prefetch" href="/videos/noir_hero.mp4" />
-        <link rel="prefetch" href="/videos/telephone_ringin.mp4" />
-        <link
-          rel="prefetch"
-          href="/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp"
-        />
-        <link
-          rel="prefetch"
-          href="/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp"
-        />
-        <link
-          rel="prefetch"
-          href="/images/portfolio/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp"
-        />
-        <link
-          rel="prefetch"
-          href="/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp"
-        />
-        <link
-          rel="prefetch"
-          href="/images/backgrounds/section-background.webp"
-        />
-        <link rel="prefetch" href="/images/animations/hero-animation.gif" />
+        {/* Avoid prefetching large media in <head>; it can steal bandwidth from LCP.
+            Next.js will prefetch routes opportunistically via <Link> when appropriate. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={generateSchemaScript([

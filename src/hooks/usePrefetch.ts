@@ -4,10 +4,11 @@ import { usePathname } from 'next/navigation';
 /**
  * Hook to prefetch links on hover for faster navigation
  */
-export function usePrefetch() {
+export function usePrefetch(enabled: boolean = true) {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!enabled) return;
     if (typeof window === 'undefined') return;
 
     const getLinkFromEventTarget = (eventTarget: EventTarget | null): HTMLAnchorElement | null => {
@@ -59,5 +60,5 @@ export function usePrefetch() {
     return () => {
       document.removeEventListener('mouseenter', handleMouseEnter as EventListener, true);
     };
-  }, [pathname]);
+  }, [pathname, enabled]);
 }

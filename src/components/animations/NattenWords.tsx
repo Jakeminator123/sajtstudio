@@ -39,11 +39,15 @@ export default function NattenWords({
   if (!mounted || shouldReduceMotion) {
     return (
       <span className={className}>
-        {letters.map((letter, index) => (
-          <span key={index} className="inline-block">
-            {letter}
-          </span>
-        ))}
+        {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
+        <span className="sr-only">{text}</span>
+        <span aria-hidden="true">
+          {letters.map((letter, index) => (
+            <span key={index} className="inline-block" aria-hidden="true">
+              {letter}
+            </span>
+          ))}
+        </span>
       </span>
     );
   }
@@ -51,6 +55,7 @@ export default function NattenWords({
   return (
     <motion.span
       className={className}
+      aria-label={text}
       style={{
         y: y ?? 0,
         opacity: typeof opacity === "number" ? opacity : opacity?.get?.() ?? 1,
@@ -59,32 +64,37 @@ export default function NattenWords({
       }}
       suppressHydrationWarning
     >
-      {letters.map((letter, index) => (
-        <motion.span
-          key={index}
-          className="inline-block"
-          initial={{ opacity: 0, y: 50, rotateX: -90 }}
-          animate={{ opacity: 1, y: 0, rotateX: 0 }}
-          transition={{
-            delay: index * 0.1,
-            duration: 0.6,
-            ease: [0.25, 0.1, 0.25, 1],
-          }}
-          whileHover={{
-            scale: 1.2,
-            y: -10,
-            color: "#0066FF",
-            transition: { duration: 0.2 },
-          }}
-          style={{
-            display: "inline-block",
-            transformStyle: "preserve-3d",
-            willChange: "transform, opacity",
-          }}
-        >
-          {letter === " " ? "\u00A0" : letter}
-        </motion.span>
-      ))}
+      {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {letters.map((letter, index) => (
+          <motion.span
+            key={index}
+            className="inline-block"
+            aria-hidden="true"
+            initial={{ opacity: 0, y: 50, rotateX: -90 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{
+              delay: index * 0.1,
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            whileHover={{
+              scale: 1.2,
+              y: -10,
+              color: "#0066FF",
+              transition: { duration: 0.2 },
+            }}
+            style={{
+              display: "inline-block",
+              transformStyle: "preserve-3d",
+              willChange: "transform, opacity",
+            }}
+          >
+            {letter === " " ? "\u00A0" : letter}
+          </motion.span>
+        ))}
+      </span>
     </motion.span>
   );
 }

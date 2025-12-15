@@ -4,8 +4,9 @@ import { useEffect } from 'react';
  * Hook to prefetch components and resources as user scrolls near them
  * This improves scroll responsiveness without blocking initial load
  */
-export function usePrefetchOnScroll() {
+export function usePrefetchOnScroll(enabled: boolean = true) {
   useEffect(() => {
+    if (!enabled) return
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
       return;
     }
@@ -99,5 +100,5 @@ export function usePrefetchOnScroll() {
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-  }, []);
+  }, [enabled]);
 }

@@ -277,7 +277,7 @@ export default function HeaderNav() {
                ============================================
                Visible on both mobile and desktop
             */}
-            <Link href="/" className="group relative" prefetch={true}>
+            <Link href="/" className="group relative" prefetch={false}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

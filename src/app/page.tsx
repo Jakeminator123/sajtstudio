@@ -120,16 +120,19 @@ const OpticScrollShowcase = dynamic(
 );
 
 export default function Home() {
-  // Prefetch links on hover for faster navigation - updated buttons v2
-  usePrefetch();
-  // Prefetch components as user scrolls near them - delayed to avoid blocking navigation
-  usePrefetchOnScroll();
+  const enablePrefetch =
+    process.env.NEXT_PUBLIC_ENABLE_PREFETCH === "true";
+  // Prefetch links/resources is great for UX, but it can hurt Lighthouse by adding extra work during audits.
+  // Default: disabled unless explicitly enabled.
+  usePrefetch(enablePrefetch);
+  usePrefetchOnScroll(enablePrefetch);
   const { isLight } = useTheme();
+  const enableIntroVideo = process.env.NEXT_PUBLIC_ENABLE_INTRO_VIDEO === "true";
 
   return (
     <>
       {/* Intro video - plays on page load to allow resources to load */}
-      <IntroVideo />
+      {enableIntroVideo && <IntroVideo />}
 
       <HeaderNav />
       <main id="main-content" tabIndex={-1} className={`relative z-10 transition-colors duration-500 ${

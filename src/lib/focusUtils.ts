@@ -9,7 +9,7 @@ export function trapFocus(container: HTMLElement) {
   const lastFocusableElement = focusableElements[focusableElements.length - 1];
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    const isTabPressed = e.key === 'Tab';
+    const isTabPressed = e.key === "Tab";
 
     if (!isTabPressed) return;
 
@@ -28,26 +28,26 @@ export function trapFocus(container: HTMLElement) {
     }
   };
 
-  container.addEventListener('keydown', handleKeyDown);
+  container.addEventListener("keydown", handleKeyDown);
   firstFocusableElement?.focus();
 
   return () => {
-    container.removeEventListener('keydown', handleKeyDown);
+    container.removeEventListener("keydown", handleKeyDown);
   };
 }
 
 // Focus visible class for better keyboard navigation
 export function setupFocusVisible() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const handleFirstTab = (e: KeyboardEvent) => {
-    if (e.key === 'Tab') {
-      document.body.classList.add('user-is-tabbing');
-      window.removeEventListener('keydown', handleFirstTab);
+    if (e.key === "Tab") {
+      document.body.classList.add("user-is-tabbing");
+      window.removeEventListener("keydown", handleFirstTab);
     }
   };
 
-  window.addEventListener('keydown', handleFirstTab);
+  window.addEventListener("keydown", handleFirstTab);
 }
 
 // Skip to content
@@ -61,14 +61,14 @@ export function skipToContent(contentId: string) {
 
 // Announce to screen readers
 export function announceToScreenReader(message: string) {
-  const announcement = document.createElement('div');
-  announcement.setAttribute('aria-live', 'polite');
-  announcement.setAttribute('aria-atomic', 'true');
-  announcement.setAttribute('class', 'sr-only');
+  const announcement = document.createElement("div");
+  announcement.setAttribute("aria-live", "polite");
+  announcement.setAttribute("aria-atomic", "true");
+  announcement.setAttribute("class", "sr-only");
   announcement.textContent = message;
-  
+
   document.body.appendChild(announcement);
-  
+
   setTimeout(() => {
     document.body.removeChild(announcement);
   }, 1000);
