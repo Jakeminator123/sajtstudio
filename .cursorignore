@@ -52,6 +52,5 @@ Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 .idea/
-cleaner.py
 .preprompt_history.json
 

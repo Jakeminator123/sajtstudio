@@ -86,8 +86,6 @@ ENV/
 
 # Secrets / certs
 *.pem
-cleaner.py
-.preprompt_history
 .env.local
 
 # Cursor / local scratch (should never be committed)
