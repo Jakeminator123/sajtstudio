@@ -2,6 +2,14 @@
   "name": "sajtstudio",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "npm@11.6.2",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "volta": {
+    "node": "24.12.0",
+    "npm": "11.6.2"
+  },
   "scripts": {
     "ci": "npm ci",
     "dev": "next dev --webpack --port 1337",
