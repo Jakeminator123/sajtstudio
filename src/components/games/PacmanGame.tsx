@@ -506,7 +506,7 @@ export default function PacmanGame() {
     "rounded-2xl bg-white/15 border border-white/30 text-white text-2xl h-14 w-14 flex items-center justify-center shadow-lg active:scale-95 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 backdrop-blur";
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
+    <div className="relative flex flex-col items-center justify-center w-full">
       {/* Score display */}
       <div className="mb-4 text-center">
         <h3 className="text-2xl font-bold text-white mb-2">PACMAN</h3>
@@ -514,9 +514,9 @@ export default function PacmanGame() {
         <p className="text-sm text-white/70 mt-2 text-center">{controlHint}</p>
       </div>
 
-      {/* Game canvas */}
+      {/* Game canvas - centered and responsive */}
       <div
-        className="relative"
+        className="relative flex items-center justify-center w-full"
         ref={containerRef}
         style={{ touchAction: isTouchDevice ? "none" : "auto" }}
       >
@@ -524,8 +524,13 @@ export default function PacmanGame() {
           ref={canvasRef}
           width={COLS * CELL_SIZE}
           height={ROWS * CELL_SIZE}
-          className="shadow-2xl rounded-lg max-w-full h-auto"
-          style={{ maxHeight: "60vh" }}
+          className="shadow-2xl rounded-lg block mx-auto"
+          style={{ 
+            maxWidth: "100%",
+            maxHeight: "55vh",
+            height: "auto",
+            width: "auto",
+          }}
         />
 
         {/* Game over / Win overlay */}

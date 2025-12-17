@@ -266,11 +266,11 @@ export default function TechShowcaseSection() {
   // Overlay dismissal removed - users scroll past if not interested
 
   const renderPacmanExperience = (variant: "overlay" | "inline") => {
-    // Larger dimensions for 4K screens - uses viewport units with larger max values
+    // Responsive dimensions - smaller on mobile, larger on desktop
     const containerDimensions =
       variant === "overlay"
-        ? { width: "min(94vw, 1100px)", height: "min(88vh, 900px)" }
-        : { width: "min(96vw, 1100px)", height: "min(85vh, 880px)" };
+        ? { width: "min(96vw, 1000px)", height: "auto", minHeight: "min(80vh, 800px)" }
+        : { width: "min(98vw, 1000px)", height: "auto", minHeight: "min(75vh, 750px)" };
 
     return (
       <motion.div
@@ -278,17 +278,13 @@ export default function TechShowcaseSection() {
         ref={pacmanRef}
         initial={
           variant === "overlay"
-            ? { opacity: 0, scale: 0.85, y: 20, x: 0 }
-            : { opacity: 0, scale: 0.5, rotate: -180, x: 0 }
+            ? { opacity: 0, scale: 0.9, y: 20 }
+            : { opacity: 0, scale: 0.8, y: 30 }
         }
-        animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, x: 0 }}
-        className={
-          variant === "overlay"
-            ? "relative w-full max-w-5xl mx-auto"
-            : "relative mx-auto [scroll-margin-top:50vh]"
-        }
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full flex flex-col items-center justify-center mx-auto px-2 sm:px-4"
         style={{
-          maxWidth: "min(100vw, 1100px)",
+          maxWidth: containerDimensions.width,
           width: "100%",
         }}
       >
@@ -339,33 +335,36 @@ export default function TechShowcaseSection() {
         </motion.div>
 
         <motion.div
-          className="relative mx-auto"
-          style={containerDimensions}
+          className="relative mx-auto w-full"
+          style={{
+            maxWidth: "min(100%, 900px)",
+          }}
           animate={{
-            rotate: countdown === 0 && !isPlaying ? [0, -5, 5, -5, 0] : 0,
+            rotate: countdown === 0 && !isPlaying ? [0, -3, 3, -3, 0] : 0,
           }}
           transition={{
             duration: 0.5,
             ease: "easeOut",
           }}
         >
+          {/* 8-bit border frame - hidden on very small screens */}
           <div
-            className="absolute inset-0 border-8 border-black rounded-lg pointer-events-none"
+            className="absolute inset-0 border-4 sm:border-8 border-black rounded-lg pointer-events-none hidden sm:block"
             style={{
               imageRendering: "pixelated",
               boxShadow: `
-                4px 4px 0 0 #333,
-                8px 8px 0 0 #666,
-                12px 12px 0 0 #999
+                2px 2px 0 0 #333,
+                4px 4px 0 0 #666
               `,
             }}
           />
 
           <div
-            className="relative rounded-lg overflow-hidden w-full h-full flex items-center justify-center p-8"
+            className="relative rounded-lg overflow-hidden w-full flex items-center justify-center p-2 sm:p-4 md:p-6"
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.75)",
               backdropFilter: "blur(4px)",
+              minHeight: "min(70vh, 600px)",
             }}
           >
             {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
@@ -813,29 +812,31 @@ export default function TechShowcaseSection() {
       <AnimatePresence>
         {showOverlay && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center p-4"
+            className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
             style={{ zIndex: 9999 }}
-            initial={{ opacity: 0, scale: 1.05 }}
+            initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            {/* 8-bit background with desaturation */}
+            {/* 8-bit background with desaturation - centered */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
                 backgroundSize: "cover",
-                backgroundPosition: "center",
+                backgroundPosition: "center center",
                 backgroundRepeat: "no-repeat",
                 filter: "saturate(0.3) contrast(1.1)",
               }}
             />
             {/* Dark overlay for better contrast with game */}
-            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/50 pointer-events-none" />
 
-            {/* Pacman game in overlay */}
-            {renderPacmanExperience("overlay")}
+            {/* Pacman game in overlay - centered */}
+            <div className="relative z-10 w-full flex items-center justify-center">
+              {renderPacmanExperience("overlay")}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -855,14 +856,18 @@ export default function TechShowcaseSection() {
       )}
 
       {/* Content - only show when section is in view */}
-      {/* Reduced height for better visibility on large screens */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8 pt-32 md:pt-40">
+      {/* Centered container for inline Pacman */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full p-2 sm:p-4 md:p-8 pt-20 sm:pt-28 md:pt-32">
         {/* Dark overlay when inline Pacman is visible for better contrast */}
         {showInlinePacman && (
-          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+          <div className="absolute inset-0 bg-black/50 pointer-events-none" />
         )}
         <AnimatePresence mode="wait">
-          {showInlinePacman && renderPacmanExperience("inline")}
+          {showInlinePacman && (
+            <div className="w-full flex items-center justify-center">
+              {renderPacmanExperience("inline")}
+            </div>
+          )}
         </AnimatePresence>
       </div>
     </motion.section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useMemo } from "react";
 
 interface WordRevealProps {
@@ -19,6 +19,7 @@ export default function WordReveal({
   direction = "up",
 }: WordRevealProps) {
   const words = useMemo(() => text.split(" "), [text]);
+  const prefersReducedMotion = useReducedMotion();
 
   const getInitialPosition = () => {
     switch (direction) {
@@ -37,6 +38,15 @@ export default function WordReveal({
 
   const initialPos = getInitialPosition();
 
+  // If user prefers reduced motion, show text immediately without animation
+  if (prefersReducedMotion) {
+    return (
+      <span className={className} suppressHydrationWarning>
+        {text}
+      </span>
+    );
+  }
+
   return (
     <span className={className} suppressHydrationWarning>
       {words.map((word, index) => (
@@ -48,7 +58,9 @@ export default function WordReveal({
           <motion.span
             initial={{ opacity: 0, ...initialPos }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            // Larger positive margin triggers animation earlier (before element enters viewport)
+            // amount: 0 means any part visible triggers it - more reliable on mobile
+            viewport={{ once: true, margin: "200px 0px", amount: 0 }}
             transition={{
               delay: delay + index * staggerDelay,
               duration: 0.6,
