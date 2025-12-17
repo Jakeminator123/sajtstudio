@@ -408,14 +408,20 @@ export default function TechShowcaseSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-30 bg-black/60 flex items-center justify-center pointer-events-none"
+                  className="absolute z-30 bg-black/70 flex items-center justify-center pointer-events-none rounded-lg"
                   style={{
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "100%",
+                    height: "100%",
                     imageRendering: "pixelated",
                   }}
                 >
-                  <div className="text-center px-4">
+                  <div className="text-center px-2 sm:px-4 max-w-full">
                     <h3
-                      className="text-3xl md:text-4xl font-bold text-white mb-4"
+                      className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4"
                       style={{
                         fontFamily:
                           "var(--font-pixel), 'Press Start 2P', monospace",
@@ -423,11 +429,7 @@ export default function TechShowcaseSection() {
                           2px 2px 0px #000,
                           -2px -2px 0px #000,
                           2px -2px 0px #000,
-                          -2px 2px 0px #000,
-                          0px 2px 0px #000,
-                          2px 0px 0px #000,
-                          -2px 0px 0px #000,
-                          0px -2px 0px #000
+                          -2px 2px 0px #000
                         `,
                         imageRendering: "pixelated",
                         letterSpacing: "2px",
@@ -443,44 +445,45 @@ export default function TechShowcaseSection() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-30 flex items-center justify-center pointer-events-auto"
+                  className="absolute z-30 flex items-center justify-center pointer-events-auto rounded-lg"
                   style={{
-                    background: "rgba(0, 0, 0, 0.75)",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: "rgba(0, 0, 0, 0.85)",
                     imageRendering: "pixelated",
-                    border: "4px solid #fff",
-                    borderStyle: "double",
+                    border: "4px double #fff",
                   }}
                 >
-                  <div className="text-center px-4">
+                  <div className="text-center px-2 sm:px-4 max-w-full">
                     <h3
-                      className="text-3xl md:text-4xl font-bold text-white mb-4"
+                      className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4"
                       style={{
                         fontFamily:
                           "var(--font-pixel), 'Press Start 2P', monospace",
                         textShadow: `
-                          3px 3px 0px #000,
-                          -3px -3px 0px #000,
-                          3px -3px 0px #000,
-                          -3px 3px 0px #000,
-                          0px 3px 0px #000,
-                          3px 0px 0px #000,
-                          -3px 0px 0px #000,
-                          0px -3px 0px #000
+                          2px 2px 0px #000,
+                          -2px -2px 0px #000,
+                          2px -2px 0px #000,
+                          -2px 2px 0px #000
                         `,
                         imageRendering: "pixelated",
-                        letterSpacing: "3px",
+                        letterSpacing: "2px",
                         textTransform: "uppercase",
                       }}
                     >
                       {gameStarted ? "PAUSAT" : "DEMO KLAR"}
                     </h3>
                     <p
-                      className="text-lg md:text-xl text-white/90 mb-6"
+                      className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-4 sm:mb-6"
                       style={{
                         fontFamily:
                           "var(--font-pixel), 'Press Start 2P', monospace",
                         textShadow:
-                          "2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000",
+                          "1px 1px 0px #000, -1px -1px 0px #000",
                         imageRendering: "pixelated",
                         letterSpacing: "1px",
                       }}
@@ -488,14 +491,14 @@ export default function TechShowcaseSection() {
                       Vi kan bygga allt från spel till företagslösningar!
                     </p>
                     <p
-                      className="text-base md:text-lg text-white/80"
+                      className="text-xs sm:text-sm md:text-base lg:text-lg text-white/80"
                       style={{
                         fontFamily:
                           "var(--font-pixel), 'Press Start 2P', monospace",
                         textShadow:
-                          "1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000",
+                          "1px 1px 0px #000",
                         imageRendering: "pixelated",
-                        letterSpacing: "1px",
+                        letterSpacing: "0.5px",
                       }}
                     >
                       Tryck på <strong>Spela{hasPlayed ? " igen" : ""}</strong>{" "}
