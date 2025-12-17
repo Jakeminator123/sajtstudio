@@ -150,11 +150,20 @@ export default function AdminPage() {
 
     // Load contacts from API
     try {
+      // Get API key from public env var (if set)
+      // NOTE: This is exposed to client, but per user request "no security needed"
+      const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY;
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      // Add Authorization header if API key is set
+      if (apiKey) {
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      }
+
       const response = await fetch("/api/contact", {
-        headers: {
-          // If CONTACTS_API_KEY is set, this will fail without it
-          // For now, we just try without auth
-        },
+        headers,
       });
 
       if (response.ok) {
