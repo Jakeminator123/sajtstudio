@@ -1,5 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import fs from "fs/promises";
+import path from "path";
+
+// Contact entry type
+interface ContactEntry {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  timestamp: string;
+  source: string;
+}
+
+// Path to contacts data file
+const CONTACTS_FILE = path.join(process.cwd(), "data", "contacts.json");
+
+// Ensure data directory exists and save contact to file
+async function saveContact(contact: Omit<ContactEntry, "id">) {
+  try {
+    // Ensure data directory exists
+    const dataDir = path.dirname(CONTACTS_FILE);
+    await fs.mkdir(dataDir, { recursive: true });
+
+    // Read existing contacts
+    let contacts: ContactEntry[] = [];
+    try {
+      const data = await fs.readFile(CONTACTS_FILE, "utf-8");
+      contacts = JSON.parse(data);
+    } catch {
+      // File doesn't exist yet, start with empty array
+      contacts = [];
+    }
+
+    // Generate unique ID
+    const id = `contact_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Add new contact
+    const newContact: ContactEntry = {
+      id,
+      ...contact,
+    };
+    contacts.push(newContact);
+
+    // Save to file
+    await fs.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2), "utf-8");
+    
+    console.log(`✅ Contact saved to ${CONTACTS_FILE}:`, { id, email: contact.email });
+    return newContact;
+  } catch (error) {
+    console.error("Error saving contact to file:", error);
+    // Don't throw - we don't want to fail the request just because file save failed
+    return null;
+  }
+}
 
 // Lazy initialization - only create Resend instance when API key exists
 const getResend = () => {
@@ -13,12 +67,13 @@ const getResend = () => {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, message } = body;
+    const { name, email, message, source } = body;
 
     // Trim and validate required fields
     const trimmedName = typeof name === "string" ? name.trim() : "";
     const trimmedEmail = typeof email === "string" ? email.trim() : "";
     const trimmedMessage = typeof message === "string" ? message.trim() : "";
+    const contactSource = typeof source === "string" ? source : "website";
 
     // Message is required, but name and email can be optional (use defaults)
     if (!trimmedMessage) {
@@ -42,6 +97,15 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+
+    // Save contact to JSON file (always, regardless of email sending status)
+    await saveContact({
+      name: finalName,
+      email: finalEmail,
+      message: trimmedMessage,
+      timestamp: new Date().toISOString(),
+      source: contactSource,
+    });
 
     // Send email using Resend
     const resend = getResend();
@@ -144,6 +208,51 @@ export async function POST(request: NextRequest) {
     console.error("Error processing contact form:", error);
     return NextResponse.json(
       { error: "Något gick fel. Försök igen senare." },
+      { status: 500 }
+    );
+  }
+}
+
+// GET endpoint to retrieve saved contacts (protected by API key)
+export async function GET(request: NextRequest) {
+  try {
+    // Simple API key protection - require CONTACTS_API_KEY env var
+    const authHeader = request.headers.get("Authorization");
+    const apiKey = process.env.CONTACTS_API_KEY;
+    
+    // If API key is set, require it for access
+    if (apiKey && authHeader !== `Bearer ${apiKey}`) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Read contacts from file
+    try {
+      const data = await fs.readFile(CONTACTS_FILE, "utf-8");
+      const contacts: ContactEntry[] = JSON.parse(data);
+      
+      // Sort by timestamp, newest first
+      contacts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      return NextResponse.json({
+        success: true,
+        count: contacts.length,
+        contacts,
+      });
+    } catch {
+      // File doesn't exist - return empty array
+      return NextResponse.json({
+        success: true,
+        count: 0,
+        contacts: [],
+      });
+    }
+  } catch (error) {
+    console.error("Error reading contacts:", error);
+    return NextResponse.json(
+      { error: "Could not read contacts" },
       { status: 500 }
     );
   }
