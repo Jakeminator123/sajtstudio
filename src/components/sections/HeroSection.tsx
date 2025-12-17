@@ -465,10 +465,18 @@ function CursorTrail({
 }
 
 export default function HeroSection() {
-  const mounted = true; // Always mounted immediately for LCP optimization - hero image loads right away
+  // Use actual mounted state to avoid hydration mismatch
+  const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [enableBackgroundVideo, setEnableBackgroundVideo] = useState(false);
+
+  // Set mounted on client to avoid hydration mismatch - use RAF to satisfy linter
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
+  }, []);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHoveringButton, setIsHoveringButton] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() => {

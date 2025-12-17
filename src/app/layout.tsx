@@ -144,8 +144,8 @@ export default function RootLayout({
   );
   const enableGlobalErrorHandler = globalHandlerFlag ?? (isProd ? true : false);
   const didChatbotFlag = parseEnvBool(process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT);
-  // Default: disabled unless explicitly enabled. This keeps Lighthouse clean and avoids heavy third‑party work by default.
-  const shouldLoadDidChatbot = didChatbotFlag ?? false;
+  // Default: enabled in dev for debugging, still opt-in for production to protect LCP.
+  const shouldLoadDidChatbot = didChatbotFlag ?? (isProd ? false : true);
 
   return (
     <html

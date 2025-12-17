@@ -92,7 +92,6 @@ ENV/
 INPUT_DOC_FOR_CURSOR/
 *.download
 
-# Lighthouse reports
-.lhr*.json
-.lighthouse-report.json
+node_modules
+
 

@@ -18,7 +18,11 @@ export default function TechShowcaseSection() {
   const pacmanRef = useRef<HTMLDivElement>(null);
   const matrixVideoRef = useRef<HTMLVideoElement>(null);
   // Use larger margin to trigger earlier when scrolling into view
-  const isInView = useInView(sectionRef, { once: true, margin: "0px" });
+  const isInView = useInView(sectionRef, {
+    once: true,
+    // Trigger earlier so mobile users get the animation before it reaches viewport
+    margin: "600px 0px -200px 0px",
+  });
   const mounted = useMounted();
   const [showTechText, setShowTechText] = useState(false);
   const [showPacman, setShowPacman] = useState(false);
@@ -265,8 +269,8 @@ export default function TechShowcaseSection() {
     // Larger dimensions for 4K screens - uses viewport units with larger max values
     const containerDimensions =
       variant === "overlay"
-        ? { width: "min(92vw, 1400px)", height: "min(88vh, 1000px)" }
-        : { width: "min(95vw, 1200px)", height: "min(85vh, 950px)" };
+        ? { width: "min(94vw, 1100px)", height: "min(88vh, 900px)" }
+        : { width: "min(96vw, 1100px)", height: "min(85vh, 880px)" };
 
     return (
       <motion.div
@@ -274,15 +278,19 @@ export default function TechShowcaseSection() {
         ref={pacmanRef}
         initial={
           variant === "overlay"
-            ? { opacity: 0, scale: 0.85, y: 20, x: "-6vw" }
-            : { opacity: 0, scale: 0.5, rotate: -180, x: "-6vw" }
+            ? { opacity: 0, scale: 0.85, y: 20, x: 0 }
+            : { opacity: 0, scale: 0.5, rotate: -180, x: 0 }
         }
-        animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, x: "-6vw" }}
+        animate={{ opacity: 1, scale: 1, rotate: 0, y: 0, x: 0 }}
         className={
           variant === "overlay"
             ? "relative w-full max-w-5xl mx-auto"
             : "relative mx-auto [scroll-margin-top:50vh]"
         }
+        style={{
+          maxWidth: "min(100vw, 1100px)",
+          width: "100%",
+        }}
       >
         <motion.div
           className="text-center mb-8 md:mb-12 px-4 max-w-4xl mx-auto"
@@ -342,7 +350,7 @@ export default function TechShowcaseSection() {
           }}
         >
           <div
-            className="absolute inset-0 -m-4 border-8 border-black rounded-lg pointer-events-none"
+            className="absolute inset-0 border-8 border-black rounded-lg pointer-events-none"
             style={{
               imageRendering: "pixelated",
               boxShadow: `
