@@ -143,7 +143,9 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_GLOBAL_ERROR_HANDLER
   );
   const enableGlobalErrorHandler = globalHandlerFlag ?? (isProd ? true : false);
-  const didChatbotFlag = parseEnvBool(process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT);
+  const didChatbotFlag = parseEnvBool(
+    process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT
+  );
   // Default: enabled in dev for debugging, still opt-in for production to protect LCP.
   const shouldLoadDidChatbot = didChatbotFlag ?? (isProd ? false : true);
 
@@ -202,7 +204,8 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Preconnect for Google Fonts - with proper crossorigin */}
+        {/* Preconnect budget: keep under Lighthouse 4-connection warning */}
+        {/* 1 & 2: Google Fonts */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -213,7 +216,7 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Preconnect for D-ID chatbot resources (only when enabled) */}
+        {/* 3+: D-ID chatbot resources (only when enabled) */}
         {shouldLoadDidChatbot && (
           <>
             <link
@@ -221,15 +224,11 @@ export default function RootLayout({
               href="https://agent.d-id.com"
               crossOrigin="anonymous"
             />
+            {/* The remaining origins are lower priority; dns-prefetch keeps latency low without spending preconnect budget */}
+            <link rel="dns-prefetch" href="https://agents-results.d-id.com" />
             <link
-              rel="preconnect"
-              href="https://agents-results.d-id.com"
-              crossOrigin="anonymous"
-            />
-            <link
-              rel="preconnect"
+              rel="dns-prefetch"
               href="https://create-images-results.d-id.com"
-              crossOrigin="anonymous"
             />
             <link rel="dns-prefetch" href="https://api.d-id.com" />
           </>

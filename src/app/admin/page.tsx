@@ -5,6 +5,13 @@ import { useState, useEffect, FormEvent } from "react";
 /**
  * Admin Dashboard - Simple statistics and contact message viewer
  *
+ * 📌 Naming cheat sheet so "contact" vs "kontakt" does not get confusing:
+ * - `/kontakt`  → the public-facing contact page (Swedish URL)
+ * - `/contact`  → the API endpoint (`src/app/api/contact/route.ts`) for form submissions
+ * - `CONTACTS_API_KEY` (server only) protects GET /api/contact when set
+ * - `NEXT_PUBLIC_CONTACTS_API_KEY` (client) mirrors the same key so this dashboard
+ *    can send the Authorization header from the browser
+ *
  * Login credentials: admin / admin (hardcoded, no security needed per user request)
  *
  * Features:
@@ -151,7 +158,9 @@ export default function AdminPage() {
     // Load contacts from API
     try {
       // Get API key from public env var (if set)
-      // NOTE: This is exposed to client, but per user request "no security needed"
+      // NOTE: This is exposed to client, but per user request "no security needed".
+      // CONTACTS_API_KEY protects the API server-side, NEXT_PUBLIC_CONTACTS_API_KEY
+      // lets this dashboard send the same key from the browser.
       const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY;
       const headers: HeadersInit = {
         "Content-Type": "application/json",

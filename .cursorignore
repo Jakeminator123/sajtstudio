@@ -54,4 +54,6 @@ $RECYCLE.BIN/
 .idea/
 .preprompt_history.json
 INPUT_DOC_FOR_CURSOR/
+cleaner.py
+cleaner2.py
 
