@@ -9,7 +9,8 @@ export const siteConfig = {
   // Grundläggande information
   name: "Sajtstudio",
   tagline: "Modern webbdesign och AI-generering av webbplatser",
-  description: "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling och AI-drivna verktyg för att skapa professionella sajter på minuter.",
+  description:
+    "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling och AI-drivna verktyg för att skapa professionella sajter på minuter.",
 
   // Kontaktinformation
   contact: {
@@ -21,7 +22,8 @@ export const siteConfig = {
 
   // SEO
   seo: {
-    defaultTitle: "Sajtstudio – Modern webbdesign och AI-generering av webbplatser",
+    defaultTitle:
+      "Sajtstudio – Modern webbdesign och AI-generering av webbplatser",
     defaultDescription:
       "Skräddarsydda, toppmoderna hemsidor och AI-genererade webbplatser för framgångsrika företag. Vi erbjuder både skräddarsydd webbutveckling med React och Next.js, samt AI-drivna verktyg för att skapa professionella sajter på minuter. Perfekt för företag som vill ha en unik hemsida eller snabbt generera en webbplats med vår AI-plattform SajtMaskin.",
     siteUrl: "https://www.sajtstudio.se",
@@ -32,7 +34,7 @@ export const siteConfig = {
    * Navigation struktur
    *
    * Navigation består av två typer av länkar:
-   * 1. Page links (nav.links): Direkta länkar till sidor (/portfolio, /contact)
+   * 1. Page links (nav.links): Direkta länkar till sidor (/portfolio, /kontakt)
    *    - Visas på alla sidor i navigationen
    *    - Används för att navigera mellan huvudsidor
    *
@@ -50,7 +52,7 @@ export const siteConfig = {
     links: [
       { href: "/", label: "Hem" },
       { href: "/portfolio", label: "Portfolio" },
-      { href: "/contact", label: "Kontakt" },
+      { href: "/kontakt", label: "Kontakt" },
     ],
     // Anchor links - visas endast på startsidan (/)
     // Måste matcha id-attribut på motsvarande sektioner i page.tsx

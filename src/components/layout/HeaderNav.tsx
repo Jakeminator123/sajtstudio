@@ -18,7 +18,7 @@
  * 1. Page Links (always visible):
  *    - Hem (/)
  *    - Portfolio (/portfolio)
- *    - Kontakt (/contact)
+ *    - Kontakt (/kontakt)
  *
  * 2. Anchor Links (included in nav, work from any page):
  *    - Tjänster (/#tjanster) - scrolls to ServicesSection on homepage

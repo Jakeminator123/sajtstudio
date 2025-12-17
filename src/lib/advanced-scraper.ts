@@ -54,7 +54,8 @@ const DEFAULT_OPTIONS: CrawlOptions = {
     "/produkter",
     "/products",
     "/kontakt",
-    "/contact",
+    // NOTE: keep "/contact" out to avoid encouraging legacy paths in audits/scrapes.
+    // The public contact page is "/kontakt".
     "/priser",
     "/pricing",
     "/portfolio",

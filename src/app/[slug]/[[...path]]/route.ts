@@ -9,9 +9,13 @@ const EXTERNAL_BASE_URL = "https://";
 const EXTERNAL_DOMAIN_SUFFIX = ".vusercontent.net";
 
 // List of reserved routes that should not be proxied
+// NOTE: These routes have priority over the catch-all slug proxy.
+// Add any new page routes here to prevent them from being proxied.
 const RESERVED_ROUTES = [
   "api",
-  "contact",
+  "admin",
+  "contact", // Old contact page - kept for backwards compatibility (returns 404 or redirect)
+  "kontakt", // New contact page
   "portfolio",
   "generated",
   "sajtgranskning",
@@ -21,6 +25,21 @@ const RESERVED_ROUTES = [
   "_next",
   "favicon.ico",
 ];
+
+const slugProxyDisabled = (() => {
+  const flag = process.env.SLUGS;
+  if (!flag) {
+    return false;
+  }
+  const normalized = flag.trim().toLowerCase();
+  if (["n", "no", "off", "0", "false"].includes(normalized)) {
+    return true;
+  }
+  if (["y", "yes", "on", "1", "true"].includes(normalized)) {
+    return false;
+  }
+  return false;
+})();
 
 /**
  * Optional catch-all route handler for generated sites
@@ -36,6 +55,10 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const { slug, path } = resolvedParams;
+
+    if (slugProxyDisabled) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
 
     // Early validation - return 404 if slug is missing or invalid
     if (!slug || typeof slug !== "string" || slug.trim() === "") {
@@ -70,7 +93,8 @@ export async function GET(
       headers: {
         "User-Agent": request.headers.get("user-agent") || "Mozilla/5.0",
         Accept: request.headers.get("accept") || "*/*",
-        "Accept-Language": request.headers.get("accept-language") || "sv-SE,sv;q=0.9",
+        "Accept-Language":
+          request.headers.get("accept-language") || "sv-SE,sv;q=0.9",
         Referer: `${EXTERNAL_BASE_URL}${slug}${EXTERNAL_DOMAIN_SUFFIX}`,
       },
       signal: AbortSignal.timeout(30000),
@@ -80,10 +104,9 @@ export async function GET(
       if (response.status === 404) {
         return new NextResponse("Site not found", { status: 404 });
       }
-      return new NextResponse(
-        `External site error: ${response.status}`,
-        { status: response.status }
-      );
+      return new NextResponse(`External site error: ${response.status}`, {
+        status: response.status,
+      });
     }
 
     // Get the content
@@ -94,7 +117,10 @@ export async function GET(
     if (contentType.includes("text/html")) {
       const origin = request.nextUrl.origin;
       const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const escapedSuffix = EXTERNAL_DOMAIN_SUFFIX.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedSuffix = EXTERNAL_DOMAIN_SUFFIX.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
 
       // Replace absolute URLs pointing to the external domain
       const externalUrlPattern = new RegExp(
@@ -135,7 +161,10 @@ export async function GET(
         return new NextResponse("Request timeout", { status: 504 });
       }
       // Handle fetch errors (network issues, DNS failures, etc.)
-      if (error.message.includes("fetch") || error.message.includes("network")) {
+      if (
+        error.message.includes("fetch") ||
+        error.message.includes("network")
+      ) {
         return new NextResponse("External site unavailable", { status: 503 });
       }
     }
@@ -153,6 +182,10 @@ export async function POST(
   try {
     const resolvedParams = await params;
     const { slug, path } = resolvedParams;
+
+    if (slugProxyDisabled) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
 
     // Early validation - return 404 if slug is missing or invalid
     if (!slug || typeof slug !== "string" || slug.trim() === "") {
@@ -180,7 +213,8 @@ export async function POST(
     const response = await fetch(targetUrl, {
       method: "POST",
       headers: {
-        "Content-Type": request.headers.get("content-type") || "application/json",
+        "Content-Type":
+          request.headers.get("content-type") || "application/json",
         "User-Agent": request.headers.get("user-agent") || "Mozilla/5.0",
         Referer: `${EXTERNAL_BASE_URL}${slug}${EXTERNAL_DOMAIN_SUFFIX}`,
       },
@@ -206,7 +240,10 @@ export async function POST(
         return new NextResponse("Request timeout", { status: 504 });
       }
       // Handle fetch errors (network issues, DNS failures, etc.)
-      if (error.message.includes("fetch") || error.message.includes("network")) {
+      if (
+        error.message.includes("fetch") ||
+        error.message.includes("network")
+      ) {
         return new NextResponse("External site unavailable", { status: 503 });
       }
     }

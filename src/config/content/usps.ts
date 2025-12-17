@@ -36,7 +36,7 @@ export const uspContent = {
   cta: {
     text: 'Låt oss bygga din nästa hemsida',
     buttonText: 'Starta ditt projekt →',
-    href: '/contact',
+    href: '/kontakt',
   },
 
   tagline: 'Sajter som levererar. Byggda med data, formade för resultat.',

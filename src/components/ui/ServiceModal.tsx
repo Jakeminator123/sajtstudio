@@ -177,12 +177,12 @@ export default function ServiceModal({
                 </motion.div>
 
                 {/* CTA */}
-                {/* Service-specific CTA: Links to /contact page */}
+                {/* Service-specific CTA: Links to /kontakt page */}
                 <motion.a
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
-                  href="/contact"
+                  href="/kontakt"
                   className="inline-block px-8 py-4 bg-accent text-white font-bold text-lg hover:bg-accent-hover transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
