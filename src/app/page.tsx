@@ -119,6 +119,17 @@ const OpticScrollShowcase = dynamic(
   }
 );
 
+const TeamSection = dynamic(
+  () =>
+    import("@/components/sections/TeamSection").catch(() => {
+      return { default: () => <SectionSkeleton /> };
+    }),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: false, // Client-only: uses Framer Motion transforms
+  }
+);
+
 export default function Home() {
   const enablePrefetch =
     process.env.NEXT_PUBLIC_ENABLE_PREFETCH === "true";
@@ -188,6 +199,11 @@ export default function Home() {
         {/* About Us Video Section */}
         <div className="content-visibility-auto">
           <AboutUsVideoSection />
+        </div>
+
+        {/* Team Section - About the founders */}
+        <div id="teamet" className="content-visibility-auto">
+          <TeamSection />
         </div>
 
         {/* Big CTA - Fantasy style */}

@@ -116,16 +116,38 @@ const nextConfig: NextConfig = {
       {
         key: "Content-Security-Policy",
         value: [
+          // Default: only allow same-origin
           "default-src 'self'",
-          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com https://*.launchdarkly.com https://app.launchdarkly.com", // unsafe-eval needed for D-ID, unsafe-inline for Next.js inline scripts, LaunchDarkly, blob for inlined workers
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // unsafe-inline needed for Next.js
-          "img-src 'self' data: https: blob:", // Allow images from anywhere (needed for D-ID and external content)
+          
+          // Scripts: unsafe-inline required for Next.js hydration, unsafe-eval for D-ID chatbot
+          // TODO: Consider nonce-based CSP in future to remove unsafe-inline
+          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com",
+          
+          // Styles: unsafe-inline required for Next.js styled-jsx and emotion
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          
+          // Images: allow data URIs for inline images, https for external
+          "img-src 'self' data: https: blob:",
+          
+          // Fonts: Google Fonts
           "font-src 'self' data: https://fonts.gstatic.com",
-          // NOTE: Sentry browser SDK sends envelopes to this ingest endpoint.
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://raw.githack.com https://cdn.jsdelivr.net wss://agent.d-id.com https://*.datadoghq.com https://browser-intake-us1-datadoghq.com https://browser-intake-us3-datadoghq.com https://browser-intake-us5-datadoghq.com https://browser-intake-eu1-datadoghq.com https://browser-intake-ap1-datadoghq.com https://*.launchdarkly.com https://app.launchdarkly.com https://clientsdk.launchdarkly.com https://api-js.mixpanel.com https://api.mixpanel.com https://o226878.ingest.us.sentry.io", // WebSocket for D-ID, raw.githack.com for Three.js HDR files, Datadog RUM (all regions), LaunchDarkly, Mixpanel, jsDelivr for react-pdf font resolver, Sentry ingest
+          
+          // API connections: D-ID chatbot + required CDNs
+          // Note: D-ID agent internally uses Datadog/Mixpanel/LaunchDarkly but those are optional
+          // cdn.jsdelivr.net is required for unicode font resolver in D-ID's Three.js
+          // raw.githack.com is required for Three.js HDR environment files
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com",
+          
+          // Media: self and D-ID for avatar videos
           "media-src 'self' https://agents-results.d-id.com blob:",
+          
+          // Frames: D-ID chatbot iframe
           "frame-src 'self' https://agent.d-id.com",
+          
+          // Workers: blob for inlined workers
           "worker-src 'self' blob:",
+          
+          // Security hardening
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",

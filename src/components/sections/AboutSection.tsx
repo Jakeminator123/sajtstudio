@@ -1,7 +1,9 @@
 "use client";
 
 import WordReveal from "@/components/animations/WordReveal";
+import BrandReveal from "@/components/animations/BrandReveal";
 import { useMounted } from "@/hooks/useMounted";
+import { useContentSection } from "@/hooks/useContent";
 import {
   MotionValue,
   motion,
@@ -217,6 +219,8 @@ function GlowingOrb({
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
+  const { getValue } = useContentSection("about");
+  const aboutTitle = getValue("T5", "Vi är Sajtstudio");
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -440,129 +444,58 @@ export default function AboutSection() {
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="text-center"
         >
-          {/* Main heading with enhanced styling - sharper, more focused */}
+          {/* Main heading with beautiful reveal animation - NOT scroll-dependent */}
           <motion.h2
             className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-12 leading-none"
-            style={
-              mounted
-                ? {
-                    // Reduced glow for sharper text - smaller, more focused shadows
-                    textShadow:
-                      "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
-                    opacity: textOpacity,
-                    scale: textScale,
-                    filter: textBlur,
-                    WebkitFontSmoothing: "antialiased",
-                    MozOsxFontSmoothing: "grayscale",
-                  }
-                : {
-                    textShadow:
-                      "0 0 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 102, 255, 0.2), 2px 2px 4px rgba(0, 0, 0, 0.5)",
-                    opacity: 1,
-                    scale: 1,
-                    filter: "blur(0px)",
-                    WebkitFontSmoothing: "antialiased",
-                    MozOsxFontSmoothing: "grayscale",
-                  }
-            }
-            suppressHydrationWarning
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <WordReveal
-              text="Vi är Sajtstudio"
-              className="bg-gradient-to-r from-white via-accent to-tertiary bg-clip-text text-transparent"
-            />
+            <BrandReveal text={aboutTitle} />
           </motion.h2>
 
           <div className="max-w-5xl mx-auto space-y-12">
-            {/* Tagline - sharper, cleaner */}
+            {/* Tagline - sharper, cleaner - NO scroll-dependent animation for better mobile perf */}
             <motion.p
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight"
+              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight text-white"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              style={
-                mounted
-                  ? {
-                      opacity: textOpacity,
-                      scale: textScale,
-                      filter: textBlur,
-                      WebkitFontSmoothing: "antialiased",
-                      MozOsxFontSmoothing: "grayscale",
-                      textRendering: "optimizeLegibility",
-                    }
-                  : {
-                      opacity: 1,
-                      scale: 1,
-                      filter: "blur(0px)",
-                      WebkitFontSmoothing: "antialiased",
-                      MozOsxFontSmoothing: "grayscale",
-                      textRendering: "optimizeLegibility",
-                    }
-              }
-              suppressHydrationWarning
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.2, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+                textRendering: "optimizeLegibility",
+              }}
             >
-              <WordReveal
-                text="Din kreativa partner bakom framtidens digitala upplevelser"
-                delay={0.3}
-                staggerDelay={0.04}
-                className="text-white"
-              />
+              Din kreativa partner bakom framtidens digitala upplevelser
             </motion.p>
 
-            {/* Main description */}
+            {/* Main description - simplified animation */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.8, duration: 0.6 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed max-w-4xl mx-auto font-medium"
-              style={
-                mounted
-                  ? {
-                      opacity: textOpacity,
-                      scale: textScale,
-                      filter: textBlur,
-                      WebkitFontSmoothing: "antialiased",
-                      MozOsxFontSmoothing: "grayscale",
-                      textRendering: "optimizeLegibility",
-                    }
-                  : {
-                      opacity: 1,
-                      scale: 1,
-                      filter: "blur(0px)",
-                      WebkitFontSmoothing: "antialiased",
-                      MozOsxFontSmoothing: "grayscale",
-                      textRendering: "optimizeLegibility",
-                    }
-              }
-              suppressHydrationWarning
+              style={{
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+                textRendering: "optimizeLegibility",
+              }}
             >
               Vi hjälper företag att få riktigt vassa hemsidor – snabbare och
               smartare.
             </motion.p>
 
-            {/* Extended description */}
+            {/* Extended description - simplified animation for mobile */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 1, duration: 0.6 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.6, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
               className="text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto space-y-6"
-              style={
-                mounted
-                  ? {
-                      opacity: textOpacity,
-                      scale: textScale,
-                      filter: textBlur,
-                    }
-                  : {
-                      opacity: 1,
-                      scale: 1,
-                      filter: "blur(0px)",
-                    }
-              }
-              suppressHydrationWarning
             >
               <p>
                 Genom att kombinera{" "}
@@ -820,57 +753,59 @@ export default function AboutSection() {
         </motion.div>
       </div>
 
-      {/* Morphing blob that travels around viewport and becomes floor/ceiling */}
+      {/* Ambient glow effect - lightweight CSS-based replacement for heavy SVG blob */}
       {mounted && (
         <motion.div
-          className="fixed inset-0 pointer-events-none z-[100]"
-          style={{
-            opacity: finalBlobOpacity,
-          }}
-          suppressHydrationWarning
+          className="absolute inset-0 pointer-events-none z-[5] overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
         >
+          {/* Top-right accent glow */}
           <motion.div
-            className="absolute w-[600px] h-[600px]"
-            style={{
-              left: blobX,
-              top: blobY,
-              x: "-50%",
-              y: "-50%",
-              scale: blobScale,
+            className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] rounded-full 
+                       bg-gradient-radial from-blue-500/20 via-blue-600/10 to-transparent blur-3xl"
+            animate={{
+              x: [0, 30, 0],
+              y: [0, -20, 0],
+              scale: [1, 1.1, 1],
             }}
             transition={{
-              type: "spring",
-              stiffness: 100,
-              damping: 15,
-              mass: 1,
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
-            suppressHydrationWarning
-          >
-            <svg
-              width="100%"
-              height="100%"
-              viewBox="0 0 200 200"
-              preserveAspectRatio="xMidYMid meet"
-              suppressHydrationWarning
-            >
-              <motion.path
-                d={blobPath}
-                fill="url(#blobGradient)"
-                style={{
-                  filter: blobBlurString,
-                }}
-                suppressHydrationWarning
-              />
-              <defs>
-                <radialGradient id="blobGradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="rgba(255, 0, 51, 0.9)" />
-                  <stop offset="40%" stopColor="rgba(255, 0, 51, 0.6)" />
-                  <stop offset="70%" stopColor="rgba(255, 0, 51, 0.3)" />
-                  <stop offset="100%" stopColor="rgba(255, 0, 51, 0)" />
-                </radialGradient>
-              </defs>
-            </svg>
-          </motion.div>
+          />
+          {/* Bottom-left rose glow - subtle, not aggressive red */}
+          <motion.div
+            className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full 
+                       bg-gradient-radial from-rose-500/15 via-rose-600/5 to-transparent blur-3xl"
+            animate={{
+              x: [0, -20, 0],
+              y: [0, 30, 0],
+              scale: [1.1, 1, 1.1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          {/* Center purple accent */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                       w-[400px] h-[400px] rounded-full 
+                       bg-gradient-radial from-purple-500/10 via-transparent to-transparent blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.5, 0.8, 0.5],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
         </motion.div>
       )}
 

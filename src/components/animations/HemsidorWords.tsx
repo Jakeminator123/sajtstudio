@@ -54,7 +54,6 @@ export default function HemsidorWords({
       style={{
         y: y ?? 0,
         opacity: typeof opacity === 'number' ? opacity : (opacity?.get?.() ?? 1),
-        willChange: "transform, opacity",
       }}
       suppressHydrationWarning
     >
@@ -82,7 +81,6 @@ export default function HemsidorWords({
             style={{
               display: "inline-block",
               transformStyle: "preserve-3d",
-              willChange: "transform, opacity",
             }}
           >
             {/* Main letter with animated gradient */}

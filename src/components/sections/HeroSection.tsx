@@ -8,6 +8,26 @@ import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+// Content structure from CMS
+export interface HeroContent {
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaSecondary: string;
+  bgImage: string;
+  bgVideo: string;
+}
+
+// Default content for backwards compatibility
+const defaultContent: HeroContent = {
+  title: "Hemsidor som betyder någonting",
+  subtitle: "Vi bygger digitala upplevelser som driver resultat",
+  ctaText: "Starta projekt",
+  ctaSecondary: "BYGG DIN SAJT NU!",
+  bgImage: "/images/hero/hero-background.webp",
+  bgVideo: "/videos/background.mp4",
+};
+
 // Magnetic button component that follows mouse
 function MagneticButton({
   href,
@@ -400,8 +420,6 @@ function AnimatedText({
         opacity: opacity ?? 1,
         scale: scale ?? 1,
         display: "inline-block",
-        // Only use will-change when animating to avoid unnecessary repaints
-        willChange: shouldReduceMotion ? "auto" : "transform, opacity",
       }}
     >
       {text}
@@ -464,7 +482,7 @@ function CursorTrail({
   );
 }
 
-export default function HeroSection() {
+export default function HeroSection({ content = defaultContent }: { content?: HeroContent }) {
   // Use actual mounted state to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -803,7 +821,7 @@ export default function HeroSection() {
                 className="w-full h-full object-cover"
                 style={{ filter: "brightness(0.8) contrast(0.9)" }}
               >
-                <source src="/videos/background.mp4" type="video/mp4" />
+                <source src={content.bgVideo} type="video/mp4" />
               </video>
               {/* Fade overlay for smoother blend */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
@@ -875,11 +893,11 @@ export default function HeroSection() {
                     ? "/images/backgrounds/city-background-sunny.webp"
                     : "/images/hero/hero-background.webp"
                 }
-                alt=""
+                alt="Stadsbild i skymning - Sajtstudio hero bakgrund"
                 fill
-                sizes="(max-width: 1920px) 100vw, 1920px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1920px"
                 className="object-cover"
-                loading="eager" // ensures LCP image is loaded immediately
+                loading="eager"
                 priority
                 fetchPriority="high"
               />
@@ -1301,24 +1319,21 @@ export default function HeroSection() {
                 />
               )}
               <span className="relative z-10 flex items-center gap-3 font-black tracking-wide">
-                <motion.span
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  🔍
-                </motion.span>
                 Utvärdera din sajt
-                <motion.span
-                  className="text-xl"
-                  animate={{ x: [0, 8, 0], scale: [1, 1.2, 1] }}
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{ x: [0, 5, 0] }}
                   transition={{
-                    duration: 1,
+                    duration: 1.2,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                 >
-                  →
-                </motion.span>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </motion.svg>
               </span>
             </MagneticButton>
 
@@ -1359,33 +1374,24 @@ export default function HeroSection() {
                 />
               )}
               <span className="relative z-10 flex items-center gap-3">
-                <motion.span
+                {content.ctaSecondary}
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                   animate={{
-                    rotate: [0, -10, 10, 0],
-                    scale: [1, 1.2, 1.2, 1],
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatDelay: 1.5,
-                  }}
-                >
-                  🚀
-                </motion.span>
-                BYGG DIN SAJT NU!
-                <motion.span
-                  animate={{
+                    x: [0, 3, 0],
                     y: [0, -3, 0],
-                    rotate: [0, 20, 0],
                   }}
                   transition={{
-                    duration: 0.8,
+                    duration: 1,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                 >
-                  ↗
-                </motion.span>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </motion.svg>
               </span>
             </MagneticButton>
           </motion.div>

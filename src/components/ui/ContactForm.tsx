@@ -77,6 +77,7 @@ export default function ContactForm() {
           name: formState.name.trim(),
           email: formState.email.trim(),
           message: formState.message.trim(),
+          source: "kontakt", // Identifies which form submitted the message
         }),
       });
 

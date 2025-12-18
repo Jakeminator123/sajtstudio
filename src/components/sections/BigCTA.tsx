@@ -164,7 +164,7 @@ export default function BigCTA() {
           >
             <Image
               src="/images/contact_phone.webp"
-              alt=""
+              alt="Smartphone som visar Sajtstudios kontaktformulär"
               width={240}
               height={300}
               className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(0,102,255,0.5)]"
@@ -204,7 +204,7 @@ export default function BigCTA() {
           >
             <Image
               src="/images/contact_phone.webp"
-              alt=""
+              alt="Kontaktikon"
               width={40}
               height={50}
               className="object-contain"
