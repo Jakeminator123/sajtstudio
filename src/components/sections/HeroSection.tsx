@@ -420,8 +420,6 @@ function AnimatedText({
         opacity: opacity ?? 1,
         scale: scale ?? 1,
         display: "inline-block",
-        // Only use will-change when animating to avoid unnecessary repaints
-        willChange: shouldReduceMotion ? "auto" : "transform, opacity",
       }}
     >
       {text}

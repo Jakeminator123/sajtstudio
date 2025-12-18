@@ -76,6 +76,36 @@ Sajtstudio uses a SQLite-based CMS for managing homepage content. Content is org
 | V5 | video | Phone ringing video |
 | V6 | video | Portfolio explosion video |
 
+### Team Section
+| Key | Type | Description |
+|-----|------|-------------|
+| T52 | text | Team section heading |
+| T53 | text | Team intro text |
+| T54 | text | Team member 1 name |
+| T55 | text | Team member 2 name |
+| T56 | text | Team member 3 name |
+| T57 | text | Team member 1 role |
+| T58 | text | Team member 2 role |
+| T59 | text | Team member 3 role |
+| T60 | text | Team member 1 description |
+| T61 | text | Team member 2 description |
+| T62 | text | Team member 3 description |
+| T63 | text | Team outro/CTA text |
+| T64 | text | Team member 1 LinkedIn URL |
+| T65 | text | Team member 2 LinkedIn URL |
+| T66 | text | Team member 3 LinkedIn URL |
+| B16 | image | Team member 1 profile image |
+| B17 | image | Team member 2 profile image |
+| B18 | image | Team member 3 profile image |
+
+### Background Images
+| Key | Type | Description |
+|-----|------|-------------|
+| B12 | image | 8-bit background |
+| B13 | image | Section background (dark) |
+| B14 | image | Section background (light) |
+| B15 | image | City background (light) |
+
 ## Admin Access
 
 Access the admin panel at `/admin`.

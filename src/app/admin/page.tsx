@@ -46,7 +46,26 @@ interface VisitorStats {
   lastUpdated: string;
 }
 
-type TabType = "overview" | "contacts" | "content";
+type TabType = "overview" | "contacts" | "content" | "audits";
+
+interface SavedAudit {
+  id: string;
+  filename: string;
+  domain: string | null;
+  company: string | null;
+  type: "audit" | "recommendation";
+  timestamp: string;
+  scores: {
+    seo?: number;
+    ux?: number;
+    performance?: number;
+    overall?: number;
+  };
+  cost: {
+    sek: number;
+    tokens: number;
+  };
+}
 
 // Track page view on client side
 function trackPageView() {
@@ -149,6 +168,8 @@ export default function AdminPage() {
   const [editValue, setEditValue] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [contentFilter, setContentFilter] = useState<string>("all");
+  const [audits, setAudits] = useState<SavedAudit[]>([]);
+  const [auditsLoading, setAuditsLoading] = useState(false);
 
   useEffect(() => {
     trackPageView();
@@ -208,8 +229,51 @@ export default function AdminPage() {
       console.error("Failed to load content");
     }
 
+    // Load audits
+    try {
+      const response = await fetch("/api/audits");
+      if (response.ok) {
+        const data = await response.json();
+        setAudits(data.audits || []);
+      }
+    } catch {
+      console.error("Failed to load audits");
+    }
+
     setLoading(false);
   }, []);
+
+  const loadAudits = async () => {
+    setAuditsLoading(true);
+    try {
+      const response = await fetch("/api/audits");
+      if (response.ok) {
+        const data = await response.json();
+        setAudits(data.audits || []);
+      }
+    } catch {
+      console.error("Failed to load audits");
+    }
+    setAuditsLoading(false);
+  };
+
+  const handleDeleteAudit = async (id: string) => {
+    if (!confirm("Är du säker på att du vill radera denna audit?")) return;
+
+    try {
+      const response = await fetch("/api/audits", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        setAudits((prev) => prev.filter((a) => a.id !== id));
+      }
+    } catch {
+      console.error("Failed to delete audit");
+    }
+  };
 
   const handleEditContent = (entry: ContentEntry) => {
     setEditingKey(entry.key);
@@ -354,7 +418,7 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
-          {(["overview", "contacts", "content"] as TabType[]).map((tab) => (
+          {(["overview", "contacts", "content", "audits"] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -367,6 +431,7 @@ export default function AdminPage() {
               {tab === "overview" && "Översikt"}
               {tab === "contacts" && `Meddelanden (${contacts.length})`}
               {tab === "content" && `Innehåll (${content.length})`}
+              {tab === "audits" && `Audits (${audits.length})`}
             </button>
           ))}
         </div>
@@ -630,9 +695,153 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Audits Tab */}
+        {activeTab === "audits" && (
+          <div className="bg-gray-800 rounded-xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">📊 Sparade Audits</h2>
+              <button
+                onClick={loadAudits}
+                disabled={auditsLoading}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {auditsLoading ? "Laddar..." : "🔄 Uppdatera"}
+              </button>
+            </div>
+
+            {audits.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">
+                Inga sparade audits ännu. Kör en audit på{" "}
+                <a href="/utvardera" className="text-blue-400 hover:underline">
+                  /utvardera
+                </a>{" "}
+                för att komma igång.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {/* Summary stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-blue-400">{audits.length}</p>
+                    <p className="text-gray-400 text-sm">Totalt</p>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-green-400">
+                      {audits.filter((a) => a.type === "audit").length}
+                    </p>
+                    <p className="text-gray-400 text-sm">Webbaudits</p>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-purple-400">
+                      {audits.filter((a) => a.type === "recommendation").length}
+                    </p>
+                    <p className="text-gray-400 text-sm">Rekommendationer</p>
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-amber-400">
+                      {audits.reduce((sum, a) => sum + (a.cost?.sek || 0), 0).toFixed(2)} kr
+                    </p>
+                    <p className="text-gray-400 text-sm">Total kostnad</p>
+                  </div>
+                </div>
+
+                {/* Audits list */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-gray-400 text-left border-b border-gray-700">
+                        <th className="pb-3 font-medium">Typ</th>
+                        <th className="pb-3 font-medium">Domän/Företag</th>
+                        <th className="pb-3 font-medium">Datum</th>
+                        <th className="pb-3 font-medium">Score</th>
+                        <th className="pb-3 font-medium">Kostnad</th>
+                        <th className="pb-3 font-medium">Åtgärder</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {audits.map((audit) => (
+                        <tr key={audit.id} className="hover:bg-gray-700/30">
+                          <td className="py-3">
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                audit.type === "audit"
+                                  ? "bg-blue-500/20 text-blue-400"
+                                  : "bg-purple-500/20 text-purple-400"
+                              }`}
+                            >
+                              {audit.type === "audit" ? "🔍 Audit" : "💡 Rekommen."}
+                            </span>
+                          </td>
+                          <td className="py-3">
+                            <span className="font-medium text-white">
+                              {audit.domain || audit.company || "—"}
+                            </span>
+                          </td>
+                          <td className="py-3 text-gray-400">
+                            {new Date(audit.timestamp).toLocaleDateString("sv-SE")}
+                          </td>
+                          <td className="py-3">
+                            {audit.scores?.overall !== undefined ? (
+                              <span
+                                className={`font-bold ${
+                                  audit.scores.overall >= 70
+                                    ? "text-green-400"
+                                    : audit.scores.overall >= 50
+                                    ? "text-yellow-400"
+                                    : "text-red-400"
+                                }`}
+                              >
+                                {audit.scores.overall}/100
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">—</span>
+                            )}
+                          </td>
+                          <td className="py-3 text-gray-400">
+                            {audit.cost?.sek?.toFixed(2) || "0.00"} kr
+                          </td>
+                          <td className="py-3">
+                            <div className="flex gap-2">
+                              <a
+                                href={`/audits/${audit.id}.json`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                                title="Visa JSON"
+                              >
+                                📄 JSON
+                              </a>
+                              <a
+                                href={`/audits/${audit.id}.md`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                                title="Visa Markdown"
+                              >
+                                📝 MD
+                              </a>
+                              <button
+                                onClick={() => handleDeleteAudit(audit.id)}
+                                className="px-2 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded text-xs transition-colors"
+                                title="Radera"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Footer note */}
         <p className="text-gray-500 text-sm mt-4 text-center">
-          Besökarstatistik lagras lokalt i webbläsaren. Kontaktmeddelanden och innehåll hämtas från servern.
+          Besökarstatistik lagras lokalt i webbläsaren. Kontaktmeddelanden, innehåll och audits hämtas från servern.
         </p>
       </div>
     </div>

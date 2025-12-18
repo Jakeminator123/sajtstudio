@@ -1675,18 +1675,20 @@ export default function HeroAnimation() {
               ? "bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.2),transparent_60%)]"
               : "bg-[radial-gradient(circle_at_30%_50%,rgba(0,102,255,0.3),transparent_60%)]"
           }`} />
-          <Image
-            src={
-              isLight
-                ? "/images/backgrounds/section-background-sunny.webp"
-                : "/images/backgrounds/section-background.webp"
-            }
-            alt=""
-            fill
-            className={`object-cover ${isLight ? "opacity-40" : "opacity-20"}`}
-            loading="eager"
-            sizes="(min-width: 1280px) 1200px, 100vw"
-          />
+          <div className="absolute inset-0">
+            <Image
+              src={
+                isLight
+                  ? "/images/backgrounds/section-background-sunny.webp"
+                  : "/images/backgrounds/section-background.webp"
+              }
+              alt=""
+              fill
+              className={`object-cover ${isLight ? "opacity-40" : "opacity-20"}`}
+              loading="eager"
+              sizes="(min-width: 1280px) 1200px, 100vw"
+            />
+          </div>
         </div>
 
         {/* Left side blue gradient accent */}

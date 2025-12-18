@@ -147,6 +147,26 @@ export const defaultContent: Record<string, Omit<NewContentEntry, "key">> = {
   B13: { type: "image", section: "backgrounds", value: "/images/backgrounds/section-background.webp", label: "Section bakgrund (dark)" },
   B14: { type: "image", section: "backgrounds", value: "/images/backgrounds/section-background-sunny.webp", label: "Section bakgrund (light)" },
   B15: { type: "image", section: "backgrounds", value: "/images/backgrounds/city-background-sunny.webp", label: "City bakgrund (light)" },
+
+  // TEAM SECTION
+  T52: { type: "text", section: "team", value: "Teamet bakom Sajtstudio", label: "Team sektion rubrik" },
+  T53: { type: "text", section: "team", value: "Sajtstudio drivs av ett dynamiskt team av entreprenörer med bred erfarenhet inom teknik, media och affärer. Vi förenas av en passion för att skapa moderna webblösningar med verklig effekt för våra kunder. Tillsammans har vi byggt upp företag, utvecklat innovativa digitala produkter och hjälpt andra att växa genom smart marknadsföring. Resultatet är en unik kombination av kompetenser som genomsyrar allt vi gör – från AI-generering av webbplatser till strategisk webbdesign och digital marknadsföring.", label: "Team intro text" },
+  T54: { type: "text", section: "team", value: "Jakob Eberg", label: "Teammedlem 1 namn" },
+  T55: { type: "text", section: "team", value: "Oscar Guditz", label: "Teammedlem 2 namn" },
+  T56: { type: "text", section: "team", value: "Joakim Hallsten", label: "Teammedlem 3 namn" },
+  T57: { type: "text", section: "team", value: "Tech Lead & Utveckling", label: "Teammedlem 1 roll" },
+  T58: { type: "text", section: "team", value: "Affärsutveckling & Partnerskap", label: "Teammedlem 2 roll" },
+  T59: { type: "text", section: "team", value: "Media & Marknadsföring", label: "Teammedlem 3 roll" },
+  T60: { type: "text", section: "team", value: "En före detta professionell pokerspelare som bytte karriärbana till tech-världen. Med flera års erfarenhet av programmering och mjukvaruutveckling ansvarar han för den tekniska utvecklingen. Hans bakgrund av datadrivna beslut – från både pokerbordet och kodning – säkerställer att varje hemsida vi levererar håller högsta klass under huven.", label: "Teammedlem 1 beskrivning" },
+  T61: { type: "text", section: "team", value: "En serieentreprenör som har drivit flera digitala projekt och företag. Han har byggt och sålt webbplatser samt varit involverad i olika tech-startups, inklusive ett kontorshotell i centrala Stockholm. På Sajtstudio fokuserar han på projektledning, försäljning och partnerskap – och ser till att vi alltid ligger i framkant vad gäller nya digitala möjligheter.", label: "Teammedlem 2 beskrivning" },
+  T62: { type: "text", section: "team", value: "Vår expert inom media och marknadsföring med över ett decennium i branschen. Han har grundat och drivit bolag specialiserade på att leverera högkvalitativa leads och data för telemarketing, med erfarenhet av att leda team på över 90 anställda. Hos Sajtstudio ansvarar han för innehållsstrategi och SEO – han säkerställer att våra kunders budskap når ut och att deras webbplatser konverterar besökare till kunder.", label: "Teammedlem 3 beskrivning" },
+  T63: { type: "text", section: "team", value: "Tillsammans kombinerar vi teknisk expertis, kreativ marknadsföring och affärssinne. Vi bygger hemsidor som faktiskt genererar affärer åt våra kunder. Varje projekt vi tar oss an är SEO-optimerat från start, så att din webbplats rankar högt på Google och är lätt för både människor och AI-verktyg att hitta. Med vårt team i ryggen kan du lita på att din digitala närvaro utvecklas av erfarna proffs som brinner för att skapa resultat.", label: "Team outro CTA" },
+  T64: { type: "text", section: "team", value: "https://www.linkedin.com/in/jakob-eberg/", label: "Teammedlem 1 LinkedIn" },
+  T65: { type: "text", section: "team", value: "https://www.linkedin.com/in/oscar-guditz/", label: "Teammedlem 2 LinkedIn" },
+  T66: { type: "text", section: "team", value: "https://www.linkedin.com/in/joakim-hallsten/", label: "Teammedlem 3 LinkedIn" },
+  B16: { type: "image", section: "team", value: "/images/team/jakob-eberg.webp", label: "Jakob Eberg profilbild" },
+  B17: { type: "image", section: "team", value: "/images/team/oscar-guditz.webp", label: "Oscar Guditz profilbild" },
+  B18: { type: "image", section: "team", value: "/images/team/joakim-hallsten.webp", label: "Joakim Hallsten profilbild" },
 };
 
 // CRUD Functions

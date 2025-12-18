@@ -60,7 +60,6 @@ export default function NattenWords({
         y: y ?? 0,
         opacity: typeof opacity === "number" ? opacity : opacity?.get?.() ?? 1,
         display: "inline-block",
-        willChange: "transform, opacity",
       }}
       suppressHydrationWarning
     >
@@ -88,7 +87,6 @@ export default function NattenWords({
             style={{
               display: "inline-block",
               transformStyle: "preserve-3d",
-              willChange: "transform, opacity",
             }}
           >
             {letter === " " ? "\u00A0" : letter}
