@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
+import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
 
-const testimonials = [
+const defaultTestimonials = [
   {
     quote:
       "De har lyft vår verksamhet med 50-100% på bara sex månader. Helt otrolig investering.",
@@ -38,6 +39,34 @@ const testimonials = [
 export default function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const { isLight } = useTheme();
+  
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("testimonials");
+  
+  // Build testimonials from CMS with fallbacks
+  const testimonials = useMemo(() => [
+    {
+      quote: getValue("T41", defaultTestimonials[0].quote),
+      author: getValue("T44", defaultTestimonials[0].author),
+      company: getValue("T47", defaultTestimonials[0].company),
+      role: defaultTestimonials[0].role,
+      highlight: defaultTestimonials[0].highlight,
+    },
+    {
+      quote: getValue("T42", defaultTestimonials[1].quote),
+      author: getValue("T45", defaultTestimonials[1].author),
+      company: getValue("T48", defaultTestimonials[1].company),
+      role: defaultTestimonials[1].role,
+      highlight: defaultTestimonials[1].highlight,
+    },
+    {
+      quote: getValue("T43", defaultTestimonials[2].quote),
+      author: getValue("T46", defaultTestimonials[2].author),
+      company: getValue("T49", defaultTestimonials[2].company),
+      role: defaultTestimonials[2].role,
+      highlight: defaultTestimonials[2].highlight,
+    },
+  ], [getValue]);
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({

@@ -22,7 +22,7 @@ export default function BrandReveal({
   className = "" 
 }: BrandRevealProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const isInView = useInView(ref, { once: true, margin: "150px" });
   const prefersReducedMotion = useReducedMotion();
 
   const words = text.split(" ");

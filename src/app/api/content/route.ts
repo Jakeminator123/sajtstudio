@@ -10,6 +10,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+
+// Ensure content is always fresh (no caching)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import {
   getAllContent,
   getContent,

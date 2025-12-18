@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import MagneticCTA from "@/components/ui/MagneticCTA";
+import { useContentSection } from "@/hooks/useContent";
 import { useMounted } from "@/hooks/useMounted";
 import { useTheme } from "@/hooks/useTheme";
 import { uspContent as defaultUspContent } from "@/config/content/usps";
@@ -40,7 +41,7 @@ function USPFeature({
 }: USPFeatureProps) {
   const ref = useRef(null);
   const mounted = useMounted();
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const isInView = useInView(ref, { once: true, margin: "200px" });
 
   // Scroll-based color animation for title
   const { scrollYProgress } = useScroll({
@@ -172,14 +173,45 @@ function USPFeature({
   );
 }
 
-export default function USPSection({ content }: { content?: USPContent }) {
+export default function USPSection({ content: propContent }: { content?: USPContent }) {
   const sectionRef = useRef(null);
   const mounted = useMounted();
   const { isLight } = useTheme();
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "250px" });
   
-  // Use provided content or fall back to default
-  const uspContent = content || defaultUspContent;
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("usp");
+  
+  // Build content from CMS with fallbacks
+  const uspContent: USPContent = useMemo(() => ({
+    title: getValue("T10", propContent?.title || defaultUspContent.title),
+    subtitle: getValue("T11", propContent?.subtitle || defaultUspContent.subtitle),
+    description: getValue("T12", propContent?.description || defaultUspContent.description),
+    features: [
+      {
+        number: "01",
+        title: getValue("T13", propContent?.features?.[0]?.title || defaultUspContent.features[0].title),
+        description: getValue("T17", propContent?.features?.[0]?.description || defaultUspContent.features[0].description),
+      },
+      {
+        number: "02",
+        title: getValue("T14", propContent?.features?.[1]?.title || defaultUspContent.features[1].title),
+        description: getValue("T18", propContent?.features?.[1]?.description || defaultUspContent.features[1].description),
+      },
+      {
+        number: "03",
+        title: getValue("T15", propContent?.features?.[2]?.title || defaultUspContent.features[2].title),
+        description: getValue("T19", propContent?.features?.[2]?.description || defaultUspContent.features[2].description),
+      },
+      {
+        number: "04",
+        title: getValue("T16", propContent?.features?.[3]?.title || defaultUspContent.features[3].title),
+        description: getValue("T20", propContent?.features?.[3]?.description || defaultUspContent.features[3].description),
+      },
+    ],
+    tagline: propContent?.tagline || defaultUspContent.tagline,
+    cta: propContent?.cta || defaultUspContent.cta,
+  }), [getValue, propContent]);
 
   // Scroll-based animations for title
   const { scrollYProgress } = useScroll({

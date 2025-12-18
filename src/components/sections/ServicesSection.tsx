@@ -5,7 +5,8 @@ import WordReveal from '@/components/animations/WordReveal'
 import ServiceCard from '@/components/ui/ServiceCard'
 import ServiceModal from '@/components/ui/ServiceModal'
 import type { Service } from '@/data/services'
-import { services } from '@/data/services'
+import { services as defaultServices } from '@/data/services'
+import { useContentSection } from '@/hooks/useContent'
 import { useModalManager } from '@/hooks/useModalManager'
 import { useMounted } from '@/hooks/useMounted'
 import { useTheme } from '@/hooks/useTheme'
@@ -16,7 +17,7 @@ import {
   useScroll,
   useTransform,
 } from 'framer-motion'
-import React, { useEffect, useRef, useState, type ReactNode } from 'react'
+import React, { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 type ServiceModalPayload = {
   service: Service
@@ -89,6 +90,40 @@ export default function ServicesSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
+
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("services")
+  
+  // Build services from CMS with fallbacks to defaults
+  const services: Service[] = useMemo(() => [
+    {
+      ...defaultServices[0],
+      title: getValue("T21", defaultServices[0].title),
+      shortDesc: getValue("T25", defaultServices[0].shortDesc),
+      longDesc: getValue("T29", defaultServices[0].longDesc),
+    },
+    {
+      ...defaultServices[1],
+      title: getValue("T22", defaultServices[1].title),
+      shortDesc: getValue("T26", defaultServices[1].shortDesc),
+      longDesc: getValue("T30", defaultServices[1].longDesc),
+    },
+    {
+      ...defaultServices[2],
+      title: getValue("T23", defaultServices[2].title),
+      shortDesc: getValue("T27", defaultServices[2].shortDesc),
+      longDesc: getValue("T31", defaultServices[2].longDesc),
+    },
+    {
+      ...defaultServices[3],
+      title: getValue("T24", defaultServices[3].title),
+      shortDesc: getValue("T28", defaultServices[3].shortDesc),
+      longDesc: getValue("T32", defaultServices[3].longDesc),
+    },
+  ], [getValue])
+  
+  // Get video URL from CMS
+  const videoUrl = getValue("V2", "/videos/background_vid.mp4")
 
   // Scroll-based parallax effects
   const { scrollYProgress } = useScroll({
@@ -243,7 +278,7 @@ export default function ServicesSection() {
           }}
           suppressHydrationWarning
         >
-          <source src="/videos/background_vid.mp4" type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
         </motion.video>
 
         {/* Dark gradient overlay for better text readability */}

@@ -1,17 +1,33 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { featuredProjects } from "@/data/projects";
+import { featuredProjects as defaultFeaturedProjects } from "@/data/projects";
+import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function PortfolioSection() {
   const sectionRef = useRef(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "250px" });
   const { isLight } = useTheme();
+  
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("portfolio");
+  
+  // Build featured projects with CMS images (B4-B11 maps to projects)
+  const featuredProjects = useMemo(() => {
+    // Map CMS image keys to project indexes (B4=first, B5=second, etc.)
+    const imageKeys = ["B5", "B4", "B6"]; // Maps to featured projects 0, 1, 2
+    return defaultFeaturedProjects.map((project, index) => ({
+      ...project,
+      image: index < imageKeys.length 
+        ? getValue(imageKeys[index], project.image || "") 
+        : project.image,
+    }));
+  }, [getValue]);
 
   // Scroll-based animations for heading
   const { scrollYProgress } = useScroll({

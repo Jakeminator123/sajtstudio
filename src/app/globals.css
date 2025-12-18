@@ -9,10 +9,24 @@ body {
 }
 
 /* Content visibility optimization - skip layout/paint for offscreen sections */
+/* Larger contain-intrinsic-size prevents CLS when sections load */
 @layer utilities {
   .content-visibility-auto {
     content-visibility: auto;
-    contain-intrinsic-size: auto 500px;
+    /* Use larger intrinsic size to prevent layout shift when content loads */
+    contain-intrinsic-size: auto 800px;
+  }
+
+  /* For smaller sections like testimonials */
+  .content-visibility-auto-sm {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
+  /* For larger sections like portfolio/team */
+  .content-visibility-auto-lg {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
   }
 
   .content-visibility-hidden {

@@ -26,7 +26,7 @@ function AnimatedNumber({
 }) {
   const [displayValue, setDisplayValue] = useState("0");
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const isInView = useInView(ref, { once: true, margin: "200px" });
 
   useEffect(() => {
     if (!isInView) return;

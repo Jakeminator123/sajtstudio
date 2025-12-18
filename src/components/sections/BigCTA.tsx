@@ -1,5 +1,6 @@
 "use client";
 
+import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -30,6 +31,14 @@ const MatrixContactForm = dynamic(
 export default function BigCTA() {
   const sectionRef = useRef(null);
   const { isLight } = useTheme();
+  
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("bigcta");
+  
+  // Get content from CMS with fallbacks
+  const title = getValue("T50", "Redo att ta nästa steg?");
+  const subtitle = getValue("T51", "Låt oss bygga något fantastiskt tillsammans");
+  const phoneImage = getValue("B3", "/images/contact_phone.webp");
 
   return (
     <section
@@ -163,7 +172,7 @@ export default function BigCTA() {
             className="relative"
           >
             <Image
-              src="/images/contact_phone.webp"
+              src={phoneImage}
               alt="Smartphone som visar Sajtstudios kontaktformulär"
               width={240}
               height={300}
@@ -203,7 +212,7 @@ export default function BigCTA() {
             className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-accent to-blue-600 rounded-lg font-bold text-white shadow-lg shadow-accent/30"
           >
             <Image
-              src="/images/contact_phone.webp"
+              src={phoneImage}
               alt="Kontaktikon"
               width={40}
               height={50}

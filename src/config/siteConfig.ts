@@ -59,6 +59,7 @@ export const siteConfig = {
     homeAnchors: [
       { href: "#tjanster", label: "Tjänster" }, // Motsvarar <div id="tjanster">
       { href: "#process", label: "Process" }, // Motsvarar <div id="process">
+      { href: "#om-oss", label: "Om oss" }, // Motsvarar <div id="om-oss">
       { href: "#omdomen", label: "Omdömen" }, // Motsvarar <div id="omdomen">
     ],
   },

@@ -21,10 +21,29 @@ export interface ContentEntry {
   updated_at: string;
 }
 
-// Cache for content to avoid repeated API calls
+// Cache for content to avoid repeated API calls within a session
+// Cache is cleared on each new page load via sessionStorage check
 const contentCache: Map<string, ContentEntry> = new Map();
 const sectionCache: Map<string, ContentEntry[]> = new Map();
 let allContentCache: ContentEntry[] | null = null;
+
+// Clear cache on new page loads (browser refresh) to ensure CMS updates are visible
+// Uses sessionStorage pageLoadId to detect true page refreshes vs SPA navigation
+if (typeof window !== "undefined") {
+  const currentLoadId = Date.now().toString();
+  const storedLoadId = sessionStorage.getItem("content_page_load_id");
+  
+  // If this is a fresh page load (not SPA navigation), clear caches
+  if (!storedLoadId || performance.navigation?.type === 1 /* reload */ || 
+      (performance.getEntriesByType && 
+       performance.getEntriesByType("navigation").length > 0 &&
+       (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type === "reload")) {
+    contentCache.clear();
+    sectionCache.clear();
+    allContentCache = null;
+    sessionStorage.setItem("content_page_load_id", currentLoadId);
+  }
+}
 
 /**
  * Hook to get a single content value by key

@@ -238,12 +238,12 @@ export default function HeroAnimation() {
   // Check if images are in view for initial animation
   const imagesInView = useInView(imagesContainerRef, {
     once: false,
-    margin: "-100px",
+    margin: "200px",
     amount: 0.2,
   });
   const secondaryImagesInView = useInView(secondaryImagesContainerRef, {
     once: false,
-    margin: "-100px",
+    margin: "200px",
     amount: 0.2,
   });
 

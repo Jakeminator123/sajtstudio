@@ -2,6 +2,7 @@
 
 import HemsidorWords from "@/components/animations/HemsidorWords";
 import NattenWords from "@/components/animations/NattenWords";
+import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
 import { prefersReducedMotion } from "@/lib/performance";
 import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
@@ -482,7 +483,20 @@ function CursorTrail({
   );
 }
 
-export default function HeroSection({ content = defaultContent }: { content?: HeroContent }) {
+export default function HeroSection({ content: propContent }: { content?: HeroContent }) {
+  // Fetch content from CMS - this enables live updates from /admin
+  const { getValue } = useContentSection("hero");
+  
+  // Build content object from CMS with fallbacks to props then defaults
+  const content: HeroContent = useMemo(() => ({
+    title: getValue("T1", propContent?.title || defaultContent.title),
+    subtitle: getValue("T2", propContent?.subtitle || defaultContent.subtitle),
+    ctaText: getValue("T3", propContent?.ctaText || defaultContent.ctaText),
+    ctaSecondary: getValue("T4", propContent?.ctaSecondary || defaultContent.ctaSecondary),
+    bgImage: getValue("B1", propContent?.bgImage || defaultContent.bgImage),
+    bgVideo: getValue("V1", propContent?.bgVideo || defaultContent.bgVideo),
+  }), [getValue, propContent]);
+  
   // Use actual mounted state to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -731,7 +745,7 @@ export default function HeroSection({ content = defaultContent }: { content?: He
   return (
     <motion.section
       ref={sectionRef}
-      className={`min-h-[100svh] flex items-center justify-center relative overflow-hidden z-10 transition-colors duration-500 pt-[var(--header-offset)] lg:pt-0 ${
+      className={`min-h-[100svh] flex items-center justify-center relative overflow-hidden z-10 transition-colors duration-500 pt-[calc(var(--header-offset)+3rem)] sm:pt-[calc(var(--header-offset)+2.5rem)] lg:pt-[calc(var(--header-offset)+2rem)] ${
         isLight ? "bg-amber-50" : "bg-black"
       }`}
       style={{

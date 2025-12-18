@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
+import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
 
 // Parse SRT format subtitles
@@ -171,8 +172,12 @@ const subtitlesData: Subtitle[] = [
 export default function AboutUsVideoSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isInView = useInView(sectionRef, { once: false, margin: "-20%" });
+  const isInView = useInView(sectionRef, { once: false, margin: "15%" });
   const { isLight } = useTheme();
+  
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("portfolio");
+  const videoUrl = getValue("V4", "/videos/om_oss.mp4");
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -326,7 +331,7 @@ export default function AboutUsVideoSection() {
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
             >
-              <source src="/videos/om_oss.mp4" type="video/mp4" />
+              <source src={videoUrl} type="video/mp4" />
               <track kind="captions" srcLang="sv" label="Svenska" default />
               Din webbläsare stöder inte videouppspelning.
             </video>

@@ -2,14 +2,15 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { useContentSection } from "@/hooks/useContent";
 import { useMounted } from "@/hooks/useMounted";
 import { useTheme } from "@/hooks/useTheme";
 import WordReveal from "@/components/animations/WordReveal";
 import SmokeEffect from "@/components/animations/SmokeEffect";
 import { designTokens } from "@/config/designTokens";
 
-const processSteps = [
+const defaultProcessSteps = [
   {
     number: "01",
     title: "Upptäckt",
@@ -40,6 +41,36 @@ export default function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
   const { isLight } = useTheme();
+  
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("process");
+  
+  // Build process steps from CMS with fallbacks
+  const processSteps = useMemo(() => [
+    {
+      number: "01",
+      title: getValue("T33", defaultProcessSteps[0].title),
+      description: getValue("T37", defaultProcessSteps[0].description),
+    },
+    {
+      number: "02",
+      title: getValue("T34", defaultProcessSteps[1].title),
+      description: getValue("T38", defaultProcessSteps[1].description),
+    },
+    {
+      number: "03",
+      title: getValue("T35", defaultProcessSteps[2].title),
+      description: getValue("T39", defaultProcessSteps[2].description),
+    },
+    {
+      number: "04",
+      title: getValue("T36", defaultProcessSteps[3].title),
+      description: getValue("T40", defaultProcessSteps[3].description),
+    },
+  ], [getValue]);
+  
+  // Get background image from CMS
+  const bgImage = getValue("B2", "/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp");
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -78,7 +109,7 @@ export default function ProcessSection() {
         {!isLight && (
           <>
             <Image
-              src="/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp"
+              src={bgImage}
               alt=""
               fill
               className="object-cover"

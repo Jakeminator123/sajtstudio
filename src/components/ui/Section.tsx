@@ -35,7 +35,7 @@ export default function Section({
   animate = true,
 }: SectionProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '200px' });
 
   const content = (
     <section
