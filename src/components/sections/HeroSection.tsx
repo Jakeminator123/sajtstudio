@@ -895,11 +895,11 @@ export default function HeroSection({ content = defaultContent }: { content?: He
                     ? "/images/backgrounds/city-background-sunny.webp"
                     : "/images/hero/hero-background.webp"
                 }
-                alt=""
+                alt="Stadsbild i skymning - Sajtstudio hero bakgrund"
                 fill
-                sizes="(max-width: 1920px) 100vw, 1920px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1920px"
                 className="object-cover"
-                loading="eager" // ensures LCP image is loaded immediately
+                loading="eager"
                 priority
                 fetchPriority="high"
               />
@@ -1321,24 +1321,21 @@ export default function HeroSection({ content = defaultContent }: { content?: He
                 />
               )}
               <span className="relative z-10 flex items-center gap-3 font-black tracking-wide">
-                <motion.span
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  🔍
-                </motion.span>
                 Utvärdera din sajt
-                <motion.span
-                  className="text-xl"
-                  animate={{ x: [0, 8, 0], scale: [1, 1.2, 1] }}
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{ x: [0, 5, 0] }}
                   transition={{
-                    duration: 1,
+                    duration: 1.2,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                 >
-                  →
-                </motion.span>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </motion.svg>
               </span>
             </MagneticButton>
 
@@ -1379,33 +1376,24 @@ export default function HeroSection({ content = defaultContent }: { content?: He
                 />
               )}
               <span className="relative z-10 flex items-center gap-3">
-                <motion.span
-                  animate={{
-                    rotate: [0, -10, 10, 0],
-                    scale: [1, 1.2, 1.2, 1],
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatDelay: 1.5,
-                  }}
-                >
-                  🚀
-                </motion.span>
                 {content.ctaSecondary}
-                <motion.span
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                   animate={{
+                    x: [0, 3, 0],
                     y: [0, -3, 0],
-                    rotate: [0, 20, 0],
                   }}
                   transition={{
-                    duration: 0.8,
+                    duration: 1,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                 >
-                  ↗
-                </motion.span>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </motion.svg>
               </span>
             </MagneticButton>
           </motion.div>

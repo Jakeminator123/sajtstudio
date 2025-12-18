@@ -405,7 +405,7 @@ export default function OpticScrollShowcase() {
                   >
                     <Image
                       src="/images/portfolio/assets_task_01k05sqa0wedsbvfk5c0773fz5_1752541456_img_0.webp"
-                      alt=""
+                      alt="Webbdesign portfolio exempel - modern företagssida"
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
@@ -419,7 +419,7 @@ export default function OpticScrollShowcase() {
                   >
                     <Image
                       src="/images/portfolio/assets_task_01k1c880wqft0s0bcr3p77v2me_1753831780_img_0.webp"
-                      alt=""
+                      alt="Webbdesign portfolio exempel - responsiv design"
                       fill
                       sizes="(max-width: 640px) 160px, 160px"
                       className="object-cover rounded-lg shadow-lg"
@@ -433,7 +433,7 @@ export default function OpticScrollShowcase() {
                   >
                     <Image
                       src="/images/portfolio/assets_task_01k80qdg0ze1rskjzfpj7r1za3_1760961264_img_0.webp"
-                      alt=""
+                      alt="Webbdesign portfolio exempel - kreativ landningssida"
                       fill
                       sizes="(max-width: 640px) 128px, 128px"
                       className="object-cover rounded-lg shadow-lg"

@@ -192,6 +192,10 @@ const config: Config = {
         spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         smooth: "cubic-bezier(0.4, 0, 0.2, 1)",
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

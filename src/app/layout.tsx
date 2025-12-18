@@ -1,6 +1,7 @@
 import PageTransition from "@/components/layout/PageTransition";
 import SkipLink from "@/components/layout/SkipLink";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import ProductionBanner from "@/components/effects/ProductionBanner";
 import {
   generateSchemaScript,
   getOrganizationSchema,
@@ -252,6 +253,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased overflow-x-hidden w-full max-w-screen relative">
+        <ProductionBanner />
         <SkipLink />
         {/* Error boundary disabled in development to avoid webpack issues */}
         {process.env.NODE_ENV === "production" ? (
