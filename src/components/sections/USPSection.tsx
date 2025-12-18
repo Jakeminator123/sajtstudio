@@ -5,7 +5,25 @@ import { useRef } from "react";
 import Link from "next/link";
 import { useMounted } from "@/hooks/useMounted";
 import { useTheme } from "@/hooks/useTheme";
-import { uspContent } from "@/config/content/usps";
+import { uspContent as defaultUspContent } from "@/config/content/usps";
+
+// Content structure for CMS integration
+export interface USPContent {
+  title: string;
+  subtitle: string;
+  description: string;
+  features: Array<{
+    number: string;
+    title: string;
+    description: string;
+  }>;
+  tagline: string;
+  cta: {
+    text: string;
+    buttonText: string;
+    href: string;
+  };
+}
 
 interface USPFeatureProps {
   number: string;
@@ -154,11 +172,14 @@ function USPFeature({
   );
 }
 
-export default function USPSection() {
+export default function USPSection({ content }: { content?: USPContent }) {
   const sectionRef = useRef(null);
   const mounted = useMounted();
   const { isLight } = useTheme();
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  
+  // Use provided content or fall back to default
+  const uspContent = content || defaultUspContent;
 
   // Scroll-based animations for title
   const { scrollYProgress } = useScroll({

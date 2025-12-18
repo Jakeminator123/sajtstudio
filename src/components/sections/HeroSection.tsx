@@ -8,6 +8,26 @@ import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+// Content structure from CMS
+export interface HeroContent {
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaSecondary: string;
+  bgImage: string;
+  bgVideo: string;
+}
+
+// Default content for backwards compatibility
+const defaultContent: HeroContent = {
+  title: "Hemsidor som betyder någonting",
+  subtitle: "Vi bygger digitala upplevelser som driver resultat",
+  ctaText: "Starta projekt",
+  ctaSecondary: "BYGG DIN SAJT NU!",
+  bgImage: "/images/hero/hero-background.webp",
+  bgVideo: "/videos/background.mp4",
+};
+
 // Magnetic button component that follows mouse
 function MagneticButton({
   href,
@@ -464,7 +484,7 @@ function CursorTrail({
   );
 }
 
-export default function HeroSection() {
+export default function HeroSection({ content = defaultContent }: { content?: HeroContent }) {
   // Use actual mounted state to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -803,7 +823,7 @@ export default function HeroSection() {
                 className="w-full h-full object-cover"
                 style={{ filter: "brightness(0.8) contrast(0.9)" }}
               >
-                <source src="/videos/background.mp4" type="video/mp4" />
+                <source src={content.bgVideo} type="video/mp4" />
               </video>
               {/* Fade overlay for smoother blend */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
@@ -1372,7 +1392,7 @@ export default function HeroSection() {
                 >
                   🚀
                 </motion.span>
-                BYGG DIN SAJT NU!
+                {content.ctaSecondary}
                 <motion.span
                   animate={{
                     y: [0, -3, 0],

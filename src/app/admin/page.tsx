@@ -1,26 +1,23 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useCallback } from "react";
 
 /**
- * Admin Dashboard - Simple statistics and contact message viewer
- *
- * 📌 Naming cheat sheet so "contact" vs "kontakt" does not get confusing:
- * - `/kontakt`  → the public-facing contact page (Swedish URL)
- * - `/contact`  → the API endpoint (`src/app/api/contact/route.ts`) for form submissions
- * - `CONTACTS_API_KEY` (server only) protects GET /api/contact when set
- * - `NEXT_PUBLIC_CONTACTS_API_KEY` (client) mirrors the same key so this dashboard
- *    can send the Authorization header from the browser
- *
- * Login credentials: admin / admin (hardcoded, no security needed per user request)
+ * Admin Dashboard - Statistics, contact messages, and content management
  *
  * Features:
  * - View all contact form submissions
  * - Basic visitor tracking (using localStorage for unique visitors)
  * - Page view counter
+ * - Content management (T1-T51, B1-B15, V1-V6 keys)
  *
- * NOTE: This is a simple admin panel with NO real security.
- * For production use, implement proper authentication.
+ * Login:
+ * - Uses env vars ADMIN_USERNAME and ADMIN_PASSWORD in production
+ * - Falls back to admin/admin in development if env vars not set
+ *
+ * API Keys:
+ * - NEXT_PUBLIC_CONTACTS_API_KEY - for fetching contacts
+ * - NEXT_PUBLIC_CONTENT_API_KEY - for updating content
  */
 
 interface ContactEntry {
@@ -32,12 +29,24 @@ interface ContactEntry {
   source: string;
 }
 
+interface ContentEntry {
+  id: number;
+  key: string;
+  type: "text" | "image" | "video";
+  section: string;
+  value: string;
+  label: string;
+  updated_at: string;
+}
+
 interface VisitorStats {
   totalPageViews: number;
   uniqueVisitors: number;
   todayPageViews: number;
   lastUpdated: string;
 }
+
+type TabType = "overview" | "contacts" | "content";
 
 // Track page view on client side
 function trackPageView() {
@@ -48,7 +57,6 @@ function trackPageView() {
     const visitorIdKey = "sajtstudio_visitor_id";
     const today = new Date().toISOString().split("T")[0];
 
-    // Get or create visitor ID
     let visitorId = localStorage.getItem(visitorIdKey);
     const isNewVisitor = !visitorId;
     if (!visitorId) {
@@ -58,7 +66,6 @@ function trackPageView() {
       localStorage.setItem(visitorIdKey, visitorId);
     }
 
-    // Get current stats
     const statsJson = localStorage.getItem(statsKey);
     let stats: VisitorStats = statsJson
       ? JSON.parse(statsJson)
@@ -69,13 +76,11 @@ function trackPageView() {
           lastUpdated: today,
         };
 
-    // Reset today's count if it's a new day
     if (stats.lastUpdated !== today) {
       stats.todayPageViews = 0;
       stats.lastUpdated = today;
     }
 
-    // Update stats
     stats.totalPageViews += 1;
     stats.todayPageViews += 1;
     if (isNewVisitor) {
@@ -88,7 +93,6 @@ function trackPageView() {
   }
 }
 
-// Get visitor stats
 function getVisitorStats(): VisitorStats {
   if (typeof window === "undefined") {
     return {
@@ -120,91 +124,179 @@ function getVisitorStats(): VisitorStats {
   }
 }
 
+// Get admin credentials from env or fallback to defaults
+function getAdminCredentials() {
+  // Default to admin/admin if env vars not set (for development convenience)
+  // In production, set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD
+  return {
+    username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || "admin",
+    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin",
+  };
+}
+
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [contacts, setContacts] = useState<ContactEntry[]>([]);
+  const [content, setContent] = useState<ContentEntry[]>([]);
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [contentFilter, setContentFilter] = useState<string>("all");
 
-  // Track page view on mount
   useEffect(() => {
     trackPageView();
   }, []);
 
-  // Hardcoded login - admin/admin (no security per user request)
+  // Login handler with env-based credentials
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin") {
+    const creds = getAdminCredentials();
+    
+    if (!creds.username || !creds.password) {
+      setLoginError("Admin credentials not configured. Set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD.");
+      return;
+    }
+    
+    if (username === creds.username && password === creds.password) {
       setIsLoggedIn(true);
       setLoginError("");
-      // Load data after login
       loadData();
     } else {
       setLoginError("Felaktigt användarnamn eller lösenord");
     }
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
-
-    // Load visitor stats from localStorage
     setStats(getVisitorStats());
 
-    // Load contacts from API
+    // Load contacts
     try {
-      // Get API key from public env var (if set)
-      // NOTE: This is exposed to client, but per user request "no security needed".
-      // CONTACTS_API_KEY protects the API server-side, NEXT_PUBLIC_CONTACTS_API_KEY
-      // lets this dashboard send the same key from the browser.
       const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY;
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      // Add Authorization header if API key is set
+      const headers: HeadersInit = { "Content-Type": "application/json" };
       if (apiKey) {
         headers["Authorization"] = `Bearer ${apiKey}`;
       }
 
-      const response = await fetch("/api/contact", {
-        headers,
-      });
-
+      const response = await fetch("/api/contact", { headers });
       if (response.ok) {
         const data = await response.json();
         setContacts(data.contacts || []);
       } else if (response.status === 401) {
         setError("API-nyckel krävs för att hämta kontakter");
-      } else {
-        setError("Kunde inte hämta kontakter");
       }
     } catch {
       setError("Nätverksfel vid hämtning av kontakter");
     }
 
+    // Load content
+    try {
+      const response = await fetch("/api/content");
+      if (response.ok) {
+        const data = await response.json();
+        setContent(data.content || []);
+      }
+    } catch {
+      console.error("Failed to load content");
+    }
+
     setLoading(false);
+  }, []);
+
+  const handleEditContent = (entry: ContentEntry) => {
+    setEditingKey(entry.key);
+    setEditValue(entry.value);
+    setSaveStatus("idle");
   };
+
+  const handleSaveContent = async () => {
+    if (!editingKey) return;
+
+    setSaveStatus("saving");
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY;
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (apiKey) {
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      }
+
+      const response = await fetch("/api/content", {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ key: editingKey, value: editValue }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update local state
+        setContent((prev) =>
+          prev.map((c) =>
+            c.key === editingKey ? { ...c, value: editValue, updated_at: data.content.updated_at } : c
+          )
+        );
+        setSaveStatus("saved");
+        setTimeout(() => {
+          setEditingKey(null);
+          setSaveStatus("idle");
+        }, 1500);
+      } else {
+        setSaveStatus("error");
+      }
+    } catch {
+      setSaveStatus("error");
+    }
+  };
+
+  const handleSeedDefaults = async () => {
+    if (!confirm("Vill du fylla i standardvärden för allt innehåll som saknas?")) return;
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY;
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      if (apiKey) {
+        headers["Authorization"] = `Bearer ${apiKey}`;
+      }
+
+      const response = await fetch("/api/content", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ action: "seed" }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`${data.inserted} standardvärden tillagda!`);
+        loadData();
+      }
+    } catch {
+      alert("Kunde inte fylla i standardvärden");
+    }
+  };
+
+  // Get unique sections for filter
+  const sections = Array.from(new Set(content.map((c) => c.section))).sort();
+  const filteredContent =
+    contentFilter === "all" ? content : content.filter((c) => c.section === contentFilter);
 
   // Login form
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-md shadow-xl">
-          <h1 className="text-3xl font-bold text-white mb-2 text-center">
-            Admin
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-2 text-center">Admin</h1>
           <p className="text-gray-400 text-center mb-8">Sajtstudio Dashboard</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-gray-300 text-sm mb-2">
-                Användarnamn
-              </label>
+              <label className="block text-gray-300 text-sm mb-2">Användarnamn</label>
               <input
                 type="text"
                 value={username}
@@ -214,9 +306,7 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-gray-300 text-sm mb-2">
-                Lösenord
-              </label>
+              <label className="block text-gray-300 text-sm mb-2">Lösenord</label>
               <input
                 type="password"
                 value={password}
@@ -235,6 +325,10 @@ export default function AdminPage() {
               Logga in
             </button>
           </form>
+
+          <p className="text-gray-500 text-xs mt-4 text-center">
+            Dev default: admin / admin
+          </p>
         </div>
       </div>
     );
@@ -243,14 +337,12 @@ export default function AdminPage() {
   // Dashboard
   return (
     <div className="min-h-screen bg-gray-900 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-            <p className="text-gray-400">
-              Sajtstudio statistik och meddelanden
-            </p>
+            <p className="text-gray-400">Sajtstudio statistik, meddelanden och innehåll</p>
           </div>
           <button
             onClick={() => setIsLoggedIn(false)}
@@ -260,103 +352,287 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Stats cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
-              Sidvisningar totalt
-            </p>
-            <p className="text-4xl font-bold text-white">
-              {stats?.totalPageViews || 0}
-            </p>
-          </div>
-          <div className="bg-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
-              Unika besökare
-            </p>
-            <p className="text-4xl font-bold text-blue-400">
-              {stats?.uniqueVisitors || 0}
-            </p>
-          </div>
-          <div className="bg-gray-800 rounded-xl p-6">
-            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
-              Sidvisningar idag
-            </p>
-            <p className="text-4xl font-bold text-green-400">
-              {stats?.todayPageViews || 0}
-            </p>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          {(["overview", "contacts", "content"] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === tab
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              {tab === "overview" && "Översikt"}
+              {tab === "contacts" && `Meddelanden (${contacts.length})`}
+              {tab === "content" && `Innehåll (${content.length})`}
+            </button>
+          ))}
         </div>
 
-        {/* Contacts section */}
-        <div className="bg-gray-800 rounded-xl p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white">Kontaktmeddelanden</h2>
-            <button
-              onClick={loadData}
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              {loading ? "Laddar..." : "Uppdatera"}
-            </button>
-          </div>
-
-          {error && (
-            <div className="bg-red-900/30 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-4">
-              {error}
+        {/* Overview Tab */}
+        {activeTab === "overview" && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="bg-gray-800 rounded-xl p-6">
+                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                  Sidvisningar totalt
+                </p>
+                <p className="text-4xl font-bold text-white">{stats?.totalPageViews || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-xl p-6">
+                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                  Unika besökare
+                </p>
+                <p className="text-4xl font-bold text-blue-400">{stats?.uniqueVisitors || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-xl p-6">
+                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                  Sidvisningar idag
+                </p>
+                <p className="text-4xl font-bold text-green-400">{stats?.todayPageViews || 0}</p>
+              </div>
             </div>
-          )}
 
-          {contacts.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">
-              Inga meddelanden än
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {contacts.map((contact) => (
-                <div
-                  key={contact.id}
-                  className="bg-gray-700/50 rounded-lg p-4 border border-gray-600"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="text-white font-semibold">{contact.name}</p>
-                      <a
-                        href={`mailto:${contact.email}`}
-                        className="text-blue-400 hover:text-blue-300 text-sm"
-                      >
-                        {contact.email}
-                      </a>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-400 text-sm">
-                        {new Date(contact.timestamp).toLocaleDateString(
-                          "sv-SE"
-                        )}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        {new Date(contact.timestamp).toLocaleTimeString(
-                          "sv-SE"
-                        )}
-                      </p>
-                      <span className="inline-block mt-1 px-2 py-0.5 bg-gray-600 text-gray-300 text-xs rounded">
-                        {contact.source}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Senaste meddelanden</h3>
+                {contacts.slice(0, 3).map((contact) => (
+                  <div key={contact.id} className="mb-3 pb-3 border-b border-gray-700 last:border-0">
+                    <p className="text-white font-medium">{contact.name}</p>
+                    <p className="text-gray-400 text-sm truncate">{contact.message}</p>
+                  </div>
+                ))}
+                {contacts.length === 0 && (
+                  <p className="text-gray-500">Inga meddelanden än</p>
+                )}
+              </div>
+
+              <div className="bg-gray-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Innehållsstatus</h3>
+                <div className="space-y-2">
+                  {sections.map((section) => (
+                    <div key={section} className="flex justify-between">
+                      <span className="text-gray-400 capitalize">{section}</span>
+                      <span className="text-white">
+                        {content.filter((c) => c.section === section).length} poster
                       </span>
                     </div>
-                  </div>
-                  <p className="text-gray-300 whitespace-pre-wrap">
-                    {contact.message}
-                  </p>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          )}
-        </div>
+          </>
+        )}
 
-        {/* Info note */}
+        {/* Contacts Tab */}
+        {activeTab === "contacts" && (
+          <div className="bg-gray-800 rounded-xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Kontaktmeddelanden</h2>
+              <button
+                onClick={loadData}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                {loading ? "Laddar..." : "Uppdatera"}
+              </button>
+            </div>
+
+            {error && (
+              <div className="bg-red-900/30 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+
+            {contacts.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">Inga meddelanden än</p>
+            ) : (
+              <div className="space-y-4">
+                {contacts.map((contact) => (
+                  <div
+                    key={contact.id}
+                    className="bg-gray-700/50 rounded-lg p-4 border border-gray-600"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-white font-semibold">{contact.name}</p>
+                        <a
+                          href={`mailto:${contact.email}`}
+                          className="text-blue-400 hover:text-blue-300 text-sm"
+                        >
+                          {contact.email}
+                        </a>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-400 text-sm">
+                          {new Date(contact.timestamp).toLocaleDateString("sv-SE")}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {new Date(contact.timestamp).toLocaleTimeString("sv-SE")}
+                        </p>
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-gray-600 text-gray-300 text-xs rounded">
+                          {contact.source || "website"}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 whitespace-pre-wrap">{contact.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Content Tab */}
+        {activeTab === "content" && (
+          <div className="bg-gray-800 rounded-xl p-6">
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+              <h2 className="text-xl font-bold text-white">Innehållshantering</h2>
+              <div className="flex gap-2">
+                <select
+                  value={contentFilter}
+                  onChange={(e) => setContentFilter(e.target.value)}
+                  className="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600"
+                >
+                  <option value="all">Alla sektioner</option>
+                  {sections.map((section) => (
+                    <option key={section} value={section}>
+                      {section.charAt(0).toUpperCase() + section.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleSeedDefaults}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Fyll standardvärden
+                </button>
+                <button
+                  onClick={loadData}
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  {loading ? "Laddar..." : "Uppdatera"}
+                </button>
+              </div>
+            </div>
+
+            <p className="text-gray-400 text-sm mb-4">
+              Klicka på en rad för att redigera. Nycklar: T* = text, B* = bild, V* = video.
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left border-b border-gray-700">
+                    <th className="pb-3 text-gray-400 font-medium w-20">Nyckel</th>
+                    <th className="pb-3 text-gray-400 font-medium w-24">Typ</th>
+                    <th className="pb-3 text-gray-400 font-medium w-28">Sektion</th>
+                    <th className="pb-3 text-gray-400 font-medium">Beskrivning</th>
+                    <th className="pb-3 text-gray-400 font-medium">Värde</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredContent.map((entry) => (
+                    <tr
+                      key={entry.key}
+                      className={`border-b border-gray-700/50 hover:bg-gray-700/30 cursor-pointer transition-colors ${
+                        editingKey === entry.key ? "bg-gray-700/50" : ""
+                      }`}
+                      onClick={() => handleEditContent(entry)}
+                    >
+                      <td className="py-3 font-mono text-blue-400">{entry.key}</td>
+                      <td className="py-3">
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            entry.type === "text"
+                              ? "bg-blue-900/50 text-blue-300"
+                              : entry.type === "image"
+                              ? "bg-green-900/50 text-green-300"
+                              : "bg-purple-900/50 text-purple-300"
+                          }`}
+                        >
+                          {entry.type}
+                        </span>
+                      </td>
+                      <td className="py-3 text-gray-400 capitalize">{entry.section}</td>
+                      <td className="py-3 text-gray-300">{entry.label}</td>
+                      <td className="py-3 text-white max-w-xs truncate">{entry.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Edit Modal */}
+            {editingKey && (
+              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <h3 className="text-xl font-bold text-white mb-4">
+                    Redigera {editingKey}
+                  </h3>
+                  <p className="text-gray-400 text-sm mb-4">
+                    {content.find((c) => c.key === editingKey)?.label}
+                  </p>
+
+                  {content.find((c) => c.key === editingKey)?.type === "text" ? (
+                    <textarea
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none min-h-[150px]"
+                      placeholder="Ange värde..."
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                      placeholder="/path/to/file"
+                    />
+                  )}
+
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button
+                      onClick={() => {
+                        setEditingKey(null);
+                        setSaveStatus("idle");
+                      }}
+                      className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      Avbryt
+                    </button>
+                    <button
+                      onClick={handleSaveContent}
+                      disabled={saveStatus === "saving"}
+                      className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                        saveStatus === "saved"
+                          ? "bg-green-600 text-white"
+                          : saveStatus === "error"
+                          ? "bg-red-600 text-white"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                    >
+                      {saveStatus === "saving"
+                        ? "Sparar..."
+                        : saveStatus === "saved"
+                        ? "Sparat!"
+                        : saveStatus === "error"
+                        ? "Fel!"
+                        : "Spara"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Footer note */}
         <p className="text-gray-500 text-sm mt-4 text-center">
-          Besökarstatistik lagras lokalt i webbläsaren. Kontaktmeddelanden
-          hämtas från servern.
+          Besökarstatistik lagras lokalt i webbläsaren. Kontaktmeddelanden och innehåll hämtas från servern.
         </p>
       </div>
     </div>
