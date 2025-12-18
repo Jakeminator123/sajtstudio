@@ -21,7 +21,9 @@ import {
 
 // Simple API key protection
 function isAuthorized(request: NextRequest): boolean {
-  const apiKey = process.env.CONTENT_API_KEY;
+  // Prefer private server key, but fall back to public for environments
+  // where only NEXT_PUBLIC_CONTENT_API_KEY is configured.
+  const apiKey = process.env.CONTENT_API_KEY || process.env.NEXT_PUBLIC_CONTENT_API_KEY;
   
   // If no API key is set, allow all requests in development
   if (!apiKey) {

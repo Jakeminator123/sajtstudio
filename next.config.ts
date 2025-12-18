@@ -136,7 +136,7 @@ const nextConfig: NextConfig = {
           // Note: D-ID agent internally uses Datadog/Mixpanel/LaunchDarkly but those are optional
           // cdn.jsdelivr.net is required for unicode font resolver in D-ID's Three.js
           // raw.githack.com is required for Three.js HDR environment files
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com wss://agent.d-id.com",
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com",
           
           // Media: self and D-ID for avatar videos
           "media-src 'self' https://agents-results.d-id.com blob:",

@@ -3,6 +3,7 @@
 import WordReveal from "@/components/animations/WordReveal";
 import BrandReveal from "@/components/animations/BrandReveal";
 import { useMounted } from "@/hooks/useMounted";
+import { useContentSection } from "@/hooks/useContent";
 import {
   MotionValue,
   motion,
@@ -218,6 +219,8 @@ function GlowingOrb({
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mounted = useMounted();
+  const { getValue } = useContentSection("about");
+  const aboutTitle = getValue("T5", "Vi är Sajtstudio");
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -449,7 +452,7 @@ export default function AboutSection() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <BrandReveal text="Vi är Sajtstudio" />
+            <BrandReveal text={aboutTitle} />
           </motion.h2>
 
           <div className="max-w-5xl mx-auto space-y-12">
