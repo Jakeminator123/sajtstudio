@@ -342,7 +342,7 @@ export default function MatrixContactForm({
                 SKICKAR...
               </span>
             ) : sent ? (
-              "✓ SKICKAT!"
+              "Strålande, vi återkommer inom kort!"
             ) : (
               "SKICKA →"
             )}

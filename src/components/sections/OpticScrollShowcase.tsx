@@ -34,34 +34,30 @@ const layers = [
 
 const illusions = [
   {
-    label: "PARALLAX",
-    title: "Djup utan WebGL",
-    copy: "Bakgrundslager som rör sig i olika hastigheter ger en optisk illusion av höjd och djup – exakt som i Fantasy’s parallaxscener.",
+    label: "BREDD",
+    title: "Från snabb start till tung leverans",
+    copy: "Små projekt, stora projekt, och allt däremellan. Vi kan leverera snabbt när det behövs — och bygga robust när det måste hålla i längden.",
   },
   {
-    label: "ZOOM",
-    title: "Scrollstyrd kamera",
-    copy: "Skalning kopplad till scroll-position simulerar en kameraåkning. Elementen känns som om de dras mot dig.",
+    label: "DJUP",
+    title: "Design, data och teknik i samma beslut",
+    copy: "Vi jobbar med helheten: struktur, copy, UX och teknik. Det ska kännas bra — men också vara lätt att förstå, hitta och agera på.",
   },
   {
-    label: "STICKY",
-    title: "Scrollytelling",
-    copy: "När innehållet låses fast kan berättelsen byta fokus utan att användaren tappar riktningen – perfekt för case-studier.",
+    label: "BALANS",
+    title: "AI när det ger fart. Inhouse när det ger kontroll.",
+    copy: "Rätt verktyg för rätt jobb. Vi kombinerar effektivitet med hantverk och tar ansvar för resultatet, inte bara leveransen.",
   },
 ];
 
-const timeline = [
-  "Ignition",
-  "Parallax drift",
-  "Zoom warp",
-  "Sticky landing",
-];
+const timeline = ["Snabb start", "Tydlig riktning", "Stabil leverans", "Skalbart vidare"];
 
 const fallbackBackground = "/images/hero/hero-background.webp";
 
 export default function OpticScrollShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const mounted = useMounted();
+  const [motionIntensity, setMotionIntensity] = useState(1);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start center", "end center"],
@@ -71,6 +67,22 @@ export default function OpticScrollShowcase() {
 
   const reduceMotion = useMemo(() => prefersReducedMotion(), []);
   const motionSafe = !reduceMotion;
+
+  // Scale down motion on smaller screens to keep it smooth and premium.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const getIntensity = () => {
+      const w = window.innerWidth;
+      if (w < 640) return 0.55;
+      if (w < 1024) return 0.8;
+      return 1;
+    };
+
+    const apply = () => setMotionIntensity(getIntensity());
+    apply();
+    window.addEventListener("resize", apply, { passive: true });
+    return () => window.removeEventListener("resize", apply);
+  }, []);
 
   const progress = useMemo(() => {
     // If scrollYProgress is a valid MotionValue (has .get method) use it directly
@@ -87,17 +99,17 @@ export default function OpticScrollShowcase() {
   const parallaxBackY = useTransform(
     progress,
     [0, 1],
-    motionSafe ? ["0%", "-40%"] : ["0%", "0%"]
+    motionSafe ? ["0%", "-25%"] : ["0%", "0%"]
   );
   const parallaxMidY = useTransform(
     progress,
     [0, 1],
-    motionSafe ? ["0%", "-20%"] : ["0%", "0%"]
+    motionSafe ? ["0%", "-12%"] : ["0%", "0%"]
   );
   const parallaxFrontY = useTransform(
     progress,
     [0, 1],
-    motionSafe ? ["0%", "20%"] : ["0%", "0%"]
+    motionSafe ? ["0%", "12%"] : ["0%", "0%"]
   );
   const starOpacity = useTransform(progress, [0, 0.5, 1], [0.2, 0.6, 1]);
 
@@ -117,7 +129,7 @@ export default function OpticScrollShowcase() {
   const viewportScale = useTransform(
     progress,
     motionSafe ? [0, 0.3, 0.6, 0.85, 1] : [0, 1],
-    motionSafe ? [0.8, 1.0, 1.2, 1.4, 1.6] : [1, 1]
+    motionSafe ? [0.9, 1.0, 1.12, 1.24, 1.35] : [1, 1]
   );
   const viewportRotate = useTransform(
     progress,
@@ -182,7 +194,11 @@ export default function OpticScrollShowcase() {
       }
 
       const nextStatus =
-        latest < 0.33 ? "Ignition" : latest < 0.66 ? "Warp" : "Landing";
+        latest < 0.33
+          ? "Snabb start"
+          : latest < 0.66
+          ? "Tydlig riktning"
+          : "Skalbart vidare";
       if (nextStatus !== statusRef.current) {
         statusRef.current = nextStatus;
         setStatus(nextStatus);
@@ -196,26 +212,38 @@ export default function OpticScrollShowcase() {
   // Use array form instead of function form to avoid .to() issues
   // Always create the same transforms - reduced motion handled via CSS prefers-reduced-motion
   // Increased values for more visible parallax effect
-  const cardParallax0 = useTransform(progress, [0, 1], motionSafe ? [30, -10] : [0, 0]);
-  const cardParallax1 = useTransform(progress, [0, 1], motionSafe ? [50, -20] : [0, 0]);
-  const cardParallax2 = useTransform(progress, [0, 1], motionSafe ? [70, -30] : [0, 0]);
+  const cardParallax0 = useTransform(
+    progress,
+    [0, 1],
+    motionSafe ? [30 * motionIntensity, -10 * motionIntensity] : [0, 0]
+  );
+  const cardParallax1 = useTransform(
+    progress,
+    [0, 1],
+    motionSafe ? [50 * motionIntensity, -18 * motionIntensity] : [0, 0]
+  );
+  const cardParallax2 = useTransform(
+    progress,
+    [0, 1],
+    motionSafe ? [65 * motionIntensity, -26 * motionIntensity] : [0, 0]
+  );
 
   /* ---------- Exploding image transforms ------------- */
   const explodeStart = 0.35;
   const explodeEnd = 0.5;
 
   // Two images fly upward-left / upward-right, one towards viewer
-  const img1X = useTransform(progress, [explodeStart, explodeEnd], [0, -250]);
-  const img1Y = useTransform(progress, [explodeStart, explodeEnd], [0, -350]);
-  const img1Rot = useTransform(progress, [explodeStart, explodeEnd], [0, -45]);
+  const img1X = useTransform(progress, [explodeStart, explodeEnd], [0, -180 * motionIntensity]);
+  const img1Y = useTransform(progress, [explodeStart, explodeEnd], [0, -240 * motionIntensity]);
+  const img1Rot = useTransform(progress, [explodeStart, explodeEnd], [0, -28 * motionIntensity]);
   const img1Opacity = useTransform(progress, [explodeStart, explodeEnd, 0.7], [1, 1, 0]);
 
-  const img2X = useTransform(progress, [explodeStart, explodeEnd], [0, 250]);
-  const img2Y = useTransform(progress, [explodeStart, explodeEnd], [0, -350]);
-  const img2Rot = useTransform(progress, [explodeStart, explodeEnd], [0, 45]);
+  const img2X = useTransform(progress, [explodeStart, explodeEnd], [0, 180 * motionIntensity]);
+  const img2Y = useTransform(progress, [explodeStart, explodeEnd], [0, -240 * motionIntensity]);
+  const img2Rot = useTransform(progress, [explodeStart, explodeEnd], [0, 28 * motionIntensity]);
   const img2Opacity = useTransform(progress, [explodeStart, explodeEnd, 0.7], [1, 1, 0]);
 
-  const img3Scale = useTransform(progress, [explodeStart, explodeEnd], [1, 3]);
+  const img3Scale = useTransform(progress, [explodeStart, explodeEnd], [1, 1 + 1.2 * motionIntensity]);
   const img3Opacity = useTransform(progress, [explodeStart, explodeEnd, 0.6], [1, 0.5, 0]);
 
   return (
@@ -287,9 +315,11 @@ export default function OpticScrollShowcase() {
               Scroll Illusions Lab
             </h2>
             <p className="mt-6 text-lg text-white/70 max-w-xl">
-              En hyllning till Fantasy-stilen: parallaxlager, zoom-effekter och
-              sticky storytelling sammanfogas till en scrollytelling-modul som
-              visar hur vi bygger visuella illusioner.
+              Vi kan ta allt från små, nästan kostnadsfria projekt till tunga uppdrag
+              med avancerad design och data. Ibland är det AI-drivet för fart och
+              skala, ibland bygger vi inhouse för maximal kontroll. Och ja — vi
+              försöker få det omöjliga äktenskapet att funka: kod som känns, och
+              design som konverterar.
             </p>
 
             <div className="mt-10 space-y-6">

@@ -9,9 +9,23 @@
 
 import Database from "better-sqlite3";
 import path from "path";
+import fs from "fs";
 
 // Database file location - in project root
 const dbPath = path.join(process.cwd(), "content.db");
+
+// Load default content from cache.json file (versioned in Git)
+const cachePath = path.join(process.cwd(), "content-cache.json");
+let cacheContent: Record<string, Omit<NewContentEntry, "key">> = {};
+
+try {
+  if (fs.existsSync(cachePath)) {
+    const cacheData = fs.readFileSync(cachePath, "utf-8");
+    cacheContent = JSON.parse(cacheData);
+  }
+} catch (error) {
+  console.warn("Failed to load content-cache.json, using hardcoded defaults:", error);
+}
 
 // Create database connection
 const contentDb = new Database(dbPath);
@@ -57,7 +71,8 @@ export interface NewContentEntry {
 }
 
 // Default content values - fallbacks when database is empty
-export const defaultContent: Record<string, Omit<NewContentEntry, "key">> = {
+// First try cache.json, then fall back to hardcoded values
+const hardcodedDefaults: Record<string, Omit<NewContentEntry, "key">> = {
   // HERO SECTION
   T1: { type: "text", section: "hero", value: "Hemsidor som betyder någonting", label: "Hero huvudrubrik" },
   T2: { type: "text", section: "hero", value: "Vi bygger digitala upplevelser som driver resultat", label: "Hero underrubrik" },
@@ -167,6 +182,12 @@ export const defaultContent: Record<string, Omit<NewContentEntry, "key">> = {
   B16: { type: "image", section: "team", value: "/images/team/jakob-eberg.webp", label: "Jakob Eberg profilbild" },
   B17: { type: "image", section: "team", value: "/images/team/oscar-guditz.webp", label: "Oscar Guditz profilbild" },
   B18: { type: "image", section: "team", value: "/images/team/joakim-hallsten.webp", label: "Joakim Hallsten profilbild" },
+};
+
+// Export defaultContent: prefer cache.json, fallback to hardcoded
+export const defaultContent: Record<string, Omit<NewContentEntry, "key">> = {
+  ...hardcodedDefaults,
+  ...cacheContent, // Cache.json overrides hardcoded if both exist
 };
 
 // CRUD Functions
@@ -281,11 +302,18 @@ export function updateContent(key: string, value: string): ContentEntry | null {
 
 /**
  * Seed database with default values
- * Only inserts entries that don't already exist
+ * Only inserts entries that don't already exist (preserves user edits)
+ * Uses cache.json if available, otherwise hardcoded defaults
  */
 export function seedDefaults(): number {
+  // Check which keys already exist in database
+  const existingKeysStmt = contentDb.prepare("SELECT key FROM content");
+  const existingKeys = new Set(
+    (existingKeysStmt.all() as { key: string }[]).map((row) => row.key)
+  );
+  
   const insertStmt = contentDb.prepare(`
-    INSERT OR IGNORE INTO content (key, type, section, value, label, updated_at)
+    INSERT INTO content (key, type, section, value, label, updated_at)
     VALUES (?, ?, ?, ?, ?, datetime('now'))
   `);
   
@@ -293,9 +321,12 @@ export function seedDefaults(): number {
   
   const transaction = contentDb.transaction(() => {
     for (const [key, entry] of Object.entries(defaultContent)) {
-      const result = insertStmt.run(key, entry.type, entry.section, entry.value, entry.label);
-      if (result.changes > 0) {
-        insertedCount++;
+      // Only insert if key doesn't exist (preserves user edits)
+      if (!existingKeys.has(key)) {
+        const result = insertStmt.run(key, entry.type, entry.section, entry.value, entry.label);
+        if (result.changes > 0) {
+          insertedCount++;
+        }
       }
     }
   });

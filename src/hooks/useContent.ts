@@ -8,7 +8,7 @@
  * For server components, use getContentValue from content-database.ts directly
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 // Content entry type (matches database)
 export interface ContentEntry {
@@ -22,27 +22,21 @@ export interface ContentEntry {
 }
 
 // Cache for content to avoid repeated API calls within a session
-// Cache is cleared on each new page load via sessionStorage check
+// Cache is cleared on each full page load (module initialization) to ensure CMS updates are visible after refresh
 const contentCache: Map<string, ContentEntry> = new Map();
 const sectionCache: Map<string, ContentEntry[]> = new Map();
 let allContentCache: ContentEntry[] | null = null;
 
-// Clear cache on new page loads (browser refresh) to ensure CMS updates are visible
-// Uses sessionStorage pageLoadId to detect true page refreshes vs SPA navigation
+// Clear cache on each full page load (browser refresh / direct navigation).
+// This module is only initialized on full page loads, not during Next.js SPA navigation,
+// so it's safe to clear caches unconditionally here.
 if (typeof window !== "undefined") {
-  const currentLoadId = Date.now().toString();
-  const storedLoadId = sessionStorage.getItem("content_page_load_id");
-  
-  // If this is a fresh page load (not SPA navigation), clear caches
-  if (!storedLoadId || performance.navigation?.type === 1 /* reload */ || 
-      (performance.getEntriesByType && 
-       performance.getEntriesByType("navigation").length > 0 &&
-       (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type === "reload")) {
-    contentCache.clear();
-    sectionCache.clear();
-    allContentCache = null;
-    sessionStorage.setItem("content_page_load_id", currentLoadId);
-  }
+  contentCache.clear();
+  sectionCache.clear();
+  allContentCache = null;
+
+  // Track this load in sessionStorage for debugging/visibility
+  sessionStorage.setItem("content_page_load_id", Date.now().toString());
 }
 
 /**
@@ -139,18 +133,26 @@ export function useContentSection(section: string) {
     fetchContent();
   }, [section]);
 
-  // Create a map for easy access by key
-  const contentMap = content.reduce((acc, entry) => {
-    acc[entry.key] = entry.value;
-    return acc;
-  }, {} as Record<string, string>);
+  // Create a map for easy access by key (memoized to keep stable references)
+  const contentMap = useMemo(() => {
+    return content.reduce((acc, entry) => {
+      acc[entry.key] = entry.value;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [content]);
+
+  // Stable accessor (prevents downstream useMemo dependencies from re-running each render)
+  const getValue = useCallback(
+    (key: string, fallback?: string) => contentMap[key] ?? fallback ?? "",
+    [contentMap]
+  );
 
   return {
     content,
     contentMap,
     isLoading,
     error,
-    getValue: (key: string, fallback?: string) => contentMap[key] ?? fallback ?? "",
+    getValue,
   };
 }
 

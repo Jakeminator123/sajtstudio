@@ -180,7 +180,7 @@ export default function ContactForm() {
             role="alert"
             aria-live="polite"
           >
-            <span className="text-blue-300">✨</span> Tack för ditt meddelande! Vi återkommer så snart som möjligt.
+            <span className="text-blue-300">✨</span> Strålande, vi återkommer inom kort!
           </motion.div>
         )}
 

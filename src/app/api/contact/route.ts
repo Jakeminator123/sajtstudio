@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
           message: trimmedMessage,
         });
         return NextResponse.json(
-          { success: true, message: "Meddelandet har skickats!" },
+          { success: true, message: "Strålande, vi återkommer inom kort!" },
           { status: 200 }
         );
       }
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
             message: trimmedMessage,
           });
           return NextResponse.json(
-            { success: true, message: "Meddelandet har skickats!" },
+            { success: true, message: "Strålande, vi återkommer inom kort!" },
             { status: 200 }
           );
         }
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { success: true, message: "Meddelandet har skickats!" },
+        { success: true, message: "Strålande, vi återkommer inom kort!" },
         { status: 200 }
       );
     } catch (emailError) {
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
           message: trimmedMessage,
         });
         return NextResponse.json(
-          { success: true, message: "Meddelandet har skickats!" },
+          { success: true, message: "Strålande, vi återkommer inom kort!" },
           { status: 200 }
         );
       }
