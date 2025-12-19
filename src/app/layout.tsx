@@ -148,7 +148,18 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT
   );
   // Default: enabled in dev for debugging, still opt-in for production to protect LCP.
-  const shouldLoadDidChatbot = didChatbotFlag ?? (isProd ? false : true);
+  const didClientKey = process.env.NEXT_PUBLIC_DID_CLIENT_KEY?.trim();
+  const didAgentId = process.env.NEXT_PUBLIC_DID_AGENT_ID?.trim();
+  const didMode = process.env.NEXT_PUBLIC_DID_MODE?.trim() || "fabio";
+  const didOrientation =
+    process.env.NEXT_PUBLIC_DID_ORIENTATION?.trim() || "horizontal";
+  const didPosition = process.env.NEXT_PUBLIC_DID_POSITION?.trim() || "right";
+
+  const shouldLoadDidChatbot =
+    (didChatbotFlag ?? (isProd ? false : true)) && !!didClientKey && !!didAgentId;
+
+  const didDebug =
+    parseEnvBool(process.env.NEXT_PUBLIC_DID_DEBUG) ?? (isProd ? false : true);
 
   return (
     <html
@@ -271,6 +282,30 @@ export default function RootLayout({
             src="/scripts/global-error-handler.js"
           />
         )}
+        {/* D-ID debug helper (dev-only by default) */}
+        {shouldLoadDidChatbot && didDebug && (
+          <Script
+            id="did-debug"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  try {
+                    window.addEventListener('did-status-change', function() {
+                      try { console.log('[D-ID] status:', window.__didStatus); } catch(_) {}
+                    });
+                    setTimeout(function() {
+                      try {
+                        const s = document.querySelector('script[data-name="did-agent"]');
+                        console.log('[D-ID] script present:', !!s, 'status:', window.__didStatus);
+                      } catch(_) {}
+                    }, 6000);
+                  } catch(_) {}
+                })();
+              `,
+            }}
+          />
+        )}
         {/* D-ID Chatbot */}
         {shouldLoadDidChatbot && (
           <Script
@@ -287,16 +322,17 @@ export default function RootLayout({
 
                   // Wait for page to be fully loaded before injecting chatbot to avoid ResizeObserver conflicts
                   const loadChatbot = function() {
+                    try { window.__didStatus = window.__didStatus || 'pending'; } catch(_) {}
                     const script = document.createElement('script');
                     script.type = 'module';
                     script.src = 'https://agent.d-id.com/v2/index.js';
-                    script.setAttribute('data-mode', 'fabio');
-                    script.setAttribute('data-client-key', 'Z29vZ2xlLW9hdXRoMnwxMTUyNzg1NzQzNDM2NzE1OTQ5ODU6VFFrU1I3SUNxWHptZHg3NHlNVHJ0');
-                    script.setAttribute('data-agent-id', 'v2_agt_S5KManKi');
+                    script.setAttribute('data-mode', ${JSON.stringify(didMode)});
+                    script.setAttribute('data-client-key', ${JSON.stringify(didClientKey)});
+                    script.setAttribute('data-agent-id', ${JSON.stringify(didAgentId)});
                     script.setAttribute('data-name', 'did-agent');
                     script.setAttribute('data-monitor', 'true');
-                    script.setAttribute('data-orientation', 'horizontal');
-                    script.setAttribute('data-position', 'right');
+                    script.setAttribute('data-orientation', ${JSON.stringify(didOrientation)});
+                    script.setAttribute('data-position', ${JSON.stringify(didPosition)});
 
                     // Add error handling
                     script.onerror = function() {
