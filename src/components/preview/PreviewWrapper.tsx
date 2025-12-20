@@ -31,7 +31,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // ============================================================================
 // TYPES
@@ -82,13 +82,22 @@ export default function PreviewWrapper({
   const [showSlowHint, setShowSlowHint] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const mountedRef = useRef(false);
 
   // Mark as mounted on client to avoid hydration issues
+  // Using requestAnimationFrame to avoid synchronous setState in effect
   useEffect(() => {
-    setIsMounted(true);
-    if (mode === "image") {
-      setIsLoading(false);
-    }
+    if (mountedRef.current) return;
+    mountedRef.current = true;
+    
+    const frameId = requestAnimationFrame(() => {
+      setIsMounted(true);
+      if (mode === "image") {
+        setIsLoading(false);
+      }
+    });
+    
+    return () => cancelAnimationFrame(frameId);
   }, [mode]);
 
   // Show hint after threshold if still loading
