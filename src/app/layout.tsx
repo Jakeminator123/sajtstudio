@@ -321,8 +321,20 @@ export default function RootLayout({
                     }
 
                   // Wait for page to be fully loaded before injecting chatbot to avoid ResizeObserver conflicts
+                  // Retry configuration
+                  var didRetryCount = 0;
+                  var didMaxRetries = 3;
+                  var didRetryDelay = 10000; // 10 seconds between retries
+
                   const loadChatbot = function() {
                     try { window.__didStatus = window.__didStatus || 'pending'; } catch(_) {}
+                    
+                    // Remove any existing failed script
+                    const existingScript = document.querySelector('script[data-name="did-agent"]');
+                    if (existingScript && window.__didStatus === 'error') {
+                      existingScript.remove();
+                    }
+                    
                     const script = document.createElement('script');
                     script.type = 'module';
                     script.src = 'https://agent.d-id.com/v2/index.js';
@@ -334,11 +346,24 @@ export default function RootLayout({
                     script.setAttribute('data-orientation', ${JSON.stringify(didOrientation)});
                     script.setAttribute('data-position', ${JSON.stringify(didPosition)});
 
-                    // Add error handling
+                    // Retry function
+                    const retryLoadChatbot = function() {
+                      if (didRetryCount < didMaxRetries) {
+                        didRetryCount++;
+                        console.log('[D-ID] Retry attempt ' + didRetryCount + '/' + didMaxRetries + ' in ' + (didRetryDelay/1000) + 's...');
+                        window.__didStatus = 'pending';
+                        setTimeout(loadChatbot, didRetryDelay);
+                      } else {
+                        console.log('[D-ID] Max retries reached. Chatbot failed to load.');
+                      }
+                    };
+
+                    // Add error handling with retry
                     script.onerror = function() {
                       try {
                         window.__didStatus = 'error';
                         window.dispatchEvent(new Event('did-status-change'));
+                        retryLoadChatbot();
                       } catch(_) {}
                     };
 
@@ -354,16 +379,19 @@ export default function RootLayout({
                           if (agentElement) {
                             window.__didStatus = 'loaded';
                             window.dispatchEvent(new Event('did-status-change'));
+                            console.log('[D-ID] Chatbot loaded successfully!');
                           } else {
                             // Agent script loaded but element not found - might be blocked by CORS
                             window.__didStatus = 'error';
                             window.dispatchEvent(new Event('did-status-change'));
+                            retryLoadChatbot();
                           }
                         } catch(_) {
                           window.__didStatus = 'error';
                           window.dispatchEvent(new Event('did-status-change'));
+                          retryLoadChatbot();
                         }
-                      }, 2000); // Reduced from 3000 to detect CORS errors faster
+                      }, 3000); // Wait 3 seconds for initialization
                     };
 
                     // Also listen for CORS errors immediately
@@ -371,18 +399,20 @@ export default function RootLayout({
                       try {
                         window.__didStatus = 'error';
                         window.dispatchEvent(new Event('did-status-change'));
+                        retryLoadChatbot();
                       } catch(_) {}
                     });
 
-                    // Also set a timeout - if status is still pending after 4 seconds, mark as error (CORS usually fails quickly)
+                    // Also set a timeout - if status is still pending after 8 seconds, retry
                     setTimeout(function() {
                       try {
                         if (window.__didStatus === 'pending') {
                           window.__didStatus = 'error';
                           window.dispatchEvent(new Event('did-status-change'));
+                          retryLoadChatbot();
                         }
                       } catch(_) {}
-                    }, 4000);
+                    }, 8000);
 
                     document.body.appendChild(script);
                   };
