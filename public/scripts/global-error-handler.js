@@ -92,7 +92,17 @@
         message.includes("fetch") &&
         (message.includes("kaspersky") ||
           message.includes("d-id") ||
-          message.includes("agent")))
+          message.includes("agent"))) ||
+      // Filter D-ID permission errors (microphone/camera access denied)
+      message.includes("notallowederror") ||
+      message.includes("permission denied") ||
+      message.includes("getusermedia") ||
+      // Filter D-ID main script errors
+      message.includes("main-d6iamsoh") ||
+      message.includes("index-cfauhdnu") ||
+      // Filter unhandled promise rejections from D-ID
+      (message.includes("[object event]") && 
+        (message.includes("d-id") || message.includes("agent")))
     );
   };
 
@@ -368,7 +378,9 @@
         allStackInfo.includes("d-id.com") ||
         allStackInfo.includes("api.d-id.com") ||
         allStackInfo.includes("index-dqcaxkvx.js") ||
-        allStackInfo.includes("main-d6iamsoh.js");
+        allStackInfo.includes("main-d6iamsoh.js") ||
+        allStackInfo.includes("index-cfauhdnu.js") ||
+        allStackInfo.includes("main-d6iamsoh");
       const hasAntivirusInStack =
         allStackInfo.includes("kaspersky") ||
         allStackInfo.includes("antivirus") ||
@@ -390,6 +402,9 @@
         errorString.toLowerCase().includes("unauthorized") ||
         errorString.toLowerCase().includes("networkerror") ||
         errorString.toLowerCase().includes("err_failed") ||
+        errorString.toLowerCase().includes("notallowederror") ||
+        errorString.toLowerCase().includes("permission denied") ||
+        errorString.toLowerCase().includes("getusermedia") ||
         hasDIDInStack ||
         (hasAntivirusInStack && isFailedFetch) ||
         (hasAntivirusInStack && hasDIDInStack) ||

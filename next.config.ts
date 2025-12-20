@@ -120,26 +120,24 @@ const nextConfig: NextConfig = {
           "default-src 'self'",
           
           // Scripts: unsafe-inline required for Next.js hydration, unsafe-eval for D-ID chatbot
-          // TODO: Consider nonce-based CSP in future to remove unsafe-inline
-          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com",
+          // vusercontent.net for preview proxied content
+          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com https://*.vusercontent.net",
           
           // Styles: unsafe-inline required for Next.js styled-jsx and emotion
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          // vusercontent.net for preview proxied content
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.vusercontent.net",
           
           // Images: allow data URIs for inline images, https for external
           "img-src 'self' data: https: blob:",
           
-          // Fonts: Google Fonts
-          "font-src 'self' data: https://fonts.gstatic.com",
+          // Fonts: Google Fonts + vusercontent.net
+          "font-src 'self' data: https://fonts.gstatic.com https://*.vusercontent.net",
           
-          // API connections: D-ID chatbot + required CDNs
-          // Note: D-ID agent internally uses Datadog/Mixpanel/LaunchDarkly but those are optional
-          // cdn.jsdelivr.net is required for unicode font resolver in D-ID's Three.js
-          // raw.githack.com is required for Three.js HDR environment files
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com",
+          // API connections: D-ID chatbot + required CDNs + vusercontent.net for previews
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com https://*.vusercontent.net",
           
           // Media: self and D-ID for avatar videos
-          "media-src 'self' https://agents-results.d-id.com blob:",
+          "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net",
           
           // Frames: D-ID chatbot iframe
           "frame-src 'self' https://agent.d-id.com",

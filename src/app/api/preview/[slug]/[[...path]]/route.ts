@@ -1,53 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPreviewBySlug } from "@/lib/preview-database";
 
-// Runtime configuration - use nodejs for better compatibility with AbortSignal.timeout
+/**
+ * Proxy route for preview content
+ * 
+ * Fetches content from vusercontent.net and serves it, bypassing X-Frame-Options.
+ * Only works for slugs that exist in the previews database.
+ */
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Base URL pattern for external sites
 const EXTERNAL_BASE_URL = "https://";
 const EXTERNAL_DOMAIN_SUFFIX = ".vusercontent.net";
 
-// List of reserved routes that should not be proxied
-// NOTE: These routes have priority over the catch-all slug proxy.
-// Add any new page routes here to prevent them from being proxied.
-const RESERVED_ROUTES = [
-  "api",
-  "admin",
-  "contact", // Old contact page - kept for backwards compatibility (returns 404 or redirect)
-  "kontakt", // New contact page
-  "portfolio",
-  "generated",
-  "sajtgranskning",
-  "utvardera",
-  "sajtmaskin",
-  "engine",
-  "_next",
-  "favicon.ico",
-];
-
-const slugProxyDisabled = (() => {
+// Check if SLUGS feature is disabled
+const slugsDisabled = (() => {
   const flag = process.env.SLUGS;
-  if (!flag) {
-    return false;
-  }
+  if (!flag) return true;
   const normalized = flag.trim().toLowerCase();
-  if (["n", "no", "off", "0", "false"].includes(normalized)) {
-    return true;
-  }
-  if (["y", "yes", "on", "1", "true"].includes(normalized)) {
-    return false;
-  }
-  return false;
+  if (["n", "no", "off", "0", "false"].includes(normalized)) return true;
+  if (["y", "yes", "on", "1", "true"].includes(normalized)) return false;
+  return true;
 })();
 
-/**
- * Optional catch-all route handler for generated sites
- * Handles routes like:
- * - /demo-kzmoqvc0t8a7dxke3a6j (path is undefined)
- * - /demo-kzmoqvc0t8a7dxke3a6j/some/path (path is ['some', 'path'])
- * Proxies to https://demo-kzmoqvc0t8a7dxke3a6j.vusercontent.net[/some/path]
- */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string; path?: string[] }> }
@@ -56,33 +32,31 @@ export async function GET(
     const resolvedParams = await params;
     const { slug, path } = resolvedParams;
 
-    if (slugProxyDisabled) {
+    if (slugsDisabled) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // Early validation - return 404 if slug is missing or invalid
     if (!slug || typeof slug !== "string" || slug.trim() === "") {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // Check if slug is a reserved route
-    if (RESERVED_ROUTES.includes(slug.toLowerCase())) {
-      return new NextResponse("Not Found", { status: 404 });
-    }
-
-    // Validate slug format (alphanumeric, dashes, underscores allowed)
+    // Validate slug format
     const slugRegex = /^[a-zA-Z0-9_-]+$/;
     if (!slugRegex.test(slug)) {
       return new NextResponse("Invalid slug format", { status: 400 });
     }
 
-    // Build the path to proxy (path is optional with [[...path]])
-    const pathString = path && path.length > 0 ? `/${path.join("/")}` : "";
+    // Check if slug exists in database
+    const preview = getPreviewBySlug(slug);
+    if (!preview) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
 
-    // Build the external URL
+    // Build the path to proxy
+    const pathString = path && path.length > 0 ? `/${path.join("/")}` : "";
     const externalUrl = `${EXTERNAL_BASE_URL}${slug}${EXTERNAL_DOMAIN_SUFFIX}${pathString}`;
 
-    // Get query parameters from the request
+    // Get query parameters
     const searchParams = request.nextUrl.searchParams.toString();
     const targetUrl = searchParams
       ? `${externalUrl}?${searchParams}`
@@ -109,58 +83,55 @@ export async function GET(
       });
     }
 
-    // Get the content
     let content = await response.text();
     const contentType = response.headers.get("content-type") || "";
 
-    // If it's HTML, rewrite URLs to point to our domain
+    // If it's HTML, rewrite URLs to point to the external origin
     if (contentType.includes("text/html")) {
-      const origin = request.nextUrl.origin;
-      const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const escapedSuffix = EXTERNAL_DOMAIN_SUFFIX.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&"
+      const externalOrigin = `${EXTERNAL_BASE_URL}${slug}${EXTERNAL_DOMAIN_SUFFIX}`;
+      
+      // Rewrite paths that start with / to point to external origin
+      // This handles /_next/, /assets/, /images/, etc.
+      // Match href="/, src="/, href='/, src='/
+      content = content.replace(
+        /(href|src|action)=(["'])\//gi,
+        `$1=$2${externalOrigin}/`
       );
-
-      // Replace absolute URLs pointing to the external domain
-      const externalUrlPattern = new RegExp(
-        `https?://${escapedSlug}${escapedSuffix}(/[^"'>\\s]*)?`,
-        "gi"
+      
+      // Also handle srcset attributes
+      content = content.replace(
+        /srcset=(["'])([^"']+)(["'])/gi,
+        (match, quote1, srcsetValue, quote2) => {
+          const rewritten = srcsetValue.replace(
+            /\s*\/([^\s,]+)/g,
+            ` ${externalOrigin}/$1`
+          );
+          return `srcset=${quote1}${rewritten}${quote2}`;
+        }
       );
-
-      content = content.replace(externalUrlPattern, (match, urlPath) => {
-        return `${origin}/${slug}${urlPath || ""}`;
-      });
-
-      // Also handle protocol-relative URLs
-      const protocolRelativePattern = new RegExp(
-        `//${escapedSlug}${escapedSuffix}(/[^"'>\\s]*)?`,
-        "gi"
+      
+      // Handle CSS url() with absolute paths
+      content = content.replace(
+        /url\((["']?)\/([^)"']+)(["']?)\)/gi,
+        `url($1${externalOrigin}/$2$3)`
       );
-
-      content = content.replace(protocolRelativePattern, (match, urlPath) => {
-        return `${origin}/${slug}${urlPath || ""}`;
-      });
     }
 
-    // Return the proxied content
     return new NextResponse(content, {
       status: response.status,
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=60, s-maxage=300",
-        "X-Frame-Options": "SAMEORIGIN",
+        // Don't set X-Frame-Options to allow iframe embedding
       },
     });
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error("Preview proxy error:", error);
 
-    // Handle timeout errors
     if (error instanceof Error) {
       if (error.name === "AbortError" || error.message.includes("timeout")) {
         return new NextResponse("Request timeout", { status: 504 });
       }
-      // Handle fetch errors (network issues, DNS failures, etc.)
       if (
         error.message.includes("fetch") ||
         error.message.includes("network")
@@ -169,7 +140,6 @@ export async function GET(
       }
     }
 
-    // Return generic error to prevent blocking deployment
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
@@ -183,22 +153,23 @@ export async function POST(
     const resolvedParams = await params;
     const { slug, path } = resolvedParams;
 
-    if (slugProxyDisabled) {
+    if (slugsDisabled) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // Early validation - return 404 if slug is missing or invalid
     if (!slug || typeof slug !== "string" || slug.trim() === "") {
-      return new NextResponse("Not Found", { status: 404 });
-    }
-
-    if (RESERVED_ROUTES.includes(slug.toLowerCase())) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
     const slugRegex = /^[a-zA-Z0-9_-]+$/;
     if (!slugRegex.test(slug)) {
       return new NextResponse("Invalid slug format", { status: 400 });
+    }
+
+    // Check if slug exists in database
+    const preview = getPreviewBySlug(slug);
+    if (!preview) {
+      return new NextResponse("Not Found", { status: 404 });
     }
 
     const pathString = path && path.length > 0 ? `/${path.join("/")}` : "";
@@ -232,14 +203,12 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Proxy POST error:", error);
+    console.error("Preview proxy POST error:", error);
 
-    // Handle timeout errors
     if (error instanceof Error) {
       if (error.name === "AbortError" || error.message.includes("timeout")) {
         return new NextResponse("Request timeout", { status: 504 });
       }
-      // Handle fetch errors (network issues, DNS failures, etc.)
       if (
         error.message.includes("fetch") ||
         error.message.includes("network")
@@ -248,7 +217,7 @@ export async function POST(
       }
     }
 
-    // Return generic error to prevent blocking deployment
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+

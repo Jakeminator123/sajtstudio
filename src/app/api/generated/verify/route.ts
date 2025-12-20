@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Base URL pattern for external sites
-const EXTERNAL_BASE_URL = "https://";
-const EXTERNAL_DOMAIN_SUFFIX = ".vusercontent.net";
+import { getPreviewBySlug } from "@/lib/preview-database";
 
 /**
- * Verifies password and returns the corresponding slug
+ * Verifies password/slug and returns the corresponding slug if valid
  * Password format: e.g., "demo-kzmoqvc0t8a7dxke3a6j"
  * This will redirect to: /demo-kzmoqvc0t8a7dxke3a6j
+ * 
+ * Now validates against the previews database instead of making external requests.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate password format (alphanumeric, dashes, underscores allowed)
-    // This matches typical subdomain patterns
     const passwordRegex = /^[a-zA-Z0-9_-]+$/;
     if (!passwordRegex.test(trimmedPassword)) {
       return NextResponse.json(
@@ -40,45 +38,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify that the external URL exists by checking if it's accessible
-    // This ensures we only allow valid passwords that correspond to existing sites
-    const externalUrl = `${EXTERNAL_BASE_URL}${trimmedPassword}${EXTERNAL_DOMAIN_SUFFIX}`;
+    // Check if the slug exists in our database
+    const preview = getPreviewBySlug(trimmedPassword);
 
-    try {
-      const checkResponse = await fetch(externalUrl, {
-        method: "HEAD",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; Sajtstudio/1.0)",
-        },
-        // Add timeout to prevent hanging
-        signal: AbortSignal.timeout(5000), // 5 second timeout
-      });
-
-      // If the site doesn't exist (404), reject the password
-      if (!checkResponse.ok && checkResponse.status === 404) {
-        return NextResponse.json(
-          { error: "Ogiltigt lösenord" },
-          { status: 401 }
-        );
-      }
-
-      // If we get any other error (timeout, network error, etc.),
-      // we'll still allow it but log for debugging
-      if (!checkResponse.ok) {
-        console.warn(`Warning: External URL check failed for ${trimmedPassword}: ${checkResponse.status}`);
-        // Continue anyway - might be temporary network issue
-      }
-    } catch (fetchError) {
-      // Network errors or timeouts - log but allow (might be temporary)
-      console.warn(`Warning: Could not verify external URL for ${trimmedPassword}:`, fetchError);
-      // Continue anyway - don't block user if there's a network issue
+    if (!preview) {
+      return NextResponse.json(
+        { error: "Ogiltigt lösenord" },
+        { status: 401 }
+      );
     }
 
-    // Return success with the slug (which is the same as the password)
+    // Return success with the slug
     return NextResponse.json(
       {
         success: true,
         slug: trimmedPassword,
+        company: preview.company_name,
         message: "Lösenord verifierat"
       },
       { status: 200 }
