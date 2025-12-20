@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent, useCallback } from "react";
+import Link from "next/link";
 
 /**
  * Admin Dashboard - Statistics, contact messages, and content management
@@ -712,9 +713,9 @@ export default function AdminPage() {
             {audits.length === 0 ? (
               <p className="text-gray-400 text-center py-8">
                 Inga sparade audits ännu. Kör en audit på{" "}
-                <a href="/utvardera" className="text-blue-400 hover:underline">
+                <Link href="/utvardera" className="text-blue-400 hover:underline">
                   /utvardera
-                </a>{" "}
+                </Link>{" "}
                 för att komma igång.
               </p>
             ) : (

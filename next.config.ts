@@ -139,8 +139,8 @@ const nextConfig: NextConfig = {
           // Media: self and D-ID for avatar videos
           "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net",
           
-          // Frames: D-ID chatbot iframe
-          "frame-src 'self' https://agent.d-id.com",
+          // Frames: D-ID chatbot iframe + vusercontent.net previews
+          "frame-src 'self' https://agent.d-id.com https://*.vusercontent.net",
           
           // Workers: blob for inlined workers
           "worker-src 'self' blob:",

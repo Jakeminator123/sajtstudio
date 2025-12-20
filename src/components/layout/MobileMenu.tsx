@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { useTheme } from "@/hooks/useTheme";
+import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
+import { useOfferModal } from "@/hooks/useOfferModal";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -38,6 +40,8 @@ export default function MobileMenu({
   navLinks,
 }: MobileMenuProps) {
   const { isLight } = useTheme();
+  const { openModal } = useUnderConstructionModal();
+  const { openModal: openOfferModal } = useOfferModal();
 
   return (
     <AnimatePresence>
@@ -118,6 +122,14 @@ export default function MobileMenu({
                       href={link.href}
                       onClick={(e) => {
                         onClose();
+                        
+                        // Handle Erbjudande link - opens modal instead of navigation
+                        if (link.href === "#erbjudande") {
+                          e.preventDefault();
+                          openOfferModal();
+                          return;
+                        }
+                        
                         // Handle anchor links: if on different page, navigate first then scroll
                         const isAnchorLink = link.href.includes("#");
                         const pathname = window.location.pathname;
@@ -149,11 +161,12 @@ export default function MobileMenu({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="mt-8"
-                onClick={onClose}
               >
                 <Button
-                  href="https://sajtmaskin-1.onrender.com/"
-                  external={true}
+                  onClick={() => {
+                    onClose();
+                    openModal();
+                  }}
                   variant="cta"
                   size="md"
                   fullWidth

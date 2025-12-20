@@ -1,6 +1,7 @@
 "use client";
 
-import WordReveal from "@/components/animations/WordReveal";
+// WordReveal available for future use
+// import WordReveal from "@/components/animations/WordReveal";
 import BrandReveal from "@/components/animations/BrandReveal";
 import { useMounted } from "@/hooks/useMounted";
 import { useContentSection } from "@/hooks/useContent";
@@ -255,109 +256,9 @@ export default function AboutSection() {
     [0.03, 0.1, 0.03]
   );
 
-  // Smoke-like blob - drifts around and fades away like smoke
-  // More organic, wispy movement
-  const blobXPercent = useTransform(
-    morphProgress,
-    [0, 0.3, 0.6, 0.8, 1],
-    [50, 30, 70, 50, 50],
-    { clamp: false }
-  );
-  // Rises up and dissipates like smoke
-  const blobYPercent = useTransform(
-    morphProgress,
-    [0, 0.4, 0.7, 1],
-    [60, 40, 20, 10],
-    { clamp: false }
-  );
-  const blobX = useTransform(blobXPercent, (val) => `${val}%`);
-  const blobY = useTransform(blobYPercent, (val) => `${val}%`);
-  // Grows then shrinks and fades like smoke dissipating
-  const blobScale = useTransform(
-    morphProgress,
-    [0, 0.3, 0.6, 0.8, 1],
-    [0.3, 1.0, 1.3, 0.8, 0.2],
-    { clamp: false }
-  );
-  // Fades away like smoke - appears quickly, disappears gradually
-  const blobOpacity = useTransform(
-    morphProgress,
-    [0, 0.2, 0.5, 0.8, 1],
-    [0, 0.7, 0.9, 0.4, 0]
-  );
-
-  // Blur increases as smoke dissipates (becomes more wispy)
-  const blobBlur = useTransform(morphProgress, [0, 0.5, 1], [30, 50, 80]);
-  const blobBlurString = useTransform(blobBlur, (val) => `blur(${val}px)`);
-
-  // Smoke-like blob shape - more wispy and organic, less defined edges
-  // Default path for initial render to prevent SVG errors
-  const defaultPath = "M 100 100 L 100 100 Z";
-
-  const blobPath = useTransform(morphProgress, (progress) => {
-    // Handle undefined/NaN progress values
-    if (progress === undefined || progress === null || isNaN(progress)) {
-      return defaultPath;
-    }
-
-    // Create a wispy, smoke-like path that morphs and dissipates
-    const t = progress;
-    const w = 200;
-    const h = 200;
-    const complexity = 16; // More points for smoother, wispier edges
-    const baseRadius = w / 3;
-
-    // Smoke becomes more irregular and wispy as it dissipates
-    const irregularity = 0.6 + t * 0.4; // More irregular as it fades
-    const wispiness = t * 0.5; // Becomes wispier
-
-    let path = `M ${
-      w / 2 +
-      Math.cos(0) *
-        baseRadius *
-        (1 + t * 0.5) *
-        (1 + Math.sin(0 * 3) * wispiness)
-    } ${
-      h / 2 +
-      Math.sin(0) *
-        baseRadius *
-        (1 + t * 0.5) *
-        (1 + Math.cos(0 * 3) * wispiness)
-    }`;
-
-    for (let i = 1; i <= complexity; i++) {
-      const angle = (i / complexity) * Math.PI * 2;
-      // More variation for smoke-like wispiness
-      const radiusVariation =
-        Math.sin(angle * 6 + t * Math.PI * 4) * irregularity * 0.5;
-      const wispyVariation =
-        Math.sin(angle * 8 + t * Math.PI * 5) * wispiness * 0.3;
-      const radius =
-        baseRadius * (1 + t * 0.5 + radiusVariation + wispyVariation);
-      const x = w / 2 + Math.cos(angle) * radius;
-      const y = h / 2 + Math.sin(angle) * radius;
-      path += ` L ${x} ${y}`;
-    }
-    path += " Z";
-    return path;
-  });
-
   // Floor transition scale
   const floorScale = useTransform(morphProgress, [0.7, 1], [0, 1]);
   const floorOpacity = useTransform(morphProgress, [0.7, 1], [0, 1]);
-
-  // Create mounted MotionValue to use in transforms
-  const mountedValue = useMotionValue(mounted ? 1 : 0);
-
-  useEffect(() => {
-    mountedValue.set(mounted ? 1 : 0);
-  }, [mounted, mountedValue]);
-
-  // Combine blob opacity with mounted value
-  const finalBlobOpacity = useTransform(
-    [blobOpacity, mountedValue],
-    (values: number[]) => values[0] * values[1]
-  );
 
   // Parallax effects
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 100]);

@@ -1,7 +1,9 @@
 import PageTransition from "@/components/layout/PageTransition";
 import SkipLink from "@/components/layout/SkipLink";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import ProductionBanner from "@/components/effects/ProductionBanner";
+import RouteAwareBanners from "@/components/layout/RouteAwareBanners";
+import DidChatbotLoader from "@/components/integrations/DidChatbotLoader";
+import Providers from "@/components/providers/Providers";
 import {
   generateSchemaScript,
   getOrganizationSchema,
@@ -130,6 +132,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const isProd = process.env.NODE_ENV === "production";
+  
   // Best practice: make invasive client-side handlers configurable.
   // Default: enabled in production, disabled in dev unless explicitly turned on.
   const parseEnvBool = (value: string | undefined): boolean | undefined => {
@@ -144,22 +147,6 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_ENABLE_GLOBAL_ERROR_HANDLER
   );
   const enableGlobalErrorHandler = globalHandlerFlag ?? (isProd ? true : false);
-  const didChatbotFlag = parseEnvBool(
-    process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT
-  );
-  // Default: enabled in dev for debugging, still opt-in for production to protect LCP.
-  const didClientKey = process.env.NEXT_PUBLIC_DID_CLIENT_KEY?.trim();
-  const didAgentId = process.env.NEXT_PUBLIC_DID_AGENT_ID?.trim();
-  const didMode = process.env.NEXT_PUBLIC_DID_MODE?.trim() || "fabio";
-  const didOrientation =
-    process.env.NEXT_PUBLIC_DID_ORIENTATION?.trim() || "horizontal";
-  const didPosition = process.env.NEXT_PUBLIC_DID_POSITION?.trim() || "right";
-
-  const shouldLoadDidChatbot =
-    (didChatbotFlag ?? (isProd ? false : true)) && !!didClientKey && !!didAgentId;
-
-  const didDebug =
-    parseEnvBool(process.env.NEXT_PUBLIC_DID_DEBUG) ?? (isProd ? false : true);
 
   return (
     <html
@@ -189,33 +176,7 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Fix for passive touchstart listeners - MUST be first to intercept all listeners */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Make touchstart listeners passive by default for better scroll performance
-              // This runs before any other scripts to intercept all addEventListener calls
-              (function() {
-                if (typeof window === 'undefined') return;
-
-                const originalAddEventListener = EventTarget.prototype.addEventListener;
-                EventTarget.prototype.addEventListener = function(type, listener, options) {
-                  // If touchstart/touchmove/touchend without explicit passive option, make it passive
-                  if ((type === 'touchstart' || type === 'touchmove' || type === 'touchend' || type === 'touchcancel') &&
-                      typeof options !== 'object') {
-                    options = { passive: true };
-                  } else if (typeof options === 'object' && options !== null && options.passive === undefined) {
-                    // If options object exists but passive is not set, default to passive for touch events
-                    if (type === 'touchstart' || type === 'touchmove' || type === 'touchend' || type === 'touchcancel') {
-                      options = { ...options, passive: true };
-                    }
-                  }
-                  return originalAddEventListener.call(this, type, listener, options);
-                };
-              })();
-            `,
-          }}
-        />
+        {/* Removed passive touch listener patch: it caused runtime errors in some environments. */}
         {/* Preconnect budget: keep under Lighthouse 4-connection warning */}
         {/* 1 & 2: Google Fonts */}
         <link
@@ -228,30 +189,9 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* 3+: D-ID chatbot resources (only when enabled) */}
-        {shouldLoadDidChatbot && (
-          <>
-            <link
-              rel="preconnect"
-              href="https://agent.d-id.com"
-              crossOrigin="anonymous"
-            />
-            {/* The remaining origins are lower priority; dns-prefetch keeps latency low without spending preconnect budget */}
-            <link rel="dns-prefetch" href="https://agents-results.d-id.com" />
-            <link
-              rel="dns-prefetch"
-              href="https://create-images-results.d-id.com"
-            />
-            <link rel="dns-prefetch" href="https://api.d-id.com" />
-          </>
-        )}
-        {/* Preload LCP image for faster rendering */}
-        <link
-          rel="preload"
-          as="image"
-          href="/images/hero/hero-background.webp"
-          fetchPriority="high"
-        />
+        {/* Hero background loaded naturally by Next.js Image component with priority.
+            Explicit preload removed - it caused warnings when intro animation delayed usage.
+            Next.js Image with priority={true} handles LCP optimization automatically. */}
         {/* Avoid prefetching large media in <head>; it can steal bandwidth from LCP.
             Next.js will prefetch routes opportunistically via <Link> when appropriate. */}
         <script
@@ -264,192 +204,27 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased overflow-x-hidden w-full max-w-screen relative">
-        <ProductionBanner />
-        <SkipLink />
-        {/* Error boundary disabled in development to avoid webpack issues */}
-        {process.env.NODE_ENV === "production" ? (
-          <ErrorBoundary>
+        <Providers>
+          <RouteAwareBanners />
+          <SkipLink />
+          {/* Error boundary disabled in development to avoid webpack issues */}
+          {process.env.NODE_ENV === "production" ? (
+            <ErrorBoundary>
+              <PageTransition>{children}</PageTransition>
+            </ErrorBoundary>
+          ) : (
             <PageTransition>{children}</PageTransition>
-          </ErrorBoundary>
-        ) : (
-          <PageTransition>{children}</PageTransition>
-        )}
-        {/* Global error handler: keep prod clean from third‑party fetch noise */}
-        {enableGlobalErrorHandler && (
-          <Script
-            id="global-error-handler"
-            strategy="afterInteractive"
-            src="/scripts/global-error-handler.js"
-          />
-        )}
-        {/* D-ID debug helper (dev-only by default) */}
-        {shouldLoadDidChatbot && didDebug && (
-          <Script
-            id="did-debug"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  try {
-                    window.addEventListener('did-status-change', function() {
-                      try { console.log('[D-ID] status:', window.__didStatus); } catch(_) {}
-                    });
-                    setTimeout(function() {
-                      try {
-                        const s = document.querySelector('script[data-name="did-agent"]');
-                        console.log('[D-ID] script present:', !!s, 'status:', window.__didStatus);
-                      } catch(_) {}
-                    }, 6000);
-                  } catch(_) {}
-                })();
-              `,
-            }}
-          />
-        )}
-        {/* D-ID Chatbot */}
-        {shouldLoadDidChatbot && (
-          <Script
-            id="d-id-chatbot"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  try {
-                    // Check if script already exists
-                    if (document.querySelector('script[data-name="did-agent"]')) {
-                      return;
-                    }
-
-                  // Wait for page to be fully loaded before injecting chatbot to avoid ResizeObserver conflicts
-                  // Retry configuration
-                  var didRetryCount = 0;
-                  var didMaxRetries = 3;
-                  var didRetryDelay = 10000; // 10 seconds between retries
-
-                  const loadChatbot = function() {
-                    try { window.__didStatus = window.__didStatus || 'pending'; } catch(_) {}
-                    
-                    // Remove any existing failed script
-                    const existingScript = document.querySelector('script[data-name="did-agent"]');
-                    if (existingScript && window.__didStatus === 'error') {
-                      existingScript.remove();
-                    }
-                    
-                    const script = document.createElement('script');
-                    script.type = 'module';
-                    script.src = 'https://agent.d-id.com/v2/index.js';
-                    script.setAttribute('data-mode', ${JSON.stringify(didMode)});
-                    script.setAttribute('data-client-key', ${JSON.stringify(didClientKey)});
-                    script.setAttribute('data-agent-id', ${JSON.stringify(didAgentId)});
-                    script.setAttribute('data-name', 'did-agent');
-                    script.setAttribute('data-monitor', 'true');
-                    script.setAttribute('data-orientation', ${JSON.stringify(didOrientation)});
-                    script.setAttribute('data-position', ${JSON.stringify(didPosition)});
-
-                    // Retry function
-                    const retryLoadChatbot = function() {
-                      if (didRetryCount < didMaxRetries) {
-                        didRetryCount++;
-                        console.log('[D-ID] Retry attempt ' + didRetryCount + '/' + didMaxRetries + ' in ' + (didRetryDelay/1000) + 's...');
-                        window.__didStatus = 'pending';
-                        setTimeout(loadChatbot, didRetryDelay);
-                      } else {
-                        console.log('[D-ID] Max retries reached. Chatbot failed to load.');
-                      }
-                    };
-
-                    // Add error handling with retry
-                    script.onerror = function() {
-                      try {
-                        window.__didStatus = 'error';
-                        window.dispatchEvent(new Event('did-status-change'));
-                        retryLoadChatbot();
-                      } catch(_) {}
-                    };
-
-                    // Check if chatbot actually loaded after a delay
-                    script.onload = function() {
-                      // Give it a moment to initialize, then check if it's actually working
-                      setTimeout(function() {
-                        try {
-                          // Check if D-ID agent element exists
-                          const agentElement = document.querySelector('[data-name="did-agent"]') ||
-                                             document.querySelector('did-agent') ||
-                                             document.querySelector('[id*="did"]');
-                          if (agentElement) {
-                            window.__didStatus = 'loaded';
-                            window.dispatchEvent(new Event('did-status-change'));
-                            console.log('[D-ID] Chatbot loaded successfully!');
-                          } else {
-                            // Agent script loaded but element not found - might be blocked by CORS
-                            window.__didStatus = 'error';
-                            window.dispatchEvent(new Event('did-status-change'));
-                            retryLoadChatbot();
-                          }
-                        } catch(_) {
-                          window.__didStatus = 'error';
-                          window.dispatchEvent(new Event('did-status-change'));
-                          retryLoadChatbot();
-                        }
-                      }, 3000); // Wait 3 seconds for initialization
-                    };
-
-                    // Also listen for CORS errors immediately
-                    script.addEventListener('error', function() {
-                      try {
-                        window.__didStatus = 'error';
-                        window.dispatchEvent(new Event('did-status-change'));
-                        retryLoadChatbot();
-                      } catch(_) {}
-                    });
-
-                    // Also set a timeout - if status is still pending after 8 seconds, retry
-                    setTimeout(function() {
-                      try {
-                        if (window.__didStatus === 'pending') {
-                          window.__didStatus = 'error';
-                          window.dispatchEvent(new Event('did-status-change'));
-                          retryLoadChatbot();
-                        }
-                      } catch(_) {}
-                    }, 8000);
-
-                    document.body.appendChild(script);
-                  };
-
-                  // Load chatbot AFTER intro video is done - wait for intro video to finish
-                  // Check if intro video has been seen/completed
-                  const checkAndLoadChatbot = function() {
-                    const introSeen = localStorage.getItem('intro_video_seen');
-                    // If intro video is done OR if it's been more than 10 seconds (intro timeout), load chatbot
-                    if (introSeen === 'true' || document.readyState === 'complete') {
-                      // Delay chatbot loading to prioritize page content
-                      setTimeout(loadChatbot, 3000); // Increased delay to improve LCP
-                    } else {
-                      // Wait a bit and check again
-                      setTimeout(checkAndLoadChatbot, 500);
-                    }
-                  };
-
-                  // Start checking after page load - delay to improve initial page load
-                  if (document.readyState === 'complete') {
-                    setTimeout(checkAndLoadChatbot, 4000); // Increased delay for better LCP
-                  } else {
-                    window.addEventListener('load', function() {
-                      setTimeout(checkAndLoadChatbot, 4000); // Increased delay for better LCP
-                    });
-                  }
-                } catch (error) {
-                  try {
-                    window.__didStatus = 'error';
-                    window.dispatchEvent(new Event('did-status-change'));
-                  } catch(_) {}
-                }
-              })();
-            `,
-            }}
-          />
-        )}
+          )}
+          {/* Global error handler: keep prod clean from third‑party fetch noise */}
+          {enableGlobalErrorHandler && (
+            <Script
+              id="global-error-handler"
+              strategy="afterInteractive"
+              src="/scripts/global-error-handler.js"
+            />
+          )}
+          <DidChatbotLoader />
+        </Providers>
       </body>
     </html>
   );

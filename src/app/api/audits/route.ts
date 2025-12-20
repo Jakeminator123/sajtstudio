@@ -25,7 +25,7 @@ interface SavedAudit {
  * GET /api/audits - List all saved audits
  * Returns metadata from saved JSON files without full content
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const auditsDir = path.join(process.cwd(), "public", "audits");
     

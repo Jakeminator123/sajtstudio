@@ -4,6 +4,7 @@ import HemsidorWords from "@/components/animations/HemsidorWords";
 import NattenWords from "@/components/animations/NattenWords";
 import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
+import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
 import { prefersReducedMotion } from "@/lib/performance";
 import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
@@ -32,6 +33,7 @@ const defaultContent: HeroContent = {
 // Magnetic button component that follows mouse
 function MagneticButton({
   href,
+  onClick,
   children,
   className,
   shouldReduceMotion,
@@ -39,7 +41,8 @@ function MagneticButton({
   onHoverChange,
   external = false,
 }: {
-  href: string;
+  href?: string;
+  onClick?: () => void;
   children: React.ReactNode;
   className?: string;
   shouldReduceMotion: boolean;
@@ -47,7 +50,7 @@ function MagneticButton({
   onHoverChange?: (hovering: boolean) => void;
   external?: boolean;
 }) {
-  const buttonRef = useRef<HTMLAnchorElement>(null);
+  const buttonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
@@ -110,31 +113,48 @@ function MagneticButton({
     };
   }, [mousePosition, isHovered, shouldReduceMotion]);
 
+  const commonProps = {
+    onMouseEnter: () => {
+      setIsHovered(true);
+      onHoverChange?.(true);
+    },
+    onMouseLeave: () => {
+      setIsHovered(false);
+      onHoverChange?.(false);
+      setButtonPosition({ x: 0, y: 0 });
+    },
+    whileHover: {
+      scale: 1.05,
+      boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)",
+    },
+    whileTap: { scale: 0.95 },
+    className,
+    style: {
+      x: shouldReduceMotion ? 0 : buttonPosition.x,
+      y: shouldReduceMotion ? 0 : buttonPosition.y,
+    },
+    transition: { type: "spring", stiffness: 300, damping: 20 },
+  };
+
+  // If onClick is provided, render as button instead of link
+  if (onClick) {
+    return (
+      <motion.button
+        ref={buttonRef as React.RefObject<HTMLButtonElement>}
+        onClick={onClick}
+        {...commonProps}
+      >
+        {children}
+      </motion.button>
+    );
+  }
+
   return (
     <motion.a
-      ref={buttonRef}
+      ref={buttonRef as React.RefObject<HTMLAnchorElement>}
       href={href}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      onMouseEnter={() => {
-        setIsHovered(true);
-        onHoverChange?.(true);
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        onHoverChange?.(false);
-        setButtonPosition({ x: 0, y: 0 });
-      }}
-      whileHover={{
-        scale: 1.05,
-        boxShadow: "0 0 40px rgba(0, 102, 255, 0.6)",
-      }}
-      whileTap={{ scale: 0.95 }}
-      className={className}
-      style={{
-        x: shouldReduceMotion ? 0 : buttonPosition.x,
-        y: shouldReduceMotion ? 0 : buttonPosition.y,
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      {...commonProps}
     >
       {children}
     </motion.a>
@@ -486,6 +506,7 @@ function CursorTrail({
 export default function HeroSection({ content: propContent }: { content?: HeroContent }) {
   // Fetch content from CMS - this enables live updates from /admin
   const { getValue } = useContentSection("hero");
+  const { openModal } = useUnderConstructionModal();
   
   // Build content object from CMS with fallbacks to props then defaults
   const content: HeroContent = useMemo(() => ({
@@ -1351,10 +1372,9 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               </span>
             </MagneticButton>
 
-            {/* Secondary CTA: Build website - Red/Tertiary bold */}
+            {/* Secondary CTA: Build website - Opens modal for under construction site */}
             <MagneticButton
-              href="https://sajtmaskin-1.onrender.com/"
-              external={true}
+              onClick={openModal}
               className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}

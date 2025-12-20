@@ -43,6 +43,8 @@ import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { siteConfig } from "@/config/siteConfig";
 import { useTheme } from "@/hooks/useTheme";
+import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
+import { useOfferModal } from "@/hooks/useOfferModal";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -63,6 +65,8 @@ export default function HeaderNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isLight } = useTheme();
+  const { openModal } = useUnderConstructionModal();
+  const { openModal: openOfferModal } = useOfferModal();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
@@ -356,6 +360,17 @@ export default function HeaderNav() {
                         href={link.href}
                         onClick={(e) => {
                           /**
+                           * Special link handling
+                           */
+                          
+                          // Handle Erbjudande link - opens modal instead of navigation
+                          if (link.href === "#erbjudande") {
+                            e.preventDefault();
+                            openOfferModal();
+                            return;
+                          }
+                          
+                          /**
                            * Anchor link navigation handling
                            *
                            * If user clicks an anchor link (#tjanster, #process, #omdomen) from a non-homepage:
@@ -425,8 +440,7 @@ export default function HeaderNav() {
               <ThemeToggle />
               <div className="cta-button-header">
                 <Button
-                  href="https://sajtmaskin-1.onrender.com/"
-                  external={true}
+                  onClick={openModal}
                   variant="cta"
                   size="sm"
                   ariaLabel="Starta projekt"

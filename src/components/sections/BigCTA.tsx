@@ -36,8 +36,6 @@ export default function BigCTA() {
   const { getValue } = useContentSection("bigcta");
   
   // Get content from CMS with fallbacks
-  const title = getValue("T50", "Redo att ta nästa steg?");
-  const subtitle = getValue("T51", "Låt oss bygga något fantastiskt tillsammans");
   const phoneImage = getValue("B3", "/images/contact_phone.webp");
 
   return (

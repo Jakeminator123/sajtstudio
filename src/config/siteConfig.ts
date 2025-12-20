@@ -52,6 +52,7 @@ export const siteConfig = {
     links: [
       { href: "/", label: "Hem" },
       { href: "/portfolio", label: "Portfolio" },
+      { href: "#erbjudande", label: "Erbjudande" }, // Opens modal instead of navigating
       { href: "/kontakt", label: "Kontakt" },
     ],
     // Anchor links - visas endast på startsidan (/)

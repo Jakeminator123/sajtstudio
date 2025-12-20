@@ -86,19 +86,19 @@ export async function GET(
     let content = await response.text();
     const contentType = response.headers.get("content-type") || "";
 
-    // If it's HTML, rewrite URLs to point to the external origin
+    // If it's HTML, rewrite URLs to point to external origin
+    // Note: <base> tag doesn't work due to CSP base-uri 'self' restriction
     if (contentType.includes("text/html")) {
       const externalOrigin = `${EXTERNAL_BASE_URL}${slug}${EXTERNAL_DOMAIN_SUFFIX}`;
       
       // Rewrite paths that start with / to point to external origin
       // This handles /_next/, /assets/, /images/, etc.
-      // Match href="/, src="/, href='/, src='/
       content = content.replace(
         /(href|src|action)=(["'])\//gi,
         `$1=$2${externalOrigin}/`
       );
       
-      // Also handle srcset attributes
+      // Handle srcset attributes
       content = content.replace(
         /srcset=(["'])([^"']+)(["'])/gi,
         (match, quote1, srcsetValue, quote2) => {

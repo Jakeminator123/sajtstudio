@@ -1,11 +1,31 @@
 /**
- * Preview Page - Database-validated preview wrapper
- *
- * This page only displays previews for slugs that exist in the previews database.
- * Invalid slugs return 404.
- *
- * URL structure: /demo-xyz or /demo-xyz/some/path
- * Displays: https://demo-xyz.vusercontent.net[/some/path] in an iframe with branding
+ * Preview Page - Dynamic Demo Site Embedding
+ * ==========================================
+ * 
+ * This catch-all route displays AI-generated demo sites in a branded Sajtstudio wrapper.
+ * 
+ * ## URL Structure:
+ * - /demo-xyz           → Displays https://demo-xyz.vusercontent.net
+ * - /demo-xyz/page      → Displays https://demo-xyz.vusercontent.net/page
+ * 
+ * ## How it works:
+ * 1. Validates the slug exists in the SQLite database (previews.db)
+ * 2. Builds the direct URL to vusercontent.net
+ * 3. Renders PreviewWrapper with iframe embedding
+ * 
+ * ## Security:
+ * - Only slugs in the database are allowed (prevents abuse)
+ * - Reserved routes are blocked (api, admin, etc.)
+ * - Slug format is validated (alphanumeric + dashes/underscores only)
+ * - Feature can be disabled via SLUGS=false env var
+ * 
+ * ## Key Discovery (2024-12-20):
+ * vusercontent.net does NOT set X-Frame-Options, so we can embed directly
+ * without proxying! This solved the "black iframe" problem.
+ * 
+ * @author Sajtstudio
+ * @see PreviewWrapper - The component that renders the iframe
+ * @see preview-database.ts - SQLite database for valid slugs
  */
 
 import { notFound } from "next/navigation";
@@ -14,12 +34,29 @@ import {
   updateLastAccessed,
 } from "@/lib/preview-database";
 import PreviewWrapper from "@/components/preview/PreviewWrapper";
+import fs from "fs";
+import path from "path";
 
-// Runtime configuration - nodejs required for better-sqlite3
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+/** Required for better-sqlite3 database access */
 export const runtime = "nodejs";
+
+/** Force dynamic rendering (no static generation) */
 export const dynamic = "force-dynamic";
 
-// Reserved routes that should not be handled by this catch-all
+/** Domain suffix for v0-generated demo sites */
+const VUSERCONTENT_DOMAIN = ".vusercontent.net";
+
+/** Supported screenshot file extensions (in priority order) */
+const PREVIEW_IMAGE_EXTS = ["webp", "png", "jpg", "jpeg"] as const;
+
+/**
+ * Reserved routes that should NOT be handled by this catch-all.
+ * These are real pages/routes in the app that take precedence.
+ */
 const RESERVED_ROUTES = [
   "api",
   "admin",
@@ -33,79 +70,125 @@ const RESERVED_ROUTES = [
   "engine",
   "_next",
   "favicon.ico",
-];
+] as const;
 
-// Check if SLUGS feature is disabled
-const slugsDisabled = (() => {
+/**
+ * Check if the SLUGS feature is enabled.
+ * Default: DISABLED (must explicitly enable with SLUGS=y/yes/true/1/on)
+ */
+const slugsEnabled = (() => {
   const flag = process.env.SLUGS;
-  if (!flag) {
-    return true; // Default to disabled if not set
-  }
+  if (!flag) return false;
+  
   const normalized = flag.trim().toLowerCase();
-  if (["n", "no", "off", "0", "false"].includes(normalized)) {
-    return true;
-  }
-  if (["y", "yes", "on", "1", "true"].includes(normalized)) {
-    return false;
-  }
-  return true; // Default to disabled if invalid value
+  return ["y", "yes", "on", "1", "true"].includes(normalized);
 })();
 
-// Base URL for vusercontent
-const VUSERCONTENT_DOMAIN = ".vusercontent.net";
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+/**
+ * Check if a slug is valid format (alphanumeric + dashes/underscores)
+ */
+function isValidSlugFormat(slug: string): boolean {
+  return /^[a-zA-Z0-9_-]+$/.test(slug);
+}
+
+/**
+ * Check if a slug is a reserved route
+ */
+function isReservedRoute(slug: string): boolean {
+  return RESERVED_ROUTES.includes(slug.toLowerCase() as typeof RESERVED_ROUTES[number]);
+}
+
+/**
+ * Try to find a preview screenshot in public/previews/
+ * Returns the path if found, null otherwise.
+ */
+function findPreviewImage(slug: string): string | null {
+  const previewsDir = path.join(process.cwd(), "public", "previews");
+  
+  for (const ext of PREVIEW_IMAGE_EXTS) {
+    const filename = `${slug}.${ext}`;
+    const filePath = path.join(previewsDir, filename);
+    
+    if (fs.existsSync(filePath)) {
+      return `/previews/${filename}`;
+    }
+  }
+  
+  return null;
+}
+
+// ============================================================================
+// PAGE COMPONENT
+// ============================================================================
 
 interface PageProps {
   params: Promise<{ slug: string; path?: string[] }>;
 }
 
 export default async function PreviewPage({ params }: PageProps) {
-  const resolvedParams = await params;
-  const { slug, path } = resolvedParams;
+  const { slug, path: pathSegments } = await params;
 
-  // Return 404 if slugs feature is disabled
-  if (slugsDisabled) {
+  // ---- VALIDATION ----
+  
+  // Feature must be enabled
+  if (!slugsEnabled) {
     notFound();
   }
 
-  // Validate slug exists
+  // Slug must exist and be a string
   if (!slug || typeof slug !== "string" || slug.trim() === "") {
     notFound();
   }
 
-  // Check if slug is a reserved route
-  if (RESERVED_ROUTES.includes(slug.toLowerCase())) {
+  // Slug must not be a reserved route
+  if (isReservedRoute(slug)) {
     notFound();
   }
 
-  // Validate slug format (alphanumeric, dashes, underscores)
-  const slugRegex = /^[a-zA-Z0-9_-]+$/;
-  if (!slugRegex.test(slug)) {
+  // Slug must have valid format
+  if (!isValidSlugFormat(slug)) {
     notFound();
   }
 
-  // Check if slug exists in database
+  // Slug must exist in database
   const preview = getPreviewBySlug(slug);
   if (!preview) {
     notFound();
   }
 
-  // Update last accessed timestamp (fire and forget)
+  // ---- UPDATE STATS ----
+  
+  // Track last access time (fire and forget, don't fail on error)
   try {
     updateLastAccessed(slug);
   } catch {
-    // Don't fail the request if stats update fails
+    // Silently ignore - stats are not critical
   }
 
-  // Build the URLs
-  const pathString = path && path.length > 0 ? `/${path.join("/")}` : "";
-  const sourceUrl = `https://${slug}${VUSERCONTENT_DOMAIN}${pathString}`;
-  // Use our proxy to bypass X-Frame-Options
-  const proxyUrl = `/api/preview/${slug}${pathString}`;
+  // ---- BUILD URLs ----
+  
+  // Build path string from segments
+  const pathString = pathSegments?.length 
+    ? `/${pathSegments.join("/")}`
+    : "";
 
+  // Direct URL to vusercontent.net (no proxy needed!)
+  const sourceUrl = `https://${slug}${VUSERCONTENT_DOMAIN}${pathString}`;
+
+  // Find optional screenshot for fallback
+  const previewImageSrc = findPreviewImage(slug);
+
+  // ---- RENDER ----
+  
   return (
     <PreviewWrapper
-      proxyUrl={proxyUrl}
+      proxyUrl={sourceUrl}  // Legacy prop, now equals sourceUrl
       sourceUrl={sourceUrl}
+      previewImageSrc={previewImageSrc}
       preview={{
         slug: preview.slug,
         company_name: preview.company_name,
@@ -115,19 +198,28 @@ export default async function PreviewPage({ params }: PageProps) {
   );
 }
 
-// Generate metadata for the page
-export async function generateMetadata({ params }: PageProps) {
-  const resolvedParams = await params;
-  const { slug } = resolvedParams;
+// ============================================================================
+// METADATA
+// ============================================================================
 
-  if (slugsDisabled || !slug) {
-    return { title: "Inte hittad | Sajtstudio" };
+export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
+
+  // Default metadata for invalid states
+  if (!slugsEnabled || !slug) {
+    return { 
+      title: "Inte hittad | Sajtstudio",
+      robots: { index: false, follow: false },
+    };
   }
 
   const preview = getPreviewBySlug(slug);
 
   if (!preview) {
-    return { title: "Inte hittad | Sajtstudio" };
+    return { 
+      title: "Inte hittad | Sajtstudio",
+      robots: { index: false, follow: false },
+    };
   }
 
   return {
@@ -137,10 +229,10 @@ export async function generateMetadata({ params }: PageProps) {
     description: preview.domain
       ? `Förhandsgranskning av webbplats för ${preview.domain}`
       : "Förhandsgranskning av webbplats skapad av Sajtstudio",
+    // Don't index preview pages
     robots: {
       index: false,
       follow: false,
     },
   };
 }
-
