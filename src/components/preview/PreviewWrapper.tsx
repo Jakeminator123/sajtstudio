@@ -32,6 +32,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useOfferModal } from "@/hooks/useOfferModal";
 
 // ============================================================================
 // TYPES
@@ -83,6 +84,7 @@ export default function PreviewWrapper({
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const mountedRef = useRef(false);
+  const { openModal: openOfferModal } = useOfferModal();
 
   // Mark as mounted on client to avoid hydration issues
   // Using requestAnimationFrame to avoid synchronous setState in effect
@@ -295,13 +297,14 @@ export default function PreviewWrapper({
             Ladda hem din sajt
           </button>
 
-          {/* Create your own site - uses relative link (works on localhost and production) */}
-          <Link
-            href="/kontakt"
+          {/* Create your own site - opens offer modal */}
+          <button
+            type="button"
+            onClick={openOfferModal}
             className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-accent to-tertiary hover:from-accent/90 hover:to-tertiary/90 rounded-lg shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
           >
             Skapa din egen sajt
-          </Link>
+          </button>
         </div>
       </motion.footer>
 

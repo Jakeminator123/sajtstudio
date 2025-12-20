@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-type DidStatus = "pending" | "loaded" | "error" | "disabled";
-
 const parseEnvBool = (value: string | undefined): boolean | undefined => {
   if (!value) return undefined;
   const v = value.trim().toLowerCase();
@@ -27,7 +25,7 @@ function cleanupDid() {
       if (el.tagName.toLowerCase().includes("did")) el.remove();
     });
 
-    (window as any).__didStatus = "disabled" as DidStatus;
+    window.__didStatus = "disabled";
   } catch {
     // ignore
   }
@@ -76,8 +74,7 @@ export default function DidChatbotLoader() {
     const inject = () => {
       if (cancelled) return;
       try {
-        (window as any).__didStatus = ((window as any).__didStatus ||
-          "pending") as DidStatus;
+        window.__didStatus = window.__didStatus || "pending";
       } catch {
         // ignore
       }
@@ -92,7 +89,7 @@ export default function DidChatbotLoader() {
 
         // Remove a previous failed script
         const existing = document.querySelector('script[data-name="did-agent"]');
-        if (existing && (window as any).__didStatus === "error") {
+        if (existing && window.__didStatus === "error") {
           existing.remove();
         }
 
@@ -116,10 +113,9 @@ export default function DidChatbotLoader() {
 
         script.onload = () => {
           try {
-            (window as any).__didStatus = "loaded" as DidStatus;
+            window.__didStatus = "loaded";
             window.dispatchEvent(new Event("did-status-change"));
             if (didDebug) {
-              // eslint-disable-next-line no-console
               console.log("[D-ID] Chatbot loaded successfully!");
             }
           } catch {
@@ -129,10 +125,9 @@ export default function DidChatbotLoader() {
 
         script.onerror = () => {
           try {
-            (window as any).__didStatus = "error" as DidStatus;
+            window.__didStatus = "error";
             window.dispatchEvent(new Event("did-status-change"));
             if (didDebug) {
-              // eslint-disable-next-line no-console
               console.warn("[D-ID] Failed to load chatbot script");
             }
           } catch {
@@ -150,8 +145,7 @@ export default function DidChatbotLoader() {
       if (didDebug) {
         window.addEventListener("did-status-change", () => {
           try {
-            // eslint-disable-next-line no-console
-            console.log("[D-ID] status:", (window as any).__didStatus);
+            console.log("[D-ID] status:", window.__didStatus);
           } catch {
             // ignore
           }
@@ -160,12 +154,11 @@ export default function DidChatbotLoader() {
         setTimeout(() => {
           try {
             const s = document.querySelector('script[data-name="did-agent"]');
-            // eslint-disable-next-line no-console
             console.log(
               "[D-ID] script present:",
               !!s,
               "status:",
-              (window as any).__didStatus
+              window.__didStatus
             );
           } catch {
             // ignore
@@ -183,7 +176,7 @@ export default function DidChatbotLoader() {
 
     return () => {
       cancelled = true;
-      window.removeEventListener("load", inject as any);
+      window.removeEventListener("load", inject);
     };
   }, [
     shouldLoad,
