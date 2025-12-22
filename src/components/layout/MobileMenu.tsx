@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { useTheme } from "@/hooks/useTheme";
-import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
 import { useOfferModal } from "@/hooks/useOfferModal";
 
 interface MobileMenuProps {
@@ -40,8 +39,7 @@ export default function MobileMenu({
   navLinks,
 }: MobileMenuProps) {
   const { isLight } = useTheme();
-  const { openModal } = useUnderConstructionModal();
-  const { openModal: openOfferModal } = useOfferModal();
+  const { openModal } = useOfferModal();
 
   return (
     <AnimatePresence>
@@ -126,7 +124,7 @@ export default function MobileMenu({
                         // Handle Erbjudande link - opens modal instead of navigation
                         if (link.href === "#erbjudande") {
                           e.preventDefault();
-                          openOfferModal();
+                          openModal();
                           return;
                         }
                         

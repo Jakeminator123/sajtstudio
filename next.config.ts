@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 
   // Disable Turbopack (use webpack instead) - fixes TurbopackInternalError
   // Turbopack is enabled by default in Next.js 16, but has bugs in 16.0.1
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Fix webpack module loading issues with dynamic imports
     if (!isServer) {
       config.resolve.fallback = {
@@ -21,38 +21,51 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Fix worker-related deployment issues
-    // Ensure optimization config exists and doesn't use workers
+    // Workaround: Next 16 + React 19 can intermittently throw
+    // "Cannot read properties of undefined (reading 'call')" from webpack.js in dev.
+    // Disabling React Fast Refresh eliminates the crash at the cost of HMR convenience.
+    if (dev && !isServer && Array.isArray(config.plugins)) {
+      config.plugins = config.plugins.filter((plugin: any) => {
+        const name = plugin?.constructor?.name ?? "";
+        return !name.includes("ReactRefresh");
+      });
+    }
+
+    // Fix worker-related deployment issues (PRODUCTION ONLY)
+    // In dev, aggressive optimization/minification can break Fast Refresh/HMR.
+    // Ensure optimization config exists.
     if (!config.optimization) {
       config.optimization = {};
     }
 
-    // Disable parallel processing to prevent worker null errors
-    config.optimization.minimize = true;
+    if (dev) {
+      // Keep dev predictable/stable for HMR
+      config.optimization.minimize = false;
+    } else {
+      // Production build: minimize and disable parallel workers to avoid worker null errors
+      config.optimization.minimize = true;
 
-    // Set maxParallelWorkers to prevent worker issues
-    if (config.optimization.minimizer) {
-      config.optimization.minimizer = config.optimization.minimizer.map(
-        (minimizer: any) => {
-          if (
-            minimizer &&
-            typeof minimizer === "object" &&
-            minimizer.constructor
-          ) {
-            // Ensure minimizers don't use workers
-            if (minimizer.options) {
-              minimizer.options.parallel = false;
+      if (config.optimization.minimizer) {
+        config.optimization.minimizer = config.optimization.minimizer.map(
+          (minimizer: any) => {
+            if (
+              minimizer &&
+              typeof minimizer === "object" &&
+              minimizer.constructor
+            ) {
+              // Ensure minimizers don't use workers
+              if (minimizer.options) {
+                minimizer.options.parallel = false;
+              }
             }
+            return minimizer;
           }
-          return minimizer;
-        }
-      );
+        );
+      }
     }
 
-    // Target modern browsers to reduce legacy JavaScript polyfills
-    if (!isServer) {
-      config.target = ["web", "es2022"]; // Updated to ES2022 for better optimization
-    }
+    // NOTE: Avoid overriding webpack `target` in Next.js dev builds.
+    // It can destabilize the runtime/HMR in Next 16 + React 19.
 
     return config;
   },
@@ -120,27 +133,27 @@ const nextConfig: NextConfig = {
           "default-src 'self'",
           
           // Scripts: unsafe-inline required for Next.js hydration, unsafe-eval for D-ID chatbot
-          // vusercontent.net for preview proxied content
-          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com https://*.vusercontent.net",
+          // vusercontent.net for preview proxied content, sajtmaskin-1.onrender.com for proxied sajtmaskin
+          "script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://agent.d-id.com https://fonts.googleapis.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
           // Styles: unsafe-inline required for Next.js styled-jsx and emotion
-          // vusercontent.net for preview proxied content
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.vusercontent.net",
+          // vusercontent.net for preview proxied content, sajtmaskin-1.onrender.com for proxied sajtmaskin
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
           // Images: allow data URIs for inline images, https for external
           "img-src 'self' data: https: blob:",
           
-          // Fonts: Google Fonts + vusercontent.net
-          "font-src 'self' data: https://fonts.gstatic.com https://*.vusercontent.net",
+          // Fonts: Google Fonts + vusercontent.net + sajtmaskin
+          "font-src 'self' data: https://fonts.gstatic.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
-          // API connections: D-ID chatbot + required CDNs + vusercontent.net for previews
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://notifications.d-id.com wss://notifications.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com https://*.vusercontent.net",
+          // API connections: D-ID chatbot + required CDNs + vusercontent.net for previews + sajtmaskin
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://notifications.d-id.com wss://notifications.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
-          // Media: self and D-ID for avatar videos
-          "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net",
+          // Media: self and D-ID for avatar videos + sajtmaskin
+          "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
-          // Frames: D-ID chatbot iframe + vusercontent.net previews
-          "frame-src 'self' https://agent.d-id.com https://*.vusercontent.net",
+          // Frames: D-ID chatbot iframe + vusercontent.net previews + sajtmaskin
+          "frame-src 'self' https://agent.d-id.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
           
           // Workers: blob for inlined workers
           "worker-src 'self' blob:",
@@ -148,7 +161,7 @@ const nextConfig: NextConfig = {
           // Security hardening
           "object-src 'none'",
           "base-uri 'self'",
-          "form-action 'self'",
+          "form-action 'self' https://sajtmaskin-1.onrender.com",
           "frame-ancestors 'self'",
           "upgrade-insecure-requests",
         ].join("; "),

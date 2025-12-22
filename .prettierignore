@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+dist
+build
+.turbo
+*.min.js
+*.min.css
+package-lock.json
+public/audits
+content-cache.json
+*.backup
+

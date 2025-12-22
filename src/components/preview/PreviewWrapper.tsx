@@ -31,7 +31,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useOfferModal } from "@/hooks/useOfferModal";
 
 // ============================================================================
@@ -78,29 +78,46 @@ export default function PreviewWrapper({
 
   // State
   const [mode, setMode] = useState<ViewMode>(initialMode);
-  const [isLoading, setIsLoading] = useState(true); // Always start loading
+  const [isLoading, setIsLoading] = useState(initialMode === "iframe"); // Only loading if iframe mode
   const [hasError, setHasError] = useState(false);
   const [showSlowHint, setShowSlowHint] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const mountedRef = useRef(false);
-  const { openModal: openOfferModal } = useOfferModal();
+  const { openModal } = useOfferModal();
 
-  // Mark as mounted on client to avoid hydration issues
-  // Using requestAnimationFrame to avoid synchronous setState in effect
+  // Mark as mounted on the client in a deferred callback to avoid hydration mismatch,
+  // while also keeping eslint happy (no synchronous setState inside effect).
   useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-    
-    const frameId = requestAnimationFrame(() => {
-      setIsMounted(true);
-      if (mode === "image") {
-        setIsLoading(false);
+    const id = requestAnimationFrame(() => setIsMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Listen for postMessage from iframe (in case demosajten wants to navigate)
+  useEffect(() => {
+    if (mode !== "iframe" || typeof window === "undefined") return;
+
+    const handleMessage = (event: MessageEvent) => {
+      // Only accept messages from the same origin as sourceUrl
+      try {
+        const sourceOrigin = new URL(sourceUrl).origin;
+        if (event.origin !== sourceOrigin) return;
+
+        // Handle navigation requests
+        if (event.data?.type === "navigate" && event.data?.url) {
+          const url = event.data.url;
+          // If it's a sajtmaskin URL, navigate to our proxy
+          if (url.includes("sajtmaskin-1.onrender.com") || url.includes("sajtmaskin")) {
+            window.location.href = "/sajtmaskin";
+          }
+        }
+      } catch {
+        // Ignore invalid URLs
       }
-    });
-    
-    return () => cancelAnimationFrame(frameId);
-  }, [mode]);
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [mode, sourceUrl]);
 
   // Show hint after threshold if still loading
   useEffect(() => {
@@ -240,8 +257,8 @@ export default function PreviewWrapper({
           </div>
         )}
 
-        {/* Loading spinner (iframe mode) - only show on client to avoid hydration issues */}
-        {isMounted && mode === "iframe" && isLoading && !hasError && (
+        {/* Loading spinner (iframe mode) */}
+        {mode === "iframe" && isLoading && !hasError && (
           <LoadingOverlay 
             showSlowHint={showSlowHint} 
             sourceUrl={sourceUrl} 
@@ -253,8 +270,8 @@ export default function PreviewWrapper({
           <ErrorOverlay sourceUrl={sourceUrl} />
         )}
 
-        {/* Iframe - direct embedding (no proxy) */}
-        {mode === "iframe" && (
+        {/* Iframe - direct embedding (no proxy) - only render on client to avoid hydration mismatch */}
+        {isMounted && mode === "iframe" && (
           <iframe
             src={sourceUrl}
             className="w-full h-full border-0"
@@ -285,6 +302,17 @@ export default function PreviewWrapper({
         </p>
 
         <div className="flex items-center gap-3">
+          {/* Back to homepage */}
+          <Link
+            href="/"
+            className="px-5 py-2.5 text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600 hover:border-gray-500 rounded-lg transition-all flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className="hidden sm:inline">Till hemsidan</span>
+          </Link>
+
           {/* Download site button */}
           <button
             type="button"
@@ -294,17 +322,20 @@ export default function PreviewWrapper({
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Ladda hem din sajt
+            <span className="hidden sm:inline">Ladda hem din sajt</span>
           </button>
 
-          {/* Create your own site - opens offer modal */}
-          <button
-            type="button"
-            onClick={openOfferModal}
+          {/* Create your own site - open OfferModal (3 choices). Fallback to /sajtmaskin if JS is broken. */}
+          <a
+            href="/sajtmaskin"
+            onClick={(e) => {
+              e.preventDefault();
+              openModal();
+            }}
             className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-accent to-tertiary hover:from-accent/90 hover:to-tertiary/90 rounded-lg shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
           >
-            Skapa din egen sajt
-          </button>
+            Bygg din egen sajt
+          </a>
         </div>
       </motion.footer>
 

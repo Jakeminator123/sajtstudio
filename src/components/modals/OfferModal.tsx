@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 
 interface OfferModalProps {
   isOpen: boolean;
@@ -13,8 +12,8 @@ const offerOptions = [
     id: "sajtmaskin",
     title: "Skapa din egen sajt",
     description: "Generera och bygg din hemsida själv med vår AI-drivna plattform Sajtmaskin.",
-    href: "https://sajtmaskin.se",
-    external: true,
+    href: "/sajtmaskin",
+    external: false,
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -54,6 +53,18 @@ const offerOptions = [
 ];
 
 export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
+  const handleOptionClick = (href: string, external: boolean) => {
+    if (external) {
+      window.open(href, "_blank", "noopener,noreferrer");
+    } else {
+      onClose();
+      // Navigate after modal starts closing
+      setTimeout(() => {
+        window.location.href = href;
+      }, 100);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -153,20 +164,13 @@ export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.25 + index * 0.1 }}
                       >
-                        {option.external ? (
-                          <a
-                            href={option.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group block"
-                          >
-                            <OptionCard option={option} />
-                          </a>
-                        ) : (
-                          <Link href={option.href} onClick={onClose} className="group block">
-                            <OptionCard option={option} />
-                          </Link>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick(option.href, option.external)}
+                          className="group block w-full text-left"
+                        >
+                          <OptionCard option={option} />
+                        </button>
                       </motion.div>
                     ))}
                   </div>

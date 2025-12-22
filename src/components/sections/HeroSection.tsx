@@ -4,7 +4,7 @@ import HemsidorWords from "@/components/animations/HemsidorWords";
 import NattenWords from "@/components/animations/NattenWords";
 import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
-import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
+import { useOfferModal } from "@/hooks/useOfferModal";
 import { prefersReducedMotion } from "@/lib/performance";
 import { MotionValue, motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
@@ -506,7 +506,7 @@ function CursorTrail({
 export default function HeroSection({ content: propContent }: { content?: HeroContent }) {
   // Fetch content from CMS - this enables live updates from /admin
   const { getValue } = useContentSection("hero");
-  const { openModal } = useUnderConstructionModal();
+  const { openModal } = useOfferModal();
   
   // Build content object from CMS with fallbacks to props then defaults
   const content: HeroContent = useMemo(() => ({

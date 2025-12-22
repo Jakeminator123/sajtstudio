@@ -103,7 +103,7 @@ export default function MatrixContactForm({
         // Don't add newline, maybe trigger send?
       } else if (e.code === "Space") {
         setMessage((prev) => prev + " ");
-      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      } else if (e.key && typeof e.key === "string" && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
         setMessage((prev) => prev + e.key);
       }
     };

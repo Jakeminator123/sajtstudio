@@ -20,6 +20,8 @@
     "start": "next start --port 1337",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "clean": "node -e \"const fs=require('fs'); const paths=['.next','out','dist','build','.turbo']; for (const p of paths){ try{ fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
     "rebuild": "npm run clean && npm run build"
   },
@@ -58,7 +60,10 @@
     "critters": "^0.0.23",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
     "tailwindcss": "^3.4.14",
     "tsx": "^4",
     "typescript": "^5.9.3"

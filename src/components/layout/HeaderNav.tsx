@@ -43,7 +43,6 @@ import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { siteConfig } from "@/config/siteConfig";
 import { useTheme } from "@/hooks/useTheme";
-import { useUnderConstructionModal } from "@/hooks/useUnderConstructionModal";
 import { useOfferModal } from "@/hooks/useOfferModal";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -65,8 +64,7 @@ export default function HeaderNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isLight } = useTheme();
-  const { openModal } = useUnderConstructionModal();
-  const { openModal: openOfferModal } = useOfferModal();
+  const { openModal } = useOfferModal();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
@@ -366,7 +364,7 @@ export default function HeaderNav() {
                           // Handle Erbjudande link - opens modal instead of navigation
                           if (link.href === "#erbjudande") {
                             e.preventDefault();
-                            openOfferModal();
+                            openModal();
                             return;
                           }
                           

@@ -26,6 +26,8 @@ build/
 .parcel-cache/
 *.cache
 *.tsbuildinfo
+content-cache.json
+content-cache.json.backup
 
 # Local env files
 .env
@@ -76,6 +78,9 @@ ENV/
 *.tmp
 *.temp
 .tmp/
+plan.txt
+new.json
+kungorelser_*.json
 
 # Secrets / certs
 *.pem
@@ -94,3 +99,7 @@ data/contacts.json
 # Lighthouse reports
 .lhr*.json
 .lighthouse-report.json
+
+# Backup files
+*.backup
+content.db.backup

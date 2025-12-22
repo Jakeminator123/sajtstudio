@@ -1,5 +1,7 @@
 import nextConfig from 'eslint-config-next'
 import tseslint from '@typescript-eslint/eslint-plugin'
+import prettier from 'eslint-plugin-prettier'
+import prettierConfig from 'eslint-config-prettier'
 
 const customIgnores = [
   'node_modules/**',
@@ -27,6 +29,7 @@ const customTsRules = {
     },
   ],
   '@typescript-eslint/no-explicit-any': 'warn',
+  'prettier/prettier': 'warn',
 }
 
 export default [
@@ -34,11 +37,15 @@ export default [
     ignores: customIgnores,
   },
   ...nextConfig,
+  prettierConfig, // Must come after nextConfig to override conflicting rules
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
       '@typescript-eslint': tseslint,
+      prettier: prettier,
     },
-    rules: customTsRules,
+    rules: {
+      ...customTsRules,
+    },
   },
 ]
