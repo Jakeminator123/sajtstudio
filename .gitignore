@@ -103,3 +103,7 @@ data/contacts.json
 # Backup files
 *.backup
 content.db.backup
+
+# SQLite databases (runtime-generated)
+*.db
+*.db-journal

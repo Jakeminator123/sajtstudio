@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const VISITOR_ID_KEY = "sajtstudio_visitor_id";
 
@@ -18,9 +18,6 @@ function getOrCreateVisitorId(): string {
 
 export default function PageViewTracker() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const search = searchParams.toString();
-  const fullPath = search ? `${pathname}?${search}` : pathname;
 
   useEffect(() => {
     if (!pathname) return;
@@ -36,7 +33,9 @@ export default function PageViewTracker() {
     }
 
     const payload = {
-      path: fullPath,
+      // Avoid useSearchParams() here to prevent missing-suspense build errors
+      // on Next.js not-found routes during prerender.
+      path: pathname,
       visitorId,
       referrer: typeof document !== "undefined" ? document.referrer : "",
     };
@@ -60,7 +59,7 @@ export default function PageViewTracker() {
     } catch {
       // Ignore tracking failures
     }
-  }, [pathname, fullPath]);
+  }, [pathname]);
 
   return null;
 }
