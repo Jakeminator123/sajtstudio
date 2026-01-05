@@ -1,6 +1,6 @@
 /**
  * Content Database - SQLite-based CMS for homepage content
- * 
+ *
  * Uses consistent key naming:
  * - T* for text content (T1, T2, T3...)
  * - B* for images/bilder (B1, B2, B3...)
@@ -199,11 +199,11 @@ export const defaultContent: Record<string, Omit<NewContentEntry, "key">> = {
 export function getContent(key: string): ContentEntry | null {
   const stmt = contentDb.prepare("SELECT * FROM content WHERE key = ?");
   const result = stmt.get(key) as ContentEntry | undefined;
-  
+
   if (result) {
     return result;
   }
-  
+
   // Return default if exists
   const defaultValue = defaultContent[key];
   if (defaultValue) {
@@ -214,7 +214,7 @@ export function getContent(key: string): ContentEntry | null {
       updated_at: new Date().toISOString(),
     };
   }
-  
+
   return null;
 }
 
@@ -233,10 +233,10 @@ export function getContentValue(key: string, fallback?: string): string {
 export function getAllContent(): ContentEntry[] {
   const stmt = contentDb.prepare("SELECT * FROM content ORDER BY section, key");
   const dbContent = stmt.all() as ContentEntry[];
-  
+
   // Merge with defaults (prefer database values)
   const merged: Map<string, ContentEntry> = new Map();
-  
+
   // Add defaults first
   for (const [key, value] of Object.entries(defaultContent)) {
     merged.set(key, {
@@ -246,12 +246,12 @@ export function getAllContent(): ContentEntry[] {
       updated_at: new Date().toISOString(),
     });
   }
-  
+
   // Override with database values
   for (const entry of dbContent) {
     merged.set(entry.key, entry);
   }
-  
+
   // Sort by section then key
   return Array.from(merged.values()).sort((a, b) => {
     if (a.section !== b.section) {
@@ -280,7 +280,7 @@ export function updateContent(key: string, value: string): ContentEntry | null {
   if (!existing) {
     return null;
   }
-  
+
   const stmt = contentDb.prepare(`
     INSERT INTO content (key, type, section, value, label, updated_at)
     VALUES (?, ?, ?, ?, ?, datetime('now'))
@@ -288,7 +288,7 @@ export function updateContent(key: string, value: string): ContentEntry | null {
       value = excluded.value,
       updated_at = datetime('now')
   `);
-  
+
   stmt.run(
     key,
     existing.type,
@@ -296,7 +296,7 @@ export function updateContent(key: string, value: string): ContentEntry | null {
     value,
     existing.label
   );
-  
+
   return getContent(key);
 }
 
@@ -311,14 +311,14 @@ export function seedDefaults(): number {
   const existingKeys = new Set(
     (existingKeysStmt.all() as { key: string }[]).map((row) => row.key)
   );
-  
+
   const insertStmt = contentDb.prepare(`
     INSERT INTO content (key, type, section, value, label, updated_at)
     VALUES (?, ?, ?, ?, ?, datetime('now'))
   `);
-  
+
   let insertedCount = 0;
-  
+
   const transaction = contentDb.transaction(() => {
     for (const [key, entry] of Object.entries(defaultContent)) {
       // Only insert if key doesn't exist (preserves user edits)
@@ -330,7 +330,7 @@ export function seedDefaults(): number {
       }
     }
   });
-  
+
   transaction();
   return insertedCount;
 }
@@ -343,10 +343,10 @@ export function resetToDefault(key: string): ContentEntry | null {
   if (!defaultValue) {
     return null;
   }
-  
+
   const stmt = contentDb.prepare("DELETE FROM content WHERE key = ?");
   stmt.run(key);
-  
+
   return getContent(key);
 }
 
@@ -356,16 +356,16 @@ export function resetToDefault(key: string): ContentEntry | null {
 export function getContentStats(): { total: number; customized: number; sections: string[] } {
   const totalStmt = contentDb.prepare("SELECT COUNT(*) as count FROM content");
   const customized = (totalStmt.get() as { count: number }).count;
-  
+
   const sectionsStmt = contentDb.prepare("SELECT DISTINCT section FROM content");
   const dbSections = (sectionsStmt.all() as { section: string }[]).map((s) => s.section);
-  
+
   // Get all unique sections from defaults
   const allSections = new Set([
     ...dbSections,
     ...Object.values(defaultContent).map((d) => d.section),
   ]);
-  
+
   return {
     total: Object.keys(defaultContent).length,
     customized,

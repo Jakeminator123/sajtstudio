@@ -205,7 +205,7 @@ export function getPreviewStats(): {
 
   // Accessed in last 24 hours
   const recentStmt = previewDb.prepare(`
-    SELECT COUNT(*) as count FROM previews 
+    SELECT COUNT(*) as count FROM previews
     WHERE last_accessed > datetime('now', '-1 day')
   `);
   const recentlyAccessed = (recentStmt.get() as { count: number }).count;
