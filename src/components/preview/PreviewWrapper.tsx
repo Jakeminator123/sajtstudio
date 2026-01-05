@@ -3,27 +3,27 @@
 /**
  * PreviewWrapper Component
  * ========================
- * 
+ *
  * Displays external demo sites (from vusercontent.net) in a branded Sajtstudio frame.
- * 
+ *
  * ## How it works:
  * - Embeds the external site directly via iframe (no proxy needed)
  * - vusercontent.net does NOT set X-Frame-Options, so direct embedding works
  * - Shows Sajtstudio branding in header and CTA footer
- * 
+ *
  * ## Features:
  * - Loading state with spinner
  * - Error handling with fallback
  * - Optional screenshot fallback (for sites that fail to load)
  * - "Open original" button for direct access
  * - Responsive design
- * 
+ *
  * ## Props:
  * - sourceUrl: Direct URL to the external site (https://demo-xxx.vusercontent.net)
  * - proxyUrl: Legacy prop, now equals sourceUrl (proxy no longer needed)
  * - previewImageSrc: Optional screenshot fallback image
  * - preview: Metadata about the preview (slug, company_name, domain)
- * 
+ *
  * @author Sajtstudio
  * @since 2024-12-20 - Fixed: Changed from proxy to direct iframe embedding
  */
@@ -122,11 +122,11 @@ export default function PreviewWrapper({
   // Show hint after threshold if still loading
   useEffect(() => {
     if (mode !== "iframe" || !isLoading || hasError) return;
-    
+
     const timer = setTimeout(() => {
       setShowSlowHint(true);
     }, SLOW_LOADING_THRESHOLD_MS);
-    
+
     return () => clearTimeout(timer);
   }, [mode, isLoading, hasError]);
 
@@ -259,9 +259,9 @@ export default function PreviewWrapper({
 
         {/* Loading spinner (iframe mode) */}
         {mode === "iframe" && isLoading && !hasError && (
-          <LoadingOverlay 
-            showSlowHint={showSlowHint} 
-            sourceUrl={sourceUrl} 
+          <LoadingOverlay
+            showSlowHint={showSlowHint}
+            sourceUrl={sourceUrl}
           />
         )}
 
@@ -343,8 +343,8 @@ export default function PreviewWrapper({
           DOWNLOAD MODAL - only render on client
           ================================================================ */}
       {isMounted && (
-        <DownloadModal 
-          isOpen={showDownloadModal} 
+        <DownloadModal
+          isOpen={showDownloadModal}
           onClose={() => setShowDownloadModal(false)}
           companyName={preview.company_name}
           slug={preview.slug}
@@ -393,7 +393,7 @@ function LoadingOverlay({ showSlowHint, sourceUrl }: { showSlowHint: boolean; so
       <div className="flex flex-col items-center gap-4 text-center px-4">
         <div className="w-12 h-12 border-4 border-gray-700 rounded-full animate-spin border-t-accent" />
         <p className="text-gray-400 text-sm">Laddar förhandsgranskning...</p>
-        
+
         {showSlowHint && (
           <div className="flex flex-col items-center gap-2 mt-2">
             <p className="text-gray-500 text-xs max-w-md">
@@ -452,13 +452,13 @@ function ErrorOverlay({ sourceUrl }: { sourceUrl: string }) {
 }
 
 /** Download modal - shows instructions for getting the site */
-function DownloadModal({ 
-  isOpen, 
-  onClose, 
+function DownloadModal({
+  isOpen,
+  onClose,
   companyName,
-  slug 
-}: { 
-  isOpen: boolean; 
+  slug
+}: {
+  isOpen: boolean;
   onClose: () => void;
   companyName: string | null;
   slug: string;
@@ -545,7 +545,7 @@ function DownloadModal({
             <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
               <p className="text-gray-300 text-sm leading-relaxed">
                 Skicka ett mejl till{" "}
-                <a 
+                <a
                   href={`mailto:hej@sajtstudio.se?subject=Ladda hem: ${slug}&body=Hej! Jag vill ladda hem min demosajt (${slug}). Tack!`}
                   className="text-accent hover:underline font-medium"
                 >
@@ -563,7 +563,7 @@ function DownloadModal({
               >
                 📧 Öppna mejlklient
               </a>
-              
+
               <button
                 onClick={handleSendRequest}
                 disabled={isSending}

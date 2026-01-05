@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useContentSection } from "@/hooks/useContent";
 import { useTheme } from "@/hooks/useTheme";
+import { isMobileDevice } from "@/lib/performance";
 
 // Parse SRT format subtitles
 interface Subtitle {
@@ -174,7 +175,7 @@ export default function AboutUsVideoSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isInView = useInView(sectionRef, { once: false, margin: "15%" });
   const { isLight } = useTheme();
-  
+
   // Fetch content from CMS - enables live updates from /admin
   const { getValue } = useContentSection("portfolio");
   const videoUrl = getValue("V4", "/videos/om_oss.mp4");
@@ -183,6 +184,14 @@ export default function AboutUsVideoSection() {
   const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(1);
   const [hasVideo, setHasVideo] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    setIsMobile(isMobileDevice() || window.innerWidth < 768);
+  }, []);
 
   // Calculate subtitle based on current time using useMemo instead of useEffect
   const currentSubtitle = useMemo(() => {
@@ -226,6 +235,28 @@ export default function AboutUsVideoSection() {
       setIsPlaying(!isPlaying);
     }
   };
+
+  // Auto-hide controls after interaction
+  const handleVideoInteraction = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    if (isPlaying) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 2500);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle video end
   const handleEnded = () => {
@@ -336,46 +367,115 @@ export default function AboutUsVideoSection() {
               Din webbläsare stöder inte videouppspelning.
             </video>
 
-            {/* Play button overlay */}
-            {!isPlaying && (
-              <motion.button
-                onClick={togglePlay}
-                className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                aria-label="Spela video"
-              >
-                <motion.div
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center ${
-                    isLight
-                      ? "bg-white/90 group-hover:bg-white"
-                      : "bg-accent/90 group-hover:bg-accent"
-                  } transition-all shadow-lg`}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+            {/* Modern minimalist play/pause button */}
+            <AnimatePresence mode="wait">
+              {!isPlaying ? (
+                <motion.button
+                  key="play-button"
+                  onClick={togglePlay}
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  aria-label="Spela video"
                 >
-                  <svg
-                    className={`w-8 h-8 md:w-10 md:h-10 ml-1 ${
-                      isLight ? "text-accent" : "text-white"
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </motion.div>
-              </motion.button>
-            )}
+                  {/* Subtle gradient overlay for better contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 opacity-60 group-hover:opacity-80 transition-opacity" />
 
-            {/* Click to pause when playing */}
-            {isPlaying && (
-              <button
-                onClick={togglePlay}
-                className="absolute inset-0 cursor-pointer"
-                aria-label="Pausa video"
-              />
-            )}
+                  {/* Elegant play button */}
+                  <motion.div
+                    className="relative z-10 flex items-center justify-center"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, duration: 0.3, ease: "easeOut" }}
+                  >
+                    {/* Outer ring with gradient */}
+                    <div className={`absolute w-20 h-20 md:w-24 md:h-24 rounded-full ${
+                      isLight
+                        ? "bg-gradient-to-br from-white/20 to-white/5"
+                        : "bg-gradient-to-br from-white/10 to-white/5"
+                    } backdrop-blur-sm border border-white/20 group-hover:border-white/40 transition-all`} />
+
+                    {/* Inner play icon */}
+                    <motion.div
+                      className="relative w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center backdrop-blur-md"
+                      style={{
+                        background: isLight
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8))"
+                          : "linear-gradient(135deg, rgba(0, 102, 255, 0.9), rgba(0, 80, 200, 0.8))",
+                        boxShadow: isLight
+                          ? "0 8px 32px rgba(0, 102, 255, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)"
+                          : "0 8px 32px rgba(0, 102, 255, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+                      }}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <svg
+                        className={`w-7 h-7 md:w-8 md:h-8 ml-1 ${
+                          isLight ? "text-accent" : "text-white"
+                        }`}
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* "Klicka för att spela" text on mobile */}
+                  {isMobile && (
+                    <motion.span
+                      className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 text-sm font-medium"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      Tryck för att spela
+                    </motion.span>
+                  )}
+                </motion.button>
+              ) : (
+                /* Click area to pause when playing - with optional controls */
+                <motion.button
+                  key="pause-area"
+                  onClick={(e) => {
+                    togglePlay();
+                    handleVideoInteraction();
+                  }}
+                  onMouseMove={handleVideoInteraction}
+                  onTouchStart={handleVideoInteraction}
+                  className="absolute inset-0 cursor-pointer"
+                  aria-label="Pausa video"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {/* Show pause indicator briefly on hover/tap */}
+                  <AnimatePresence>
+                    {showControls && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                          <svg
+                            className="w-6 h-6 md:w-7 md:h-7 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                          </svg>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              )}
+            </AnimatePresence>
 
             {/* Subtitle overlay */}
             {currentSubtitle && (

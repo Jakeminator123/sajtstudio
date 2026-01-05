@@ -103,3 +103,7 @@ data/contacts.json
 # Backup files
 *.backup
 content.db.backup
+
+old
+cleaner.py
+cleaner2.py

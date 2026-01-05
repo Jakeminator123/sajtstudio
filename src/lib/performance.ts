@@ -117,6 +117,26 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
+ * Check if device is mobile (touch-based or small screen)
+ * Used to reduce heavy animations on mobile for performance
+ */
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false
+
+  // Check screen width
+  const isSmallScreen = window.innerWidth < 768
+
+  // Check for touch capability (more reliable than user agent)
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+  // Check for slow connection on mobile
+  const connection = (navigator as { connection?: { effectiveType?: string } }).connection
+  const isSlowConnection = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
+
+  return isSmallScreen || (isTouchDevice && isSlowConnection)
+}
+
+/**
  * Get connection speed (if available)
  */
 export function getConnectionSpeed(): 'slow' | 'fast' | 'unknown' {

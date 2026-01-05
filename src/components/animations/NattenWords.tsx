@@ -28,9 +28,9 @@ export default function NattenWords({
   const fallbackProgress = useMotionValue(0);
   const progress = scrollProgress || fallbackProgress;
 
-  // Scroll-based animations - always call hooks with valid MotionValue
-  const yTransform = useTransform(progress, [0, 0.5, 1], [0, -50, -100]);
-  const opacityTransform = useTransform(progress, [0, 0.5, 0.9], [1, 1, 0]);
+  // Scroll-based animations - tuned to start earlier while the hero is still in view
+  const yTransform = useTransform(progress, [0, 0.2, 0.6, 1], [0, -8, -60, -95]);
+  const opacityTransform = useTransform(progress, [0, 0.25, 0.55], [1, 1, 0]);
 
   const y = scrollProgress ? yTransform : undefined;
   const opacity = scrollProgress ? opacityTransform : undefined;
@@ -38,9 +38,7 @@ export default function NattenWords({
   // Only apply animations when mounted to prevent hydration mismatch
   if (!mounted || shouldReduceMotion) {
     return (
-      <span className={className}>
-        {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
-        <span className="sr-only">{text}</span>
+      <span className={className} aria-label={text}>
         <span aria-hidden="true">
           {letters.map((letter, index) => (
             <span key={index} className="inline-block" aria-hidden="true">
@@ -63,8 +61,6 @@ export default function NattenWords({
       }}
       suppressHydrationWarning
     >
-      {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
-      <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {letters.map((letter, index) => (
           <motion.span

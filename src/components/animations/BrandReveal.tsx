@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { isMobileDevice } from "@/lib/performance";
 
 interface BrandRevealProps {
   text?: string;
@@ -10,36 +11,63 @@ interface BrandRevealProps {
 
 /**
  * BrandReveal - Beautiful animated text reveal for "Vi är Sajtstudio"
- * 
+ *
  * Features:
  * - Smooth letter-by-letter reveal (not scroll-dependent)
  * - Beautiful gradient animation
  * - Subtle glow effect
  * - Mobile-optimized (reduced animations on mobile)
  */
-export default function BrandReveal({ 
+export default function BrandReveal({
   text = "Vi är Sajtstudio",
-  className = "" 
+  className = ""
 }: BrandRevealProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "150px" });
   const prefersReducedMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(isMobileDevice() || window.innerWidth < 768);
+  }, []);
 
   const words = text.split(" ");
 
-  // Simple reveal for reduced motion
-  if (prefersReducedMotion) {
+  // Simple reveal for reduced motion or mobile
+  if (prefersReducedMotion || isMobile) {
     return (
-      <span className={`inline-block ${className}`}>
-        <span className="bg-gradient-to-r from-white via-blue-400 to-rose-500 bg-clip-text text-transparent">
+      <span
+        className={`inline-block ${className}`}
+        style={{
+          // Prevent text blurriness on mobile
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          textRendering: "optimizeLegibility",
+        }}
+      >
+        <motion.span
+          className="bg-gradient-to-r from-white via-blue-400 to-rose-500 bg-clip-text text-transparent"
+          initial={{ opacity: 0, y: 15 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           {text}
-        </span>
+        </motion.span>
       </span>
     );
   }
 
   return (
-    <span ref={ref} className={`inline-block relative ${className}`}>
+    <span
+      ref={ref}
+      className={`inline-block relative ${className}`}
+      style={{
+        // Prevent text blurriness
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        textRendering: "optimizeLegibility",
+      }}
+    >
       {/* Background glow - subtle, not scroll-dependent */}
       <motion.span
         className="absolute inset-0 blur-2xl opacity-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-rose-500/30 -z-10"
@@ -53,18 +81,18 @@ export default function BrandReveal({
         <span key={wordIndex} className="inline-block mr-[0.25em]">
           {word.split("").map((letter, letterIndex) => {
             const totalIndex = wordIndex * 3 + letterIndex; // Stagger calculation
-            
+
             return (
               <motion.span
                 key={letterIndex}
                 className="inline-block relative"
-                initial={{ 
-                  opacity: 0, 
+                initial={{
+                  opacity: 0,
                   y: 30,
                   rotateX: -90,
                 }}
-                animate={isInView ? { 
-                  opacity: 1, 
+                animate={isInView ? {
+                  opacity: 1,
                   y: 0,
                   rotateX: 0,
                 } : {}}
@@ -73,7 +101,12 @@ export default function BrandReveal({
                   delay: totalIndex * 0.04,
                   ease: [0.25, 0.1, 0.25, 1],
                 }}
-                style={{ perspective: "500px" }}
+                style={{
+                  perspective: "500px",
+                  // Prevent text blurriness during transforms
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                }}
               >
                 {/* Main letter with animated gradient */}
                 <motion.span

@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, MotionValue, useTransform, useMotionValue } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
+import { isMobileDevice } from "@/lib/performance";
 
 interface HemsidorWordsProps {
   scrollProgress?: MotionValue<number>;
@@ -19,23 +20,30 @@ export default function HemsidorWords({
   const text = "hemsidor";
   const letters = useMemo(() => text.split(""), [text]);
 
+  // Detect mobile for performance optimization
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(isMobileDevice() || window.innerWidth < 768);
+  }, []);
+
   // Create fallback MotionValue for SSR safety - hooks must be called directly
   const fallbackProgress = useMotionValue(0);
   const progress = scrollProgress || fallbackProgress;
 
-  // Scroll-based animations - always call hooks with valid MotionValue
-  const yTransform = useTransform(progress, [0, 0.5, 1], [0, -50, -100]);
-  const opacityTransform = useTransform(progress, [0, 0.5, 0.9], [1, 1, 0]);
+  // Scroll-based animations - tuned to start earlier while the hero is still in view
+  const yTransform = useTransform(progress, [0, 0.2, 0.6, 1], [0, -10, -70, -110]);
+  const opacityTransform = useTransform(progress, [0, 0.25, 0.55], [1, 1, 0]);
 
   const y = scrollProgress ? yTransform : undefined;
   const opacity = scrollProgress ? opacityTransform : undefined;
 
+  // Use reduced animations on mobile or when user prefers reduced motion
+  const useSimpleAnimations = shouldReduceMotion || isMobile;
+
   // Only apply animations when mounted to prevent hydration mismatch
   if (!mounted || shouldReduceMotion) {
     return (
-      <span className={className}>
-        {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
-        <span className="sr-only">{text}</span>
+      <span className={className} aria-label={text}>
         <span aria-hidden="true">
           {letters.map((letter, index) => (
             <span key={index} className="inline-block" aria-hidden="true">
@@ -47,6 +55,44 @@ export default function HemsidorWords({
     );
   }
 
+  // MOBILE: Simple optimized version without heavy effects
+  if (isMobile) {
+    return (
+      <motion.span
+        className={`${className} relative inline-block`}
+        aria-label={text}
+        style={{
+          y: y ?? 0,
+          opacity: typeof opacity === 'number' ? opacity : (opacity?.get?.() ?? 1),
+        }}
+        suppressHydrationWarning
+      >
+        <span aria-hidden="true">
+          {letters.map((letter, index) => (
+            <motion.span
+              key={index}
+              className="inline-block relative text-accent font-black"
+              aria-hidden="true"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: index * 0.04,
+                duration: 0.4,
+                ease: "easeOut",
+              }}
+              style={{
+                textShadow: "0 0 20px rgba(0, 102, 255, 0.5)",
+              }}
+            >
+              {letter === " " ? "\u00A0" : letter}
+            </motion.span>
+          ))}
+        </span>
+      </motion.span>
+    );
+  }
+
+  // DESKTOP: Full animations with effects
   return (
     <motion.span
       className={`${className} relative inline-block`}
@@ -57,8 +103,6 @@ export default function HemsidorWords({
       }}
       suppressHydrationWarning
     >
-      {/* Accessibility/SEO: keep a single readable token for screen readers/crawlers */}
-      <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {letters.map((letter, index) => (
           <motion.span
@@ -93,21 +137,23 @@ export default function HemsidorWords({
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
-              animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+              animate={
+                useSimpleAnimations
+                  ? undefined
+                  : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }
+              }
+              transition={
+                useSimpleAnimations
+                  ? undefined
+                  : { duration: 4, repeat: Infinity, ease: "linear" }
+              }
               suppressHydrationWarning
             >
               {letter === " " ? "\u00A0" : letter}
             </motion.span>
 
-            {/* Strong glowing shadow effect behind each letter */}
-            {!shouldReduceMotion && (
+            {/* Strong glowing shadow effect behind each letter - DESKTOP ONLY */}
+            {!useSimpleAnimations && (
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-accent via-accent-light to-accent blur-lg opacity-70 -z-10"
                 animate={{
@@ -123,8 +169,8 @@ export default function HemsidorWords({
               />
             )}
 
-            {/* Outer glow ring that pulses */}
-            {!shouldReduceMotion && (
+            {/* Outer glow ring that pulses - DESKTOP ONLY */}
+            {!useSimpleAnimations && (
               <motion.span
                 className="absolute inset-0 rounded-lg border-2 border-accent/60"
                 animate={{
@@ -145,8 +191,8 @@ export default function HemsidorWords({
               />
             )}
 
-            {/* Subtle shimmer effect */}
-            {!shouldReduceMotion && (
+            {/* Subtle shimmer effect - DESKTOP ONLY */}
+            {!useSimpleAnimations && (
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -z-5"
                 style={{

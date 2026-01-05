@@ -31,6 +31,10 @@ export default function PageTransition({ children }: PageTransitionProps) {
     // Scroll to top on route change - use requestAnimationFrame to avoid blocking
     if (typeof window !== 'undefined') {
       requestAnimationFrame(() => {
+        // If the URL includes a hash, let hash-based navigation (anchor scroll) win.
+        // This prevents "wrong section" behavior when landing on /#something.
+        const hasHash = Boolean(window.location.hash && window.location.hash !== '#');
+        if (hasHash) return;
         window.scrollTo({ top: 0, behavior: 'instant' });
       });
     }

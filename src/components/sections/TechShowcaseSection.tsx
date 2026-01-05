@@ -4,6 +4,7 @@ import { useMounted } from "@/hooks/useMounted";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { isMobileDevice } from "@/lib/performance";
 
 // Dynamically import PacmanGame to avoid SSR issues
 const PacmanGame = dynamic(() => import("@/components/games/PacmanGame"), {
@@ -24,7 +25,13 @@ export default function TechShowcaseSection() {
     margin: "600px 0px -200px 0px",
   });
   const mounted = useMounted();
+  const [isMobile, setIsMobile] = useState(false);
   const [showTechText, setShowTechText] = useState(false);
+
+  // Detect mobile for performance optimization
+  useEffect(() => {
+    setIsMobile(isMobileDevice() || window.innerWidth < 768);
+  }, []);
   const [showPacman, setShowPacman] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -45,7 +52,7 @@ export default function TechShowcaseSection() {
   const showOverlay = showPacman && !overlayDismissed;
   const showInlinePacman = showPacman && overlayDismissed;
 
-  // Matrix text typing animation
+  // Matrix text typing animation - optimized for mobile
   useEffect(() => {
     if (showTechText && !showPacman) {
       setMatrixText("");
@@ -59,20 +66,22 @@ export default function TechShowcaseSection() {
           setMatrixText(matrixFullText.slice(0, currentIndex + 1));
           currentIndex++;
           const lastChar = matrixFullText[currentIndex - 1];
-          // Faster typing animation
-          const delay = lastChar === " " ? 15 : 35; // Reduced from 25/55
+          // Faster typing on mobile to reduce energy consumption
+          const baseDelay = isMobile ? 10 : 35;
+          const spaceDelay = isMobile ? 5 : 15;
+          const delay = lastChar === " " ? spaceDelay : baseDelay;
           timeoutId = setTimeout(typeText, delay);
         } else {
           setMatrixFinished(true);
           // Faster reveal of secondary message
-          setTimeout(() => setPostMatrixMessageVisible(true), 250); // Reduced from 400ms
+          setTimeout(() => setPostMatrixMessageVisible(true), isMobile ? 150 : 250);
         }
       };
 
-      // Start typing immediately
+      // Start typing immediately (faster on mobile)
       const typingTimer = setTimeout(() => {
         typeText();
-      }, 80); // Reduced from 150ms
+      }, isMobile ? 50 : 80);
 
       return () => {
         clearTimeout(typingTimer);
@@ -83,7 +92,7 @@ export default function TechShowcaseSection() {
       setMatrixFinished(false);
       setPostMatrixMessageVisible(false);
     }
-  }, [showTechText, showPacman, matrixFullText]);
+  }, [showTechText, showPacman, matrixFullText, isMobile]);
 
   // Control Matrix video playback
   useEffect(() => {

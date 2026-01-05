@@ -2,7 +2,7 @@
 
 import { useVideoLoader } from "@/hooks/useVideoLoader";
 import { useTheme } from "@/hooks/useTheme";
-import { prefersReducedMotion } from "@/lib/performance";
+import { isMobileDevice, prefersReducedMotion } from "@/lib/performance";
 import {
   motion,
   useInView,
@@ -107,9 +107,19 @@ export default function HeroAnimation() {
 
   // Check for reduced motion preference
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setIsMobile(isMobileDevice() || window.innerWidth < 768);
+  }, []);
+
+  const reduceFx = shouldReduceMotion || isMobile;
 
   // Lock scrolling during explosion animation - user cannot interact
   useEffect(() => {
+    // Never lock scroll on mobile (causes "stuck" feeling + hurts perf/UX)
+    if (reduceFx) return;
     if (explosionAutoPlay && !hasExploded) {
       // Lock scroll during explosion
       document.body.style.overflow = "hidden";
@@ -121,7 +131,7 @@ export default function HeroAnimation() {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
-  }, [explosionAutoPlay, hasExploded]);
+  }, [explosionAutoPlay, hasExploded, reduceFx]);
 
   // Unlock scrolling when explosion animation completes
   useEffect(() => {
@@ -250,9 +260,13 @@ export default function HeroAnimation() {
   // Ref to track if animation is running (avoids React re-render issues)
   const animationRunningRef = useRef(false);
   const animationControlsRef = useRef<ReturnType<typeof animate> | null>(null);
+  const lastExplosionProgressRef = useRef<number | null>(null);
 
   // Auto-play explosion when video touches images
   useEffect(() => {
+    // On mobile / reduced motion we don't auto-trigger the "explosion → auto-scroll" sequence.
+    // This prevents deep-links (/#kontakt, /#portfolio, etc) from unexpectedly yanking the user to TechShowcase.
+    if (reduceFx) return;
     if (animationRunningRef.current) return; // Use ref instead of state
 
     const explosionDuration = 5; // 5 seconds for visible card explosion (longer for images)
@@ -261,7 +275,20 @@ export default function HeroAnimation() {
     const explosionStartProgress = 0.6; // Explosion triggers later
 
     const unsubscribe = mediaScrollProgress.on("change", (latest) => {
-      if (latest >= explosionStartProgress && !animationRunningRef.current) {
+      // Avoid triggering immediately on mount when the user lands past this section (deep links).
+      const prev = lastExplosionProgressRef.current;
+      if (prev === null) {
+        lastExplosionProgressRef.current = latest;
+        return;
+      }
+      lastExplosionProgressRef.current = latest;
+
+      // Only trigger when crossing the threshold from below → above.
+      if (
+        prev < explosionStartProgress &&
+        latest >= explosionStartProgress &&
+        !animationRunningRef.current
+      ) {
         // Mark animation as running and stop scroll sync BEFORE React state updates
         animationRunningRef.current = true;
         shouldSyncWithScrollRef.current = false; // Stop syncing with scroll
@@ -410,6 +437,7 @@ export default function HeroAnimation() {
 
     return () => {
       unsubscribe();
+      lastExplosionProgressRef.current = null;
       if (whiteoutCheckRaf !== null) {
         cancelAnimationFrame(whiteoutCheckRaf);
       }
@@ -426,6 +454,7 @@ export default function HeroAnimation() {
     primaryDebrisPositions,
     secondaryDebrisPositions,
     sideDebrisPositions,
+    reduceFx,
   ]); // Removed explosionAutoPlay - we use ref instead
 
   // Auto-scroll is now handled in the explosion auto-play effect above
@@ -523,6 +552,26 @@ export default function HeroAnimation() {
     const alpha = 0.18 + clamped * 0.22;
     return `0 ${spread}px ${blur}px rgba(255, 0, 51, ${alpha})`;
   });
+
+  // "Vi är Sajtstudio" portal / text-reveal (desktop-first)
+  // Always create MotionValues (no conditional hooks), then selectively render.
+  const vrLabelProgress = useTransform(smoothMediaProgress, [0.5, 0.66], [0, 1]);
+  const vrLabelClipPath = useTransform(vrLabelProgress, (v) => {
+    const pct = Math.max(0, Math.min(1, v));
+    const right = (1 - pct) * 100;
+    return `inset(0 ${right}% 0 0 round 999px)`;
+  });
+  const vrLabelX = useTransform(vrLabelProgress, [0, 1], [-28, 0]);
+  const vrLabelOpacity = useTransform(vrLabelProgress, [0, 0.2, 1], [0, 0.9, 1]);
+  const vrPortalSpin = useTransform(smoothMediaProgress, [0.48, 0.86], [0, 360]);
+  const vrPortalPulse = useTransform(
+    smoothMediaProgress,
+    [0.45, 0.6, 0.75, 1],
+    [0, 1, 0.75, 0.6]
+  );
+  const vrScanY = useTransform(smoothMediaProgress, [0.52, 0.7], [80, -80]);
+  const vrScanOpacity = useTransform(smoothMediaProgress, [0.5, 0.58, 0.7], [0, 0.7, 0]);
+  const vrBeamX = useTransform(smoothMediaProgress, [0.52, 0.68], [-160, 160]);
 
   // Design and Functionality text animations removed for cleaner explosion
 
@@ -1851,7 +1900,7 @@ export default function HeroAnimation() {
           {!hasExploded && (
             <>
               {/* ============================================ */}
-              {/* RED LANDING PAD - Transforms into glowing floor */}
+              {/* VR SITE STUDIO PORTAL - replaces the old red square "landing pad" */}
               {/* ============================================ */}
               <motion.div
                 className="absolute left-1/2 top-1/2 pointer-events-none"
@@ -1867,12 +1916,104 @@ export default function HeroAnimation() {
                   boxShadow: redPadShadow,
                 }}
               >
-                <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
-                  <div className="absolute inset-0 rounded-[38%] bg-gradient-to-br from-tertiary via-tertiary/70 to-tertiary/40 opacity-90" />
-                  <div className="absolute inset-0 rounded-[40%] blur-3xl bg-tertiary/35" />
-                  <div className="absolute -inset-x-[25%] bottom-[-45%] h-[60%] bg-gradient-to-b from-tertiary/28 via-tertiary/12 to-transparent blur-3xl opacity-80" />
-                  <div className="absolute inset-x-[-30%] bottom-[-15%] h-[40%] rounded-full bg-tertiary/20 blur-[50px]" />
-                </div>
+                {reduceFx ? (
+                  // Mobile / reduced-motion: lightweight, non-scroll-y "badge" (no heavy filters)
+                  <div className="relative w-[260px] h-[140px] md:w-[320px] md:h-[180px]">
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-tertiary/55 via-tertiary/25 to-accent/15" />
+                    <div className="absolute inset-0 rounded-2xl border border-white/10" />
+                    <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_40%,rgba(255,0,51,0.35),transparent_60%)] opacity-70" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="px-5 py-3 rounded-full bg-black/35 text-white font-semibold tracking-wide">
+                        Vi är Sajtstudio
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Desktop: portal ring + scanline + scroll-revealed label
+                  <div className="relative w-[280px] h-[280px] md:w-[340px] md:h-[340px]">
+                    {/* soft aura */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        opacity: vrPortalPulse,
+                        background:
+                          "radial-gradient(circle at 50% 50%, rgba(255,0,51,0.35) 0%, rgba(255,0,51,0.12) 38%, transparent 62%)",
+                      }}
+                      suppressHydrationWarning
+                    />
+
+                    {/* portal ring (gradient + subtle spin) */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full overflow-hidden border border-white/10"
+                      style={{
+                        rotate: vrPortalSpin,
+                        background:
+                          "conic-gradient(from 180deg, rgba(255,0,51,0.75), rgba(0,102,255,0.35), rgba(255,0,51,0.75))",
+                      }}
+                      suppressHydrationWarning
+                    >
+                      {/* inner cutout */}
+                      <div className="absolute inset-[10%] rounded-full bg-black/35" />
+
+                      {/* scanline */}
+                      <motion.div
+                        className="absolute left-[-20%] right-[-20%] h-[18%]"
+                        style={{
+                          top: "50%",
+                          y: vrScanY,
+                          opacity: vrScanOpacity,
+                          background:
+                            "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), rgba(255,0,51,0.16), transparent)",
+                        }}
+                        suppressHydrationWarning
+                      />
+
+                      {/* tiny noise grid (cheap) */}
+                      <div
+                        className="absolute inset-0 opacity-[0.08]"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)",
+                          backgroundSize: "18px 18px",
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* floating label: reveal from left as you scroll */}
+                    <motion.div
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] md:w-[86%]"
+                      style={{
+                        opacity: vrLabelOpacity,
+                        x: vrLabelX,
+                        clipPath: vrLabelClipPath,
+                      }}
+                      suppressHydrationWarning
+                    >
+                      <div className="relative rounded-2xl border border-white/10 bg-black/35 overflow-hidden">
+                        {/* holographic beam passes under text */}
+                        <motion.div
+                          className="absolute inset-y-0 w-[35%] opacity-70"
+                          style={{
+                            x: vrBeamX,
+                            background:
+                              "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), rgba(0,102,255,0.18), transparent)",
+                            transform: "skewX(-18deg)",
+                          }}
+                          suppressHydrationWarning
+                        />
+                        <div className="relative px-5 py-4 md:px-6 md:py-5">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-2.5 w-2.5 rounded-full bg-tertiary shadow-[0_0_18px_rgba(255,0,51,0.55)]" />
+                            <div className="text-white font-semibold tracking-wide text-sm md:text-base">
+                              Vi är Sajtstudio
+                            </div>
+                          </div>
+                          {/* Intentionally no extra copy here (per request) */}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
               </motion.div>
             </>
           )}
@@ -2202,3 +2343,4 @@ export default function HeroAnimation() {
     </section>
   );
 }
+

@@ -41,6 +41,55 @@ export default function MobileMenu({
   const { isLight } = useTheme();
   const { openModal } = useOfferModal();
 
+  const scrollToSection = (hash: string) => {
+    if (typeof window === "undefined") return;
+    const id = hash.startsWith("#") ? hash.slice(1) : hash;
+    if (!id) return;
+
+    window.history.pushState(null, "", `/#${id}`);
+
+    let attempts = 0;
+    const maxAttempts = 40;
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        const computeHeaderOffset = () => {
+          const rootStyle = getComputedStyle(document.documentElement);
+          const headerHeightRaw = rootStyle.getPropertyValue("--header-height").trim();
+          const headerHeight = Number.parseInt(headerHeightRaw || "0", 10) || 80;
+          return headerHeight + 16;
+        };
+
+        const scrollToEl = () => {
+          const offset = computeHeaderOffset();
+          const top = el.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        };
+
+        scrollToEl();
+
+        let settle = 0;
+        const settleMax = 10;
+        const settleTick = () => {
+          settle++;
+          const offset = computeHeaderOffset();
+          const rectTop = el.getBoundingClientRect().top;
+          const delta = rectTop - offset;
+          if (Math.abs(delta) < 8) return;
+          scrollToEl();
+          if (settle < settleMax) {
+            window.setTimeout(settleTick, 120);
+          }
+        };
+        window.setTimeout(settleTick, 120);
+        return;
+      }
+      attempts++;
+      if (attempts < maxAttempts) requestAnimationFrame(tryScroll);
+    };
+    requestAnimationFrame(tryScroll);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -120,20 +169,39 @@ export default function MobileMenu({
                       href={link.href}
                       onClick={(e) => {
                         onClose();
-                        
+
                         // Handle Erbjudande link - opens modal instead of navigation
                         if (link.href === "#erbjudande") {
                           e.preventDefault();
                           openModal();
                           return;
                         }
-                        
+
+                        // Homepage convenience: keep users on the one-pager for Portfolio/Kontakt
+                        const pathname = window.location.pathname;
+                        if (pathname === "/" && (link.href === "/portfolio" || link.href === "/kontakt")) {
+                          e.preventDefault();
+                          scrollToSection(link.href === "/portfolio" ? "#portfolio" : "#kontakt");
+                          return;
+                        }
+
                         // Handle anchor links: if on different page, navigate first then scroll
                         const isAnchorLink = link.href.includes("#");
-                        const pathname = window.location.pathname;
                         if (isAnchorLink && pathname !== "/") {
                           e.preventDefault();
                           window.location.href = link.href;
+                          return;
+                        }
+
+                        // Anchor links on homepage: do smooth scroll (and wait for lazy sections if needed)
+                        if (isAnchorLink && pathname === "/") {
+                          const hash = link.href.includes("#")
+                            ? `#${link.href.split("#")[1]}`
+                            : "";
+                          if (hash) {
+                            e.preventDefault();
+                            scrollToSection(hash);
+                          }
                         }
                       }}
                       className={`block py-3 px-4 text-lg font-semibold hover:text-accent transition-colors relative group overflow-hidden rounded-lg ${

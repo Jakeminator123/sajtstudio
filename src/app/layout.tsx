@@ -132,7 +132,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const isProd = process.env.NODE_ENV === "production";
-  
+
   // Best practice: make invasive client-side handlers configurable.
   // Default: enabled in production, disabled in dev unless explicitly turned on.
   const parseEnvBool = (value: string | undefined): boolean | undefined => {
@@ -203,7 +203,7 @@ export default function RootLayout({
           ])}
         />
       </head>
-      <body className="antialiased overflow-x-hidden w-full max-w-screen relative">
+      <body className="antialiased overflow-x-hidden w-full max-w-screen relative" suppressHydrationWarning>
         <Providers>
           <RouteAwareBanners />
           <SkipLink />

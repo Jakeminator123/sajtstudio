@@ -60,6 +60,7 @@ type NavLink = {
 export default function HeaderNav() {
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement | null>(null);
+  const didInitialHashScrollRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -69,6 +70,74 @@ export default function HeaderNav() {
   const [currentHash, setCurrentHash] = useState("");
   const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
   const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const scrollToSection = (hash: string) => {
+    if (typeof window === "undefined") return;
+    const id = hash.startsWith("#") ? hash.slice(1) : hash;
+    if (!id) return;
+
+    // Update URL without letting the browser "jump" before the element exists
+    window.history.pushState(null, "", `/#${id}`);
+    // Keep local state in sync (pushState doesn't trigger hashchange)
+    setCurrentHash(`#${id}`);
+
+    let attempts = 0;
+    const maxAttempts = 220; // allow lazy sections to mount (~3-4s worst case)
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        const computeHeaderOffset = () => {
+          const rootStyle = getComputedStyle(document.documentElement);
+          const headerHeightRaw = rootStyle.getPropertyValue("--header-height").trim();
+          const headerHeight = Number.parseInt(headerHeightRaw || "0", 10) || 80;
+          return headerHeight + 16;
+        };
+
+        const scrollToEl = () => {
+          const offset = computeHeaderOffset();
+          const top = el.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        };
+
+        // First scroll
+        scrollToEl();
+
+        // Re-align a few times to survive layout shifts from lazy-loaded sections
+        let settle = 0;
+        const settleMax = 10;
+        const settleTick = () => {
+          settle++;
+          const offset = computeHeaderOffset();
+          const rectTop = el.getBoundingClientRect().top;
+          const delta = rectTop - offset;
+          if (Math.abs(delta) < 8) return;
+          scrollToEl();
+          if (settle < settleMax) {
+            window.setTimeout(settleTick, 120);
+          }
+        };
+        window.setTimeout(settleTick, 120);
+        return;
+      }
+      attempts++;
+      if (attempts < maxAttempts) requestAnimationFrame(tryScroll);
+    };
+    requestAnimationFrame(tryScroll);
+  };
+
+  // If we land directly on a hash (e.g. /#portfolio), wait for lazy sections to mount then scroll.
+  useEffect(() => {
+    if (!mounted) return;
+    if (pathname !== "/") return;
+    if (didInitialHashScrollRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    didInitialHashScrollRef.current = true;
+    scrollToSection(hash);
+  }, [mounted, pathname]);
 
   // Ensure hydration safety - only track scroll after mount
   useEffect(() => {
@@ -342,9 +411,11 @@ export default function HeaderNav() {
                   const isAnchorLink = Boolean(link.hash);
                   const isActive =
                     (!isAnchorLink && pathname === link.href) ||
-                    (isAnchorLink &&
-                      pathname === "/" &&
-                      currentHash === link.hash);
+                    (isAnchorLink && pathname === "/" && currentHash === link.hash) ||
+                    // Special-case: on homepage we keep Portfolio/Kontakt as in-page sections
+                    (pathname === "/" &&
+                      (link.href === "/portfolio" || link.href === "/kontakt") &&
+                      currentHash === (link.href === "/portfolio" ? "#portfolio" : "#kontakt"));
 
                   return (
                     <motion.div
@@ -360,14 +431,21 @@ export default function HeaderNav() {
                           /**
                            * Special link handling
                            */
-                          
+
                           // Handle Erbjudande link - opens modal instead of navigation
                           if (link.href === "#erbjudande") {
                             e.preventDefault();
                             openModal();
                             return;
                           }
-                          
+
+                          // Homepage convenience: keep users on the one-pager for Portfolio/Kontakt
+                          if (pathname === "/" && (link.href === "/portfolio" || link.href === "/kontakt")) {
+                            e.preventDefault();
+                            scrollToSection(link.href === "/portfolio" ? "#portfolio" : "#kontakt");
+                            return;
+                          }
+
                           /**
                            * Anchor link navigation handling
                            *
@@ -383,6 +461,13 @@ export default function HeaderNav() {
                             // Use window.location.href for full page navigation with anchor
                             // This ensures browser scrolls to anchor after page load
                             window.location.href = link.href;
+                            return;
+                          }
+
+                          // Anchor links on homepage: do smooth scroll (and wait for lazy sections if needed)
+                          if (isAnchorLink && pathname === "/" && link.hash) {
+                            e.preventDefault();
+                            scrollToSection(link.hash);
                             return;
                           }
                           // Allow normal Next.js navigation for regular page links

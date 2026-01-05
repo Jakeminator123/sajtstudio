@@ -507,7 +507,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   // Fetch content from CMS - this enables live updates from /admin
   const { getValue } = useContentSection("hero");
   const { openModal } = useOfferModal();
-  
+
   // Build content object from CMS with fallbacks to props then defaults
   const content: HeroContent = useMemo(() => ({
     title: getValue("T1", propContent?.title || defaultContent.title),
@@ -517,7 +517,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
     bgImage: getValue("B1", propContent?.bgImage || defaultContent.bgImage),
     bgVideo: getValue("V1", propContent?.bgVideo || defaultContent.bgVideo),
   }), [getValue, propContent]);
-  
+
   // Use actual mounted state to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -540,7 +540,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   // Theme hook for light/dark mode
   const { isLight } = useTheme();
 
-  // Check for reduced motion preference
+  // Check for reduced motion preference and mobile device
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), []);
 
   // Delay background video to avoid stealing bandwidth/CPU from LCP.
@@ -684,7 +684,8 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   // Adjusted offset to trigger earlier when header approaches text
   const { scrollYProgress: sectionScrollProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "end start"], // Trigger when section center passes viewport top
+    // Start animating as soon as the hero begins to move (earlier than before)
+    offset: ["start start", "end start"],
     layoutEffect: false,
   });
 
@@ -693,10 +694,11 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -30]);
 
   // Trigger text animations sooner so visitors don’t have to scroll as far
-  const headingX = useTransform(scrollYProgress, [0, 0.25], [0, -200]);
-  const headingOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const subtitleX = useTransform(scrollYProgress, [0, 0.25], [0, 200]);
-  const subtitleOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  // Use hero section progress (not global page scroll) so the effect starts earlier.
+  const headingX = useTransform(sectionScrollProgress, [0, 0.35], [0, -200]);
+  const headingOpacity = useTransform(sectionScrollProgress, [0, 0.22], [1, 0]);
+  const subtitleX = useTransform(sectionScrollProgress, [0, 0.35], [0, 200]);
+  const subtitleOpacity = useTransform(sectionScrollProgress, [0, 0.22], [1, 0]);
 
   // Generate stable particle positions (only on client) - memoized for performance
   const particles = useMemo(() => {

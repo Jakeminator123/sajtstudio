@@ -173,7 +173,11 @@ export default function Home() {
         </div>
 
         {/* Portfolio animation - lazy loaded for better LCP */}
-        <div className="content-visibility-auto">
+        <div
+          id="portfolio"
+          className="content-visibility-auto-lg"
+          style={{ scrollMarginTop: "calc(var(--header-height, 80px) + 16px)" }}
+        >
           <HeroAnimation />
         </div>
         {/* Tech vs Design showcase - lazy loaded for better LCP */}
@@ -207,7 +211,11 @@ export default function Home() {
         </div>
 
         {/* Big CTA - Fantasy style */}
-        <div className="content-visibility-auto">
+        <div
+          id="kontakt"
+          className="content-visibility-auto-lg"
+          style={{ scrollMarginTop: "calc(var(--header-height, 80px) + 16px)" }}
+        >
           <BigCTA />
         </div>
       </main>
