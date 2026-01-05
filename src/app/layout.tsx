@@ -3,6 +3,7 @@ import SkipLink from "@/components/layout/SkipLink";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import RouteAwareBanners from "@/components/layout/RouteAwareBanners";
 import DidChatbotLoader from "@/components/integrations/DidChatbotLoader";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import Providers from "@/components/providers/Providers";
 import {
   generateSchemaScript,
@@ -205,6 +206,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased overflow-x-hidden w-full max-w-screen relative" suppressHydrationWarning>
         <Providers>
+          <AnalyticsTracker />
           <RouteAwareBanners />
           <SkipLink />
           {/* Error boundary disabled in development to avoid webpack issues */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent, useCallback } from "react";
+import { useState, FormEvent, useCallback } from "react";
 import Link from "next/link";
 
 /**
@@ -68,82 +68,6 @@ interface SavedAudit {
   };
 }
 
-// Track page view on client side
-function trackPageView() {
-  if (typeof window === "undefined") return;
-
-  try {
-    const statsKey = "sajtstudio_visitor_stats";
-    const visitorIdKey = "sajtstudio_visitor_id";
-    const today = new Date().toISOString().split("T")[0];
-
-    let visitorId = localStorage.getItem(visitorIdKey);
-    const isNewVisitor = !visitorId;
-    if (!visitorId) {
-      visitorId = `visitor_${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 9)}`;
-      localStorage.setItem(visitorIdKey, visitorId);
-    }
-
-    const statsJson = localStorage.getItem(statsKey);
-    let stats: VisitorStats = statsJson
-      ? JSON.parse(statsJson)
-      : {
-          totalPageViews: 0,
-          uniqueVisitors: 0,
-          todayPageViews: 0,
-          lastUpdated: today,
-        };
-
-    if (stats.lastUpdated !== today) {
-      stats.todayPageViews = 0;
-      stats.lastUpdated = today;
-    }
-
-    stats.totalPageViews += 1;
-    stats.todayPageViews += 1;
-    if (isNewVisitor) {
-      stats.uniqueVisitors += 1;
-    }
-
-    localStorage.setItem(statsKey, JSON.stringify(stats));
-  } catch {
-    // Ignore localStorage errors
-  }
-}
-
-function getVisitorStats(): VisitorStats {
-  if (typeof window === "undefined") {
-    return {
-      totalPageViews: 0,
-      uniqueVisitors: 0,
-      todayPageViews: 0,
-      lastUpdated: new Date().toISOString().split("T")[0],
-    };
-  }
-
-  try {
-    const statsKey = "sajtstudio_visitor_stats";
-    const statsJson = localStorage.getItem(statsKey);
-    return statsJson
-      ? JSON.parse(statsJson)
-      : {
-          totalPageViews: 0,
-          uniqueVisitors: 0,
-          todayPageViews: 0,
-          lastUpdated: new Date().toISOString().split("T")[0],
-        };
-  } catch {
-    return {
-      totalPageViews: 0,
-      uniqueVisitors: 0,
-      todayPageViews: 0,
-      lastUpdated: new Date().toISOString().split("T")[0],
-    };
-  }
-}
-
 // Get admin credentials from env or fallback to defaults
 function getAdminCredentials() {
   // Default to admin/admin if env vars not set (for development convenience)
@@ -172,10 +96,6 @@ export default function AdminPage() {
   const [audits, setAudits] = useState<SavedAudit[]>([]);
   const [auditsLoading, setAuditsLoading] = useState(false);
 
-  useEffect(() => {
-    trackPageView();
-  }, []);
-
   // Login handler with env-based credentials
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
@@ -198,7 +118,19 @@ export default function AdminPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
-    setStats(getVisitorStats());
+    setStats(null);
+
+    // Load visitor stats from server
+    try {
+      const response = await fetch("/api/stats");
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data.stats || null);
+      }
+    } catch {
+      // Ignore stats errors to avoid blocking the dashboard
+      setStats(null);
+    }
 
     // Load contacts
     try {
@@ -842,7 +774,7 @@ export default function AdminPage() {
 
         {/* Footer note */}
         <p className="text-gray-500 text-sm mt-4 text-center">
-          Besökarstatistik lagras lokalt i webbläsaren. Kontaktmeddelanden, innehåll och audits hämtas från servern.
+          Besökarstatistik, kontaktmeddelanden, innehåll och audits hämtas från servern.
         </p>
       </div>
     </div>
