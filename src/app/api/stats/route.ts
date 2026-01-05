@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { visitorId, page } = await request.json();
-    
+
     if (!visitorId) {
       return NextResponse.json(
         { success: false, error: "Missing visitorId" },
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     recordPageView(visitorId, page || "/");
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to record page view:", error);

@@ -70,7 +70,7 @@ export function getStats(): StatsData {
   const uniqueVisitors = (uniqueStmt.get() as { count: number }).count;
 
   const todayStmt = statsDb.prepare(`
-    SELECT COUNT(*) as count FROM page_views 
+    SELECT COUNT(*) as count FROM page_views
     WHERE date(created_at) = date('now')
   `);
   const todayPageViews = (todayStmt.get() as { count: number }).count;
