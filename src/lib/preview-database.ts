@@ -9,7 +9,7 @@ import Database from "better-sqlite3";
 import path from "path";
 
 // Database file location - in project root
-const dbPath = path.join(process.cwd(), "previews.db");
+const dbPath = path.join(process.cwd(), "data", "db", "previews.db");
 
 // Create database connection
 const previewDb = new Database(dbPath);

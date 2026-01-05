@@ -8,7 +8,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 
-const dbPath = path.join(process.cwd(), "content.db");
+const dbPath = path.join(process.cwd(), "data", "db", "content.db");
 const cachePath = path.join(process.cwd(), "content-cache.json");
 const newJsonPath = path.join(process.cwd(), "new.json");
 

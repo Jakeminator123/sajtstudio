@@ -93,8 +93,9 @@ INPUT_DOC_FOR_CURSOR/
 node_modules
 
 # Data files (contains personal data from contact forms)
-data/
 data/contacts.json
+data/stats.json
+# Note: data/db/*.db files are tracked (empty schema files)
 
 # Lighthouse reports
 .lhr*.json

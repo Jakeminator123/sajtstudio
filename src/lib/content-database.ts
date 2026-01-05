@@ -12,7 +12,7 @@ import path from "path";
 import fs from "fs";
 
 // Database file location - in project root
-const dbPath = path.join(process.cwd(), "content.db");
+const dbPath = path.join(process.cwd(), "data", "db", "content.db");
 
 // Load default content from cache.json file (versioned in Git)
 const cachePath = path.join(process.cwd(), "content-cache.json");
