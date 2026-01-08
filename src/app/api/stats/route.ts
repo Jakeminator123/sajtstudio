@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing visitorId" }, { status: 400 })
     }
 
-    const ipHeader = request.ip || request.headers.get("x-forwarded-for")
-    const ip = ipHeader?.split(",")[0]?.trim() || null
+    const forwardedFor = request.headers.get("x-forwarded-for")
+    const realIp = request.headers.get("x-real-ip")
+    const ip = forwardedFor?.split(",")[0]?.trim() || realIp?.trim() || null
     const ipHash = hashIp(ip)
 
     recordPageView(visitorId, page || "/", ipHash)
