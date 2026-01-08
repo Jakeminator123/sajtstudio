@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { useState, FormEvent, useCallback } from "react";
-import Link from "next/link";
+import { useState, FormEvent, useCallback } from "react"
+import Link from "next/link"
 
 /**
  * Admin Dashboard - Statistics, contact messages, and content management
@@ -22,50 +22,51 @@ import Link from "next/link";
  */
 
 interface ContactEntry {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  timestamp: string;
-  source: string;
+  id: string
+  name: string
+  email: string
+  message: string
+  timestamp: string
+  source: string
 }
 
 interface ContentEntry {
-  id: number;
-  key: string;
-  type: "text" | "image" | "video";
-  section: string;
-  value: string;
-  label: string;
-  updated_at: string;
+  id: number
+  key: string
+  type: "text" | "image" | "video"
+  section: string
+  value: string
+  label: string
+  updated_at: string
 }
 
 interface VisitorStats {
-  totalPageViews: number;
-  uniqueVisitors: number;
-  todayPageViews: number;
-  lastUpdated: string;
+  totalPageViews: number
+  uniqueVisitors: number
+  uniqueIpVisitors: number
+  todayPageViews: number
+  lastUpdated: string
 }
 
-type TabType = "overview" | "contacts" | "content" | "audits";
+type TabType = "overview" | "contacts" | "content" | "audits"
 
 interface SavedAudit {
-  id: string;
-  filename: string;
-  domain: string | null;
-  company: string | null;
-  type: "audit" | "recommendation";
-  timestamp: string;
+  id: string
+  filename: string
+  domain: string | null
+  company: string | null
+  type: "audit" | "recommendation"
+  timestamp: string
   scores: {
-    seo?: number;
-    ux?: number;
-    performance?: number;
-    overall?: number;
-  };
+    seo?: number
+    ux?: number
+    performance?: number
+    overall?: number
+  }
   cost: {
-    sek: number;
-    tokens: number;
-  };
+    sek: number
+    tokens: number
+  }
 }
 
 // Get admin credentials from env or fallback to defaults
@@ -75,56 +76,58 @@ function getAdminCredentials() {
   return {
     username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || "admin",
     password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin",
-  };
+  }
 }
 
 export default function AdminPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [contacts, setContacts] = useState<ContactEntry[]>([]);
-  const [content, setContent] = useState<ContentEntry[]>([]);
-  const [stats, setStats] = useState<VisitorStats | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>("overview");
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [contentFilter, setContentFilter] = useState<string>("all");
-  const [audits, setAudits] = useState<SavedAudit[]>([]);
-  const [auditsLoading, setAuditsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [loginError, setLoginError] = useState("")
+  const [contacts, setContacts] = useState<ContactEntry[]>([])
+  const [content, setContent] = useState<ContentEntry[]>([])
+  const [stats, setStats] = useState<VisitorStats | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [activeTab, setActiveTab] = useState<TabType>("overview")
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState("")
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [contentFilter, setContentFilter] = useState<string>("all")
+  const [audits, setAudits] = useState<SavedAudit[]>([])
+  const [auditsLoading, setAuditsLoading] = useState(false)
 
   // Login handler with env-based credentials
   const handleLogin = (e: FormEvent) => {
-    e.preventDefault();
-    const creds = getAdminCredentials();
+    e.preventDefault()
+    const creds = getAdminCredentials()
 
     if (!creds.username || !creds.password) {
-      setLoginError("Admin credentials not configured. Set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD.");
-      return;
+      setLoginError(
+        "Admin credentials not configured. Set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD."
+      )
+      return
     }
 
     if (username === creds.username && password === creds.password) {
-      setIsLoggedIn(true);
-      setLoginError("");
-      loadData();
+      setIsLoggedIn(true)
+      setLoginError("")
+      loadData()
     } else {
-      setLoginError("Felaktigt användarnamn eller lösenord");
+      setLoginError("Felaktigt användarnamn eller lösenord")
     }
-  };
+  }
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true)
+    setError("")
 
     // Load visitor stats from database
     try {
-      const response = await fetch("/api/stats");
+      const response = await fetch("/api/stats")
       if (response.ok) {
-        const data = await response.json();
-        setStats(data.stats || null);
+        const data = await response.json()
+        setStats(data.stats || null)
       }
     } catch {
       // Stats errors don't block the dashboard
@@ -132,154 +135,156 @@ export default function AdminPage() {
 
     // Load contacts
     try {
-      const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY;
-      const headers: HeadersInit = { "Content-Type": "application/json" };
+      const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY
+      const headers: HeadersInit = { "Content-Type": "application/json" }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`;
+        headers["Authorization"] = `Bearer ${apiKey}`
       }
 
-      const response = await fetch("/api/contact", { headers });
+      const response = await fetch("/api/contact", { headers })
       if (response.ok) {
-        const data = await response.json();
-        setContacts(data.contacts || []);
+        const data = await response.json()
+        setContacts(data.contacts || [])
       } else if (response.status === 401) {
-        setError("API-nyckel krävs för att hämta kontakter");
+        setError("API-nyckel krävs för att hämta kontakter")
       }
     } catch {
-      setError("Nätverksfel vid hämtning av kontakter");
+      setError("Nätverksfel vid hämtning av kontakter")
     }
 
     // Load content
     try {
-      const response = await fetch("/api/content");
+      const response = await fetch("/api/content")
       if (response.ok) {
-        const data = await response.json();
-        setContent(data.content || []);
+        const data = await response.json()
+        setContent(data.content || [])
       }
     } catch {
-      console.error("Failed to load content");
+      console.error("Failed to load content")
     }
 
     // Load audits
     try {
-      const response = await fetch("/api/audits");
+      const response = await fetch("/api/audits")
       if (response.ok) {
-        const data = await response.json();
-        setAudits(data.audits || []);
+        const data = await response.json()
+        setAudits(data.audits || [])
       }
     } catch {
-      console.error("Failed to load audits");
+      console.error("Failed to load audits")
     }
 
-    setLoading(false);
-  }, []);
+    setLoading(false)
+  }, [])
 
   const loadAudits = async () => {
-    setAuditsLoading(true);
+    setAuditsLoading(true)
     try {
-      const response = await fetch("/api/audits");
+      const response = await fetch("/api/audits")
       if (response.ok) {
-        const data = await response.json();
-        setAudits(data.audits || []);
+        const data = await response.json()
+        setAudits(data.audits || [])
       }
     } catch {
-      console.error("Failed to load audits");
+      console.error("Failed to load audits")
     }
-    setAuditsLoading(false);
-  };
+    setAuditsLoading(false)
+  }
 
   const handleDeleteAudit = async (id: string) => {
-    if (!confirm("Är du säker på att du vill radera denna audit?")) return;
+    if (!confirm("Är du säker på att du vill radera denna audit?")) return
 
     try {
       const response = await fetch("/api/audits", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
-      });
+      })
 
       if (response.ok) {
-        setAudits((prev) => prev.filter((a) => a.id !== id));
+        setAudits((prev) => prev.filter((a) => a.id !== id))
       }
     } catch {
-      console.error("Failed to delete audit");
+      console.error("Failed to delete audit")
     }
-  };
+  }
 
   const handleEditContent = (entry: ContentEntry) => {
-    setEditingKey(entry.key);
-    setEditValue(entry.value);
-    setSaveStatus("idle");
-  };
+    setEditingKey(entry.key)
+    setEditValue(entry.value)
+    setSaveStatus("idle")
+  }
 
   const handleSaveContent = async () => {
-    if (!editingKey) return;
+    if (!editingKey) return
 
-    setSaveStatus("saving");
+    setSaveStatus("saving")
     try {
-      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY;
-      const headers: HeadersInit = { "Content-Type": "application/json" };
+      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY
+      const headers: HeadersInit = { "Content-Type": "application/json" }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`;
+        headers["Authorization"] = `Bearer ${apiKey}`
       }
 
       const response = await fetch("/api/content", {
         method: "PUT",
         headers,
         body: JSON.stringify({ key: editingKey, value: editValue }),
-      });
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         // Update local state
         setContent((prev) =>
           prev.map((c) =>
-            c.key === editingKey ? { ...c, value: editValue, updated_at: data.content.updated_at } : c
+            c.key === editingKey
+              ? { ...c, value: editValue, updated_at: data.content.updated_at }
+              : c
           )
-        );
-        setSaveStatus("saved");
+        )
+        setSaveStatus("saved")
         setTimeout(() => {
-          setEditingKey(null);
-          setSaveStatus("idle");
-        }, 1500);
+          setEditingKey(null)
+          setSaveStatus("idle")
+        }, 1500)
       } else {
-        setSaveStatus("error");
+        setSaveStatus("error")
       }
     } catch {
-      setSaveStatus("error");
+      setSaveStatus("error")
     }
-  };
+  }
 
   const handleSeedDefaults = async () => {
-    if (!confirm("Vill du fylla i standardvärden för allt innehåll som saknas?")) return;
+    if (!confirm("Vill du fylla i standardvärden för allt innehåll som saknas?")) return
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY;
-      const headers: HeadersInit = { "Content-Type": "application/json" };
+      const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY
+      const headers: HeadersInit = { "Content-Type": "application/json" }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`;
+        headers["Authorization"] = `Bearer ${apiKey}`
       }
 
       const response = await fetch("/api/content", {
         method: "POST",
         headers,
         body: JSON.stringify({ action: "seed" }),
-      });
+      })
 
       if (response.ok) {
-        const data = await response.json();
-        alert(`${data.inserted} standardvärden tillagda!`);
-        loadData();
+        const data = await response.json()
+        alert(`${data.inserted} standardvärden tillagda!`)
+        loadData()
       }
     } catch {
-      alert("Kunde inte fylla i standardvärden");
+      alert("Kunde inte fylla i standardvärden")
     }
-  };
+  }
 
   // Get unique sections for filter
-  const sections = Array.from(new Set(content.map((c) => c.section))).sort();
+  const sections = Array.from(new Set(content.map((c) => c.section))).sort()
   const filteredContent =
-    contentFilter === "all" ? content : content.filter((c) => c.section === contentFilter);
+    contentFilter === "all" ? content : content.filter((c) => c.section === contentFilter)
 
   // Login form
   if (!isLoggedIn) {
@@ -321,12 +326,10 @@ export default function AdminPage() {
             </button>
           </form>
 
-          <p className="text-gray-500 text-xs mt-4 text-center">
-            Dev default: admin / admin
-          </p>
+          <p className="text-gray-500 text-xs mt-4 text-center">Dev default: admin / admin</p>
         </div>
       </div>
-    );
+    )
   }
 
   // Dashboard
@@ -370,7 +373,7 @@ export default function AdminPage() {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <div className="bg-gray-800 rounded-xl p-6">
                 <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
                   Sidvisningar totalt
@@ -385,6 +388,12 @@ export default function AdminPage() {
               </div>
               <div className="bg-gray-800 rounded-xl p-6">
                 <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
+                  Unika IP (hashade)
+                </p>
+                <p className="text-4xl font-bold text-amber-400">{stats?.uniqueIpVisitors ?? 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-xl p-6">
+                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
                   Sidvisningar idag
                 </p>
                 <p className="text-4xl font-bold text-green-400">{stats?.todayPageViews || 0}</p>
@@ -395,14 +404,15 @@ export default function AdminPage() {
               <div className="bg-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Senaste meddelanden</h3>
                 {contacts.slice(0, 3).map((contact) => (
-                  <div key={contact.id} className="mb-3 pb-3 border-b border-gray-700 last:border-0">
+                  <div
+                    key={contact.id}
+                    className="mb-3 pb-3 border-b border-gray-700 last:border-0"
+                  >
                     <p className="text-white font-medium">{contact.name}</p>
                     <p className="text-gray-400 text-sm truncate">{contact.message}</p>
                   </div>
                 ))}
-                {contacts.length === 0 && (
-                  <p className="text-gray-500">Inga meddelanden än</p>
-                )}
+                {contacts.length === 0 && <p className="text-gray-500">Inga meddelanden än</p>}
               </div>
 
               <div className="bg-gray-800 rounded-xl p-6">
@@ -546,8 +556,8 @@ export default function AdminPage() {
                             entry.type === "text"
                               ? "bg-blue-900/50 text-blue-300"
                               : entry.type === "image"
-                              ? "bg-green-900/50 text-green-300"
-                              : "bg-purple-900/50 text-purple-300"
+                                ? "bg-green-900/50 text-green-300"
+                                : "bg-purple-900/50 text-purple-300"
                           }`}
                         >
                           {entry.type}
@@ -566,9 +576,7 @@ export default function AdminPage() {
             {editingKey && (
               <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
                 <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <h3 className="text-xl font-bold text-white mb-4">
-                    Redigera {editingKey}
-                  </h3>
+                  <h3 className="text-xl font-bold text-white mb-4">Redigera {editingKey}</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     {content.find((c) => c.key === editingKey)?.label}
                   </p>
@@ -593,8 +601,8 @@ export default function AdminPage() {
                   <div className="flex justify-end gap-3 mt-6">
                     <button
                       onClick={() => {
-                        setEditingKey(null);
-                        setSaveStatus("idle");
+                        setEditingKey(null)
+                        setSaveStatus("idle")
                       }}
                       className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                     >
@@ -607,17 +615,17 @@ export default function AdminPage() {
                         saveStatus === "saved"
                           ? "bg-green-600 text-white"
                           : saveStatus === "error"
-                          ? "bg-red-600 text-white"
-                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                            ? "bg-red-600 text-white"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
                       }`}
                     >
                       {saveStatus === "saving"
                         ? "Sparar..."
                         : saveStatus === "saved"
-                        ? "Sparat!"
-                        : saveStatus === "error"
-                        ? "Fel!"
-                        : "Spara"}
+                          ? "Sparat!"
+                          : saveStatus === "error"
+                            ? "Fel!"
+                            : "Spara"}
                     </button>
                   </div>
                 </div>
@@ -718,8 +726,8 @@ export default function AdminPage() {
                                   audit.scores.overall >= 70
                                     ? "text-green-400"
                                     : audit.scores.overall >= 50
-                                    ? "text-yellow-400"
-                                    : "text-red-400"
+                                      ? "text-yellow-400"
+                                      : "text-red-400"
                                 }`}
                               >
                                 {audit.scores.overall}/100
@@ -776,5 +784,5 @@ export default function AdminPage() {
         </p>
       </div>
     </div>
-  );
+  )
 }

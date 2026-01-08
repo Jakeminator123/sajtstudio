@@ -2,13 +2,13 @@
  * Stats Database - SQLite-based storage for visitor statistics
  */
 
-import Database from "better-sqlite3";
-import path from "path";
+import Database from "better-sqlite3"
+import path from "path"
 
-const dbPath = path.join(process.cwd(), "data", "db", "stats.db");
+const dbPath = path.join(process.cwd(), "data", "db", "stats.db")
 
 // Create database connection
-const statsDb = new Database(dbPath);
+const statsDb = new Database(dbPath)
 
 // Initialize tables
 statsDb.exec(`
@@ -18,7 +18,7 @@ statsDb.exec(`
     page TEXT DEFAULT '/',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
-`);
+`)
 
 statsDb.exec(`
   CREATE TABLE IF NOT EXISTS visitors (
@@ -27,61 +27,88 @@ statsDb.exec(`
     first_visit DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_visit DATETIME DEFAULT CURRENT_TIMESTAMP
   )
-`);
+`)
+
+// Store anonymized IP hashes to derive IP-based uniqueness without persisting raw IPs
+statsDb.exec(`
+  CREATE TABLE IF NOT EXISTS visitor_ips (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip_hash TEXT UNIQUE NOT NULL,
+    first_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`)
 
 // Create indexes
-statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(created_at)`);
-statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_visitors_id ON visitors(visitor_id)`);
+statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(created_at)`)
+statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_visitors_id ON visitors(visitor_id)`)
+statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_visitor_ips_hash ON visitor_ips(ip_hash)`)
 
 export interface StatsData {
-  totalPageViews: number;
-  uniqueVisitors: number;
-  todayPageViews: number;
-  lastUpdated: string;
+  totalPageViews: number
+  uniqueVisitors: number
+  uniqueIpVisitors: number
+  todayPageViews: number
+  lastUpdated: string
 }
 
 /**
  * Record a page view
  */
-export function recordPageView(visitorId: string, page: string = "/"): void {
+export function recordPageView(
+  visitorId: string,
+  page: string = "/",
+  ipHash?: string | null
+): void {
   const insertView = statsDb.prepare(`
     INSERT INTO page_views (visitor_id, page) VALUES (?, ?)
-  `);
-  insertView.run(visitorId, page);
+  `)
+  insertView.run(visitorId, page)
 
   // Upsert visitor
   const upsertVisitor = statsDb.prepare(`
     INSERT INTO visitors (visitor_id) VALUES (?)
     ON CONFLICT(visitor_id) DO UPDATE SET last_visit = datetime('now')
-  `);
-  upsertVisitor.run(visitorId);
+  `)
+  upsertVisitor.run(visitorId)
+
+  if (ipHash) {
+    const upsertIp = statsDb.prepare(`
+      INSERT INTO visitor_ips (ip_hash) VALUES (?)
+      ON CONFLICT(ip_hash) DO UPDATE SET last_seen = datetime('now')
+    `)
+    upsertIp.run(ipHash)
+  }
 }
 
 /**
  * Get statistics for admin dashboard
  */
 export function getStats(): StatsData {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0]
 
-  const totalStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM page_views`);
-  const totalPageViews = (totalStmt.get() as { count: number }).count;
+  const totalStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM page_views`)
+  const totalPageViews = (totalStmt.get() as { count: number }).count
 
-  const uniqueStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM visitors`);
-  const uniqueVisitors = (uniqueStmt.get() as { count: number }).count;
+  const uniqueStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM visitors`)
+  const uniqueVisitors = (uniqueStmt.get() as { count: number }).count
+
+  const uniqueIpStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM visitor_ips`)
+  const uniqueIpVisitors = (uniqueIpStmt.get() as { count: number }).count
 
   const todayStmt = statsDb.prepare(`
     SELECT COUNT(*) as count FROM page_views
     WHERE date(created_at) = date('now')
-  `);
-  const todayPageViews = (todayStmt.get() as { count: number }).count;
+  `)
+  const todayPageViews = (todayStmt.get() as { count: number }).count
 
   return {
     totalPageViews,
     uniqueVisitors,
+    uniqueIpVisitors,
     todayPageViews,
     lastUpdated: today,
-  };
+  }
 }
 
-export default statsDb;
-
+export default statsDb
