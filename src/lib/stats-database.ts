@@ -34,10 +34,18 @@ statsDb.exec(`
   CREATE TABLE IF NOT EXISTS visitor_ips (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ip_hash TEXT UNIQUE NOT NULL,
+    ip_prefix TEXT,
     first_seen DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `)
+
+// Backfill ip_prefix column if table already existed
+try {
+  statsDb.exec(`ALTER TABLE visitor_ips ADD COLUMN ip_prefix TEXT`)
+} catch {
+  // Column already exists; safe to ignore
+}
 
 // Create indexes
 statsDb.exec(`CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(created_at)`)
@@ -50,7 +58,11 @@ export interface StatsData {
   uniqueIpVisitors: number
   todayPageViews: number
   lastUpdated: string
-  recentIpHashes: { hash: string; lastSeen: string }[]
+  recentIpHashes: {
+    hash: string
+    lastSeen: string
+    prefix: string | null
+  }[]
 }
 
 /**
@@ -59,7 +71,8 @@ export interface StatsData {
 export function recordPageView(
   visitorId: string,
   page: string = "/",
-  ipHash?: string | null
+  ipHash?: string | null,
+  ipPrefix?: string | null
 ): void {
   const insertView = statsDb.prepare(`
     INSERT INTO page_views (visitor_id, page) VALUES (?, ?)
@@ -75,10 +88,10 @@ export function recordPageView(
 
   if (ipHash) {
     const upsertIp = statsDb.prepare(`
-      INSERT INTO visitor_ips (ip_hash) VALUES (?)
-      ON CONFLICT(ip_hash) DO UPDATE SET last_seen = datetime('now')
+      INSERT INTO visitor_ips (ip_hash, ip_prefix) VALUES (?, ?)
+      ON CONFLICT(ip_hash) DO UPDATE SET last_seen = datetime('now'), ip_prefix = excluded.ip_prefix
     `)
-    upsertIp.run(ipHash)
+    upsertIp.run(ipHash, ipPrefix ?? null)
   }
 }
 
@@ -104,12 +117,16 @@ export function getStats(): StatsData {
   const todayPageViews = (todayStmt.get() as { count: number }).count
 
   const recentIpStmt = statsDb.prepare(`
-    SELECT ip_hash as hash, last_seen as lastSeen
+    SELECT ip_hash as hash, last_seen as lastSeen, ip_prefix as prefix
     FROM visitor_ips
     ORDER BY last_seen DESC
     LIMIT 10
   `)
-  const recentIpHashes = recentIpStmt.all() as { hash: string; lastSeen: string }[]
+  const recentIpHashes = recentIpStmt.all() as {
+    hash: string
+    lastSeen: string
+    prefix: string | null
+  }[]
 
   return {
     totalPageViews,

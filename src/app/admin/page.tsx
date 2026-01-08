@@ -46,7 +46,7 @@ interface VisitorStats {
   uniqueIpVisitors: number
   todayPageViews: number
   lastUpdated: string
-  recentIpHashes?: { hash: string; lastSeen: string }[]
+  recentIpHashes?: { hash: string; lastSeen: string; prefix: string | null }[]
 }
 
 type TabType = "overview" | "contacts" | "content" | "audits"
@@ -433,22 +433,26 @@ export default function AdminPage() {
               <div className="bg-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Senaste IP-hashar</h3>
                 <p className="text-gray-500 text-sm mb-3">
-                  Maskerade värden (hash-prefix) för senaste besökare.
+                  Maskerade värden för senaste besökare. Prefix visar nät (ingen rå IP).
                 </p>
                 {stats?.recentIpHashes && stats.recentIpHashes.length > 0 ? (
                   <div className="space-y-2">
-                    {stats.recentIpHashes.map((ip) => (
-                      <div key={ip.hash} className="flex justify-between text-sm">
-                        <span className="text-blue-300 font-mono">
-                          {ip.hash.slice(0, 12)}
-                          {ip.hash.length > 12 ? "…" : ""}
-                        </span>
-                        <span className="text-gray-400">
-                          {new Date(ip.lastSeen).toLocaleDateString("sv-SE")}{" "}
-                          {new Date(ip.lastSeen).toLocaleTimeString("sv-SE")}
-                        </span>
-                      </div>
-                    ))}
+                    {stats.recentIpHashes.map((ip) => {
+                      const hashLabel = `${ip.hash.slice(0, 12)}${ip.hash.length > 12 ? "…" : ""}`
+                      const prefixLabel = ip.prefix ? ip.prefix : "okänt nät"
+                      const dateLabel = `${new Date(ip.lastSeen).toLocaleDateString("sv-SE")} ${new Date(
+                        ip.lastSeen
+                      ).toLocaleTimeString("sv-SE")}`
+                      return (
+                        <div key={ip.hash} className="flex justify-between text-sm">
+                          <div className="flex flex-col">
+                            <span className="text-blue-300 font-mono">{hashLabel}</span>
+                            <span className="text-gray-400 text-xs">{prefixLabel}</span>
+                          </div>
+                          <span className="text-gray-400">{dateLabel}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <p className="text-gray-500">Ingen IP-data än</p>
