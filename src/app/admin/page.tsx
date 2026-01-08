@@ -46,6 +46,7 @@ interface VisitorStats {
   uniqueIpVisitors: number
   todayPageViews: number
   lastUpdated: string
+  recentIpHashes?: { hash: string; lastSeen: string }[]
 }
 
 type TabType = "overview" | "contacts" | "content" | "audits"
@@ -400,7 +401,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-gray-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Senaste meddelanden</h3>
                 {contacts.slice(0, 3).map((contact) => (
@@ -427,6 +428,31 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="bg-gray-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Senaste IP-hashar</h3>
+                <p className="text-gray-500 text-sm mb-3">
+                  Maskerade värden (hash-prefix) för senaste besökare.
+                </p>
+                {stats?.recentIpHashes && stats.recentIpHashes.length > 0 ? (
+                  <div className="space-y-2">
+                    {stats.recentIpHashes.map((ip) => (
+                      <div key={ip.hash} className="flex justify-between text-sm">
+                        <span className="text-blue-300 font-mono">
+                          {ip.hash.slice(0, 12)}
+                          {ip.hash.length > 12 ? "…" : ""}
+                        </span>
+                        <span className="text-gray-400">
+                          {new Date(ip.lastSeen).toLocaleDateString("sv-SE")}{" "}
+                          {new Date(ip.lastSeen).toLocaleTimeString("sv-SE")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Ingen IP-data än</p>
+                )}
               </div>
             </div>
           </>

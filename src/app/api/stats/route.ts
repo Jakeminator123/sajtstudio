@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing visitorId" }, { status: 400 })
     }
 
+    if (typeof page === "string" && page.startsWith("/admin")) {
+      return NextResponse.json({ success: true, skipped: true })
+    }
+
     const forwardedFor = request.headers.get("x-forwarded-for")
     const realIp = request.headers.get("x-real-ip")
     const ip = forwardedFor?.split(",")[0]?.trim() || realIp?.trim() || null

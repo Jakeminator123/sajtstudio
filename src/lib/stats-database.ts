@@ -50,6 +50,7 @@ export interface StatsData {
   uniqueIpVisitors: number
   todayPageViews: number
   lastUpdated: string
+  recentIpHashes: { hash: string; lastSeen: string }[]
 }
 
 /**
@@ -102,12 +103,21 @@ export function getStats(): StatsData {
   `)
   const todayPageViews = (todayStmt.get() as { count: number }).count
 
+  const recentIpStmt = statsDb.prepare(`
+    SELECT ip_hash as hash, last_seen as lastSeen
+    FROM visitor_ips
+    ORDER BY last_seen DESC
+    LIMIT 10
+  `)
+  const recentIpHashes = recentIpStmt.all() as { hash: string; lastSeen: string }[]
+
   return {
     totalPageViews,
     uniqueVisitors,
     uniqueIpVisitors,
     todayPageViews,
     lastUpdated: today,
+    recentIpHashes,
   }
 }
 
