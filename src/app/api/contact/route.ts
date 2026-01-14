@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import fs from "fs/promises"
 import path from "path"
+import { siteConfig } from "@/config/siteConfig"
 
 // Contact entry type
 interface ContactEntry {
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data, error } = await resend.emails.send({
         from: "Sajtstudio Kontaktformulär <onboarding@resend.dev>", // You'll need to verify your domain with Resend
-        to: ["erik@sajtstudio.se"],
+        to: [siteConfig.contact.email],
         subject: `Nytt meddelande från ${finalName} - Sajtstudio`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
