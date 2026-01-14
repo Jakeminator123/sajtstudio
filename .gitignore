@@ -1,6 +1,65 @@
-.env*
-!.env.example
+# Build outputs / dependencies
 node_modules/
-.next/
-dist/
+#.next/
 out/
+dist/
+build/
+.turbo/
+.vercel/
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+.tmp/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+# Large/binary assets (keep source code index fast)
+INPUT_DOC_FOR_CURSOR/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.gif
+*.jpg
+*.jpeg
+*.ico
+*.pdf
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.tgz
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+.env.local
+.env.production
+.env.producuction
+
+# Databases
+*.db-journal
+.db
+
+# OS / IDE noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.idea/
+.preprompt_history.json
+INPUT_DOC_FOR_CURSOR/
+cleaner.py
+cleaner2.py
+node_modules
+.next
+old/
+
+
+
