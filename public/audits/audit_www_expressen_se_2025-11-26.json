@@ -1,0 +1,204 @@
+{
+  "company": "Expressen",
+  "audit_scores": {
+    "seo": 85,
+    "technical_seo": 80,
+    "ux": 75,
+    "content": 90,
+    "performance": 70,
+    "accessibility": 65,
+    "security": 85,
+    "mobile": 80
+  },
+  "strengths": [
+    "Aktuellt och relevant innehåll",
+    "SSL-certifikat implementerat",
+    "Snabb svarstid"
+  ],
+  "issues": [
+    "Tillgänglighetsproblem med kontrast",
+    "Långsamma laddningstider för vissa resurser",
+    "En del rubriker saknar hierarki"
+  ],
+  "improvements": [
+    {
+      "item": "Förbättra bildoptimering",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Minska laddningstider och förbättra prestanda",
+      "how": "Använd moderna format som WebP och nyttja lazy-loading",
+      "estimated_time": "2 veckor",
+      "technologies": [
+        "Image optimization tools"
+      ]
+    },
+    {
+      "item": "Implementera bättre kontrast",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Förbättra tillgängligheten för användare med nedsatt syn",
+      "how": "Utvärdera och justera färgpaletten enligt WCAG-standarder",
+      "estimated_time": "1 vecka",
+      "technologies": [
+        "CSS adjustments"
+      ]
+    },
+    {
+      "item": "Förbättra rubrikhierarki",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Förbättra SEO och läsbarhet",
+      "how": "Se över och justera HTML-strukturen för användning av korrekta h-taggar",
+      "estimated_time": "1 vecka",
+      "technologies": [
+        "HTML"
+      ]
+    }
+  ],
+  "budget_estimate": {
+    "immediate_fixes": {
+      "low": 5000,
+      "high": 15000
+    },
+    "full_optimization": {
+      "low": 30000,
+      "high": 60000
+    },
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Förbättrad laddningstid och prestanda",
+    "Ökad användarvänlighet och tillgänglighet",
+    "Bättre SEO-rankning"
+  ],
+  "security_analysis": {
+    "https_status": "Active and valid",
+    "headers_analysis": "Some security headers missing",
+    "cookie_policy": "Needs stronger policies",
+    "vulnerabilities": [
+      "Lack of Content Security Policy",
+      "X-Content-Type-Options not set"
+    ]
+  },
+  "technical_recommendations": [
+    {
+      "area": "Säkerhet",
+      "current_state": "Vissa säkerhetshuvuden saknas",
+      "recommendation": "Implementera fullständiga säkerhetshuvuden",
+      "implementation": "Add CSP, X-Content-Type-Options headers"
+    }
+  ],
+  "technical_architecture": {
+    "recommended_stack": {
+      "frontend": "React",
+      "backend": "Node.js",
+      "cms": "Headless CMS",
+      "hosting": "AWS"
+    },
+    "integrations": [
+      "Analytics tools",
+      "SEO optimization tools"
+    ],
+    "security_measures": [
+      "Implement Content Security Policy",
+      "Regular security audits"
+    ]
+  },
+  "priority_matrix": {
+    "quick_wins": [
+      "Implementera lazy-loading av bilder"
+    ],
+    "major_projects": [
+      "Fullständig omstrukturering av rubrikhierarkin"
+    ],
+    "fill_ins": [
+      "Utvärdera och korrigera kontrastproblem"
+    ],
+    "thankless_tasks": [
+      "Ständiga hastighetsoptimeringar"
+    ]
+  },
+  "target_audience_analysis": {
+    "demographics": "Blandad åldersgrupp, främst svensk publik",
+    "behaviors": "Nyhetstörstande, återkommande besök",
+    "pain_points": "Hittar inte snabbt önskat innehåll",
+    "expectations": "Snabb och lättåtkomlig information"
+  },
+  "competitor_insights": {
+    "industry_standards": "Snabb och responsiv design",
+    "missing_features": "Interaktivt och personligt anpassat innehåll",
+    "unique_strengths": "Bred och aktuell nyhetsportfölj"
+  },
+  "content_strategy": {
+    "key_pages": [
+      "Nyheter",
+      "Sport",
+      "Nöje"
+    ],
+    "content_types": [
+      "Artiklar",
+      "Videor",
+      "Podcasts"
+    ],
+    "seo_foundation": "Nyckelordsfokuserad innehållsproduktion",
+    "conversion_paths": [
+      "Prenumeration",
+      "Inloggning till premiuminnehåll"
+    ]
+  },
+  "design_direction": {
+    "style": "Ren och modern design",
+    "color_psychology": "Blått och vitt för förtroende",
+    "ui_patterns": [
+      "Sticky navigation",
+      "Infinite scroll"
+    ],
+    "accessibility_level": "WCAG 2.0 AA"
+  },
+  "implementation_roadmap": {
+    "phase_1": {
+      "duration": "1 månad",
+      "deliverables": [
+        "Implementera bildoptimering",
+        "Justera kontraster"
+      ]
+    },
+    "phase_2": {
+      "duration": "2 månader",
+      "deliverables": [
+        "Förbättra rubrikhierarki",
+        "Implementera säkerhetshuvuden"
+      ]
+    },
+    "phase_3": {
+      "duration": "3 månader",
+      "deliverables": [
+        "SEO optimering",
+        "Integrera nya CMS-funktioner"
+      ]
+    },
+    "launch": {
+      "activities": [
+        "Fullständigt systembyte",
+        "Användartester"
+      ]
+    }
+  },
+  "success_metrics": {
+    "kpis": [
+      "Ökad sidladdningshastighet",
+      "Bättre SEO-rankning",
+      "Ökad användartid"
+    ],
+    "tracking_setup": "Google Analytics, Lighthouse score tracking",
+    "review_schedule": "Månadsvis granskning"
+  },
+  "audit_type": "website_audit",
+  "cost": {
+    "tokens": 2735,
+    "sek": 0.17,
+    "usd": 0.015
+  },
+  "domain": "www.expressen.se",
+  "timestamp": "2025-11-26T03:52:03.196Z"
+}

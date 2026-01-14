@@ -1,0 +1,86 @@
+{
+  "name": "sajtstudio",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "volta": {
+    "node": "20.18.0",
+    "npm": "10.9.2"
+  },
+  "scripts": {
+    "ci": "npm ci",
+    "dev": "next dev --webpack --port 1337",
+    "dev:safe": "npm run dev",
+    "dev:mobile": "next dev --hostname 0.0.0.0 --port 1337",
+    "dev:turbo": "next dev --turbopack --port 1337",
+    "build": "next build --webpack",
+    "start": "next start --port 1337",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "clean": "node -e \"const fs=require('fs'); const paths=['.next','out','dist','build','.turbo']; for (const p of paths){ try{ fs.rmSync(p,{recursive:true,force:true}); } catch {} }\"",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.3.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cheerio": "^0.22.35",
+    "better-sqlite3": "^12.5.0",
+    "cheerio": "^1.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.554.0",
+    "next": "16.0.10",
+    "openai": "^6.9.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "resend": "^6.4.2",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.181.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/node": "^22",
+    "@types/offscreencanvas": "^2019.7.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/stats.js": "^0.17.4",
+    "autoprefixer": "^10.4.22",
+    "babel-plugin-react-compiler": "1.0.0",
+    "baseline-browser-mapping": "^2.8.32",
+    "critters": "^0.0.23",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "16.0.10",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "postcss": "^8.5.6",
+    "prettier": "^3.7.4",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "glob": "11.1.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

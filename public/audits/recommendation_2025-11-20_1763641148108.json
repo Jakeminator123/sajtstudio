@@ -1,0 +1,70 @@
+{
+  "company": "Företag inom Hälsa & Vård med verksamhet inom privatpersoner nationellt",
+  "website_type_recommendation": "En varumärkesbyggande företagswebb med fokus på trovärdighet och enkel tillgång till kontaktinformation, kompletterad med medlemssidor bakom inloggning för exklusivt innehåll. Designen ska utstråla professionalitet och förtroende, med tydliga call-to-action-element och mobilanpassning för att tilltala en bred nationell målgrupp.",
+  "improvements": [
+    {
+      "item": "Tydlig och professionell startsida med företagsprofil",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Första intrycket är avgörande för varumärkesbyggande inom hälsa & vård; trovärdigheten måste kommuniceras direkt.",
+      "how": "Designa en modern, ren startsida med professionella bilder, tydlig presentation av verksamhet och värdegrund."
+    },
+    {
+      "item": "Kontaktinformation lättillgänglig på flera ställen",
+      "impact": "high",
+      "effort": "low",
+      "why": "Enkel kontaktväg ökar trovärdighet och minskar barriärer för målgruppen som söker hjälp.",
+      "how": "Placera kontaktinformation i toppmeny, sidfot samt på en dedikerad kontaktsida."
+    },
+    {
+      "item": "Medlemsinlogg med säker åtkomst till exklusivt innehåll",
+      "impact": "high",
+      "effort": "high",
+      "why": "Skapar mervärde för målgruppen och ger möjlighet till differentierat innehåll för registrerade användare.",
+      "how": "Implementera ett säkert inloggningssystem med möjlighet att skydda vissa sidor eller resurser bakom inlogg."
+    },
+    {
+      "item": "Responsiv design och tillgänglighet",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Privatpersoner använder dator, platta och mobil. Tillgänglighetskrav är särskilt viktiga inom hälsa & vård.",
+      "how": "Använd ett modulärt ramverk (ex. WordPress, headless CMS eller liknande) samt WCAG-standard."
+    },
+    {
+      "item": "Grundläggande SEO och snabba laddningstider",
+      "impact": "medium",
+      "effort": "medium",
+      "why": "Upptäckbarhet på webben är essentiellt för nationell räckvidd och varumärkesbyggande.",
+      "how": "Optimera sidstruktur, meta-taggar, alt-attribut, prestanda och validera mot Google PageSpeed."
+    }
+  ],
+  "budget_estimate": {
+    "low": 80000,
+    "high": 150000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökat förtroende för företaget nationellt",
+    "Starkare varumärkesidentitet och högre trovärdighet",
+    "Ökad kontakt från intresserade privatpersoner",
+    "Möjlighet till medlemsbaserad kommunikation och exklusiva tjänster/innehåll",
+    "God användarupplevelse oavsett enhet"
+  ],
+  "technical_requirements": [
+    "Säkert inloggningssystem (ex. OAuth2 eller motsvarande standard)",
+    "Responsiv front-end enligt WCAG 2.1 (AA-nivå)",
+    "CMS-stöd för redigering av sidor och innehåll",
+    "SSL-certifikat (https)",
+    "Grundläggande SEO-optimering (metataggar, sitemap, robots.txt)",
+    "Snabb hosting och cache-lösning",
+    "Backup och GDPR-efterlevnad"
+  ],
+  "audit_type": "recommendation",
+  "cost": {
+    "tokens": 1351,
+    "sek": 0.1,
+    "usd": 0.0091
+  },
+  "domain": null,
+  "timestamp": "2025-11-20T12:19:08.107Z"
+}

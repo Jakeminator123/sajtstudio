@@ -1,0 +1,842 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure scroll offset calculations have a positioned ancestor (Framer Motion) */
+html,
+body {
+  position: relative;
+}
+
+/* Content visibility optimization - skip layout/paint for offscreen sections */
+/* Larger contain-intrinsic-size prevents CLS when sections load */
+@layer utilities {
+  .content-visibility-auto {
+    content-visibility: auto;
+    /* Use larger intrinsic size to prevent layout shift when content loads */
+    contain-intrinsic-size: auto 800px;
+  }
+
+  /* For smaller sections like testimonials */
+  .content-visibility-auto-sm {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
+  /* For larger sections like portfolio/team */
+  .content-visibility-auto-lg {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
+  }
+
+  .content-visibility-hidden {
+    content-visibility: hidden;
+  }
+}
+
+/* Custom scrollbar for modal */
+@layer utilities {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #e0e0e0 transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    border: 2px solid transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #bdbdbd;
+  }
+}
+
+/* Shake animation for CTA button when words hit it */
+@keyframes shakeAndGlow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 20px rgba(255, 0, 51, 0.5);
+  }
+  10% {
+    transform: scale(1.1) rotate(-2deg);
+    box-shadow: 0 0 30px rgba(255, 0, 51, 0.8);
+  }
+  20% {
+    transform: scale(1.15) rotate(2deg);
+    box-shadow: 0 0 40px rgba(0, 102, 255, 0.8);
+  }
+  30% {
+    transform: scale(1.1) rotate(-2deg);
+    box-shadow: 0 0 30px rgba(255, 0, 51, 0.8);
+  }
+  40% {
+    transform: scale(1.2) rotate(1deg);
+    box-shadow: 0 0 50px rgba(0, 102, 255, 1);
+  }
+  50% {
+    transform: scale(1.15) rotate(-1deg);
+    box-shadow: 0 0 40px rgba(255, 0, 51, 0.8);
+  }
+  60% {
+    transform: scale(1.1) rotate(0deg);
+    box-shadow: 0 0 30px rgba(0, 102, 255, 0.8);
+  }
+}
+
+.cta-button-header.shake-animation {
+  animation: shakeAndGlow 1s ease-out;
+  z-index: 100;
+}
+
+/* Shimmer effect for nav links */
+@keyframes shimmerRedBlue {
+  0% {
+    background-position: -200% 50%;
+    color: #bdbdbd;
+  }
+  25% {
+    background-position: -100% 50%;
+    color: #0066ff;
+  }
+  50% {
+    background-position: 0% 50%;
+    color: #ff0033;
+  }
+  75% {
+    background-position: 100% 50%;
+    color: #0066ff;
+  }
+  100% {
+    background-position: 200% 50%;
+    color: #bdbdbd;
+  }
+}
+
+.nav-link-shimmer {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 102, 255, 0.3),
+    rgba(255, 0, 51, 0.3),
+    rgba(0, 102, 255, 0.3),
+    transparent
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.nav-link-shimmer:hover {
+  animation: shimmerRedBlue 3s ease-in-out infinite;
+}
+
+.nav-link-shimmer.shimmer-active {
+  animation: shimmerRedBlue 3s ease-in-out;
+}
+
+/* Enhanced focus styles for better accessibility */
+@layer base {
+  /* Remove default focus outline */
+  *:focus {
+    outline: none;
+  }
+
+  /* Add custom focus visible styles */
+  *:focus-visible {
+    outline: 3px solid #0066ff;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Specific focus styles for interactive elements */
+  a:focus-visible,
+  button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+  }
+
+  /* Skip keyboard focus for mouse users */
+  .user-is-tabbing *:focus {
+    outline: 3px solid #0066ff;
+    outline-offset: 2px;
+  }
+
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+  /* Dark mode (default) */
+  :root {
+    /* Header offset (fixed header + iOS safe-area) */
+    --header-safe-top: env(safe-area-inset-top, 0px);
+    /* Default fallback; runtime may overwrite via HeaderNav measurement */
+    --header-height: calc(80px + var(--header-safe-top));
+    --header-offset: var(--header-height);
+
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 216 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 216 100% 50%;
+    --chart-1: 216 100% 50%;
+    --chart-2: 350 100% 50%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    /* Theme mode indicator */
+    --theme-mode: dark;
+  }
+
+  /* Light mode */
+  .light {
+    --background: 45 30% 96%;
+    --foreground: 220 20% 20%;
+    --card: 45 40% 97%;
+    --card-foreground: 220 20% 20%;
+    --popover: 45 35% 98%;
+    --popover-foreground: 220 20% 20%;
+    --primary: 220 20% 20%;
+    --primary-foreground: 45 40% 97%;
+    --secondary: 45 25% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 45 20% 88%;
+    --muted-foreground: 220 10% 40%;
+    --accent: 200 100% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 20% 88%;
+    --input: 45 25% 92%;
+    --ring: 200 100% 45%;
+    --chart-1: 200 100% 45%;
+    --chart-2: 350 100% 50%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --theme-mode: light;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 216 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 216 100% 50%;
+    --chart-1: 216 100% 50%;
+    --chart-2: 350 100% 50%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --theme-mode: dark;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Global touch-action optimization - improves scroll performance */
+/* Default to allow vertical scrolling, prevent horizontal scrolling */
+* {
+  touch-action: pan-y;
+}
+
+/* Interactive elements - allow manipulation (tap, pinch-zoom) */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+[role="link"] {
+  touch-action: manipulation;
+}
+
+/* Elements that need drag/pan - allow pan in all directions */
+[data-draggable="true"],
+[data-pan="true"] {
+  touch-action: pan-x pan-y;
+}
+
+/* Elements that need pinch-zoom */
+[data-zoom="true"] {
+  touch-action: pinch-zoom;
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase tap target size */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover effects on touch devices */
+  *:hover {
+    transform: none !important;
+  }
+
+  /* Improve touch feedback */
+  button,
+  a {
+    -webkit-tap-highlight-color: rgba(0, 102, 255, 0.2);
+    -webkit-touch-callout: none;
+  }
+
+  /* Ensure links are clickable on mobile */
+  a[href] {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 102, 255, 0.2);
+  }
+
+  /* Disable text selection on interactive elements */
+  button,
+  a {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Smooth scrolling with touch momentum */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scroll snap only on desktop to avoid mobile issues */
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+}
+
+/* Prevent overscroll bounce on iOS - only on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    position: relative;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  html {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Ensure no horizontal scroll */
+  * {
+    max-width: 100%;
+  }
+}
+
+body {
+  color: white;
+  font-family: var(--font-sans);
+  /* Background color set per page - default is transparent/black for home page */
+}
+
+/* Hide scrollbars but keep scrolling functionality */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  background-color: #000000; /* Black background */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  background-color: #000000; /* Black background */
+  color: #ffffff; /* White text */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Hide any resize handles or drag tabs */
+* {
+  resize: none;
+}
+
+*::-webkit-resizer {
+  display: none;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+/* Smooth section transitions */
+section {
+  scroll-margin-top: var(--header-offset);
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Ensure anchor links work correctly with fixed header */
+[id] {
+  scroll-margin-top: var(--header-offset);
+}
+
+/* Enhanced scroll behavior */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-offset);
+}
+
+/* Compensate for fixed header - ensure main content starts below header */
+/* HeroSection should be fullscreen, so we use negative margin to offset padding */
+main {
+  padding-top: var(--header-offset);
+}
+
+/* HeroSection should be fullscreen with header overlay */
+main > section:first-child {
+  margin-top: calc(-1 * var(--header-offset));
+}
+
+/* Section fade-in on scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Video slow motion effect */
+@keyframes slowMotion {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Rain animation - drizzle style, falling from above but slightly from the side */
+@keyframes rain {
+  0% {
+    transform: translateY(-100%) translateX(-20px) rotate(8deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.6;
+  }
+  95% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(calc(100vh + 50px)) translateX(20px) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+/* Lightning flash */
+@keyframes lightning {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Window flash/reflection animation for light mode */
+@keyframes windowFlash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  20% {
+    opacity: 0.3;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0;
+  }
+}
+
+/* Bird flying animation for light mode */
+@keyframes birdFly {
+  0% {
+    transform: translateX(-50px) translateY(0) scaleX(1);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(25vw) translateY(-20px) scaleX(1);
+  }
+  50% {
+    transform: translateX(50vw) translateY(10px) scaleX(1);
+  }
+  75% {
+    transform: translateX(75vw) translateY(-15px) scaleX(1);
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 50px)) translateY(0) scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* Bird wing flap animation */
+@keyframes wingFlap {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.6);
+  }
+}
+
+/* Subtle breathing animation for light mode backgrounds */
+@keyframes lightBreathing {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.02);
+  }
+}
+
+/* Soft shimmer animation for light mode cards */
+@keyframes lightShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Warm gradient pulse for light mode */
+@keyframes warmPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Light mode body styles - bright, fresh, and warm */
+html.light {
+  background: linear-gradient(
+    135deg,
+    #fffef8 0%,
+    #fff9f0 20%,
+    #f0f9ff 40%,
+    #fff5f5 60%,
+    #fffef8 80%,
+    #f5faff 100%
+  ) !important;
+  background-size: 400% 400%;
+  animation: lightBreathing 25s ease-in-out infinite;
+}
+
+html.light body {
+  background: linear-gradient(
+    135deg,
+    #fffef8 0%,
+    #fff9f0 20%,
+    #f0f9ff 40%,
+    #fff5f5 60%,
+    #fffef8 80%,
+    #f5faff 100%
+  ) !important;
+  background-size: 400% 400%;
+  animation: lightBreathing 25s ease-in-out infinite;
+  color: #1a202c !important;
+}
+
+/* Light mode section backgrounds with warm colors */
+html.light section {
+  position: relative;
+}
+
+/* Light mode card styling - bright and clean */
+html.light .bg-card,
+html.light [class*="bg-white"],
+html.light .bg-background {
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #fffef8 30%,
+    #fafcff 70%,
+    #ffffff 100%
+  ) !important;
+  position: relative;
+}
+
+/* Add subtle shimmer overlay to cards in light mode */
+html.light .bg-card::before,
+html.light [class*="rounded-lg"][class*="bg-"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 250, 235, 0.4) 25%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 250, 235, 0.4) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: lightShimmer 8s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.5;
+}
+
+/* Warm glow effect for interactive elements in light mode */
+html.light button:hover,
+html.light a:hover {
+  filter: brightness(1.02);
+}
+
+/* Light mode header scrolled state enhancement */
+html.light header[class*="bg-gradient"] {
+  background: linear-gradient(
+    to right,
+    hsl(45, 50%, 96%),
+    hsl(35, 45%, 97%),
+    hsl(200, 30%, 97%)
+  ) !important;
+}
+
+/* Ensure text colors adapt in light mode */
+html.light .text-white {
+  color: #1a202c;
+}
+
+html.light .text-gray-300,
+html.light .text-gray-400 {
+  color: #4a5568;
+}
+
+/* Light mode shadows with warm tint */
+html.light [class*="shadow"] {
+  --tw-shadow-color: rgba(180, 150, 100, 0.1);
+}
+
+/* Skeleton component dynamic sizing via CSS custom properties */
+/* This allows dynamic width/height via CSS variables instead of direct inline styles */
+.skeleton-dynamic {
+  width: var(--skeleton-width, auto);
+  height: var(--skeleton-height, auto);
+}
+
+/* Video filter for background videos */
+.video-filter {
+  filter: grayscale(100%) contrast(120%);
+}
+
+/* Hero video opacity */
+.hero-video-opacity {
+  opacity: 0.25;
+}
+
+/* Animated gradient text */
+@keyframes gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Animated GIF background - slow and subtle */
+@keyframes slowGifMove {
+  0% {
+    transform: scale(2.5) translate(0, 0);
+  }
+  25% {
+    transform: scale(2.55) translate(0.5%, 0.5%);
+  }
+  50% {
+    transform: scale(2.5) translate(0, 0);
+  }
+  75% {
+    transform: scale(2.45) translate(-0.5%, -0.5%);
+  }
+  100% {
+    transform: scale(2.5) translate(0, 0);
+  }
+}
+
+.animated-gif-background {
+  transform: scale(1.2);
+  transform-origin: center center;
+  animation: slowGifMove 800s linear infinite;
+  will-change: transform;
+  filter: blur(2px) brightness(0.6);
+}
+
+/* Fantasy-inspired typography */
+.text-display-mega {
+  font-size: clamp(4rem, 15vw, 16rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+}
+
+.text-display-xl {
+  font-size: clamp(3rem, 12vw, 12rem);
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+/* Fantasy-inspired spacing */
+.section-spacing-lg {
+  padding: clamp(10rem, 20vh, 25rem) 0;
+}
+
+.section-spacing-md {
+  padding: clamp(6rem, 15vh, 15rem) 0;
+}
+
+.section-spacing-sm {
+  padding: clamp(4rem, 10vh, 10rem) 0;
+}
+
+/* 3D transform utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+/* Hide default cursor for custom cursor */
+.hide-cursor * {
+  cursor: none !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

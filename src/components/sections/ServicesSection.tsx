@@ -1,0 +1,397 @@
+'use client'
+
+import SmokeEffect from '@/components/animations/SmokeEffect'
+import WordReveal from '@/components/animations/WordReveal'
+import ServiceCard from '@/components/ui/ServiceCard'
+import ServiceModal from '@/components/ui/ServiceModal'
+import type { Service } from '@/data/services'
+import { services as defaultServices } from '@/data/services'
+import { useContentSection } from '@/hooks/useContent'
+import { useModalManager } from '@/hooks/useModalManager'
+import { useMounted } from '@/hooks/useMounted'
+import { useTheme } from '@/hooks/useTheme'
+import {
+  MotionValue,
+  motion,
+  useMotionValue,
+  useScroll,
+  useTransform,
+} from 'framer-motion'
+import React, { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+
+type ServiceModalPayload = {
+  service: Service
+  index: number
+}
+
+// Particle component to avoid hooks in map
+function FloatingParticle({
+  index,
+  scrollYProgress,
+  mounted,
+}: {
+  index: number
+  scrollYProgress: MotionValue<number>
+  mounted: boolean
+}) {
+  // Always call hooks - never conditionally
+  const baseOpacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [0, 0.3 + index * 0.02, 0.7 + index * 0.02, 1],
+    [0, 1, 1, 0]
+  )
+  const baseScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0])
+
+  // Create MotionValues that will be updated based on mounted state
+  const opacity: MotionValue<number> = useMotionValue(0)
+  const scale: MotionValue<number> = useMotionValue(0)
+
+  // Update values when mounted changes or when scroll values change
+  useEffect(() => {
+    if (!mounted) {
+      opacity.set(0)
+      scale.set(0)
+      return
+    }
+
+    // Subscribe to scroll-based values when mounted
+    const unsubscribeOpacity = baseOpacity.on('change', (val) => {
+      opacity.set(val)
+    })
+    const unsubscribeScale = baseScale.on('change', (val) => {
+      scale.set(val)
+    })
+
+    return () => {
+      unsubscribeOpacity()
+      unsubscribeScale()
+    }
+  }, [mounted, baseOpacity, baseScale, opacity, scale])
+
+  return (
+    <motion.div
+      className="absolute w-1 h-1 bg-accent/30 rounded-full"
+      style={{
+        left: `${(index * 5) % 100}%`,
+        top: `${(index * 7) % 100}%`,
+        opacity,
+        scale,
+      }}
+      suppressHydrationWarning
+    />
+  )
+}
+
+export default function ServicesSection() {
+  const { isOpen, modalId, data, openModal, closeModal } =
+    useModalManager<ServiceModalPayload>()
+  const mounted = useMounted()
+  const { isLight } = useTheme()
+  const sectionRef = useRef<HTMLElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
+
+  // Fetch content from CMS - enables live updates from /admin
+  const { getValue } = useContentSection("services")
+  
+  // Build services from CMS with fallbacks to defaults
+  const services: Service[] = useMemo(() => [
+    {
+      ...defaultServices[0],
+      title: getValue("T21", defaultServices[0].title),
+      shortDesc: getValue("T25", defaultServices[0].shortDesc),
+      longDesc: getValue("T29", defaultServices[0].longDesc),
+    },
+    {
+      ...defaultServices[1],
+      title: getValue("T22", defaultServices[1].title),
+      shortDesc: getValue("T26", defaultServices[1].shortDesc),
+      longDesc: getValue("T30", defaultServices[1].longDesc),
+    },
+    {
+      ...defaultServices[2],
+      title: getValue("T23", defaultServices[2].title),
+      shortDesc: getValue("T27", defaultServices[2].shortDesc),
+      longDesc: getValue("T31", defaultServices[2].longDesc),
+    },
+    {
+      ...defaultServices[3],
+      title: getValue("T24", defaultServices[3].title),
+      shortDesc: getValue("T28", defaultServices[3].shortDesc),
+      longDesc: getValue("T32", defaultServices[3].longDesc),
+    },
+  ], [getValue])
+  
+  // Get video URL from CMS
+  const videoUrl = getValue("V2", "/videos/background_vid.mp4")
+
+  // Scroll-based parallax effects
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  })
+
+  const videoOpacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [0, 0.3, 0.7, 1],
+    [0.4, 0.6, 0.5, 0.3]
+  )
+  const videoScale: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05])
+  const textY: MotionValue<number> = useTransform(scrollYProgress, [0, 0.5], [0, -50])
+
+  // Always call hooks - never conditionally
+  const accentGradientOpacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.3, 0.5, 0.3]
+  )
+  const gridOpacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [0.05, 0.15, 0.05]
+  )
+
+  // Combine base values with mounted state
+  // Create MotionValues that will be updated based on mounted state
+  const finalAccentOpacity: MotionValue<number> = useMotionValue(0.3)
+  const finalGridOpacity: MotionValue<number> = useMotionValue(0.05)
+  const finalVideoOpacity: MotionValue<number> = useMotionValue(0)
+  const finalVideoScale: MotionValue<number> = useMotionValue(1)
+
+  // Update values when mounted changes or when scroll values change
+  useEffect(() => {
+    if (!mounted) {
+      finalAccentOpacity.set(0.3)
+      finalGridOpacity.set(0.05)
+      finalVideoOpacity.set(0)
+      finalVideoScale.set(1)
+      return
+    }
+
+    // Subscribe to scroll-based values when mounted
+    const unsubscribeAccent = accentGradientOpacity.on('change', (val) => {
+      finalAccentOpacity.set(val)
+    })
+    const unsubscribeGrid = gridOpacity.on('change', (val) => {
+      finalGridOpacity.set(val)
+    })
+    const unsubscribeVideo = videoOpacity.on('change', (val) => {
+      finalVideoOpacity.set(val)
+    })
+    const unsubscribeScale = videoScale.on('change', (val) => {
+      finalVideoScale.set(val)
+    })
+
+    return () => {
+      unsubscribeAccent()
+      unsubscribeGrid()
+      unsubscribeVideo()
+      unsubscribeScale()
+    }
+  }, [mounted, accentGradientOpacity, gridOpacity, videoOpacity, videoScale, finalAccentOpacity, finalGridOpacity, finalVideoOpacity, finalVideoScale])
+
+  // Only load/play background video when the section is near the viewport.
+  // This prevents offscreen videos from dominating network/CPU and hurting Lighthouse.
+  useEffect(() => {
+    if (!mounted) return
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+    if (!sectionRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        setShouldPlayVideo(entry.isIntersecting)
+      },
+      { rootMargin: '300px', threshold: 0.1 }
+    )
+
+    observer.observe(sectionRef.current)
+    return () => observer.disconnect()
+  }, [mounted])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (shouldPlayVideo) {
+      video.play().catch(() => {
+        // Autoplay may be blocked; ignore.
+      })
+    } else {
+      video.pause()
+    }
+  }, [shouldPlayVideo])
+
+  const handleOpenModal = (service: Service, index: number) => {
+    openModal(`service-${service.id}`, { service, index })
+  }
+
+  // Generate particles array - simplified to avoid TypeScript issues
+  const particleIndexes: number[] = Array.from({ length: 20 }, (_, i) => i)
+
+  const serviceModalData: ServiceModalPayload | null =
+    isOpen && modalId?.startsWith('service-') && data
+      ? (data as ServiceModalPayload)
+      : null
+
+  const serviceModal: ReactNode =
+    serviceModalData !== null ? (
+      <ServiceModal
+        isOpen
+        onClose={closeModal}
+        service={serviceModalData.service}
+        direction={serviceModalData.index % 2 === 0 ? 'left' : 'right'}
+      />
+    ) : null
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`section-spacing-md relative overflow-hidden min-h-screen flex items-center transition-colors duration-500 ${
+        isLight
+          ? "bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50 text-gray-900"
+          : "bg-black text-white"
+      }`}
+    >
+      {/* Light mode decorative elements */}
+      {isLight && (
+        <>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-blue-200/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-20 right-10 w-64 h-64 bg-gradient-to-tl from-rose-200/25 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-amber-100/20 via-transparent to-sky-100/20 rounded-full blur-3xl pointer-events-none" />
+        </>
+      )}
+      {/* Video background */}
+      <div className="absolute inset-0 z-0">
+        <motion.video
+          ref={videoRef}
+          loop
+          muted
+          playsInline
+          preload="none"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            opacity: finalVideoOpacity,
+            scale: finalVideoScale,
+            pointerEvents: mounted ? 'auto' : 'none',
+          }}
+          suppressHydrationWarning
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </motion.video>
+
+        {/* Dark gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/80 z-10" />
+
+        {/* Accent gradient overlay */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-tertiary/20 z-10"
+          style={{
+            opacity: finalAccentOpacity,
+          }}
+          suppressHydrationWarning
+        />
+
+        {/* Animated grid pattern overlay */}
+        <motion.div
+          className="absolute inset-0 opacity-10 z-10"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            opacity: finalGridOpacity,
+          }}
+          suppressHydrationWarning
+        />
+      </div>
+
+      <SmokeEffect count={6} speed={20} opacity={0.15} />
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        {particleIndexes.map((i: number): ReactNode => (
+          <FloatingParticle
+            key={i}
+            index={i}
+            scrollYProgress={scrollYProgress}
+            mounted={mounted}
+          />
+        ))}
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-20">
+        {/* Section header with enhanced styling */}
+        <motion.div
+          className="mb-16 md:mb-24 text-center"
+          style={mounted ? { y: textY } : undefined}
+          suppressHydrationWarning
+        >
+          <motion.h2
+            className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-none"
+            style={
+              mounted
+                ? {
+                    textShadow:
+                      '0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)',
+                  }
+                : undefined
+            }
+            suppressHydrationWarning
+          >
+            <WordReveal
+              text="Våra Tjänster"
+              className="bg-gradient-to-r from-white via-accent to-white bg-clip-text text-transparent"
+            />
+          </motion.h2>
+          <motion.p
+            className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <WordReveal
+              text="Vi kombinerar skräddarsydd webbutveckling med AI-generering. Välj mellan att låta oss bygga din unika hemsida eller använda vår AI-plattform SajtMaskin för att skapa professionella webbplatser på minuter."
+              delay={0.3}
+              staggerDelay={0.02}
+              className="text-gray-200"
+            />
+          </motion.p>
+        </motion.div>
+
+        {/* Services grid with enhanced animations */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          {services.map((service: Service, index: number): ReactNode => (
+            <motion.div
+              key={service.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{
+                duration: 0.6,
+                delay: index * 0.15,
+                ease: [0.25, 0.1, 0.25, 1],
+              }}
+            >
+              <ServiceCard
+                service={service}
+                index={index}
+                onClick={() => handleOpenModal(service, index)}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Service Modal */}
+      {serviceModal}
+    </section>
+  )
+}

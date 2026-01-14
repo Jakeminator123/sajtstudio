@@ -1,0 +1,59 @@
+{
+  "company": "Konsultverksamhet inom okjhnoi",
+  "website_type_recommendation": "En e-handelsplattform med fokus på intuitiv navigering, en stark sökfunktion och tydlig presentation av priser. Plattformen bör även inkludera optimeringsverktyg för konversion och SEO för att nå både privata och företagskunder effektivt.",
+  "improvements": [
+    {
+      "item": "E-handelsfunktionalitet",
+      "impact": "high",
+      "effort": "high",
+      "why": "Viktig för direkt försäljning av produkter online och stödjer verksamhetens huvudsakliga syfte.",
+      "how": "Implementera med hjälp av en robust e-handelslösning som Shopify eller WooCommerce."
+    },
+    {
+      "item": "Sökfunktion",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Låter användare snabbt hitta produkter, vilket förbättrar användarupplevelsen och ökar konverteringsgraden.",
+      "how": "Använd avancerade sökverktyg, som Elasticsearch eller Algolia."
+    },
+    {
+      "item": "Responsiv design",
+      "impact": "high",
+      "effort": "medium",
+      "why": "Anpassar webbplatsen för alla enheter, vilket är kritiskt för att nå både privata och företagskunder.",
+      "how": "Använd responsiv CSS och ramverk som Bootstrap."
+    },
+    {
+      "item": "Prisinformation",
+      "impact": "medium",
+      "effort": "low",
+      "why": "Ger transparens och underlättar kundernas köpbeslut.",
+      "how": "Använd strukturerade datamarkeringar för att visa priser tydligt."
+    }
+  ],
+  "budget_estimate": {
+    "low": 150000,
+    "high": 300000,
+    "currency": "SEK"
+  },
+  "expected_outcomes": [
+    "Ökad onlinetrafik och försäljning",
+    "Förbättrad användarupplevelse",
+    "Starkare varumärkesnärvaro digitalt"
+  ],
+  "technical_requirements": [
+    "CMS med stöd för e-handel",
+    "Responsiv design och layout",
+    "SEO-optimering",
+    "Integrerad betalningslösning",
+    "Hög säkerhetsstandard för kunddata"
+  ],
+  "audit_type": "recommendation",
+  "cost": {
+    "tokens": 1036,
+    "sek": 0.07,
+    "usd": 0.006
+  },
+  "domain": null,
+  "timestamp": "2025-11-20T12:17:32.537Z"
+}
