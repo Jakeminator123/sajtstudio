@@ -1,6 +1,6 @@
 # Build outputs / dependencies
 node_modules/
-#.next/
+.next/
 out/
 dist/
 build/
@@ -61,5 +61,7 @@ node_modules
 .next
 old/
 
-
-
+# Environment files with secrets
+.env
+.env.*
+!.env.example
