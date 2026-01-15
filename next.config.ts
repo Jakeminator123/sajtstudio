@@ -143,7 +143,7 @@ const nextConfig: NextConfig = {
           "font-src 'self' data: https://fonts.gstatic.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
 
           // API connections: D-ID chatbot + required CDNs + vusercontent.net for previews + sajtmaskin
-          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://notifications.d-id.com wss://notifications.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
+          "connect-src 'self' https://agent.d-id.com https://api.d-id.com https://agents-results.d-id.com https://create-images-results.d-id.com https://notifications.d-id.com wss://notifications.d-id.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://raw.githack.com https://api-js.mixpanel.com https://browser-intake-us3-datadoghq.com https://app.launchdarkly.com wss://agent.d-id.com wss://*.stt.speech.microsoft.com https://*.stt.speech.microsoft.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
 
           // Media: self and D-ID for avatar videos + sajtmaskin
           "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
