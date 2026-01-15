@@ -148,8 +148,8 @@ const nextConfig: NextConfig = {
           // Media: self and D-ID for avatar videos + sajtmaskin
           "media-src 'self' https://agents-results.d-id.com blob: https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
 
-          // Frames: D-ID chatbot iframe + vusercontent.net previews + sajtmaskin
-          "frame-src 'self' https://agent.d-id.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com",
+          // Frames: D-ID chatbot iframe + vusercontent.net previews + sajtmaskin + selected embeds
+          "frame-src 'self' https://agent.d-id.com https://*.vusercontent.net https://sajtmaskin-1.onrender.com https://v0-juice-factory-website.vercel.app",
 
           // Workers: blob for inlined workers
           "worker-src 'self' blob:",
