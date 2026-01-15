@@ -591,12 +591,33 @@ export async function POST(request: NextRequest) {
           error: error instanceof Error ? error.message : String(error),
           url,
         })
-        return NextResponse.json(
-          {
-            error: 'Kunde inte hämta hemsidan. Kontrollera URL:en och försök igen.',
-          },
-          { status: 400 }
-        )
+
+        // If webSearch is enabled, we can still proceed with a minimal placeholder and let
+        // the model use web_search to gather information about the domain.
+        if (webSearch) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          websiteContent = {
+            url: typeof url === 'string' ? url : String(url),
+            title: 'Kunde inte hämta innehåll (JS-sajt eller blockerad)',
+            description: '',
+            headings: [],
+            text: '',
+            images: 0,
+            links: { internal: 0, external: 0 },
+            meta: {},
+            hasSSL: typeof url === 'string' ? url.startsWith('https://') : true,
+            responseTime: scrapeDuration,
+            wordCount: 0,
+            textPreview: `Scrape failed: ${errorMessage}`,
+          }
+        } else {
+          return NextResponse.json(
+            {
+              error: 'Kunde inte hämta hemsidan. Kontrollera URL:en och försök igen.',
+            },
+            { status: 400 }
+          )
+        }
       }
 
       // Build prompt

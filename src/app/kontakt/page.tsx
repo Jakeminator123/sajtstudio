@@ -12,6 +12,7 @@
 import Footer from '@/components/layout/Footer'
 import HeaderNav from '@/components/layout/HeaderNav'
 import ContactForm from '@/components/ui/ContactForm'
+import { siteConfig } from '@/config/siteConfig'
 import { useMounted } from '@/hooks/useMounted'
 import { useTheme } from '@/hooks/useTheme'
 import { motion, useScroll, useTransform } from 'framer-motion'
@@ -270,12 +271,12 @@ export default function ContactPage() {
                       E-post
                     </p>
                     <a
-                      href="mailto:hello@sajtstudio.se"
+                      href={`mailto:${siteConfig.contact.email}`}
                       className={`text-xl md:text-2xl group-hover:text-blue-500 transition-all duration-300 flex items-center gap-2 ${
                         isLight ? 'text-gray-800' : 'text-white'
                       }`}
                     >
-                      hello@sajtstudio.se
+                      {siteConfig.contact.email}
                       <motion.span
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500"
                         initial={{ x: -10 }}

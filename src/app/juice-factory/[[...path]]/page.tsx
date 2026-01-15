@@ -1,10 +1,17 @@
 import type { Metadata } from 'next'
 
+import { cookies } from 'next/headers'
+import { notFound } from 'next/navigation'
+
+import EmbedPasswordGate from '@/components/preview/EmbedPasswordGate'
 import PreviewWrapper from '@/components/preview/PreviewWrapper'
+import { getEmbedCookieName, verifyEmbedSessionToken } from '@/lib/embed-auth'
+import { getProtectedEmbedBySlug, updateProtectedEmbedLastAccessed } from '@/lib/preview-database'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-const JUICE_FACTORY_URL = 'https://v0-juice-factory-website.vercel.app'
+const SLUG = 'juice-factory'
 
 type PageProps = {
   params: Promise<{ path?: string[] }>
@@ -33,12 +40,33 @@ export const metadata: Metadata = {
 }
 
 export default async function JuiceFactoryEmbedPage({ params, searchParams }: PageProps) {
+  const embed = getProtectedEmbedBySlug(SLUG)
+  if (!embed) {
+    // Embed not configured in DB (or DB missing). Keep it explicit rather than silently opening access.
+    notFound()
+  }
+
+  const cookieStore = await cookies()
+  const authCookie = cookieStore.get(getEmbedCookieName(SLUG))
+  const isAuthed = authCookie ? verifyEmbedSessionToken(authCookie.value, SLUG) : false
+
+  if (!isAuthed) {
+    return <EmbedPasswordGate slug={SLUG} title={embed.title || 'Juice Factory'} />
+  }
+
   const { path } = await params
   const resolvedSearchParams = searchParams ? await searchParams : undefined
 
   const pathPart = path?.length ? `/${path.map(encodeURIComponent).join('/')}` : ''
   const query = toQueryString(resolvedSearchParams)
-  const sourceUrl = `${JUICE_FACTORY_URL}${pathPart}${query}`
+  const sourceUrl = `${embed.target_url}${pathPart}${query}`
+
+  // Track access (best-effort)
+  try {
+    updateProtectedEmbedLastAccessed(SLUG)
+  } catch {
+    // Ignore - not critical
+  }
 
   return (
     <PreviewWrapper
@@ -46,9 +74,9 @@ export default async function JuiceFactoryEmbedPage({ params, searchParams }: Pa
       sourceUrl={sourceUrl}
       previewImageSrc={null}
       preview={{
-        slug: 'juice-factory',
-        company_name: 'Juice Factory',
-        domain: 'v0-juice-factory-website.vercel.app',
+        slug: SLUG,
+        company_name: embed.title || 'Juice Factory',
+        domain: new URL(embed.target_url).host,
       }}
     />
   )

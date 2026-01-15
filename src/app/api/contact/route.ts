@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import fs from 'fs/promises'
 import path from 'path'
 import { siteConfig } from '@/config/siteConfig'
+import { getDataDir } from '@/lib/storage-paths'
 
 // Contact entry type
 interface ContactEntry {
@@ -15,7 +16,7 @@ interface ContactEntry {
 }
 
 // Path to contacts data file
-const CONTACTS_FILE = path.join(process.cwd(), 'data', 'contacts.json')
+const CONTACTS_FILE = path.join(getDataDir(), 'contacts.json')
 
 // Ensure data directory exists and save contact to file
 async function saveContact(contact: Omit<ContactEntry, 'id'>) {

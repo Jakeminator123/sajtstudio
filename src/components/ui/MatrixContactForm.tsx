@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useMobileDetection } from '@/hooks/useMobileDetection'
 
 interface MatrixContactFormProps {
   onKeyboardModeChange?: (useKeyboard: boolean) => void
@@ -71,8 +72,9 @@ function BlinkingCursor() {
 
 export default function MatrixContactForm({
   onKeyboardModeChange,
-  email = 'hello@sajtstudio.se',
+  email = 'erik@sajtstudio.se',
 }: MatrixContactFormProps) {
+  const isMobile = useMobileDetection()
   const [message, setMessage] = useState('')
   const [senderEmail, setSenderEmail] = useState('')
   const [useRealKeyboard, setUseRealKeyboard] = useState(false)
@@ -200,6 +202,8 @@ export default function MatrixContactForm({
     }
   }, [message, senderEmail])
 
+  const isEmailInputVisible = isMobile || showEmailInput
+
   // Clear message
   const handleClear = useCallback(() => {
     setMessage('')
@@ -239,25 +243,40 @@ export default function MatrixContactForm({
       </div>
 
       {/* Email input (optional) */}
-      <AnimatePresence>
-        {showEmailInput && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="relative z-10 px-4 pb-2"
-          >
-            <input
-              ref={emailInputRef}
-              type="email"
-              value={senderEmail}
-              onChange={(e) => setSenderEmail(e.target.value)}
-              placeholder="Din email (valfritt)"
-              className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isMobile ? (
+        <div className="relative z-10 px-4 pb-2">
+          <input
+            ref={emailInputRef}
+            type="email"
+            value={senderEmail}
+            onChange={(e) => setSenderEmail(e.target.value)}
+            inputMode="email"
+            placeholder="Din e-post (valfritt)"
+            className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
+          />
+        </div>
+      ) : (
+        <AnimatePresence>
+          {showEmailInput && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="relative z-10 px-4 pb-2"
+            >
+              <input
+                ref={emailInputRef}
+                type="email"
+                value={senderEmail}
+                onChange={(e) => setSenderEmail(e.target.value)}
+                inputMode="email"
+                placeholder="Din e-post (valfritt)"
+                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Hidden input for real keyboard mode */}
       {useRealKeyboard && (
@@ -294,12 +313,18 @@ export default function MatrixContactForm({
             {useRealKeyboard ? 'TANGENTBORD AKTIVT' : 'ANVÄND EGET TANGENTBORD'}
           </button>
 
-          <button
-            onClick={() => setShowEmailInput(!showEmailInput)}
-            className="text-green-500/50 hover:text-green-400 transition-colors text-xs font-mono"
-          >
-            {showEmailInput ? '- email' : '+ email'}
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => setShowEmailInput(!showEmailInput)}
+              className={`px-3 py-1.5 rounded text-xs font-mono transition-all border ${
+                isEmailInputVisible
+                  ? 'bg-green-500/20 text-green-400 border-green-500/50'
+                  : 'bg-transparent text-green-500/50 border-green-500/20 hover:border-green-500/40'
+              }`}
+            >
+              {isEmailInputVisible ? 'DÖLJ E-POST' : 'LÄGG TILL E-POST'}
+            </button>
+          )}
         </div>
 
         {/* Action buttons */}

@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
-import path from 'path'
+import { getDbPath } from '@/lib/storage-paths'
 
-// Database file location - in project root
-const dbPath = path.join(process.cwd(), 'data', 'db', 'leaderboard.db')
+// Database file location (defaults to <repo>/data/db; override with DATA_DIR in production)
+const dbPath = getDbPath('leaderboard.db')
 
 // Create database connection
 const db = new Database(dbPath)

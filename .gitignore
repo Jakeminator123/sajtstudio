@@ -45,6 +45,7 @@ INPUT_DOC_FOR_CURSOR/
 # Databases
 *.db-journal
 .db
+scripts/*.py
 
 # OS / IDE noise
 .DS_Store

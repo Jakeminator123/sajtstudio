@@ -14,7 +14,7 @@ export const siteConfig = {
 
   // Kontaktinformation
   contact: {
-    email: 'hello@sajtstudio.se',
+    email: 'erik@sajtstudio.se',
     phone: '+46 70 123 45 67',
     location: 'Stockholm, Sverige',
     timezone: 'Europe/Stockholm',

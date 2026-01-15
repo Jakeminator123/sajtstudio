@@ -3,9 +3,9 @@
  */
 
 import Database from 'better-sqlite3'
-import path from 'path'
+import { getDbPath } from '@/lib/storage-paths'
 
-const dbPath = path.join(process.cwd(), 'data', 'db', 'stats.db')
+const dbPath = getDbPath('stats.db')
 
 // Create database connection
 const statsDb = new Database(dbPath)

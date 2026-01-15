@@ -10,9 +10,10 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
+import { getDbPath } from '@/lib/storage-paths'
 
-// Database file location - in project root
-const dbPath = path.join(process.cwd(), 'data', 'db', 'content.db')
+// Database file location (defaults to <repo>/data/db; override with DATA_DIR in production)
+const dbPath = getDbPath('content.db')
 
 // Load default content from cache.json file (versioned in Git)
 const cachePath = path.join(process.cwd(), 'content-cache.json')

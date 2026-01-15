@@ -28,11 +28,12 @@
  * @since 2024-12-20 - Fixed: Changed from proxy to direct iframe embedding
  */
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { useOfferModal } from '@/hooks/useOfferModal'
+import { useMobileDetection } from '@/hooks/useMobileDetection'
 
 // ============================================================================
 // TYPES
@@ -73,6 +74,10 @@ export default function PreviewWrapper({
   previewImageSrc,
   preview,
 }: PreviewWrapperProps) {
+  const isMobile = useMobileDetection()
+  const prefersReducedMotion = useReducedMotion()
+  const shouldAnimateChrome = !isMobile && !prefersReducedMotion
+
   // Determine initial mode: show image if available, otherwise iframe
   const initialMode: ViewMode = previewImageSrc ? 'image' : 'iframe'
 
@@ -164,9 +169,10 @@ export default function PreviewWrapper({
           HEADER - Sajtstudio branding + action buttons
           ================================================================ */}
       <motion.header
-        initial={{ y: -60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        // NOTE: On mobile, transforms can make text look blurry (subpixel/GPU). Keep header static.
+        initial={shouldAnimateChrome ? { y: -60, opacity: 0 } : { opacity: 1 }}
+        animate={shouldAnimateChrome ? { y: 0, opacity: 1 } : { opacity: 1 }}
+        transition={shouldAnimateChrome ? { duration: 0.4, ease: 'easeOut' } : { duration: 0 }}
         className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-b border-gray-800/50 shadow-lg z-20"
       >
         {/* Logo and branding */}
@@ -294,9 +300,12 @@ export default function PreviewWrapper({
           FOOTER - CTA to create own site + download button
           ================================================================ */}
       <motion.footer
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut', delay: 0.2 }}
+        // NOTE: Same as header: avoid transform-based entrance animations on mobile to prevent blur.
+        initial={shouldAnimateChrome ? { y: 60, opacity: 0 } : { opacity: 1 }}
+        animate={shouldAnimateChrome ? { y: 0, opacity: 1 } : { opacity: 1 }}
+        transition={
+          shouldAnimateChrome ? { duration: 0.4, ease: 'easeOut', delay: 0.2 } : { duration: 0 }
+        }
         className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-t border-gray-800/50 z-20"
       >
         <p className="text-gray-400 text-sm text-center sm:text-left">

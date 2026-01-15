@@ -35,7 +35,7 @@ export async function scrapeWebsite(url: string): Promise<WebsiteContent> {
   try {
     // Fetch the website with a timeout
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    const timeout = setTimeout(() => controller.abort(), 15000) // 15 second timeout
 
     let response: Response
     try {
@@ -51,7 +51,7 @@ export async function scrapeWebsite(url: string): Promise<WebsiteContent> {
     } catch (fetchError) {
       clearTimeout(timeout)
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        throw new Error('Timeout: Hemsidan svarade inte inom 10 sekunder')
+        throw new Error('Timeout: Hemsidan svarade inte inom 15 sekunder')
       }
       throw fetchError
     }
@@ -138,7 +138,7 @@ export async function scrapeWebsite(url: string): Promise<WebsiteContent> {
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        throw new Error('Timeout: Hemsidan svarade inte inom 10 sekunder')
+        throw new Error('Timeout: Hemsidan svarade inte inom 15 sekunder')
       }
       throw new Error(`Kunde inte hämta hemsidan: ${error.message}`)
     }

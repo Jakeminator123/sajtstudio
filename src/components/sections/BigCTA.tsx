@@ -2,6 +2,7 @@
 
 import { useContentSection } from '@/hooks/useContent'
 import { useTheme } from '@/hooks/useTheme'
+import { siteConfig } from '@/config/siteConfig'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
@@ -187,12 +188,12 @@ export default function BigCTA() {
 
         {/* Matrix Contact Form - positioned to the right (desktop) */}
         <div className="absolute z-20 right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 hidden md:block">
-          <MatrixContactForm email="hello@sajtstudio.se" />
+          <MatrixContactForm email={siteConfig.contact.email} />
         </div>
 
         {/* Mobile: Form and Phone button */}
         <div className="absolute z-20 bottom-4 left-4 right-4 md:hidden space-y-4">
-          <MatrixContactForm email="hello@sajtstudio.se" />
+          <MatrixContactForm email={siteConfig.contact.email} />
 
           {/* Mobile phone call button */}
           <motion.a
@@ -234,7 +235,7 @@ export default function BigCTA() {
         >
           {/* Email */}
           <motion.a
-            href="mailto:hello@sajtstudio.se"
+            href={`mailto:${siteConfig.contact.email}`}
             className={`group flex items-center gap-3 hover:text-accent transition-colors ${
               isLight ? 'text-gray-600' : 'text-white/60'
             }`}
@@ -251,7 +252,7 @@ export default function BigCTA() {
             >
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span className="font-mono text-sm">hello@sajtstudio.se</span>
+            <span className="font-mono text-sm">{siteConfig.contact.email}</span>
           </motion.a>
 
           {/* Divider */}
