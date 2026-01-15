@@ -57,4 +57,3 @@ style={{ x: wordsX, y: wordsY, scale: wordsScale }}
 - **Stäng av extensionen** för bästa resultat
 - **Eller ignorera varningarna** - de påverkar inte funktionaliteten
 - **Inline styles är okej** när de är nödvändiga för animationer
-

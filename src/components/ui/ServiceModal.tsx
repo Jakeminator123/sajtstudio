@@ -1,56 +1,56 @@
-"use client";
+'use client'
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 
 interface ServiceModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   service: {
-    number: string;
-    title: string;
-    longDesc: string;
-    features: string[];
-    icon?: string;
-  };
-  direction?: "left" | "right";
+    number: string
+    title: string
+    longDesc: string
+    features: string[]
+    icon?: string
+  }
+  direction?: 'left' | 'right'
 }
 
 export default function ServiceModal({
   isOpen,
   onClose,
   service,
-  direction = "right",
+  direction = 'right',
 }: ServiceModalProps) {
   // Focus trap
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const focusableElements = document.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    )
+    const firstElement = focusableElements[0] as HTMLElement
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
 
     const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab') return
 
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement?.focus();
+          e.preventDefault()
+          lastElement?.focus()
         }
       } else {
         if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement?.focus();
+          e.preventDefault()
+          firstElement?.focus()
         }
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleTab);
-    return () => document.removeEventListener('keydown', handleTab);
-  }, [isOpen]);
+    document.addEventListener('keydown', handleTab)
+    return () => document.removeEventListener('keydown', handleTab)
+  }, [isOpen])
 
   return (
     <AnimatePresence>
@@ -58,9 +58,9 @@ export default function ServiceModal({
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-            animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
-            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.3 }}
             onClick={onClose}
             className="fixed inset-0 z-[100] bg-black/60"
@@ -71,7 +71,7 @@ export default function ServiceModal({
             <motion.div
               initial={{
                 opacity: 0,
-                x: direction === "left" ? -400 : 400,
+                x: direction === 'left' ? -400 : 400,
                 scale: 0.9,
               }}
               animate={{
@@ -81,11 +81,11 @@ export default function ServiceModal({
               }}
               exit={{
                 opacity: 0,
-                x: direction === "left" ? -400 : 400,
+                x: direction === 'left' ? -400 : 400,
                 scale: 0.9,
               }}
               transition={{
-                type: "spring",
+                type: 'spring',
                 stiffness: 300,
                 damping: 30,
               }}
@@ -195,6 +195,5 @@ export default function ServiceModal({
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }
-

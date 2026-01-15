@@ -11,8 +11,10 @@ interface RequestIdleCallbackHandle {
   value: number
 }
 
-interface WindowWithIdleCallback
-  extends Omit<Window, 'cancelIdleCallback' | 'requestIdleCallback'> {
+interface WindowWithIdleCallback extends Omit<
+  Window,
+  'cancelIdleCallback' | 'requestIdleCallback'
+> {
   requestIdleCallback(
     callback: () => void,
     options?: RequestIdleCallbackOptions
@@ -25,19 +27,16 @@ interface WindowWithIdleCallback
  * Uses requestIdleCallback if available, otherwise setTimeout(0)
  */
 export function yieldToBrowser(): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (typeof window === 'undefined') {
       resolve()
       return
     }
 
     if ('requestIdleCallback' in window) {
-      ;(window as unknown as WindowWithIdleCallback).requestIdleCallback(
-        () => resolve(),
-        {
-          timeout: 5,
-        }
-      )
+      ;(window as unknown as WindowWithIdleCallback).requestIdleCallback(() => resolve(), {
+        timeout: 5,
+      })
     } else {
       setTimeout(() => resolve(), 0)
     }
@@ -60,10 +59,7 @@ export async function processInChunks<T>(
     processor(items[i], i)
 
     // Yield every chunkSize items or if we've been running too long
-    if (
-      (i + 1) % chunkSize === 0 ||
-      performance.now() - startTime > yieldAfter
-    ) {
+    if ((i + 1) % chunkSize === 0 || performance.now() - startTime > yieldAfter) {
       await yieldToBrowser()
     }
   }
@@ -82,10 +78,8 @@ export function scheduleIdleTask(
   }
 
   if ('requestIdleCallback' in window) {
-    return (window as unknown as WindowWithIdleCallback).requestIdleCallback(
-      callback,
-      options
-    ).value
+    return (window as unknown as WindowWithIdleCallback).requestIdleCallback(callback, options)
+      .value
   } else {
     return setTimeout(callback, 0) as unknown as number
   }
@@ -109,11 +103,7 @@ export function cancelIdleTask(id: number): void {
 /**
  * Measure task duration and warn if it exceeds threshold
  */
-export function measureTask<T>(
-  name: string,
-  task: () => T,
-  threshold: number = 50
-): T {
+export function measureTask<T>(name: string, task: () => T, threshold: number = 50): T {
   const start = performance.now()
   const result = task()
   const duration = performance.now() - start
@@ -124,9 +114,7 @@ export function measureTask<T>(
     process.env.NODE_ENV === 'development'
   ) {
     console.warn(
-      `[Performance] Task "${name}" took ${duration.toFixed(
-        2
-      )}ms (threshold: ${threshold}ms)`
+      `[Performance] Task "${name}" took ${duration.toFixed(2)}ms (threshold: ${threshold}ms)`
     )
   }
 
@@ -151,9 +139,7 @@ export async function measureTaskAsync<T>(
     process.env.NODE_ENV === 'development'
   ) {
     console.warn(
-      `[Performance] Task "${name}" took ${duration.toFixed(
-        2
-      )}ms (threshold: ${threshold}ms)`
+      `[Performance] Task "${name}" took ${duration.toFixed(2)}ms (threshold: ${threshold}ms)`
     )
   }
 

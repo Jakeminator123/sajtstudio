@@ -8,14 +8,8 @@
     "performance": 75,
     "accessibility": 80
   },
-  "strengths": [
-    "Snabb svarstid",
-    "Bra teknisk grund med SSL"
-  ],
-  "issues": [
-    "Saknar metabeskrivning",
-    "Svag rubrikstruktur"
-  ],
+  "strengths": ["Snabb svarstid", "Bra teknisk grund med SSL"],
+  "issues": ["Saknar metabeskrivning", "Svag rubrikstruktur"],
   "improvements": [
     {
       "item": "Lägga till metabeskrivning",
@@ -44,10 +38,7 @@
     "high": 30000,
     "currency": "SEK"
   },
-  "expected_outcomes": [
-    "Ökad synlighet i sökmotorer",
-    "Bättre användarupplevelse"
-  ],
+  "expected_outcomes": ["Ökad synlighet i sökmotorer", "Bättre användarupplevelse"],
   "audit_type": "website_audit",
   "cost": {
     "tokens": 847,

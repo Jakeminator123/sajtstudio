@@ -317,19 +317,19 @@ a,
 input,
 select,
 textarea,
-[role="button"],
-[role="link"] {
+[role='button'],
+[role='link'] {
   touch-action: manipulation;
 }
 
 /* Elements that need drag/pan - allow pan in all directions */
-[data-draggable="true"],
-[data-pan="true"] {
+[data-draggable='true'],
+[data-pan='true'] {
   touch-action: pan-x pan-y;
 }
 
 /* Elements that need pinch-zoom */
-[data-zoom="true"] {
+[data-zoom='true'] {
   touch-action: pinch-zoom;
 }
 
@@ -663,7 +663,7 @@ html.light section {
 
 /* Light mode card styling - bright and clean */
 html.light .bg-card,
-html.light [class*="bg-white"],
+html.light [class*='bg-white'],
 html.light .bg-background {
   background: linear-gradient(
     145deg,
@@ -677,8 +677,8 @@ html.light .bg-background {
 
 /* Add subtle shimmer overlay to cards in light mode */
 html.light .bg-card::before,
-html.light [class*="rounded-lg"][class*="bg-"]::before {
-  content: "";
+html.light [class*='rounded-lg'][class*='bg-']::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -706,7 +706,7 @@ html.light a:hover {
 }
 
 /* Light mode header scrolled state enhancement */
-html.light header[class*="bg-gradient"] {
+html.light header[class*='bg-gradient'] {
   background: linear-gradient(
     to right,
     hsl(45, 50%, 96%),
@@ -726,7 +726,7 @@ html.light .text-gray-400 {
 }
 
 /* Light mode shadows with warm tint */
-html.light [class*="shadow"] {
+html.light [class*='shadow'] {
   --tw-shadow-color: rgba(180, 150, 100, 0.1);
 }
 

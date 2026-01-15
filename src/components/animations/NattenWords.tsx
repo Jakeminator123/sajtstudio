@@ -1,39 +1,34 @@
-"use client";
+'use client'
 
-import {
-  motion,
-  MotionValue,
-  useTransform,
-  useMotionValue,
-} from "framer-motion";
-import { useMemo } from "react";
+import { motion, MotionValue, useTransform, useMotionValue } from 'framer-motion'
+import { useMemo } from 'react'
 
 interface NattenWordsProps {
-  scrollProgress?: MotionValue<number>;
-  shouldReduceMotion?: boolean;
-  mounted?: boolean;
-  className?: string;
+  scrollProgress?: MotionValue<number>
+  shouldReduceMotion?: boolean
+  mounted?: boolean
+  className?: string
 }
 
 export default function NattenWords({
   scrollProgress,
   shouldReduceMotion = false,
   mounted = true,
-  className = "",
+  className = '',
 }: NattenWordsProps) {
-  const text = "någonting";
-  const letters = useMemo(() => text.split(""), [text]);
+  const text = 'någonting'
+  const letters = useMemo(() => text.split(''), [text])
 
   // Create fallback MotionValue for SSR safety - hooks must be called directly
-  const fallbackProgress = useMotionValue(0);
-  const progress = scrollProgress || fallbackProgress;
+  const fallbackProgress = useMotionValue(0)
+  const progress = scrollProgress || fallbackProgress
 
   // Scroll-based animations - tuned to start earlier while the hero is still in view
-  const yTransform = useTransform(progress, [0, 0.2, 0.6, 1], [0, -8, -60, -95]);
-  const opacityTransform = useTransform(progress, [0, 0.25, 0.55], [1, 1, 0]);
+  const yTransform = useTransform(progress, [0, 0.2, 0.6, 1], [0, -8, -60, -95])
+  const opacityTransform = useTransform(progress, [0, 0.25, 0.55], [1, 1, 0])
 
-  const y = scrollProgress ? yTransform : undefined;
-  const opacity = scrollProgress ? opacityTransform : undefined;
+  const y = scrollProgress ? yTransform : undefined
+  const opacity = scrollProgress ? opacityTransform : undefined
 
   // Only apply animations when mounted to prevent hydration mismatch
   if (!mounted || shouldReduceMotion) {
@@ -47,7 +42,7 @@ export default function NattenWords({
           ))}
         </span>
       </span>
-    );
+    )
   }
 
   return (
@@ -56,8 +51,8 @@ export default function NattenWords({
       aria-label={text}
       style={{
         y: y ?? 0,
-        opacity: typeof opacity === "number" ? opacity : opacity?.get?.() ?? 1,
-        display: "inline-block",
+        opacity: typeof opacity === 'number' ? opacity : (opacity?.get?.() ?? 1),
+        display: 'inline-block',
       }}
       suppressHydrationWarning
     >
@@ -77,18 +72,18 @@ export default function NattenWords({
             whileHover={{
               scale: 1.2,
               y: -10,
-              color: "#0066FF",
+              color: '#0066FF',
               transition: { duration: 0.2 },
             }}
             style={{
-              display: "inline-block",
-              transformStyle: "preserve-3d",
+              display: 'inline-block',
+              transformStyle: 'preserve-3d',
             }}
           >
-            {letter === " " ? "\u00A0" : letter}
+            {letter === ' ' ? '\u00A0' : letter}
           </motion.span>
         ))}
       </span>
     </motion.span>
-  );
+  )
 }

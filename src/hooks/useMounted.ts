@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 /**
  * useMounted Hook
@@ -19,16 +19,15 @@ import { useState, useEffect } from 'react';
  * @returns {boolean} True when component is mounted on client, false during SSR
  */
 export function useMounted(): boolean {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     // Use requestAnimationFrame to avoid setState in effect warning
     // This is a standard pattern for preventing hydration mismatches
     requestAnimationFrame(() => {
-      setMounted(true);
-    });
-  }, []);
+      setMounted(true)
+    })
+  }, [])
 
-  return mounted;
+  return mounted
 }
-

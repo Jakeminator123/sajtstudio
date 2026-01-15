@@ -1,40 +1,40 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion'
 
 interface NeuralBackgroundProps {
   /** Opacity of the dark overlay (0-1), default 0.7 */
-  dimOpacity?: number;
+  dimOpacity?: number
   /** Number of neural nodes */
-  nodeCount?: number;
+  nodeCount?: number
   /** Primary color for glows */
-  primaryColor?: string;
+  primaryColor?: string
   /** Secondary color for accents */
-  secondaryColor?: string;
+  secondaryColor?: string
 }
 
 interface Node {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  delay: number;
-  duration: number;
+  id: number
+  x: number
+  y: number
+  size: number
+  delay: number
+  duration: number
 }
 
 interface Connection {
-  id: number;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  delay: number;
+  id: number
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  delay: number
 }
 
 // Helper to generate seeded random values (deterministic based on seed)
 function seededRandom(seed: number): number {
-  const x = Math.sin(seed * 9999) * 10000;
-  return x - Math.floor(x);
+  const x = Math.sin(seed * 9999) * 10000
+  return x - Math.floor(x)
 }
 
 function generateNodes(count: number): Node[] {
@@ -45,18 +45,18 @@ function generateNodes(count: number): Node[] {
     size: seededRandom(i * 4 + 3) * 4 + 2,
     delay: seededRandom(i * 4 + 4) * 5,
     duration: seededRandom(i * 4 + 5) * 3 + 2,
-  }));
+  }))
 }
 
 function generateConnections(nodeList: Node[]): Connection[] {
-  const conns: Connection[] = [];
-  const maxDistance = 25;
+  const conns: Connection[] = []
+  const maxDistance = 25
 
   for (let i = 0; i < nodeList.length; i++) {
     for (let j = i + 1; j < nodeList.length; j++) {
-      const dx = nodeList[i].x - nodeList[j].x;
-      const dy = nodeList[i].y - nodeList[j].y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      const dx = nodeList[i].x - nodeList[j].x
+      const dy = nodeList[i].y - nodeList[j].y
+      const distance = Math.sqrt(dx * dx + dy * dy)
 
       if (distance < maxDistance && conns.length < 50) {
         conns.push({
@@ -66,26 +66,26 @@ function generateConnections(nodeList: Node[]): Connection[] {
           x2: nodeList[j].x,
           y2: nodeList[j].y,
           delay: seededRandom(i * 100 + j) * 3,
-        });
+        })
       }
     }
   }
-  return conns;
+  return conns
 }
 
 // Pre-generate data outside of component (stable across renders)
-const INITIAL_NODES = generateNodes(30);
-const INITIAL_CONNECTIONS = generateConnections(INITIAL_NODES);
+const INITIAL_NODES = generateNodes(30)
+const INITIAL_CONNECTIONS = generateConnections(INITIAL_NODES)
 
 export default function NeuralBackground({
   dimOpacity = 0.7,
   nodeCount = 30,
-  primaryColor = "#3b82f6",
-  secondaryColor = "#8b5cf6",
+  primaryColor = '#3b82f6',
+  secondaryColor = '#8b5cf6',
 }: NeuralBackgroundProps) {
   // Use static pre-generated data (nodeCount prop is ignored to maintain purity)
-  const nodes = nodeCount === 30 ? INITIAL_NODES : INITIAL_NODES.slice(0, nodeCount);
-  const connections = INITIAL_CONNECTIONS;
+  const nodes = nodeCount === 30 ? INITIAL_NODES : INITIAL_NODES.slice(0, nodeCount)
+  const connections = INITIAL_CONNECTIONS
 
   return (
     <div className="fixed inset-0 -z-20 overflow-hidden">
@@ -97,8 +97,8 @@ export default function NeuralBackground({
         className="absolute w-[800px] h-[800px] rounded-full blur-[120px] opacity-20"
         style={{
           background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
-          left: "10%",
-          top: "20%",
+          left: '10%',
+          top: '20%',
         }}
         animate={{
           x: [0, 100, 0],
@@ -108,7 +108,7 @@ export default function NeuralBackground({
         transition={{
           duration: 20,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
       />
 
@@ -116,8 +116,8 @@ export default function NeuralBackground({
         className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-15"
         style={{
           background: `radial-gradient(circle, ${secondaryColor} 0%, transparent 70%)`,
-          right: "10%",
-          bottom: "20%",
+          right: '10%',
+          bottom: '20%',
         }}
         animate={{
           x: [0, -80, 0],
@@ -127,7 +127,7 @@ export default function NeuralBackground({
         transition={{
           duration: 15,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
           delay: 2,
         }}
       />
@@ -153,7 +153,7 @@ export default function NeuralBackground({
               duration: 4,
               repeat: Infinity,
               delay: conn.delay,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -175,7 +175,7 @@ export default function NeuralBackground({
               duration: node.duration,
               repeat: Infinity,
               delay: node.delay,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -189,7 +189,7 @@ export default function NeuralBackground({
             linear-gradient(${primaryColor}20 1px, transparent 1px),
             linear-gradient(90deg, ${primaryColor}20 1px, transparent 1px)
           `,
-          backgroundSize: "50px 50px",
+          backgroundSize: '50px 50px',
         }}
       />
 
@@ -201,12 +201,12 @@ export default function NeuralBackground({
           boxShadow: `0 0 20px ${primaryColor}40`,
         }}
         animate={{
-          top: ["-10%", "110%"],
+          top: ['-10%', '110%'],
         }}
         transition={{
           duration: 8,
           repeat: Infinity,
-          ease: "linear",
+          ease: 'linear',
         }}
       />
 
@@ -220,10 +220,9 @@ export default function NeuralBackground({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)",
+          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)',
         }}
       />
     </div>
-  );
+  )
 }
-

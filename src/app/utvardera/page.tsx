@@ -1,426 +1,401 @@
-"use client";
+'use client'
 
-import Footer from "@/components/layout/Footer";
-import HeaderNav from "@/components/layout/HeaderNav";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import Dashboard from "@/components/audit/Dashboard";
-import LoadingState from "@/components/audit/LoadingState";
-import ScrollToTop from "@/components/ui/ScrollToTop";
-import { ToastContainer, type ToastType } from "@/components/ui/Toast";
-import Audit3DVisualization from "@/components/audit/Audit3DVisualization";
-import NeuralBackground from "@/components/effects/NeuralBackground";
-import TypewriterText from "@/components/effects/TypewriterText";
-import Card3D from "@/components/effects/Card3D";
-import NeonButton from "@/components/effects/NeonButton";
-import AnimatedEmoji from "@/components/effects/AnimatedEmoji";
-import { AnimatePresence, motion } from "framer-motion";
-import { FormEvent, useEffect, useState, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import type { AuditResult } from "@/types/audit";
-import type { QuestionAnswers } from "@/lib/openai-client";
-import { MODEL_OPTIONS, DEFAULT_MODEL } from "@/config/openai";
+import Footer from '@/components/layout/Footer'
+import HeaderNav from '@/components/layout/HeaderNav'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import Dashboard from '@/components/audit/Dashboard'
+import LoadingState from '@/components/audit/LoadingState'
+import ScrollToTop from '@/components/ui/ScrollToTop'
+import { ToastContainer, type ToastType } from '@/components/ui/Toast'
+import Audit3DVisualization from '@/components/audit/Audit3DVisualization'
+import NeuralBackground from '@/components/effects/NeuralBackground'
+import TypewriterText from '@/components/effects/TypewriterText'
+import Card3D from '@/components/effects/Card3D'
+import NeonButton from '@/components/effects/NeonButton'
+import AnimatedEmoji from '@/components/effects/AnimatedEmoji'
+import { AnimatePresence, motion } from 'framer-motion'
+import { FormEvent, useEffect, useState, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import type { AuditResult } from '@/types/audit'
+import type { QuestionAnswers } from '@/lib/openai-client'
+import { MODEL_OPTIONS, DEFAULT_MODEL } from '@/config/openai'
 
-type Mode = "choice" | "audit" | "questions" | "results";
+type Mode = 'choice' | 'audit' | 'questions' | 'results'
 
 function UtvarderaPageContent() {
-  const searchParams = useSearchParams();
-  const [mounted, setMounted] = useState(false);
-  const [mode, setMode] = useState<Mode>("choice");
-  const [url, setUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [abortController, setAbortController] =
-    useState<AbortController | null>(null);
+  const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
+  const [mode, setMode] = useState<Mode>('choice')
+  const [url, setUrl] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
   const [loadingStage, setLoadingStage] = useState<
-    "connecting" | "scraping" | "analyzing" | "generating"
-  >("connecting");
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<AuditResult | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
-  const [useWebSearch, setUseWebSearch] = useState(false);
+    'connecting' | 'scraping' | 'analyzing' | 'generating'
+  >('connecting')
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<AuditResult | null>(null)
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+  const [useWebSearch, setUseWebSearch] = useState(false)
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; type?: ToastType; duration?: number }>
-  >([]);
+  >([])
   const [answers, setAnswers] = useState<QuestionAnswers>({
-    industry: "",
-    industryDescription: "",
-    purpose: "",
-    audience: "",
+    industry: '',
+    industryDescription: '',
+    purpose: '',
+    audience: '',
     content: [],
     features: [],
-    budget: "",
-    timeline: "",
-  });
+    budget: '',
+    timeline: '',
+  })
   const selectedModelMeta =
-    MODEL_OPTIONS.find((option) => option.id === selectedModel) ?? MODEL_OPTIONS[0];
+    MODEL_OPTIONS.find((option) => option.id === selectedModel) ?? MODEL_OPTIONS[0]
 
   // Toast notification helper
-  const showToast = useCallback(
-    (message: string, type: ToastType = "info", duration?: number) => {
-      const id = `toast-${Date.now()}-${Math.random()}`;
-      setToasts((prev) => [...prev, { id, message, type, duration }]);
-    },
-    []
-  );
+  const showToast = useCallback((message: string, type: ToastType = 'info', duration?: number) => {
+    const id = `toast-${Date.now()}-${Math.random()}`
+    setToasts((prev) => [...prev, { id, message, type, duration }])
+  }, [])
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
+    setToasts((prev) => prev.filter((toast) => toast.id !== id))
+  }, [])
 
   // URL normalization helper
   const normalizeUrl = useCallback((urlInput: string): string => {
-    let normalized = urlInput.trim();
+    let normalized = urlInput.trim()
     if (!normalized) {
-      throw new Error("URL kan inte vara tom");
+      throw new Error('URL kan inte vara tom')
     }
 
     // Remove any leading/trailing whitespace and slashes
-    normalized = normalized.trim().replace(/^\/+|\/+$/g, "");
+    normalized = normalized.trim().replace(/^\/+|\/+$/g, '')
 
     // Auto-add https:// if missing protocol
     if (!normalized.match(/^https?:\/\//i)) {
-      normalized = `https://${normalized}`;
+      normalized = `https://${normalized}`
     }
 
     // Validate URL format
     try {
-      const urlObj = new URL(normalized);
+      const urlObj = new URL(normalized)
       // Ensure we have a valid hostname
       if (!urlObj.hostname || urlObj.hostname.length === 0) {
-        throw new Error("Ogiltig URL - saknar domännamn");
+        throw new Error('Ogiltig URL - saknar domännamn')
       }
-      return normalized;
+      return normalized
     } catch (error) {
       if (error instanceof TypeError) {
-        throw new Error("Ogiltig URL-format. Ange t.ex. 'exempel.se' eller 'https://exempel.se'");
+        throw new Error("Ogiltig URL-format. Ange t.ex. 'exempel.se' eller 'https://exempel.se'")
       }
-      throw error;
+      throw error
     }
-  }, []);
+  }, [])
 
   // Auto-save result to localStorage
   useEffect(() => {
     if (result) {
       try {
-        const savedResults = JSON.parse(
-          localStorage.getItem("audit-results") || "[]"
-        );
+        const savedResults = JSON.parse(localStorage.getItem('audit-results') || '[]')
         const newResult = {
           ...result,
           savedAt: new Date().toISOString(),
-        };
+        }
         // Keep only last 5 results
-        const updatedResults = [newResult, ...savedResults].slice(0, 5);
-        localStorage.setItem("audit-results", JSON.stringify(updatedResults));
+        const updatedResults = [newResult, ...savedResults].slice(0, 5)
+        localStorage.setItem('audit-results', JSON.stringify(updatedResults))
       } catch {
         // Silently fail if localStorage is not available
       }
     }
-  }, [result]);
-
+  }, [result])
 
   useEffect(() => {
     // Use requestAnimationFrame to ensure DOM is ready
     requestAnimationFrame(() => {
-      setMounted(true);
-    });
-  }, []);
+      setMounted(true)
+    })
+  }, [])
 
   // Handle URL parameters from sajtgranskning page
   useEffect(() => {
-    if (!mounted || isLoading) return;
+    if (!mounted || isLoading) return
 
-    const urlParam = searchParams.get("url");
-    const modeParam = searchParams.get("mode");
+    const urlParam = searchParams.get('url')
+    const modeParam = searchParams.get('mode')
 
-    if (modeParam === "audit" && urlParam) {
+    if (modeParam === 'audit' && urlParam) {
       try {
-        const decodedUrl = decodeURIComponent(urlParam);
+        const decodedUrl = decodeURIComponent(urlParam)
         // Normalize URL before setting
-        const normalizedUrl = normalizeUrl(decodedUrl);
-        setUrl(normalizedUrl);
-        setMode("audit");
+        const normalizedUrl = normalizeUrl(decodedUrl)
+        setUrl(normalizedUrl)
+        setMode('audit')
         // Auto-submit after a short delay to allow UI to render
         const timeoutId = setTimeout(() => {
-          const form = document.querySelector('form') as HTMLFormElement | null;
+          const form = document.querySelector('form') as HTMLFormElement | null
           if (form) {
-            form.requestSubmit();
+            form.requestSubmit()
           }
-        }, 200);
+        }, 200)
 
-        return () => clearTimeout(timeoutId);
+        return () => clearTimeout(timeoutId)
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Ogiltig URL i länken");
-        setMode("audit");
+        setError(error instanceof Error ? error.message : 'Ogiltig URL i länken')
+        setMode('audit')
       }
     }
-  }, [mounted, searchParams, normalizeUrl, isLoading]);
+  }, [mounted, searchParams, normalizeUrl, isLoading])
 
   const handleUrlSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     // Validate and normalize URL
-    let normalizedUrl: string;
+    let normalizedUrl: string
     try {
-      normalizedUrl = normalizeUrl(url);
+      normalizedUrl = normalizeUrl(url)
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Ogiltig URL");
-      return;
+      setError(error instanceof Error ? error.message : 'Ogiltig URL')
+      return
     }
 
-    setIsLoading(true);
-    setLoadingStage("connecting");
-    setLoadingProgress(0);
+    setIsLoading(true)
+    setLoadingStage('connecting')
+    setLoadingProgress(0)
 
     // Simulate progress updates
     const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => Math.min(prev + 5, 90));
-    }, 500);
+      setLoadingProgress((prev) => Math.min(prev + 5, 90))
+    }, 500)
 
     // Create AbortController for timeout handling
-    const controller = new AbortController();
-    setAbortController(controller);
-    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+    const controller = new AbortController()
+    setAbortController(controller)
+    const timeoutId = setTimeout(() => controller.abort(), 300000) // 5 minute timeout
 
     // Stage timers with cleanup (only for visual stages)
-    const stageTimeouts: NodeJS.Timeout[] = [];
+    const stageTimeouts: NodeJS.Timeout[] = []
 
     try {
       // Stage 1: Connecting
-      setLoadingStage("connecting");
-      setLoadingProgress(10);
+      setLoadingStage('connecting')
+      setLoadingProgress(10)
 
       // Stage 2: Scraping
       const scrapingTimer = setTimeout(() => {
         if (!controller.signal.aborted) {
-          setLoadingStage("scraping");
-          setLoadingProgress(30);
+          setLoadingStage('scraping')
+          setLoadingProgress(30)
         }
-      }, 1000);
-      stageTimeouts.push(scrapingTimer);
+      }, 1000)
+      stageTimeouts.push(scrapingTimer)
 
       // Stage 3: Analyzing
       const analyzingTimer = setTimeout(() => {
         if (!controller.signal.aborted) {
-          setLoadingStage("analyzing");
-          setLoadingProgress(60);
+          setLoadingStage('analyzing')
+          setLoadingProgress(60)
         }
-      }, 3000);
-      stageTimeouts.push(analyzingTimer);
+      }, 3000)
+      stageTimeouts.push(analyzingTimer)
 
-      const response = await fetch("/api/audit", {
-        method: "POST",
+      const response = await fetch('/api/audit', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mode: "audit",
+          mode: 'audit',
           url: normalizedUrl,
           model: selectedModel,
           webSearch: useWebSearch,
         }),
         signal: controller.signal,
-      });
+      })
 
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
       // Stage 4: Generating
-      setLoadingStage("generating");
-      setLoadingProgress(85);
+      setLoadingStage('generating')
+      setLoadingProgress(85)
 
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Okänt fel" }));
+        const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }))
         throw new Error(
-          errorData.error ||
-            `Server error: ${response.status} ${response.statusText}`
-        );
+          errorData.error || `Server error: ${response.status} ${response.statusText}`
+        )
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!data || !data.result) {
-        throw new Error("Kunde inte hämta resultat från servern");
+        throw new Error('Kunde inte hämta resultat från servern')
       }
 
       if (!data.success) {
-        throw new Error(data.error || "Analysen misslyckades");
+        throw new Error(data.error || 'Analysen misslyckades')
       }
 
-      setLoadingProgress(100);
+      setLoadingProgress(100)
       setTimeout(() => {
         if (!controller.signal.aborted) {
-          setResult(data.result);
-          setMode("results");
-          showToast("Analysen är klar! 🎉", "success");
+          setResult(data.result)
+          setMode('results')
+          showToast('Analysen är klar! 🎉', 'success')
         }
-      }, 500);
+      }, 500)
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
+        if (error.name === 'AbortError') {
           setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
-        } else if (
-          error.message.includes("timeout") ||
-          error.message.includes("Timeout")
-        ) {
+            'Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå.'
+          )
+        } else if (error.message.includes('timeout') || error.message.includes('Timeout')) {
           setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
+            'Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå.'
+          )
         } else {
-          setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          setError(error.message || 'Ett oväntat fel uppstod. Försök igen.')
         }
       } else {
-        setError("Ett oväntat fel uppstod. Försök igen.");
+        setError('Ett oväntat fel uppstod. Försök igen.')
       }
     } finally {
       // Cleanup all timers
-      clearInterval(progressInterval);
-      clearTimeout(timeoutId);
-      stageTimeouts.forEach((timer) => clearTimeout(timer));
-      setIsLoading(false);
-      setLoadingProgress(0);
-      setAbortController(null);
+      clearInterval(progressInterval)
+      clearTimeout(timeoutId)
+      stageTimeouts.forEach((timer) => clearTimeout(timer))
+      setIsLoading(false)
+      setLoadingProgress(0)
+      setAbortController(null)
     }
-  };
+  }
 
   const handleQuestionSubmit = async () => {
-    setError(null);
-    setIsLoading(true);
-    setLoadingStage("connecting");
-    setLoadingProgress(0);
+    setError(null)
+    setIsLoading(true)
+    setLoadingStage('connecting')
+    setLoadingProgress(0)
 
     // Simulate progress
     const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => Math.min(prev + 10, 90));
-    }, 300);
+      setLoadingProgress((prev) => Math.min(prev + 10, 90))
+    }, 300)
 
     // Create AbortController for timeout handling
-    const controller = new AbortController();
-    setAbortController(controller);
-    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+    const controller = new AbortController()
+    setAbortController(controller)
+    const timeoutId = setTimeout(() => controller.abort(), 300000) // 5 minute timeout
 
     try {
-      setLoadingStage("analyzing");
-      setLoadingProgress(30);
+      setLoadingStage('analyzing')
+      setLoadingProgress(30)
 
-      const response = await fetch("/api/audit", {
-        method: "POST",
+      const response = await fetch('/api/audit', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mode: "questions",
+          mode: 'questions',
           answers,
           model: selectedModel,
           webSearch: useWebSearch,
         }),
         signal: controller.signal,
-      });
+      })
 
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
-      setLoadingStage("generating");
-      setLoadingProgress(70);
+      setLoadingStage('generating')
+      setLoadingProgress(70)
 
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Okänt fel" }));
+        const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }))
         throw new Error(
-          errorData.error ||
-            `Server error: ${response.status} ${response.statusText}`
-        );
+          errorData.error || `Server error: ${response.status} ${response.statusText}`
+        )
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       // Validate response structure
-      if (!data || typeof data !== "object") {
-        throw new Error(
-          "Kunde inte hämta resultat från servern - ogiltigt svar"
-        );
+      if (!data || typeof data !== 'object') {
+        throw new Error('Kunde inte hämta resultat från servern - ogiltigt svar')
       }
 
       if (!data.success) {
-        throw new Error(data.error || "Analysen misslyckades");
+        throw new Error(data.error || 'Analysen misslyckades')
       }
 
-      if (!data.result || typeof data.result !== "object") {
-        throw new Error(
-          "Kunde inte hämta resultat från servern - saknar resultat"
-        );
+      if (!data.result || typeof data.result !== 'object') {
+        throw new Error('Kunde inte hämta resultat från servern - saknar resultat')
       }
 
       // Validate result has required fields
       if (!data.result.audit_type || !data.result.cost) {
-        throw new Error(
-          "Kunde inte hämta resultat från servern - ogiltigt resultatformat"
-        );
+        throw new Error('Kunde inte hämta resultat från servern - ogiltigt resultatformat')
       }
 
-      setLoadingProgress(100);
+      setLoadingProgress(100)
 
       // Set result after a short delay for smooth transition
       setTimeout(() => {
-        setResult(data.result);
-        setMode("results");
-        showToast("Analysen är klar! 🎉", "success");
-        setIsLoading(false);
-        setLoadingProgress(0);
-        setAbortController(null);
-      }, 500);
+        setResult(data.result)
+        setMode('results')
+        showToast('Analysen är klar! 🎉', 'success')
+        setIsLoading(false)
+        setLoadingProgress(0)
+        setAbortController(null)
+      }, 500)
 
       // Cleanup timers but not the result timer
-      clearInterval(progressInterval);
-      clearTimeout(timeoutId);
+      clearInterval(progressInterval)
+      clearTimeout(timeoutId)
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
+        if (error.name === 'AbortError') {
           setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
-        } else if (
-          error.message.includes("timeout") ||
-          error.message.includes("Timeout")
-        ) {
+            'Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå.'
+          )
+        } else if (error.message.includes('timeout') || error.message.includes('Timeout')) {
           setError(
-            "Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå."
-          );
+            'Tidsgränsen överskreds. Analysen tog för lång tid. Försök igen eller välj en snabbare analysnivå.'
+          )
         } else {
-          setError(error.message || "Ett oväntat fel uppstod. Försök igen.");
+          setError(error.message || 'Ett oväntat fel uppstod. Försök igen.')
         }
       } else {
-        setError("Ett oväntat fel uppstod. Försök igen.");
+        setError('Ett oväntat fel uppstod. Försök igen.')
       }
     } finally {
       // Ensure cleanup even if error occurs
-      clearInterval(progressInterval);
-      clearTimeout(timeoutId);
-      setIsLoading(false);
-      setLoadingProgress(0);
-      setAbortController(null);
+      clearInterval(progressInterval)
+      clearTimeout(timeoutId)
+      setIsLoading(false)
+      setLoadingProgress(0)
+      setAbortController(null)
     }
-  };
+  }
 
   const handleCancel = () => {
     if (abortController) {
-      abortController.abort();
-      setAbortController(null);
+      abortController.abort()
+      setAbortController(null)
     }
-    setIsLoading(false);
-    setLoadingProgress(0);
-    setLoadingStage("connecting");
-    setError("Analysen avbröts av användaren");
-    showToast("Analysen avbröts", "info");
-  };
+    setIsLoading(false)
+    setLoadingProgress(0)
+    setLoadingStage('connecting')
+    setError('Analysen avbröts av användaren')
+    showToast('Analysen avbröts', 'info')
+  }
 
   const handleCopyLink = useCallback(() => {
-    if (!result) return;
+    if (!result) return
 
     try {
       const resultData = {
@@ -428,33 +403,33 @@ function UtvarderaPageContent() {
         company: result.company,
         auditType: result.audit_type,
         timestamp: new Date().toISOString(),
-      };
-      const encoded = btoa(JSON.stringify(resultData));
-      const link = `${window.location.origin}${window.location.pathname}?result=${encoded}`;
+      }
+      const encoded = btoa(JSON.stringify(resultData))
+      const link = `${window.location.origin}${window.location.pathname}?result=${encoded}`
 
       navigator.clipboard
         .writeText(link)
         .then(() => {
-          showToast("Länk kopierad till urklipp! 🔗", "success", 3000);
+          showToast('Länk kopierad till urklipp! 🔗', 'success', 3000)
         })
         .catch(() => {
-          showToast("Kunde inte kopiera länk", "error");
-        });
+          showToast('Kunde inte kopiera länk', 'error')
+        })
     } catch {
-      showToast("Kunde inte kopiera länk", "error");
+      showToast('Kunde inte kopiera länk', 'error')
     }
-  }, [result, showToast]);
+  }, [result, showToast])
 
   const downloadJSON = () => {
     if (!result) {
-      setError("Inget resultat att ladda ner");
-      return;
+      setError('Inget resultat att ladda ner')
+      return
     }
 
     // Validate result structure before downloading
     if (!result.audit_type || !result.cost) {
-      setError("Resultatet är ogiltigt och kan inte laddas ner");
-      return;
+      setError('Resultatet är ogiltigt och kan inte laddas ner')
+      return
     }
 
     try {
@@ -462,222 +437,219 @@ function UtvarderaPageContent() {
       const jsonData = {
         ...result,
         exported_at: new Date().toISOString(),
-        export_version: "1.0",
-      };
+        export_version: '1.0',
+      }
 
-      const jsonString = JSON.stringify(jsonData, null, 2);
+      const jsonString = JSON.stringify(jsonData, null, 2)
 
       // Validate JSON stringification succeeded
       if (!jsonString || jsonString.length === 0) {
-        throw new Error("Kunde inte serialisera JSON-data");
+        throw new Error('Kunde inte serialisera JSON-data')
       }
 
       const blob = new Blob([jsonString], {
-        type: "application/json;charset=utf-8",
-      });
+        type: 'application/json;charset=utf-8',
+      })
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
 
       // Generate filename with better formatting
-      const dateStr = new Date().toISOString().split("T")[0];
+      const dateStr = new Date().toISOString().split('T')[0]
       const domainPart = result.domain
-        ? result.domain.replace(/\./g, "_").replace(/[^a-zA-Z0-9_]/g, "")
-        : result.audit_type;
-      const filename = `audit-${domainPart}-${dateStr}.json`;
+        ? result.domain.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+        : result.audit_type
+      const filename = `audit-${domainPart}-${dateStr}.json`
 
-      a.download = filename;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
+      a.download = filename
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
 
       // Cleanup
       setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }, 100)
 
-      showToast("JSON-fil nedladdad! 💾", "success");
+      showToast('JSON-fil nedladdad! 💾', 'success')
     } catch (error) {
       const errorMsg =
         error instanceof Error
           ? `Kunde inte ladda ner JSON-filen: ${error.message}`
-          : "Kunde inte ladda ner JSON-filen";
-      setError(errorMsg);
-      showToast(errorMsg, "error");
+          : 'Kunde inte ladda ner JSON-filen'
+      setError(errorMsg)
+      showToast(errorMsg, 'error')
     }
-  };
+  }
 
   const downloadPDF = async () => {
     if (!result) {
-      setError("Inget resultat att ladda ner");
-      return;
+      setError('Inget resultat att ladda ner')
+      return
     }
 
     // Validate result structure before requesting PDF
     if (!result.audit_type || !result.cost) {
-      setError("Resultatet är ogiltigt och kan inte laddas ner som PDF");
-      return;
+      setError('Resultatet är ogiltigt och kan inte laddas ner som PDF')
+      return
     }
 
     // Set loading state for PDF generation
-    setIsLoading(true);
-    setLoadingStage("generating");
-    setLoadingProgress(50);
+    setIsLoading(true)
+    setLoadingStage('generating')
+    setLoadingProgress(50)
 
     try {
       // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for PDF
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout for PDF
 
-      const response = await fetch("/api/audit/pdf", {
-        method: "POST",
+      const response = await fetch('/api/audit/pdf', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ result }),
         signal: controller.signal,
-      });
+      })
 
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Okänt fel" }));
+        const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }))
         throw new Error(
-          errorData.error ||
-            `Server error: ${response.status} ${response.statusText}`
-        );
+          errorData.error || `Server error: ${response.status} ${response.statusText}`
+        )
       }
 
       // Validate response is PDF
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/pdf")) {
-        throw new Error("Servern returnerade inte en PDF-fil");
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/pdf')) {
+        throw new Error('Servern returnerade inte en PDF-fil')
       }
 
-      const blob = await response.blob();
+      const blob = await response.blob()
 
       // Validate blob size
       if (blob.size === 0) {
-        throw new Error("PDF-filen är tom");
+        throw new Error('PDF-filen är tom')
       }
 
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
 
       // Generate filename with better formatting
-      const dateStr = new Date().toISOString().split("T")[0];
+      const dateStr = new Date().toISOString().split('T')[0]
       const domainPart = result.domain
-        ? result.domain.replace(/\./g, "_").replace(/[^a-zA-Z0-9_]/g, "")
-        : result.audit_type;
-      const filename = `audit-${domainPart}-${dateStr}.pdf`;
+        ? result.domain.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+        : result.audit_type
+      const filename = `audit-${domainPart}-${dateStr}.pdf`
 
-      a.download = filename;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
+      a.download = filename
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
 
       // Cleanup
       setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }, 100)
 
-      showToast("PDF nedladdad! 📄", "success");
+      showToast('PDF nedladdad! 📄', 'success')
     } catch (error) {
-      let errorMsg = "Kunde inte ladda ner PDF-fil";
+      let errorMsg = 'Kunde inte ladda ner PDF-fil'
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          errorMsg = "PDF-generering tog för lång tid. Försök igen.";
+        if (error.name === 'AbortError') {
+          errorMsg = 'PDF-generering tog för lång tid. Försök igen.'
         } else {
-          errorMsg = `Kunde inte ladda ner PDF-fil: ${error.message}`;
+          errorMsg = `Kunde inte ladda ner PDF-fil: ${error.message}`
         }
       }
-      setError(errorMsg);
-      showToast(errorMsg, "error");
+      setError(errorMsg)
+      showToast(errorMsg, 'error')
     } finally {
-      setIsLoading(false);
-      setLoadingProgress(0);
-      setLoadingStage("connecting");
+      setIsLoading(false)
+      setLoadingProgress(0)
+      setLoadingStage('connecting')
     }
-  };
+  }
 
   const questions = [
     {
-      id: "industry",
-      title: "Vilken bransch och verksamhet?",
-      type: "combo",
+      id: 'industry',
+      title: 'Vilken bransch och verksamhet?',
+      type: 'combo',
       options: [
-        "E-handel",
-        "Restaurang & Mat",
-        "Konsultverksamhet",
-        "Hälsa & Vård",
-        "Bygg & Entreprenad",
-        "IT & Tech",
-        "Utbildning",
-        "Annat",
+        'E-handel',
+        'Restaurang & Mat',
+        'Konsultverksamhet',
+        'Hälsa & Vård',
+        'Bygg & Entreprenad',
+        'IT & Tech',
+        'Utbildning',
+        'Annat',
       ],
     },
     {
-      id: "purpose",
-      title: "Vad är huvudsyftet med hemsidan?",
-      type: "single",
+      id: 'purpose',
+      title: 'Vad är huvudsyftet med hemsidan?',
+      type: 'single',
       options: [
-        "Generera leads/förfrågningar",
-        "Sälja produkter online",
-        "Informera om tjänster",
-        "Bygga varumärke",
-        "Bokningar/tidsbokning",
+        'Generera leads/förfrågningar',
+        'Sälja produkter online',
+        'Informera om tjänster',
+        'Bygga varumärke',
+        'Bokningar/tidsbokning',
       ],
     },
     {
-      id: "audience",
-      title: "Vem är er målgrupp?",
-      type: "single",
+      id: 'audience',
+      title: 'Vem är er målgrupp?',
+      type: 'single',
       options: [
-        "Privatpersoner lokalt",
-        "Privatpersoner nationellt",
-        "Företag (B2B)",
-        "Både privat och företag",
-        "Internationell publik",
+        'Privatpersoner lokalt',
+        'Privatpersoner nationellt',
+        'Företag (B2B)',
+        'Både privat och företag',
+        'Internationell publik',
       ],
     },
     {
-      id: "content",
-      title: "Vad ska hemsidan visa?",
-      type: "multi",
+      id: 'content',
+      title: 'Vad ska hemsidan visa?',
+      type: 'multi',
       options: [
-        "Produkter/tjänster",
-        "Portfolio/tidigare arbeten",
-        "Blogg/nyheter",
-        "Kontaktinformation",
-        "Om oss/företaget",
-        "Priser",
-        "Kundcase/referenser",
+        'Produkter/tjänster',
+        'Portfolio/tidigare arbeten',
+        'Blogg/nyheter',
+        'Kontaktinformation',
+        'Om oss/företaget',
+        'Priser',
+        'Kundcase/referenser',
       ],
     },
     {
-      id: "features",
-      title: "Vilka funktioner behövs?",
-      type: "multi",
+      id: 'features',
+      title: 'Vilka funktioner behövs?',
+      type: 'multi',
       options: [
-        "Kontaktformulär",
-        "Bokningssystem",
-        "E-handel/varukorg",
-        "Flerspråkighet",
-        "Medlemsinlogg",
-        "Nyhetsbrev",
-        "Sökfunktion",
-        "Live-chatt",
+        'Kontaktformulär',
+        'Bokningssystem',
+        'E-handel/varukorg',
+        'Flerspråkighet',
+        'Medlemsinlogg',
+        'Nyhetsbrev',
+        'Sökfunktion',
+        'Live-chatt',
       ],
     },
-  ];
+  ]
 
-  const currentQ = questions[currentQuestion];
+  const currentQ = questions[currentQuestion]
 
   // Don't render animations until mounted on client
   if (!mounted) {
@@ -695,7 +667,7 @@ function UtvarderaPageContent() {
         </main>
         <Footer />
       </>
-    );
+    )
   }
 
   return (
@@ -710,7 +682,7 @@ function UtvarderaPageContent() {
           secondaryColor="#8b5cf6"
         />
         <AnimatePresence mode="wait">
-          {mode === "choice" && (
+          {mode === 'choice' && (
             <motion.section
               key="choice"
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -731,15 +703,15 @@ function UtvarderaPageContent() {
                       <motion.span
                         className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"
                         animate={{
-                          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                         }}
                         transition={{
                           duration: 4,
                           repeat: Infinity,
-                          ease: "linear",
+                          ease: 'linear',
                         }}
                         style={{
-                          backgroundSize: "200% 200%",
+                          backgroundSize: '200% 200%',
                         }}
                       >
                         AI-driven
@@ -747,11 +719,7 @@ function UtvarderaPageContent() {
                       {/* Fixed height container for typewriter to prevent layout shifts */}
                       <span className="block text-white mt-2 text-4xl md:text-5xl h-[1.2em]">
                         <TypewriterText
-                          texts={[
-                            "Sajtutvärdering",
-                            "Webbplatsanalys",
-                            "Rekommendationer",
-                          ]}
+                          texts={['Sajtutvärdering', 'Webbplatsanalys', 'Rekommendationer']}
                           speed={110}
                           deleteSpeed={60}
                           pauseTime={1500}
@@ -763,9 +731,9 @@ function UtvarderaPageContent() {
                   <div className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto h-[3em] md:h-[2em]">
                     <TypewriterText
                       texts={[
-                        "Professionell analys av din sajt eller helt nya rekommendationer.",
-                        "AI hjälper dig att prioritera och budgetera smart.",
-                        "Showiga effekter kombinerat med affärsinsikter.",
+                        'Professionell analys av din sajt eller helt nya rekommendationer.',
+                        'AI hjälper dig att prioritera och budgetera smart.',
+                        'Showiga effekter kombinerat med affärsinsikter.',
                       ]}
                       className="text-gray-300"
                       speed={70}
@@ -773,7 +741,6 @@ function UtvarderaPageContent() {
                       pauseTime={2500}
                     />
                   </div>
-
                 </motion.div>
 
                 {/* Model Selection - Clean Card Grid */}
@@ -786,7 +753,7 @@ function UtvarderaPageContent() {
                   <motion.h3
                     className="text-sm text-gray-400 mb-4 text-center uppercase tracking-wider font-medium"
                     animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   >
                     Välj analysnivå
                   </motion.h3>
@@ -794,23 +761,48 @@ function UtvarderaPageContent() {
                   {/* Model Cards Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {MODEL_OPTIONS.map((option, index) => {
-                      const isSelected = selectedModel === option.id;
-                      const tierColors: Record<string, { border: string; bg: string; glow: string }> = {
-                        fast: { border: "border-emerald-400/50", bg: "from-emerald-500/10 to-emerald-600/5", glow: "rgba(52, 211, 153, 0.3)" },
-                        balanced: { border: "border-blue-400/50", bg: "from-blue-500/10 to-blue-600/5", glow: "rgba(59, 130, 246, 0.3)" },
-                        premium: { border: "border-purple-400/50", bg: "from-purple-500/10 to-purple-600/5", glow: "rgba(168, 85, 247, 0.3)" },
-                        expert: { border: "border-amber-400/50", bg: "from-amber-500/10 to-amber-600/5", glow: "rgba(251, 191, 36, 0.3)" },
-                      };
-                      const colors = tierColors[option.tier] || tierColors.balanced;
+                      const isSelected = selectedModel === option.id
+                      const tierColors: Record<
+                        string,
+                        { border: string; bg: string; glow: string }
+                      > = {
+                        fast: {
+                          border: 'border-emerald-400/50',
+                          bg: 'from-emerald-500/10 to-emerald-600/5',
+                          glow: 'rgba(52, 211, 153, 0.3)',
+                        },
+                        balanced: {
+                          border: 'border-blue-400/50',
+                          bg: 'from-blue-500/10 to-blue-600/5',
+                          glow: 'rgba(59, 130, 246, 0.3)',
+                        },
+                        premium: {
+                          border: 'border-purple-400/50',
+                          bg: 'from-purple-500/10 to-purple-600/5',
+                          glow: 'rgba(168, 85, 247, 0.3)',
+                        },
+                        expert: {
+                          border: 'border-amber-400/50',
+                          bg: 'from-amber-500/10 to-amber-600/5',
+                          glow: 'rgba(251, 191, 36, 0.3)',
+                        },
+                      }
+                      const colors = tierColors[option.tier] || tierColors.balanced
 
                       // Map tier to emoji and animation
-                      const emojiConfig: Record<string, { emoji: string; animation: "pulse" | "bounce" | "glow" | "rocket" | "brain" }> = {
-                        fast: { emoji: "⚡", animation: "pulse" },
-                        balanced: { emoji: "✨", animation: "glow" },
-                        premium: { emoji: "🚀", animation: "rocket" },
-                        expert: { emoji: "🧠", animation: "brain" },
-                      };
-                      const { emoji, animation } = emojiConfig[option.tier] || emojiConfig.balanced;
+                      const emojiConfig: Record<
+                        string,
+                        {
+                          emoji: string
+                          animation: 'pulse' | 'bounce' | 'glow' | 'rocket' | 'brain'
+                        }
+                      > = {
+                        fast: { emoji: '⚡', animation: 'pulse' },
+                        balanced: { emoji: '✨', animation: 'glow' },
+                        premium: { emoji: '🚀', animation: 'rocket' },
+                        expert: { emoji: '🧠', animation: 'brain' },
+                      }
+                      const { emoji, animation } = emojiConfig[option.tier] || emojiConfig.balanced
 
                       return (
                         <motion.button
@@ -825,10 +817,10 @@ function UtvarderaPageContent() {
                           className={`relative p-4 rounded-xl border-2 transition-all duration-300 text-left backdrop-blur-sm ${
                             isSelected
                               ? `${colors.border} bg-gradient-to-br ${colors.bg}`
-                              : "border-white/10 bg-white/5 hover:border-white/30"
+                              : 'border-white/10 bg-white/5 hover:border-white/30'
                           }`}
                           style={{
-                            boxShadow: isSelected ? `0 0 25px ${colors.glow}` : "none",
+                            boxShadow: isSelected ? `0 0 25px ${colors.glow}` : 'none',
                           }}
                         >
                           {/* Recommended Badge */}
@@ -839,11 +831,11 @@ function UtvarderaPageContent() {
                           )}
 
                           {/* Selection indicator */}
-                          <div className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 transition-all ${
-                            isSelected
-                              ? "bg-white border-white"
-                              : "border-white/30"
-                          }`}>
+                          <div
+                            className={`absolute top-3 right-3 w-4 h-4 rounded-full border-2 transition-all ${
+                              isSelected ? 'bg-white border-white' : 'border-white/30'
+                            }`}
+                          >
                             {isSelected && (
                               <motion.div
                                 initial={{ scale: 0 }}
@@ -870,24 +862,33 @@ function UtvarderaPageContent() {
 
                           {/* Speed & Reasoning indicators */}
                           <div className="flex gap-1 flex-wrap">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                              option.speed === "snabb" ? "bg-green-500/20 text-green-300" :
-                              option.speed === "medium" ? "bg-blue-500/20 text-blue-300" :
-                              "bg-orange-500/20 text-orange-300"
-                            }`}>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-full ${
+                                option.speed === 'snabb'
+                                  ? 'bg-green-500/20 text-green-300'
+                                  : option.speed === 'medium'
+                                    ? 'bg-blue-500/20 text-blue-300'
+                                    : 'bg-orange-500/20 text-orange-300'
+                              }`}
+                            >
                               {option.speed}
                             </span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                              option.reasoning === "minimal" ? "bg-gray-500/20 text-gray-300" :
-                              option.reasoning === "standard" ? "bg-blue-500/20 text-blue-300" :
-                              option.reasoning === "avancerad" ? "bg-purple-500/20 text-purple-300" :
-                              "bg-amber-500/20 text-amber-300"
-                            }`}>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-full ${
+                                option.reasoning === 'minimal'
+                                  ? 'bg-gray-500/20 text-gray-300'
+                                  : option.reasoning === 'standard'
+                                    ? 'bg-blue-500/20 text-blue-300'
+                                    : option.reasoning === 'avancerad'
+                                      ? 'bg-purple-500/20 text-purple-300'
+                                      : 'bg-amber-500/20 text-amber-300'
+                              }`}
+                            >
                               {option.reasoning}
                             </span>
                           </div>
                         </motion.button>
-                      );
+                      )
                     })}
                   </div>
 
@@ -901,7 +902,10 @@ function UtvarderaPageContent() {
                     <p className="text-sm text-gray-300">{selectedModelMeta.description}</p>
                     <div className="flex justify-center gap-2 mt-2 flex-wrap">
                       {selectedModelMeta.capabilities?.map((cap, i) => (
-                        <span key={i} className="text-[11px] px-2 py-1 bg-white/10 rounded-full text-gray-400">
+                        <span
+                          key={i}
+                          className="text-[11px] px-2 py-1 bg-white/10 rounded-full text-gray-400"
+                        >
                           {cap}
                         </span>
                       ))}
@@ -925,25 +929,23 @@ function UtvarderaPageContent() {
                         </div>
                         <p className="text-xs text-gray-500">
                           {useWebSearch
-                            ? "Hämtar aktuell information från webben för mer uppdaterade svar"
-                            : "Av som standard. Aktivera för nyheter, priser eller aktuella händelser"}
+                            ? 'Hämtar aktuell information från webben för mer uppdaterade svar'
+                            : 'Av som standard. Aktivera för nyheter, priser eller aktuella händelser'}
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setUseWebSearch((prev) => !prev)}
                         className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
-                          useWebSearch
-                            ? "bg-green-500"
-                            : "bg-gray-700"
+                          useWebSearch ? 'bg-green-500' : 'bg-gray-700'
                         }`}
                         aria-checked={useWebSearch}
                         role="switch"
                       >
                         <motion.div
                           className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
-                          animate={{ left: useWebSearch ? "calc(100% - 24px)" : "4px" }}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                          animate={{ left: useWebSearch ? 'calc(100% - 24px)' : '4px' }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         />
                       </button>
                     </div>
@@ -954,17 +956,23 @@ function UtvarderaPageContent() {
                   <motion.div
                     initial={{ opacity: 0, x: -50, rotateY: -30, scale: 0.9 }}
                     animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
-                    transition={{ delay: 0.2, duration: 0.8, type: "spring", stiffness: 100, damping: 15 }}
+                    transition={{
+                      delay: 0.2,
+                      duration: 0.8,
+                      type: 'spring',
+                      stiffness: 100,
+                      damping: 15,
+                    }}
                   >
                     <Card3D intensity={18} className="w-full">
                       <motion.button
-                        onClick={() => setMode("audit")}
+                        onClick={() => setMode('audit')}
                         className="group relative p-8 backdrop-blur-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-2 border-blue-400/30 rounded-3xl hover:border-blue-400/60 transition-all duration-300 w-full"
                         whileHover={{ scale: 1.03, y: -5 }}
                         whileTap={{ scale: 0.97 }}
                         style={{
                           boxShadow:
-                            "0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)",
+                            '0 0 30px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.1)',
                         }}
                       >
                         {/* Animated border glow */}
@@ -982,17 +990,15 @@ function UtvarderaPageContent() {
                             transition={{
                               duration: 4,
                               repeat: Infinity,
-                              ease: "easeInOut",
+                              ease: 'easeInOut',
                             }}
                           >
                             🔍
                           </motion.div>
-                          <h2 className="text-2xl font-bold text-white mb-3">
-                            Jag har en hemsida
-                          </h2>
+                          <h2 className="text-2xl font-bold text-white mb-3">Jag har en hemsida</h2>
                           <p className="text-gray-300">
-                            Få en djupgående analys av din befintliga sajt med
-                            konkreta förbättringsförslag
+                            Få en djupgående analys av din befintliga sajt med konkreta
+                            förbättringsförslag
                           </p>
 
                           {/* Animated accent lines */}
@@ -1005,7 +1011,7 @@ function UtvarderaPageContent() {
                             transition={{
                               duration: 2.5,
                               repeat: Infinity,
-                              ease: "easeInOut",
+                              ease: 'easeInOut',
                             }}
                           />
                         </div>
@@ -1016,17 +1022,23 @@ function UtvarderaPageContent() {
                   <motion.div
                     initial={{ opacity: 0, x: 50, rotateY: 30, scale: 0.9 }}
                     animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8, type: "spring", stiffness: 100, damping: 15 }}
+                    transition={{
+                      delay: 0.3,
+                      duration: 0.8,
+                      type: 'spring',
+                      stiffness: 100,
+                      damping: 15,
+                    }}
                   >
                     <Card3D intensity={18} className="w-full">
                       <motion.button
-                        onClick={() => setMode("questions")}
+                        onClick={() => setMode('questions')}
                         className="group relative p-8 backdrop-blur-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-3xl hover:border-purple-400/60 transition-all duration-300 w-full"
                         whileHover={{ scale: 1.03, y: -5 }}
                         whileTap={{ scale: 0.97 }}
                         style={{
                           boxShadow:
-                            "0 0 30px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1)",
+                            '0 0 30px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1)',
                         }}
                       >
                         {/* Animated border glow */}
@@ -1045,12 +1057,12 @@ function UtvarderaPageContent() {
                               y: {
                                 duration: 2,
                                 repeat: Infinity,
-                                ease: "easeInOut",
+                                ease: 'easeInOut',
                               },
                               rotate: {
                                 duration: 20,
                                 repeat: Infinity,
-                                ease: "linear",
+                                ease: 'linear',
                               },
                             }}
                           >
@@ -1060,8 +1072,8 @@ function UtvarderaPageContent() {
                             Jag behöver en ny hemsida
                           </h2>
                           <p className="text-gray-300">
-                            Svara på några frågor och få skräddarsydda
-                            rekommendationer för din nya sajt
+                            Svara på några frågor och få skräddarsydda rekommendationer för din nya
+                            sajt
                           </p>
 
                           {/* Animated accent lines */}
@@ -1074,7 +1086,7 @@ function UtvarderaPageContent() {
                             transition={{
                               duration: 2.5,
                               repeat: Infinity,
-                              ease: "easeInOut",
+                              ease: 'easeInOut',
                               delay: 1.5,
                             }}
                           />
@@ -1087,7 +1099,7 @@ function UtvarderaPageContent() {
             </motion.section>
           )}
 
-          {mode === "audit" && !isLoading && (
+          {mode === 'audit' && !isLoading && (
             <motion.section
               key="audit"
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
@@ -1103,7 +1115,7 @@ function UtvarderaPageContent() {
                   transition={{ duration: 0.8 }}
                 >
                   <button
-                    onClick={() => setMode("choice")}
+                    onClick={() => setMode('choice')}
                     className="text-gray-400 hover:text-white mb-8 flex items-center gap-2 transition-colors"
                   >
                     <span>←</span> Tillbaka
@@ -1126,29 +1138,29 @@ function UtvarderaPageContent() {
                         id="url"
                         value={url}
                         onChange={(e) => {
-                          setUrl(e.target.value);
+                          setUrl(e.target.value)
                         }}
                         onBlur={(e) => {
-                          let value = e.target.value.trim();
+                          let value = e.target.value.trim()
                           if (!value) {
-                            setUrl("");
-                            return;
+                            setUrl('')
+                            return
                           }
                           // Remove any leading/trailing whitespace
-                          value = value.trim();
+                          value = value.trim()
                           // Auto-add https:// if missing protocol
                           if (value && !value.match(/^https?:\/\//i)) {
                             // Remove any leading slashes
-                            value = value.replace(/^\/+/, "");
-                            value = `https://${value}`;
+                            value = value.replace(/^\/+/, '')
+                            value = `https://${value}`
                           }
                           // Basic URL validation
                           try {
-                            new URL(value);
-                            setUrl(value);
+                            new URL(value)
+                            setUrl(value)
                           } catch {
                             // Invalid URL, but let user continue typing
-                            setUrl(value);
+                            setUrl(value)
                           }
                         }}
                         placeholder="https://exempel.se eller exempel.se"
@@ -1170,9 +1182,7 @@ function UtvarderaPageContent() {
                         className="p-4 backdrop-blur-xl bg-red-500/20 border border-red-400/30 text-red-200 rounded-xl shadow-lg"
                       >
                         <div className="flex items-start gap-3">
-                          <span className="text-red-400 text-xl flex-shrink-0">
-                            ⚠️
-                          </span>
+                          <span className="text-red-400 text-xl flex-shrink-0">⚠️</span>
                           <div className="flex-1">
                             <p className="font-medium">{error}</p>
                             <button
@@ -1219,11 +1229,11 @@ function UtvarderaPageContent() {
                     transition={{ delay: 0.6, duration: 0.5 }}
                     whileHover={{
                       scale: 1.02,
-                      borderColor: "rgba(255, 255, 255, 0.3)",
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
                     }}
                     style={{
                       boxShadow:
-                        "0 0 30px rgba(59, 130, 246, 0.1), inset 0 0 20px rgba(59, 130, 246, 0.05)",
+                        '0 0 30px rgba(59, 130, 246, 0.1), inset 0 0 20px rgba(59, 130, 246, 0.05)',
                     }}
                   >
                     <h3 className="font-semibold text-white mb-4 text-lg flex items-center gap-2">
@@ -1232,7 +1242,7 @@ function UtvarderaPageContent() {
                         transition={{
                           duration: 4,
                           repeat: Infinity,
-                          ease: "linear",
+                          ease: 'linear',
                         }}
                       >
                         ⚙️
@@ -1241,11 +1251,11 @@ function UtvarderaPageContent() {
                     </h3>
                     <ul className="space-y-3">
                       {[
-                        { icon: "🔍", text: "SEO och sökbarhet" },
-                        { icon: "💫", text: "Användarupplevelse (UX)" },
-                        { icon: "📝", text: "Innehållskvalitet" },
-                        { icon: "⚡", text: "Prestanda och laddningstider" },
-                        { icon: "♿", text: "Tillgänglighet" },
+                        { icon: '🔍', text: 'SEO och sökbarhet' },
+                        { icon: '💫', text: 'Användarupplevelse (UX)' },
+                        { icon: '📝', text: 'Innehållskvalitet' },
+                        { icon: '⚡', text: 'Prestanda och laddningstider' },
+                        { icon: '♿', text: 'Tillgänglighet' },
                       ].map((item, i) => (
                         <motion.li
                           key={i}
@@ -1253,7 +1263,7 @@ function UtvarderaPageContent() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.7 + i * 0.1 }}
-                          whileHover={{ x: 5, color: "#fff" }}
+                          whileHover={{ x: 5, color: '#fff' }}
                         >
                           <motion.span
                             animate={{ scale: [1, 1.2, 1] }}
@@ -1275,7 +1285,7 @@ function UtvarderaPageContent() {
             </motion.section>
           )}
 
-          {mode === "audit" && isLoading && (
+          {mode === 'audit' && isLoading && (
             <motion.section
               key="loading"
               initial={{ opacity: 0 }}
@@ -1293,7 +1303,7 @@ function UtvarderaPageContent() {
             </motion.section>
           )}
 
-          {mode === "questions" && isLoading && (
+          {mode === 'questions' && isLoading && (
             <motion.section
               key="questions-loading"
               initial={{ opacity: 0 }}
@@ -1311,7 +1321,7 @@ function UtvarderaPageContent() {
             </motion.section>
           )}
 
-          {mode === "questions" && !isLoading && (
+          {mode === 'questions' && !isLoading && (
             <motion.section
               key="questions"
               initial={{ opacity: 0, x: -50, scale: 0.95 }}
@@ -1319,9 +1329,9 @@ function UtvarderaPageContent() {
               exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{
                 duration: 0.5,
-                ease: [0.25, 0.1, 0.25, 1]
+                ease: [0.25, 0.1, 0.25, 1],
               }}
-              style={{ willChange: "transform, opacity" }}
+              style={{ willChange: 'transform, opacity' }}
               className="relative min-h-screen py-24 md:py-32 overflow-hidden flex items-center justify-center"
             >
               <div className="container mx-auto px-6 relative z-10 max-w-2xl">
@@ -1334,9 +1344,9 @@ function UtvarderaPageContent() {
                     <button
                       onClick={() => {
                         if (currentQuestion === 0) {
-                          setMode("choice");
+                          setMode('choice')
                         } else {
-                          setCurrentQuestion(currentQuestion - 1);
+                          setCurrentQuestion(currentQuestion - 1)
                         }
                       }}
                       className="text-gray-400 hover:text-white flex items-center gap-2 transition-colors"
@@ -1352,27 +1362,25 @@ function UtvarderaPageContent() {
                     <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden backdrop-blur-sm">
                       <motion.div
                         className="bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 h-full rounded-full relative"
-                        initial={{ width: "0%" }}
+                        initial={{ width: '0%' }}
                         animate={{
-                          width: `${
-                            ((currentQuestion + 1) / questions.length) * 100
-                          }%`,
+                          width: `${((currentQuestion + 1) / questions.length) * 100}%`,
                         }}
                         transition={{
                           duration: 0.5,
-                          ease: [0.25, 0.1, 0.25, 1]
+                          ease: [0.25, 0.1, 0.25, 1],
                         }}
-                        style={{ willChange: "width" }}
+                        style={{ willChange: 'width' }}
                       >
                         <motion.div
                           animate={{ x: ['-100%', '100%'] }}
-                          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
                           style={{ width: '40%' }}
                         />
                         <motion.div
                           animate={{ opacity: [0.3, 0.6, 0.3] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-full"
                         />
                       </motion.div>
@@ -1387,15 +1395,15 @@ function UtvarderaPageContent() {
                       exit={{ opacity: 0, x: -50, scale: 0.95 }}
                       transition={{
                         duration: 0.4,
-                        ease: [0.25, 0.1, 0.25, 1]
+                        ease: [0.25, 0.1, 0.25, 1],
                       }}
-                      style={{ willChange: "transform, opacity" }}
+                      style={{ willChange: 'transform, opacity' }}
                     >
                       <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
                         {currentQ.title}
                       </h2>
 
-                      {currentQ.id === "industry" && (
+                      {currentQ.id === 'industry' && (
                         <div className="space-y-4">
                           <select
                             value={answers.industry}
@@ -1411,11 +1419,7 @@ function UtvarderaPageContent() {
                               Välj bransch...
                             </option>
                             {currentQ.options?.map((opt) => (
-                              <option
-                                key={opt}
-                                value={opt}
-                                className="bg-black"
-                              >
+                              <option key={opt} value={opt} className="bg-black">
                                 {opt}
                               </option>
                             ))}
@@ -1435,79 +1439,61 @@ function UtvarderaPageContent() {
                         </div>
                       )}
 
-                      {currentQ.type === "single" &&
-                        currentQ.id !== "industry" && (
-                          <div className="space-y-3">
-                            {currentQ.options?.map((option) => (
-                              <label
-                                key={option}
-                                className="block cursor-pointer"
+                      {currentQ.type === 'single' && currentQ.id !== 'industry' && (
+                        <div className="space-y-3">
+                          {currentQ.options?.map((option) => (
+                            <label key={option} className="block cursor-pointer">
+                              <input
+                                type="radio"
+                                name={currentQ.id}
+                                value={option}
+                                checked={answers[currentQ.id as keyof QuestionAnswers] === option}
+                                onChange={(e) =>
+                                  setAnswers({
+                                    ...answers,
+                                    [currentQ.id]: e.target.value,
+                                  })
+                                }
+                                className="sr-only"
+                              />
+                              <div
+                                className={`p-4 rounded-xl border transition-colors duration-200 ${
+                                  answers[currentQ.id as keyof QuestionAnswers] === option
+                                    ? 'bg-white/20 border-white/40 text-white'
+                                    : 'bg-white/5 border-white/20 text-gray-300 hover:bg-white/10'
+                                }`}
+                                style={{ willChange: 'background-color, border-color' }}
                               >
-                                <input
-                                  type="radio"
-                                  name={currentQ.id}
-                                  value={option}
-                                  checked={
-                                    answers[
-                                      currentQ.id as keyof QuestionAnswers
-                                    ] === option
-                                  }
-                                  onChange={(e) =>
-                                    setAnswers({
-                                      ...answers,
-                                      [currentQ.id]: e.target.value,
-                                    })
-                                  }
-                                  className="sr-only"
-                                />
-                                <div
-                                  className={`p-4 rounded-xl border transition-colors duration-200 ${
-                                    answers[
-                                      currentQ.id as keyof QuestionAnswers
-                                    ] === option
-                                      ? "bg-white/20 border-white/40 text-white"
-                                      : "bg-white/5 border-white/20 text-gray-300 hover:bg-white/10"
-                                  }`}
-                                  style={{ willChange: "background-color, border-color" }}
-                                >
-                                  {option}
-                                </div>
-                              </label>
-                            ))}
-                          </div>
-                        )}
+                                {option}
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      )}
 
-                      {currentQ.type === "multi" && (
+                      {currentQ.type === 'multi' && (
                         <div className="space-y-3">
                           {currentQ.options?.map((option) => {
-                            const fieldKey = currentQ.id as
-                              | "content"
-                              | "features";
-                            const isChecked =
-                              answers[fieldKey].includes(option);
+                            const fieldKey = currentQ.id as 'content' | 'features'
+                            const isChecked = answers[fieldKey].includes(option)
                             return (
-                              <label
-                                key={option}
-                                className="block cursor-pointer"
-                              >
+                              <label key={option} className="block cursor-pointer">
                                 <input
                                   type="checkbox"
                                   value={option}
                                   checked={isChecked}
                                   onChange={(e) => {
-                                    const currentValues = answers[fieldKey];
+                                    const currentValues = answers[fieldKey]
                                     if (e.target.checked) {
                                       setAnswers({
                                         ...answers,
                                         [fieldKey]: [...currentValues, option],
-                                      });
+                                      })
                                     } else {
                                       setAnswers({
                                         ...answers,
-                                        [fieldKey]: currentValues.filter(
-                                          (v) => v !== option
-                                        ),
-                                      });
+                                        [fieldKey]: currentValues.filter((v) => v !== option),
+                                      })
                                     }
                                   }}
                                   className="sr-only"
@@ -1515,18 +1501,16 @@ function UtvarderaPageContent() {
                                 <div
                                   className={`p-4 rounded-xl border transition-colors duration-200 ${
                                     isChecked
-                                      ? "bg-white/20 border-white/40 text-white"
-                                      : "bg-white/5 border-white/20 text-gray-300 hover:bg-white/10"
+                                      ? 'bg-white/20 border-white/40 text-white'
+                                      : 'bg-white/5 border-white/20 text-gray-300 hover:bg-white/10'
                                   }`}
-                                  style={{ willChange: "background-color, border-color" }}
+                                  style={{ willChange: 'background-color, border-color' }}
                                 >
-                                  <span className="mr-2">
-                                    {isChecked ? "✓" : "○"}
-                                  </span>
+                                  <span className="mr-2">{isChecked ? '✓' : '○'}</span>
                                   {option}
                                 </div>
                               </label>
-                            );
+                            )
                           })}
                         </div>
                       )}
@@ -1536,24 +1520,23 @@ function UtvarderaPageContent() {
                   <div className="mt-8 flex justify-end">
                     <NeonButton
                       onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        e.preventDefault()
+                        e.stopPropagation()
                         if (currentQuestion < questions.length - 1) {
-                          setCurrentQuestion((prev) => prev + 1);
+                          setCurrentQuestion((prev) => prev + 1)
                         } else {
-                          handleQuestionSubmit();
+                          handleQuestionSubmit()
                         }
                       }}
                       disabled={
                         isLoading ||
-                        (currentQ.id === "industry"
+                        (currentQ.id === 'industry'
                           ? !answers.industry || !answers.industryDescription.trim()
-                          : currentQ.type === "single"
-                          ? !answers[currentQ.id as keyof QuestionAnswers]
-                          : currentQ.type === "multi"
-                          ? answers[currentQ.id as "content" | "features"]
-                              .length === 0
-                          : false)
+                          : currentQ.type === 'single'
+                            ? !answers[currentQ.id as keyof QuestionAnswers]
+                            : currentQ.type === 'multi'
+                              ? answers[currentQ.id as 'content' | 'features'].length === 0
+                              : false)
                       }
                       variant="purple"
                       size="lg"
@@ -1581,7 +1564,7 @@ function UtvarderaPageContent() {
                             transition={{
                               duration: 2,
                               repeat: Infinity,
-                              ease: "linear",
+                              ease: 'linear',
                             }}
                           >
                             ✨
@@ -1600,9 +1583,7 @@ function UtvarderaPageContent() {
                       className="mt-4 p-4 backdrop-blur-xl bg-red-500/20 border border-red-400/30 text-red-200 rounded-xl shadow-lg"
                     >
                       <div className="flex items-start gap-3">
-                        <span className="text-red-400 text-xl flex-shrink-0">
-                          ⚠️
-                        </span>
+                        <span className="text-red-400 text-xl flex-shrink-0">⚠️</span>
                         <div className="flex-1">
                           <p className="font-medium">{error}</p>
                           <button
@@ -1620,7 +1601,7 @@ function UtvarderaPageContent() {
             </motion.section>
           )}
 
-          {mode === "results" && result && (
+          {mode === 'results' && result && (
             <motion.section
               key="results"
               initial={{ opacity: 0, y: 30, scale: 0.98 }}
@@ -1639,21 +1620,21 @@ function UtvarderaPageContent() {
                   {/* Back Button with animation */}
                   <motion.button
                     onClick={() => {
-                      setMode("choice");
-                      setResult(null);
-                      setError(null);
-                      setUrl("");
-                      setCurrentQuestion(0);
+                      setMode('choice')
+                      setResult(null)
+                      setError(null)
+                      setUrl('')
+                      setCurrentQuestion(0)
                       setAnswers({
-                        industry: "",
-                        industryDescription: "",
-                        purpose: "",
-                        audience: "",
+                        industry: '',
+                        industryDescription: '',
+                        purpose: '',
+                        audience: '',
                         content: [],
                         features: [],
-                        budget: "",
-                        timeline: "",
-                      });
+                        budget: '',
+                        timeline: '',
+                      })
                     }}
                     className="text-gray-400 hover:text-white mb-8 flex items-center gap-2 transition-all"
                     whileHover={{ scale: 1.05, x: -5 }}
@@ -1674,7 +1655,13 @@ function UtvarderaPageContent() {
                     <motion.div
                       initial={{ opacity: 0, y: 30, scale: 0.95, rotateX: -10 }}
                       animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                      transition={{ duration: 1.2, delay: 0.2, type: "spring", stiffness: 100, damping: 15 }}
+                      transition={{
+                        duration: 1.2,
+                        delay: 0.2,
+                        type: 'spring',
+                        stiffness: 100,
+                        damping: 15,
+                      }}
                       className="mb-12 relative"
                     >
                       {/* Background glow effect */}
@@ -1687,7 +1674,7 @@ function UtvarderaPageContent() {
                         transition={{
                           duration: 4,
                           repeat: Infinity,
-                          ease: "easeInOut",
+                          ease: 'easeInOut',
                         }}
                       />
 
@@ -1695,23 +1682,18 @@ function UtvarderaPageContent() {
                         <motion.h2
                           className="text-3xl md:text-4xl font-bold text-white mb-2"
                           animate={{
-                            backgroundPosition: [
-                              "0% 50%",
-                              "100% 50%",
-                              "0% 50%",
-                            ],
+                            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                           }}
                           transition={{
                             duration: 5,
                             repeat: Infinity,
-                            ease: "linear",
+                            ease: 'linear',
                           }}
                           style={{
-                            background:
-                              "linear-gradient(90deg, #fff, #3b82f6, #a855f7, #fff)",
-                            backgroundSize: "200% 100%",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
+                            background: 'linear-gradient(90deg, #fff, #3b82f6, #a855f7, #fff)',
+                            backgroundSize: '200% 100%',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
                           }}
                         >
                           Interaktiv 3D-visualisering
@@ -1734,7 +1716,7 @@ function UtvarderaPageContent() {
                         transition={{
                           duration: 5,
                           repeat: Infinity,
-                          ease: "easeInOut",
+                          ease: 'easeInOut',
                         }}
                       >
                         <Audit3DVisualization scores={result.audit_scores} />
@@ -1747,7 +1729,7 @@ function UtvarderaPageContent() {
                     result={result}
                     onDownloadPDF={downloadPDF}
                     onDownloadJSON={downloadJSON}
-                    isGeneratingPDF={isLoading && loadingStage === "generating"}
+                    isGeneratingPDF={isLoading && loadingStage === 'generating'}
                     onCopyLink={handleCopyLink}
                   />
                 </motion.div>
@@ -1760,7 +1742,7 @@ function UtvarderaPageContent() {
       <Footer />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
-  );
+  )
 }
 
 export default function UtvarderaPage() {
@@ -1774,5 +1756,5 @@ export default function UtvarderaPage() {
     >
       <UtvarderaPageContent />
     </Suspense>
-  );
+  )
 }

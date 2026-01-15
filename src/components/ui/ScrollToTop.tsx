@@ -1,29 +1,29 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 export default function ScrollToTop() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     const toggleVisibility = () => {
       // Use window.scrollY for better compatibility (pageYOffset is deprecated)
-      const scrollY = window.scrollY || window.pageYOffset || 0;
-      setIsVisible(scrollY > 300);
-    };
+      const scrollY = window.scrollY || window.pageYOffset || 0
+      setIsVisible(scrollY > 300)
+    }
 
-    window.addEventListener('scroll', toggleVisibility, { passive: true });
+    window.addEventListener('scroll', toggleVisibility, { passive: true })
 
-    return () => window.removeEventListener('scroll', toggleVisibility);
-  }, []);
+    return () => window.removeEventListener('scroll', toggleVisibility)
+  }, [])
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
-    });
-  };
+    })
+  }
 
   return (
     <AnimatePresence>
@@ -55,5 +55,5 @@ export default function ScrollToTop() {
         </motion.button>
       )}
     </AnimatePresence>
-  );
+  )
 }

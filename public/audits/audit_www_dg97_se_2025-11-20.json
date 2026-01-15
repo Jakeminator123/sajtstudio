@@ -8,14 +8,8 @@
     "performance": 50,
     "accessibility": 60
   },
-  "strengths": [
-    "Central location",
-    "Comprehensive offer"
-  ],
-  "issues": [
-    "Slow response time",
-    "Lack of ALT tags"
-  ],
+  "strengths": ["Central location", "Comprehensive offer"],
+  "issues": ["Slow response time", "Lack of ALT tags"],
   "improvements": [
     {
       "item": "Improve site speed",
@@ -44,10 +38,7 @@
     "high": 15000,
     "currency": "SEK"
   },
-  "expected_outcomes": [
-    "Improved SEO rankings",
-    "Better user engagement"
-  ],
+  "expected_outcomes": ["Improved SEO rankings", "Better user engagement"],
   "audit_type": "website_audit",
   "cost": {
     "tokens": 1281,

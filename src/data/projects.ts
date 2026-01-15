@@ -1,20 +1,20 @@
 /**
  * Portfolio Projects Data
- * 
+ *
  * Struktur för portfolio-projekt. Lägg till nya projekt här
  * eller importera från extern källa i framtiden.
  */
 
 export interface Project {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  color: string; // Tailwind color class eller hex
-  image?: string; // Sökväg till bild
-  url?: string; // Extern länk om projektet är live
-  tags: string[];
-  featured: boolean; // Om projektet ska visas på startsidan
+  id: string
+  title: string
+  category: string
+  description: string
+  color: string // Tailwind color class eller hex
+  image?: string // Sökväg till bild
+  url?: string // Extern länk om projektet är live
+  tags: string[]
+  featured: boolean // Om projektet ska visas på startsidan
 }
 
 export const projects: Project[] = [
@@ -32,7 +32,8 @@ export const projects: Project[] = [
     id: '2',
     title: 'Creative Agency',
     category: 'Portfolio',
-    description: 'Visuellt imponerande portfoliosajt för kreativt byrå med interaktiva case studies.',
+    description:
+      'Visuellt imponerande portfoliosajt för kreativt byrå med interaktiva case studies.',
     color: 'bg-tertiary',
     image: '/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp',
     tags: ['React', 'Animation', 'Portfolio'],
@@ -52,7 +53,8 @@ export const projects: Project[] = [
     id: '4',
     title: 'Fashion Brand',
     category: 'E-commerce',
-    description: 'Premium fashion e-handel med lookbook, virtual try-on och personaliserad shopping.',
+    description:
+      'Premium fashion e-handel med lookbook, virtual try-on och personaliserad shopping.',
     color: 'bg-tertiary',
     image: '/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp',
     tags: ['E-commerce', 'Fashion', 'AR'],
@@ -98,9 +100,8 @@ export const projects: Project[] = [
     tags: ['Innovation', 'Tech', 'Visualization'],
     featured: false,
   },
-];
+]
 
-export const categories = ['Alla', 'E-commerce', 'Portfolio', 'Web App', 'Business'];
+export const categories = ['Alla', 'E-commerce', 'Portfolio', 'Web App', 'Business']
 
-export const featuredProjects = projects.filter(p => p.featured);
-
+export const featuredProjects = projects.filter((p) => p.featured)

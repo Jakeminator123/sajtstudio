@@ -31,18 +31,21 @@
 ## Förbättringsförslag
 
 ### Förbättra bildoptimering
+
 - **Påverkan:** high
 - **Svårighetsgrad:** medium
 - **Varför:** Minska laddningstider och förbättra prestanda
 - **Hur:** Använd moderna format som WebP och nyttja lazy-loading
 
 ### Implementera bättre kontrast
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** low
 - **Varför:** Förbättra tillgängligheten för användare med nedsatt syn
 - **Hur:** Utvärdera och justera färgpaletten enligt WCAG-standarder
 
 ### Förbättra rubrikhierarki
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** low
 - **Varför:** Förbättra SEO och läsbarhet
@@ -74,9 +77,11 @@
 ## Tekniska rekommendationer
 
 ### Säkerhet
+
 - **Nuläge:** Vissa säkerhetshuvuden saknas
 - **Rekommendation:** Implementera fullständiga säkerhetshuvuden
 - **Implementation:**
+
 ```
 Add CSP, X-Content-Type-Options headers
 ```
@@ -84,12 +89,15 @@ Add CSP, X-Content-Type-Options headers
 ## Prioritetsmatris
 
 ### Snabba vinster (Hög påverkan, Låg insats)
+
 - Implementera lazy-loading av bilder
 
 ### Stora projekt (Hög påverkan, Hög insats)
+
 - Fullständig omstrukturering av rubrikhierarkin
 
 ### Utfyllnadsarbete (Låg påverkan, Låg insats)
+
 - Utvärdera och korrigera kontrastproblem
 
 ## Målgruppsanalys
@@ -140,24 +148,28 @@ Add CSP, X-Content-Type-Options headers
 ## Implementeringsplan
 
 ### PHASE 1
+
 - **Tid:** 1 månad
 - **Leverabler:**
   - Implementera bildoptimering
   - Justera kontraster
 
 ### PHASE 2
+
 - **Tid:** 2 månader
 - **Leverabler:**
   - Förbättra rubrikhierarki
   - Implementera säkerhetshuvuden
 
 ### PHASE 3
+
 - **Tid:** 3 månader
 - **Leverabler:**
   - SEO optimering
   - Integrera nya CMS-funktioner
 
 ### LAUNCH
+
 - **Aktiviteter:**
   - Fullständigt systembyte
   - Användartester
@@ -170,4 +182,3 @@ Add CSP, X-Content-Type-Options headers
   - Ökad användartid
 - **Spårningsupplägg:** Google Analytics, Lighthouse score tracking
 - **Uppföljningsplan:** Månadsvis granskning
-

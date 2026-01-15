@@ -21,12 +21,10 @@
 ### Automatisk läsning
 
 1. **`.cursorrules` läses automatiskt** vid varje Cursor-session
-
    - Denna fil refererar till alla viktiga dokumentationsfiler
    - AI-agenter får automatiskt kontext om var dokumentationen finns
 
 2. **När du nämner nyckelord** som:
-
    - "mobil", "desktop", "responsive"
    - "struktur", "komponenter"
    - "design system", "breakpoints"
@@ -38,7 +36,6 @@
 Om AI-agenter behöver hitta specifik information:
 
 1. **Sök efter filnamn**:
-
    - "MOBILE_DESKTOP_INDEX" → Hitta mobil/desktop-kod
    - "SITE_STRUCTURE" → Hitta projektstruktur
    - "RESPONSIVE_DESIGN_GUIDE" → Hitta responsive patterns
@@ -88,7 +85,6 @@ README.md länkar till alla dokument
 När du lägger till ny funktionalitet:
 
 1. **Uppdatera relevant dokumentation**:
-
    - Ny komponent → Uppdatera `SITE_STRUCTURE.md`
    - Ny mobil/desktop-kod → Uppdatera `MOBILE_DESKTOP_INDEX.md`
    - Nytt responsive pattern → Uppdatera `RESPONSIVE_DESIGN_GUIDE.md`

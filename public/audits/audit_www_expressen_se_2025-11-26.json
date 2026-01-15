@@ -10,11 +10,7 @@
     "security": 85,
     "mobile": 80
   },
-  "strengths": [
-    "Aktuellt och relevant innehåll",
-    "SSL-certifikat implementerat",
-    "Snabb svarstid"
-  ],
+  "strengths": ["Aktuellt och relevant innehåll", "SSL-certifikat implementerat", "Snabb svarstid"],
   "issues": [
     "Tillgänglighetsproblem med kontrast",
     "Långsamma laddningstider för vissa resurser",
@@ -28,9 +24,7 @@
       "why": "Minska laddningstider och förbättra prestanda",
       "how": "Använd moderna format som WebP och nyttja lazy-loading",
       "estimated_time": "2 veckor",
-      "technologies": [
-        "Image optimization tools"
-      ]
+      "technologies": ["Image optimization tools"]
     },
     {
       "item": "Implementera bättre kontrast",
@@ -39,9 +33,7 @@
       "why": "Förbättra tillgängligheten för användare med nedsatt syn",
       "how": "Utvärdera och justera färgpaletten enligt WCAG-standarder",
       "estimated_time": "1 vecka",
-      "technologies": [
-        "CSS adjustments"
-      ]
+      "technologies": ["CSS adjustments"]
     },
     {
       "item": "Förbättra rubrikhierarki",
@@ -50,9 +42,7 @@
       "why": "Förbättra SEO och läsbarhet",
       "how": "Se över och justera HTML-strukturen för användning av korrekta h-taggar",
       "estimated_time": "1 vecka",
-      "technologies": [
-        "HTML"
-      ]
+      "technologies": ["HTML"]
     }
   ],
   "budget_estimate": {
@@ -75,10 +65,7 @@
     "https_status": "Active and valid",
     "headers_analysis": "Some security headers missing",
     "cookie_policy": "Needs stronger policies",
-    "vulnerabilities": [
-      "Lack of Content Security Policy",
-      "X-Content-Type-Options not set"
-    ]
+    "vulnerabilities": ["Lack of Content Security Policy", "X-Content-Type-Options not set"]
   },
   "technical_recommendations": [
     {
@@ -95,28 +82,14 @@
       "cms": "Headless CMS",
       "hosting": "AWS"
     },
-    "integrations": [
-      "Analytics tools",
-      "SEO optimization tools"
-    ],
-    "security_measures": [
-      "Implement Content Security Policy",
-      "Regular security audits"
-    ]
+    "integrations": ["Analytics tools", "SEO optimization tools"],
+    "security_measures": ["Implement Content Security Policy", "Regular security audits"]
   },
   "priority_matrix": {
-    "quick_wins": [
-      "Implementera lazy-loading av bilder"
-    ],
-    "major_projects": [
-      "Fullständig omstrukturering av rubrikhierarkin"
-    ],
-    "fill_ins": [
-      "Utvärdera och korrigera kontrastproblem"
-    ],
-    "thankless_tasks": [
-      "Ständiga hastighetsoptimeringar"
-    ]
+    "quick_wins": ["Implementera lazy-loading av bilder"],
+    "major_projects": ["Fullständig omstrukturering av rubrikhierarkin"],
+    "fill_ins": ["Utvärdera och korrigera kontrastproblem"],
+    "thankless_tasks": ["Ständiga hastighetsoptimeringar"]
   },
   "target_audience_analysis": {
     "demographics": "Blandad åldersgrupp, främst svensk publik",
@@ -130,66 +103,36 @@
     "unique_strengths": "Bred och aktuell nyhetsportfölj"
   },
   "content_strategy": {
-    "key_pages": [
-      "Nyheter",
-      "Sport",
-      "Nöje"
-    ],
-    "content_types": [
-      "Artiklar",
-      "Videor",
-      "Podcasts"
-    ],
+    "key_pages": ["Nyheter", "Sport", "Nöje"],
+    "content_types": ["Artiklar", "Videor", "Podcasts"],
     "seo_foundation": "Nyckelordsfokuserad innehållsproduktion",
-    "conversion_paths": [
-      "Prenumeration",
-      "Inloggning till premiuminnehåll"
-    ]
+    "conversion_paths": ["Prenumeration", "Inloggning till premiuminnehåll"]
   },
   "design_direction": {
     "style": "Ren och modern design",
     "color_psychology": "Blått och vitt för förtroende",
-    "ui_patterns": [
-      "Sticky navigation",
-      "Infinite scroll"
-    ],
+    "ui_patterns": ["Sticky navigation", "Infinite scroll"],
     "accessibility_level": "WCAG 2.0 AA"
   },
   "implementation_roadmap": {
     "phase_1": {
       "duration": "1 månad",
-      "deliverables": [
-        "Implementera bildoptimering",
-        "Justera kontraster"
-      ]
+      "deliverables": ["Implementera bildoptimering", "Justera kontraster"]
     },
     "phase_2": {
       "duration": "2 månader",
-      "deliverables": [
-        "Förbättra rubrikhierarki",
-        "Implementera säkerhetshuvuden"
-      ]
+      "deliverables": ["Förbättra rubrikhierarki", "Implementera säkerhetshuvuden"]
     },
     "phase_3": {
       "duration": "3 månader",
-      "deliverables": [
-        "SEO optimering",
-        "Integrera nya CMS-funktioner"
-      ]
+      "deliverables": ["SEO optimering", "Integrera nya CMS-funktioner"]
     },
     "launch": {
-      "activities": [
-        "Fullständigt systembyte",
-        "Användartester"
-      ]
+      "activities": ["Fullständigt systembyte", "Användartester"]
     }
   },
   "success_metrics": {
-    "kpis": [
-      "Ökad sidladdningshastighet",
-      "Bättre SEO-rankning",
-      "Ökad användartid"
-    ],
+    "kpis": ["Ökad sidladdningshastighet", "Bättre SEO-rankning", "Ökad användartid"],
     "tracking_setup": "Google Analytics, Lighthouse score tracking",
     "review_schedule": "Månadsvis granskning"
   },

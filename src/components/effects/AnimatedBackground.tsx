@@ -1,88 +1,86 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
+import { motion } from 'framer-motion'
+import { useEffect, useState, useMemo } from 'react'
 
 interface AnimatedBackgroundProps {
-  variant?: "aurora" | "nebula" | "matrix" | "waves";
+  variant?: 'aurora' | 'nebula' | 'matrix' | 'waves'
 }
 
 // Deterministic seed function using golden ratio for consistent values
 function seededRandom(seed: number): number {
-  const x = Math.sin(seed) * 10000;
-  return Math.abs(x - Math.floor(x));
+  const x = Math.sin(seed) * 10000
+  return Math.abs(x - Math.floor(x))
 }
 
-export default function AnimatedBackground({
-  variant = "aurora",
-}: AnimatedBackgroundProps) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [mounted, setMounted] = useState(false);
+export default function AnimatedBackground({ variant = 'aurora' }: AnimatedBackgroundProps) {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [mounted, setMounted] = useState(false)
 
   // Mount check to prevent hydration mismatches
   // Use requestAnimationFrame to avoid setState in effect warning
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       requestAnimationFrame(() => {
-        setMounted(true);
-      });
+        setMounted(true)
+      })
     }
-  }, []);
+  }, [])
 
   // Pre-compute all memoized values at the top level (before any early returns)
   // This ensures hooks are called in the same order every render
   const floatingOrbs = useMemo(() => {
-    if (!mounted) return [];
-    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    if (!mounted) return []
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1920
+    const height = typeof window !== 'undefined' ? window.innerHeight : 1080
     return [...Array(6)].map((_, i) => {
-      const seed = i * 0.618033988749895; // Golden ratio
+      const seed = i * 0.618033988749895 // Golden ratio
       return {
         i,
         seed,
         width,
         height,
-      };
-    });
-  }, [mounted]);
+      }
+    })
+  }, [mounted])
 
   const stars = useMemo(() => {
-    if (!mounted) return [];
+    if (!mounted) return []
     return [...Array(100)].map((_, i) => {
-      const seed = i * 0.618033988749895; // Golden ratio
-      return { i, seed };
-    });
-  }, [mounted]);
+      const seed = i * 0.618033988749895 // Golden ratio
+      return { i, seed }
+    })
+  }, [mounted])
 
   const matrixRain = useMemo(() => {
-    if (!mounted) return [];
-    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    if (!mounted) return []
+    const height = typeof window !== 'undefined' ? window.innerHeight : 1080
     return [...Array(30)].map((_, i) => {
-      const seed = i * 0.618033988749895; // Golden ratio
-      return { i, seed, height };
-    });
-  }, [mounted]);
+      const seed = i * 0.618033988749895 // Golden ratio
+      return { i, seed, height }
+    })
+  }, [mounted])
 
   const particles = useMemo(() => {
-    if (!mounted) return [];
-    const width = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const height = typeof window !== "undefined" ? window.innerHeight : 1080;
+    if (!mounted) return []
+    const width = typeof window !== 'undefined' ? window.innerWidth : 1920
+    const height = typeof window !== 'undefined' ? window.innerHeight : 1080
     return [...Array(20)].map((_, i) => {
-      const seed = i * 0.618033988749895; // Golden ratio
-      return { i, seed, width, height };
-    });
-  }, [mounted]);
+      const seed = i * 0.618033988749895 // Golden ratio
+      return { i, seed, width, height }
+    })
+  }, [mounted])
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mounted]);
+      setMousePos({ x: e.clientX, y: e.clientY })
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [mounted])
 
-  if (variant === "aurora") {
+  if (variant === 'aurora') {
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden">
         {/* Aurora Borealis Effect */}
@@ -91,16 +89,16 @@ export default function AnimatedBackground({
             className="absolute inset-0"
             animate={{
               background: [
-                "radial-gradient(circle at 20% 80%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 80% 20%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 40% 40%, #ffff0040 0%, transparent 50%)",
-                "radial-gradient(circle at 60% 60%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 20% 40%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 80% 80%, #ffff0040 0%, transparent 50%)",
-                "radial-gradient(circle at 50% 50%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 30% 70%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 70% 30%, #ffff0040 0%, transparent 50%)",
-                "radial-gradient(circle at 20% 80%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 80% 20%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 40% 40%, #ffff0040 0%, transparent 50%)",
+                'radial-gradient(circle at 20% 80%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 80% 20%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 40% 40%, #ffff0040 0%, transparent 50%)',
+                'radial-gradient(circle at 60% 60%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 20% 40%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 80% 80%, #ffff0040 0%, transparent 50%)',
+                'radial-gradient(circle at 50% 50%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 30% 70%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 70% 30%, #ffff0040 0%, transparent 50%)',
+                'radial-gradient(circle at 20% 80%, #ff00ff40 0%, transparent 50%), radial-gradient(circle at 80% 20%, #00ffff40 0%, transparent 50%), radial-gradient(circle at 40% 40%, #ffff0040 0%, transparent 50%)',
               ],
             }}
             transition={{
               duration: 10,
               repeat: Infinity,
-              ease: "linear",
+              ease: 'linear',
             }}
           />
           <motion.div
@@ -120,14 +118,7 @@ export default function AnimatedBackground({
               width: seededRandom(seed) * 400 + 200,
               height: seededRandom(seed + 1) * 400 + 200,
               background: `radial-gradient(circle, ${
-                [
-                  "#ff00ff60",
-                  "#00ffff60",
-                  "#ffff0060",
-                  "#ff00aa60",
-                  "#00ff9960",
-                  "#9900ff60",
-                ][i]
+                ['#ff00ff60', '#00ffff60', '#ffff0060', '#ff00aa60', '#00ff9960', '#9900ff60'][i]
               }, transparent)`,
             }}
             animate={{
@@ -146,7 +137,7 @@ export default function AnimatedBackground({
             transition={{
               duration: 20 + i * 5,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -156,7 +147,7 @@ export default function AnimatedBackground({
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg, #ffffff10 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
+            backgroundSize: '50px 50px',
           }}
         />
 
@@ -166,7 +157,7 @@ export default function AnimatedBackground({
             key={`line-${i}`}
             className="absolute h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"
             style={{
-              width: "100%",
+              width: '100%',
               top: `${20 + i * 20}%`,
             }}
             animate={{
@@ -177,15 +168,15 @@ export default function AnimatedBackground({
               duration: 3,
               repeat: Infinity,
               delay: i * 0.5,
-              ease: "linear",
+              ease: 'linear',
             }}
           />
         ))}
       </div>
-    );
+    )
   }
 
-  if (variant === "nebula") {
+  if (variant === 'nebula') {
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden">
         {/* Nebula Clouds */}
@@ -193,15 +184,15 @@ export default function AnimatedBackground({
           className="absolute inset-0"
           animate={{
             background: [
-              "radial-gradient(ellipse at top left, #ff006620, transparent 40%), radial-gradient(ellipse at bottom right, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #00ffff10, transparent 60%)",
-              "radial-gradient(ellipse at top right, #ff006620, transparent 40%), radial-gradient(ellipse at bottom left, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #ff00ff10, transparent 60%)",
-              "radial-gradient(ellipse at top left, #ff006620, transparent 40%), radial-gradient(ellipse at bottom right, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #00ffff10, transparent 60%)",
+              'radial-gradient(ellipse at top left, #ff006620, transparent 40%), radial-gradient(ellipse at bottom right, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #00ffff10, transparent 60%)',
+              'radial-gradient(ellipse at top right, #ff006620, transparent 40%), radial-gradient(ellipse at bottom left, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #ff00ff10, transparent 60%)',
+              'radial-gradient(ellipse at top left, #ff006620, transparent 40%), radial-gradient(ellipse at bottom right, #4a00ff20, transparent 40%), radial-gradient(ellipse at center, #00ffff10, transparent 60%)',
             ],
           }}
           transition={{
             duration: 15,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
 
@@ -228,10 +219,10 @@ export default function AnimatedBackground({
           />
         ))}
       </div>
-    );
+    )
   }
 
-  if (variant === "matrix") {
+  if (variant === 'matrix') {
     return (
       <div className="fixed inset-0 -z-10 overflow-hidden bg-black">
         {/* Matrix Rain */}
@@ -249,14 +240,12 @@ export default function AnimatedBackground({
               duration: seededRandom(seed) * 5 + 5,
               repeat: Infinity,
               delay: seededRandom(seed + 1) * 5,
-              ease: "linear",
+              ease: 'linear',
             }}
           >
             {[...Array(20)].map((_, j) => {
-              const charSeed = seed + j * 0.1;
-              return (
-                <div key={j}>{seededRandom(charSeed) > 0.5 ? "1" : "0"}</div>
-              );
+              const charSeed = seed + j * 0.1
+              return <div key={j}>{seededRandom(charSeed) > 0.5 ? '1' : '0'}</div>
             })}
           </motion.div>
         ))}
@@ -269,7 +258,7 @@ export default function AnimatedBackground({
           }}
         />
       </div>
-    );
+    )
   }
 
   // Waves variant
@@ -284,20 +273,18 @@ export default function AnimatedBackground({
           <motion.path
             key={`wave-${i}`}
             d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z"
-            fill={`rgba(${100 + i * 30}, ${50 + i * 50}, 255, ${
-              0.05 + i * 0.02
-            })`}
+            fill={`rgba(${100 + i * 30}, ${50 + i * 50}, 255, ${0.05 + i * 0.02})`}
             animate={{
               d: [
-                "M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z",
-                "M0,320L48,304C96,288,192,256,288,224C384,192,480,160,576,176C672,192,768,256,864,272C960,288,1056,256,1152,234.7C1248,213,1344,203,1392,197.3L1440,192L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z",
-                "M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z",
+                'M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z',
+                'M0,320L48,304C96,288,192,256,288,224C384,192,480,160,576,176C672,192,768,256,864,272C960,288,1056,256,1152,234.7C1248,213,1344,203,1392,197.3L1440,192L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z',
+                'M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,250.7C1248,256,1344,288,1392,304L1440,320L1440,560L1392,560C1344,560,1248,560,1152,560C1056,560,960,560,864,560C768,560,672,560,576,560C480,560,384,560,288,560C192,560,96,560,48,560L0,560Z',
               ],
             }}
             transition={{
               duration: 10 + i * 2,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: 'easeInOut',
             }}
           />
         ))}
@@ -310,19 +297,16 @@ export default function AnimatedBackground({
           className="absolute w-1 h-1 bg-blue-400 rounded-full"
           animate={{
             x: [seededRandom(seed) * width, seededRandom(seed + 1) * width],
-            y: [
-              seededRandom(seed + 2) * height,
-              seededRandom(seed + 3) * height,
-            ],
+            y: [seededRandom(seed + 2) * height, seededRandom(seed + 3) * height],
             opacity: [0, 1, 0],
           }}
           transition={{
             duration: seededRandom(seed + 4) * 10 + 5,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
       ))}
     </div>
-  );
+  )
 }

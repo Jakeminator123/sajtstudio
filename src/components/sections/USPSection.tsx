@@ -1,60 +1,55 @@
-"use client";
+'use client'
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { useMemo, useRef } from "react";
-import MagneticCTA from "@/components/ui/MagneticCTA";
-import { useContentSection } from "@/hooks/useContent";
-import { useMounted } from "@/hooks/useMounted";
-import { useTheme } from "@/hooks/useTheme";
-import { uspContent as defaultUspContent } from "@/config/content/usps";
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { useMemo, useRef } from 'react'
+import MagneticCTA from '@/components/ui/MagneticCTA'
+import { useContentSection } from '@/hooks/useContent'
+import { useMounted } from '@/hooks/useMounted'
+import { useTheme } from '@/hooks/useTheme'
+import { uspContent as defaultUspContent } from '@/config/content/usps'
 
 // Content structure for CMS integration
 export interface USPContent {
-  title: string;
-  subtitle: string;
-  description: string;
+  title: string
+  subtitle: string
+  description: string
   features: Array<{
-    number: string;
-    title: string;
-    description: string;
-  }>;
-  tagline: string;
+    number: string
+    title: string
+    description: string
+  }>
+  tagline: string
   cta: {
-    text: string;
-    buttonText: string;
-    href: string;
-  };
+    text: string
+    buttonText: string
+    href: string
+  }
 }
 
 interface USPFeatureProps {
-  number: string;
-  title: string;
-  description: string;
-  delay?: number;
+  number: string
+  title: string
+  description: string
+  delay?: number
 }
 
-function USPFeature({
-  number,
-  title,
-  description,
-  delay = 0,
-}: USPFeatureProps) {
-  const ref = useRef(null);
-  const mounted = useMounted();
-  const isInView = useInView(ref, { once: true, margin: "200px" });
+function USPFeature({ number, title, description, delay = 0 }: USPFeatureProps) {
+  const ref = useRef(null)
+  const mounted = useMounted()
+  const isInView = useInView(ref, { once: true, margin: '200px' })
 
   // Scroll-based color animation for title
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start center", "center center", "end center"],
-  });
+    offset: ['start center', 'center center', 'end center'],
+  })
 
   // Use rgba format consistently to avoid hydration mismatch (Framer Motion converts rgb to rgba)
   const titleColor = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    ["rgba(255, 255, 255, 1)", "rgba(255, 0, 51, 1)", "rgba(255, 0, 51, 1)"]
-  );
+    ['rgba(255, 255, 255, 1)', 'rgba(255, 0, 51, 1)', 'rgba(255, 0, 51, 1)']
+  )
 
   return (
     <motion.div
@@ -77,7 +72,7 @@ function USPFeature({
         className="absolute top-0 left-0 right-0 h-px origin-left"
         style={{
           backgroundImage:
-            "linear-gradient(to right, transparent, rgba(0, 102, 255, 0.3), rgba(156, 163, 175, 1), transparent)",
+            'linear-gradient(to right, transparent, rgba(0, 102, 255, 0.3), rgba(156, 163, 175, 1), transparent)',
         }}
       />
 
@@ -86,10 +81,10 @@ function USPFeature({
         className={`absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500
           ${
             parseInt(number) % 2 === 0
-              ? "from-accent/8 via-accent/4 to-transparent"
-              : "from-gray-900/8 via-gray-800/4 to-transparent"
+              ? 'from-accent/8 via-accent/4 to-transparent'
+              : 'from-gray-900/8 via-gray-800/4 to-transparent'
           }`}
-        initial={{ x: "-100%" }}
+        initial={{ x: '-100%' }}
         whileHover={{ x: 0 }}
         transition={{ duration: 0.5 }}
       />
@@ -99,11 +94,7 @@ function USPFeature({
           {/* Number with enhanced animation and glow */}
           <motion.span
             initial={{ opacity: 0, x: -30, scale: 0.8 }}
-            animate={
-              isInView
-                ? { opacity: 1, x: 0, scale: 1 }
-                : { opacity: 0, x: -30, scale: 0.8 }
-            }
+            animate={isInView ? { opacity: 1, x: 0, scale: 1 } : { opacity: 0, x: -30, scale: 0.8 }}
             transition={{
               duration: 0.8,
               delay: delay + 0.3,
@@ -113,17 +104,15 @@ function USPFeature({
             className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black transition-all duration-500 leading-none sm:min-w-[120px] relative
               ${
                 parseInt(number) % 2 === 0
-                  ? "text-gray-200 group-hover:text-accent"
-                  : "text-gray-200 group-hover:text-tertiary"
+                  ? 'text-gray-200 group-hover:text-accent'
+                  : 'text-gray-200 group-hover:text-tertiary'
               }`}
           >
             {number}
             {/* Glow effect on hover */}
             <motion.span
               className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-50
-                ${
-                  parseInt(number) % 2 === 0 ? "text-accent" : "text-tertiary"
-                }`}
+                ${parseInt(number) % 2 === 0 ? 'text-accent' : 'text-tertiary'}`}
               initial={{ scale: 0.8 }}
               whileHover={{ scale: 1.2 }}
             >
@@ -142,7 +131,7 @@ function USPFeature({
             }}
           >
             <motion.h3
-              style={mounted ? { color: titleColor } : { color: "rgba(255, 255, 255, 1)" }}
+              style={mounted ? { color: titleColor } : { color: 'rgba(255, 255, 255, 1)' }}
               className="text-h2 font-bold mb-6 leading-tight"
               whileHover={{ x: 4 }}
               transition={{ duration: 0.2 }}
@@ -165,87 +154,114 @@ function USPFeature({
             whileHover={{ scaleY: 1 }}
             transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
             className={`absolute left-0 top-0 bottom-0 w-1 origin-top shadow-lg
-              ${parseInt(number) % 2 === 0 ? "bg-accent" : "bg-tertiary"}`}
+              ${parseInt(number) % 2 === 0 ? 'bg-accent' : 'bg-tertiary'}`}
           />
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
 
 export default function USPSection({ content: propContent }: { content?: USPContent }) {
-  const sectionRef = useRef(null);
-  const mounted = useMounted();
-  const { isLight } = useTheme();
-  const isInView = useInView(sectionRef, { once: true, margin: "250px" });
-  
+  const sectionRef = useRef(null)
+  const mounted = useMounted()
+  const { isLight } = useTheme()
+  const isInView = useInView(sectionRef, { once: true, margin: '250px' })
+
   // Fetch content from CMS - enables live updates from /admin
-  const { getValue } = useContentSection("usp");
-  
+  const { getValue } = useContentSection('usp')
+
   // Build content from CMS with fallbacks
-  const uspContent: USPContent = useMemo(() => ({
-    title: getValue("T10", propContent?.title || defaultUspContent.title),
-    subtitle: getValue("T11", propContent?.subtitle || defaultUspContent.subtitle),
-    description: getValue("T12", propContent?.description || defaultUspContent.description),
-    features: [
-      {
-        number: "01",
-        title: getValue("T13", propContent?.features?.[0]?.title || defaultUspContent.features[0].title),
-        description: getValue("T17", propContent?.features?.[0]?.description || defaultUspContent.features[0].description),
-      },
-      {
-        number: "02",
-        title: getValue("T14", propContent?.features?.[1]?.title || defaultUspContent.features[1].title),
-        description: getValue("T18", propContent?.features?.[1]?.description || defaultUspContent.features[1].description),
-      },
-      {
-        number: "03",
-        title: getValue("T15", propContent?.features?.[2]?.title || defaultUspContent.features[2].title),
-        description: getValue("T19", propContent?.features?.[2]?.description || defaultUspContent.features[2].description),
-      },
-      {
-        number: "04",
-        title: getValue("T16", propContent?.features?.[3]?.title || defaultUspContent.features[3].title),
-        description: getValue("T20", propContent?.features?.[3]?.description || defaultUspContent.features[3].description),
-      },
-    ],
-    tagline: propContent?.tagline || defaultUspContent.tagline,
-    cta: propContent?.cta || defaultUspContent.cta,
-  }), [getValue, propContent]);
+  const uspContent: USPContent = useMemo(
+    () => ({
+      title: getValue('T10', propContent?.title || defaultUspContent.title),
+      subtitle: getValue('T11', propContent?.subtitle || defaultUspContent.subtitle),
+      description: getValue('T12', propContent?.description || defaultUspContent.description),
+      features: [
+        {
+          number: '01',
+          title: getValue(
+            'T13',
+            propContent?.features?.[0]?.title || defaultUspContent.features[0].title
+          ),
+          description: getValue(
+            'T17',
+            propContent?.features?.[0]?.description || defaultUspContent.features[0].description
+          ),
+        },
+        {
+          number: '02',
+          title: getValue(
+            'T14',
+            propContent?.features?.[1]?.title || defaultUspContent.features[1].title
+          ),
+          description: getValue(
+            'T18',
+            propContent?.features?.[1]?.description || defaultUspContent.features[1].description
+          ),
+        },
+        {
+          number: '03',
+          title: getValue(
+            'T15',
+            propContent?.features?.[2]?.title || defaultUspContent.features[2].title
+          ),
+          description: getValue(
+            'T19',
+            propContent?.features?.[2]?.description || defaultUspContent.features[2].description
+          ),
+        },
+        {
+          number: '04',
+          title: getValue(
+            'T16',
+            propContent?.features?.[3]?.title || defaultUspContent.features[3].title
+          ),
+          description: getValue(
+            'T20',
+            propContent?.features?.[3]?.description || defaultUspContent.features[3].description
+          ),
+        },
+      ],
+      tagline: propContent?.tagline || defaultUspContent.tagline,
+      cta: propContent?.cta || defaultUspContent.cta,
+    }),
+    [getValue, propContent]
+  )
 
   // Scroll-based animations for title
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "center center", "end start"],
-  });
+    offset: ['start end', 'center center', 'end start'],
+  })
 
   // Interpolate color from white to red (tertiary) as it comes into center
   // Use rgba format consistently to avoid hydration mismatch (Framer Motion converts rgb to rgba)
   const titleColor = useTransform(
     scrollYProgress,
     [0, 0.5, 1],
-    ["rgba(255, 255, 255, 1)", "rgba(255, 0, 51, 1)", "rgba(255, 0, 51, 1)"]
-  );
+    ['rgba(255, 255, 255, 1)', 'rgba(255, 0, 51, 1)', 'rgba(255, 0, 51, 1)']
+  )
 
   // Slide out to sides when scrolling past
-  const titleX = useTransform(scrollYProgress, [0.7, 1], [0, -200]);
-  const titleOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
+  const titleX = useTransform(scrollYProgress, [0.7, 1], [0, -200])
+  const titleOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0])
 
   return (
     <section
       ref={sectionRef}
       className={`py-32 md:py-48 overflow-hidden relative transition-colors duration-500 ${
-        isLight
-          ? "bg-gradient-to-br from-orange-50 via-amber-50 to-rose-50"
-          : "bg-black"
+        isLight ? 'bg-gradient-to-br from-orange-50 via-amber-50 to-rose-50' : 'bg-black'
       }`}
     >
       {/* Dynamic background with multiple gradients */}
-      <div className={`absolute inset-0 pointer-events-none z-0 ${
-        isLight
-          ? "bg-gradient-to-br from-sky-100/30 via-transparent to-rose-100/30"
-          : "bg-gradient-to-br from-black via-gray-950 to-black"
-      }`} />
+      <div
+        className={`absolute inset-0 pointer-events-none z-0 ${
+          isLight
+            ? 'bg-gradient-to-br from-sky-100/30 via-transparent to-rose-100/30'
+            : 'bg-gradient-to-br from-black via-gray-950 to-black'
+        }`}
+      />
 
       {/* Light mode decorative orbs */}
       {isLight && (
@@ -266,7 +282,7 @@ export default function USPSection({ content: propContent }: { content?: USPCont
         transition={{
           duration: 8,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
       />
 
@@ -280,7 +296,7 @@ export default function USPSection({ content: propContent }: { content?: USPCont
         transition={{
           duration: 10,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
           delay: 2,
         }}
       />
@@ -301,15 +317,22 @@ export default function USPSection({ content: propContent }: { content?: USPCont
                 delay: 0.1,
                 ease: [0.25, 0.1, 0.25, 1],
               }}
-              style={mounted ? {
-                color: titleColor,
-                x: titleX,
-                opacity: typeof titleOpacity === 'number' ? titleOpacity : (titleOpacity?.get?.() ?? 1),
-              } : {
-                color: "rgba(255, 255, 255, 1)",
-                x: 0,
-                opacity: 1,
-              }}
+              style={
+                mounted
+                  ? {
+                      color: titleColor,
+                      x: titleX,
+                      opacity:
+                        typeof titleOpacity === 'number'
+                          ? titleOpacity
+                          : (titleOpacity?.get?.() ?? 1),
+                    }
+                  : {
+                      color: 'rgba(255, 255, 255, 1)',
+                      x: 0,
+                      opacity: 1,
+                    }
+              }
               className="text-hero md:text-display font-black mb-8 leading-[0.9] text-center"
               suppressHydrationWarning
             >
@@ -377,5 +400,5 @@ export default function USPSection({ content: propContent }: { content?: USPCont
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

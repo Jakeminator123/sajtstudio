@@ -1,237 +1,236 @@
-"use client";
+'use client'
 
-import { useMounted } from "@/hooks/useMounted";
-import { AnimatePresence, motion, useInView } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
-import { isMobileDevice } from "@/lib/performance";
+import { useMounted } from '@/hooks/useMounted'
+import { AnimatePresence, motion, useInView } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { isMobileDevice } from '@/lib/performance'
 
 // Dynamically import PacmanGame to avoid SSR issues
-const PacmanGame = dynamic(() => import("@/components/games/PacmanGame"), {
+const PacmanGame = dynamic(() => import('@/components/games/PacmanGame'), {
   ssr: false,
-  loading: () => (
-    <div className="text-white text-center">Loading Pacman...</div>
-  ),
-});
+  loading: () => <div className="text-white text-center">Loading Pacman...</div>,
+})
 
 export default function TechShowcaseSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const pacmanRef = useRef<HTMLDivElement>(null);
-  const matrixVideoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null)
+  const pacmanRef = useRef<HTMLDivElement>(null)
+  const matrixVideoRef = useRef<HTMLVideoElement>(null)
   // Use larger margin to trigger earlier when scrolling into view
   const isInView = useInView(sectionRef, {
     once: true,
     // Trigger earlier so mobile users get the animation before it reaches viewport
-    margin: "600px 0px -200px 0px",
-  });
-  const mounted = useMounted();
-  const [isMobile, setIsMobile] = useState(false);
-  const [showTechText, setShowTechText] = useState(false);
+    margin: '600px 0px -200px 0px',
+  })
+  const mounted = useMounted()
+  const [isMobile, setIsMobile] = useState(false)
+  const [showTechText, setShowTechText] = useState(false)
 
   // Detect mobile for performance optimization
   useEffect(() => {
-    setIsMobile(isMobileDevice() || window.innerWidth < 768);
-  }, []);
-  const [showPacman, setShowPacman] = useState(false);
-  const [countdown, setCountdown] = useState(5);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-  const [whiteFadeOut, setWhiteFadeOut] = useState(false);
-  const [hasScrolledToPacman, setHasScrolledToPacman] = useState(false);
-  const [overlayDismissed, setOverlayDismissed] = useState(false);
-  const [matrixText, setMatrixText] = useState("");
-  const [matrixFinished, setMatrixFinished] = useState(false);
-  const [postMatrixMessageVisible, setPostMatrixMessageVisible] =
-    useState(false);
-  const hasStartedAnimationRef = useRef(false);
-  const [animationStarted, setAnimationStarted] = useState(false); // Track if animation sequence has started (for mobile stability)
-  const matrixFullText = "ENOUGH WITH THE\nFLASHY STUFF";
+    setIsMobile(isMobileDevice() || window.innerWidth < 768)
+  }, [])
+  const [showPacman, setShowPacman] = useState(false)
+  const [countdown, setCountdown] = useState(5)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [hasPlayed, setHasPlayed] = useState(false)
+  const [whiteFadeOut, setWhiteFadeOut] = useState(false)
+  const [hasScrolledToPacman, setHasScrolledToPacman] = useState(false)
+  const [overlayDismissed, setOverlayDismissed] = useState(false)
+  const [matrixText, setMatrixText] = useState('')
+  const [matrixFinished, setMatrixFinished] = useState(false)
+  const [postMatrixMessageVisible, setPostMatrixMessageVisible] = useState(false)
+  const hasStartedAnimationRef = useRef(false)
+  const [animationStarted, setAnimationStarted] = useState(false) // Track if animation sequence has started (for mobile stability)
+  const matrixFullText = 'ENOUGH WITH THE\nFLASHY STUFF'
   // Show overlay when Pacman should be visible and overlay hasn't been dismissed
   // Don't require isInView since animation can trigger even if user scrolled past
-  const showOverlay = showPacman && !overlayDismissed;
-  const showInlinePacman = showPacman && overlayDismissed;
+  const showOverlay = showPacman && !overlayDismissed
+  const showInlinePacman = showPacman && overlayDismissed
 
   // Matrix text typing animation - optimized for mobile
   useEffect(() => {
     if (showTechText && !showPacman) {
-      setMatrixText("");
-      setMatrixFinished(false);
-      setPostMatrixMessageVisible(false);
-      let currentIndex = 0;
-      let timeoutId: NodeJS.Timeout;
+      setMatrixText('')
+      setMatrixFinished(false)
+      setPostMatrixMessageVisible(false)
+      let currentIndex = 0
+      let timeoutId: NodeJS.Timeout
 
       const typeText = () => {
         if (currentIndex < matrixFullText.length) {
-          setMatrixText(matrixFullText.slice(0, currentIndex + 1));
-          currentIndex++;
-          const lastChar = matrixFullText[currentIndex - 1];
+          setMatrixText(matrixFullText.slice(0, currentIndex + 1))
+          currentIndex++
+          const lastChar = matrixFullText[currentIndex - 1]
           // Faster typing on mobile to reduce energy consumption
-          const baseDelay = isMobile ? 10 : 35;
-          const spaceDelay = isMobile ? 5 : 15;
-          const delay = lastChar === " " ? spaceDelay : baseDelay;
-          timeoutId = setTimeout(typeText, delay);
+          const baseDelay = isMobile ? 10 : 35
+          const spaceDelay = isMobile ? 5 : 15
+          const delay = lastChar === ' ' ? spaceDelay : baseDelay
+          timeoutId = setTimeout(typeText, delay)
         } else {
-          setMatrixFinished(true);
+          setMatrixFinished(true)
           // Faster reveal of secondary message
-          setTimeout(() => setPostMatrixMessageVisible(true), isMobile ? 150 : 250);
+          setTimeout(() => setPostMatrixMessageVisible(true), isMobile ? 150 : 250)
         }
-      };
+      }
 
       // Start typing immediately (faster on mobile)
-      const typingTimer = setTimeout(() => {
-        typeText();
-      }, isMobile ? 50 : 80);
+      const typingTimer = setTimeout(
+        () => {
+          typeText()
+        },
+        isMobile ? 50 : 80
+      )
 
       return () => {
-        clearTimeout(typingTimer);
-        if (timeoutId) clearTimeout(timeoutId);
-      };
+        clearTimeout(typingTimer)
+        if (timeoutId) clearTimeout(timeoutId)
+      }
     } else {
-      setMatrixText("");
-      setMatrixFinished(false);
-      setPostMatrixMessageVisible(false);
+      setMatrixText('')
+      setMatrixFinished(false)
+      setPostMatrixMessageVisible(false)
     }
-  }, [showTechText, showPacman, matrixFullText, isMobile]);
+  }, [showTechText, showPacman, matrixFullText, isMobile])
 
   // Control Matrix video playback
   useEffect(() => {
-    const video = matrixVideoRef.current;
-    if (!video) return;
+    const video = matrixVideoRef.current
+    if (!video) return
 
     if (whiteFadeOut && !showPacman) {
       // Play video when entering Matrix transition
       video.play().catch(() => {
         // Autoplay blocked - video will be visible but silent
-      });
+      })
     } else if (showPacman) {
       // Pause and reset video when transitioning to Pacman
-      video.pause();
-      video.currentTime = 0;
+      video.pause()
+      video.currentTime = 0
     }
-  }, [whiteFadeOut, showPacman]);
+  }, [whiteFadeOut, showPacman])
 
   // Check if section is already in view when component mounts (e.g., after HeroAnimation auto-scrolls)
   // Also use IntersectionObserver as fallback to catch when section becomes visible
   useEffect(() => {
-    if (!mounted || !sectionRef.current) return;
+    if (!mounted || !sectionRef.current) return
 
-    let textTimer: NodeJS.Timeout | null = null;
-    let pacmanTimer: NodeJS.Timeout | null = null;
+    let textTimer: NodeJS.Timeout | null = null
+    let pacmanTimer: NodeJS.Timeout | null = null
 
     const startAnimation = () => {
       // Prevent multiple triggers using ref to avoid stale closure
-      if (hasStartedAnimationRef.current) return;
-      hasStartedAnimationRef.current = true;
-      setAnimationStarted(true); // Set state for stable rendering (mobile fix)
+      if (hasStartedAnimationRef.current) return
+      hasStartedAnimationRef.current = true
+      setAnimationStarted(true) // Set state for stable rendering (mobile fix)
 
-      setWhiteFadeOut(true);
+      setWhiteFadeOut(true)
 
       // Faster transition - Matrix text appears quickly
       textTimer = setTimeout(() => {
-        setShowTechText(true);
-      }, 100); // Reduced from 200ms
+        setShowTechText(true)
+      }, 100) // Reduced from 200ms
 
       // Faster transition to Pacman (Matrix text + message = ~2.5s)
       pacmanTimer = setTimeout(() => {
-        setShowPacman(true);
-      }, 3500); // Reduced from 5500ms
-    };
+        setShowPacman(true)
+      }, 3500) // Reduced from 5500ms
+    }
 
     // Check immediately on mount with a small delay to ensure DOM is ready
     const checkTimer = setTimeout(() => {
-      if (hasStartedAnimationRef.current) return;
-      const rect = sectionRef.current?.getBoundingClientRect();
+      if (hasStartedAnimationRef.current) return
+      const rect = sectionRef.current?.getBoundingClientRect()
       if (rect) {
-        const windowHeight =
-          window.innerHeight || document.documentElement.clientHeight;
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight
         // Check if section is visible in viewport (at least partially visible)
         if (rect.top < windowHeight && rect.bottom > 0) {
-          startAnimation();
+          startAnimation()
         }
       }
-    }, 100);
+    }, 100)
 
     // Also set up IntersectionObserver as fallback
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !hasStartedAnimationRef.current) {
-            startAnimation();
+            startAnimation()
           }
-        });
+        })
       },
-      { threshold: 0.1, rootMargin: "0px" }
-    );
+      { threshold: 0.1, rootMargin: '0px' }
+    )
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+      observer.observe(sectionRef.current)
     }
 
     return () => {
-      clearTimeout(checkTimer);
-      if (textTimer) clearTimeout(textTimer);
-      if (pacmanTimer) clearTimeout(pacmanTimer);
-      observer.disconnect();
-    };
-  }, [mounted]);
+      clearTimeout(checkTimer)
+      if (textTimer) clearTimeout(textTimer)
+      if (pacmanTimer) clearTimeout(pacmanTimer)
+      observer.disconnect()
+    }
+  }, [mounted])
 
   // Also trigger when isInView changes (normal scroll behavior)
   // Note: We use refs for timers to prevent cleanup from clearing them when isInView flickers on mobile
-  const textTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const pacmanTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const textTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const pacmanTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (!mounted || !isInView || hasStartedAnimationRef.current) {
-      return;
+      return
     }
 
     if (isInView) {
-      hasStartedAnimationRef.current = true;
-      setAnimationStarted(true); // Set state for stable rendering (mobile fix)
+      hasStartedAnimationRef.current = true
+      setAnimationStarted(true) // Set state for stable rendering (mobile fix)
 
       // Start white fade out immediately when section comes into view
-      setWhiteFadeOut(true);
+      setWhiteFadeOut(true)
 
       // Faster transition - Matrix text appears quickly
       textTimerRef.current = setTimeout(() => {
-        setShowTechText(true);
-      }, 100); // Reduced from 200ms for quicker transition
+        setShowTechText(true)
+      }, 100) // Reduced from 200ms for quicker transition
 
       // Faster transition to Pacman - Matrix text finishes in ~2s, message shows for ~0.5s
       // Quick transition maintains engagement
-      pacmanTimerRef.current = setTimeout(() => setShowPacman(true), 3500); // Reduced from 5500ms
+      pacmanTimerRef.current = setTimeout(() => setShowPacman(true), 3500) // Reduced from 5500ms
 
       // Don't clear timers in cleanup - once animation starts, it should complete
       // The ref check prevents double-triggering anyway
     }
-  }, [isInView, mounted]);
+  }, [isInView, mounted])
 
   // Reset overlay dismissal whenever Pacman sequence retriggers
   useEffect(() => {
     if (showPacman) {
-      setOverlayDismissed(false);
+      setOverlayDismissed(false)
       // Close any open HeroAnimation modals when Pacman is about to show
       // This prevents modals from appearing over Pacman game on mobile
-      window.dispatchEvent(new CustomEvent("closeHeroModals"));
+      window.dispatchEvent(new CustomEvent('closeHeroModals'))
     }
-  }, [showPacman]);
+  }, [showPacman])
 
   // Close HeroAnimation modals when white fade starts (mobile safety)
   useEffect(() => {
     if (whiteFadeOut) {
       // Small delay to ensure modals are closed before white fade appears
       const timer = setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("closeHeroModals"));
-      }, 100);
-      return () => clearTimeout(timer);
+        window.dispatchEvent(new CustomEvent('closeHeroModals'))
+      }, 100)
+      return () => clearTimeout(timer)
     }
-  }, [whiteFadeOut]);
+  }, [whiteFadeOut])
 
   // Auto-scroll to Pacman once game is revealed (only once)
   // On mobile, skip auto-scroll as it can cause viewport issues and the overlay is fullscreen anyway
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
 
     // Skip auto-scroll for overlay mode - it's fullscreen fixed position
     // Only scroll for inline mode
@@ -239,54 +238,54 @@ export default function TechShowcaseSection() {
       // Small delay to let the overlay-to-inline transition complete
       const scrollTimer = setTimeout(() => {
         pacmanRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "center",
-        });
-        setHasScrolledToPacman(true);
-      }, 300);
-      return () => clearTimeout(scrollTimer);
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        })
+        setHasScrolledToPacman(true)
+      }, 300)
+      return () => clearTimeout(scrollTimer)
     }
-  }, [showInlinePacman, hasScrolledToPacman, mounted]);
+  }, [showInlinePacman, hasScrolledToPacman, mounted])
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
 
     // Countdown when Pacman shows and game hasn't started yet
-    let countdownInterval: NodeJS.Timeout;
+    let countdownInterval: NodeJS.Timeout
     if (showPacman && countdown > 0 && !gameStarted && !isPlaying) {
       countdownInterval = setInterval(() => {
-        setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
+        setCountdown((prev) => (prev > 0 ? prev - 1 : 0))
+      }, 1000)
     }
 
     return () => {
-      if (countdownInterval) clearInterval(countdownInterval);
-    };
-  }, [showPacman, countdown, gameStarted, isPlaying, mounted]);
+      if (countdownInterval) clearInterval(countdownInterval)
+    }
+  }, [showPacman, countdown, gameStarted, isPlaying, mounted])
 
   const handlePlayGame = () => {
-    setIsPlaying(true);
-    setGameStarted(true);
-    setCountdown(0); // Hide countdown
-    setHasPlayed(true);
-  };
+    setIsPlaying(true)
+    setGameStarted(true)
+    setCountdown(0) // Hide countdown
+    setHasPlayed(true)
+  }
 
   // Overlay dismissal removed - users scroll past if not interested
 
-  const renderPacmanExperience = (variant: "overlay" | "inline") => {
+  const renderPacmanExperience = (variant: 'overlay' | 'inline') => {
     // Responsive dimensions - smaller on mobile, larger on desktop
     const containerDimensions =
-      variant === "overlay"
-        ? { width: "min(96vw, 1000px)", height: "auto", minHeight: "min(80vh, 800px)" }
-        : { width: "min(98vw, 1000px)", height: "auto", minHeight: "min(75vh, 750px)" };
+      variant === 'overlay'
+        ? { width: 'min(96vw, 1000px)', height: 'auto', minHeight: 'min(80vh, 800px)' }
+        : { width: 'min(98vw, 1000px)', height: 'auto', minHeight: 'min(75vh, 750px)' }
 
     return (
       <motion.div
         key={`${variant}-pacman`}
         ref={pacmanRef}
         initial={
-          variant === "overlay"
+          variant === 'overlay'
             ? { opacity: 0, scale: 0.9, y: 20 }
             : { opacity: 0, scale: 0.8, y: 30 }
         }
@@ -294,14 +293,14 @@ export default function TechShowcaseSection() {
         className="relative w-full flex flex-col items-center justify-center mx-auto px-2 sm:px-4"
         style={{
           maxWidth: containerDimensions.width,
-          width: "100%",
+          width: '100%',
         }}
       >
         <motion.div
           className="text-center mb-8 md:mb-12 px-4 max-w-4xl mx-auto"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
         >
           <h2
             className="text-xl md:text-2xl lg:text-3xl font-black mb-4"
@@ -313,9 +312,9 @@ export default function TechShowcaseSection() {
                 2px -2px 0px #000,
                 -2px 2px 0px #000
               `,
-              imageRendering: "pixelated",
-              letterSpacing: "2px",
-              color: "#a855f7",
+              imageRendering: 'pixelated',
+              letterSpacing: '2px',
+              color: '#a855f7',
             }}
           >
             Vi kan ta oss an diametralt olika projekt!
@@ -324,9 +323,9 @@ export default function TechShowcaseSection() {
             className="text-sm md:text-base lg:text-lg text-gray-300 mb-2"
             style={{
               fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-              textShadow: "1px 1px 0px #000",
-              imageRendering: "pixelated",
-              letterSpacing: "1px",
+              textShadow: '1px 1px 0px #000',
+              imageRendering: 'pixelated',
+              letterSpacing: '1px',
             }}
           >
             Varför inte lite härlig retro?
@@ -335,8 +334,8 @@ export default function TechShowcaseSection() {
             className="text-xs md:text-sm text-yellow-400"
             style={{
               fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-              textShadow: "1px 1px 0px #000",
-              imageRendering: "pixelated",
+              textShadow: '1px 1px 0px #000',
+              imageRendering: 'pixelated',
             }}
           >
             🏆 Kom på toplistan & vi bjuder på en testsajt gratis! 🏆
@@ -346,21 +345,21 @@ export default function TechShowcaseSection() {
         <motion.div
           className="relative mx-auto w-full"
           style={{
-            maxWidth: "min(100%, 900px)",
+            maxWidth: 'min(100%, 900px)',
           }}
           animate={{
             rotate: countdown === 0 && !isPlaying ? [0, -3, 3, -3, 0] : 0,
           }}
           transition={{
             duration: 0.5,
-            ease: "easeOut",
+            ease: 'easeOut',
           }}
         >
           {/* 8-bit border frame - hidden on very small screens */}
           <div
             className="absolute inset-0 border-4 sm:border-8 border-black rounded-lg pointer-events-none hidden sm:block"
             style={{
-              imageRendering: "pixelated",
+              imageRendering: 'pixelated',
               boxShadow: `
                 2px 2px 0 0 #333,
                 4px 4px 0 0 #666
@@ -371,9 +370,9 @@ export default function TechShowcaseSection() {
           <div
             className="relative rounded-lg overflow-hidden w-full flex items-center justify-center p-2 sm:p-4 md:p-6"
             style={{
-              backgroundColor: "rgba(0, 0, 0, 0.75)",
-              backdropFilter: "blur(4px)",
-              minHeight: "min(70vh, 600px)",
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(4px)',
+              minHeight: 'min(70vh, 600px)',
             }}
           >
             {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
@@ -386,26 +385,25 @@ export default function TechShowcaseSection() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
               >
                 <motion.button
                   onClick={handlePlayGame}
                   className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold hover:scale-105 transition-transform shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white"
                   style={{
-                    fontFamily:
-                      "var(--font-pixel), 'Press Start 2P', monospace",
+                    fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
                     textShadow:
-                      "2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000",
-                    imageRendering: "pixelated",
-                    letterSpacing: "2px",
-                    borderRadius: "0",
-                    boxShadow: "4px 4px 0px #000, -2px -2px 0px #000",
+                      '2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
+                    imageRendering: 'pixelated',
+                    letterSpacing: '2px',
+                    borderRadius: '0',
+                    boxShadow: '4px 4px 0px #000, -2px -2px 0px #000',
                   }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={countdown > 0 && !hasPlayed}
                 >
-                  🎮 {hasPlayed ? "SPELA IGEN" : "SPELA"}
+                  🎮 {hasPlayed ? 'SPELA IGEN' : 'SPELA'}
                 </motion.button>
               </motion.div>
             )}
@@ -423,25 +421,24 @@ export default function TechShowcaseSection() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    width: "100%",
-                    height: "100%",
-                    imageRendering: "pixelated",
+                    width: '100%',
+                    height: '100%',
+                    imageRendering: 'pixelated',
                   }}
                 >
                   <div className="text-center px-2 sm:px-4 max-w-full">
                     <h3
                       className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4"
                       style={{
-                        fontFamily:
-                          "var(--font-pixel), 'Press Start 2P', monospace",
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
                         textShadow: `
                           2px 2px 0px #000,
                           -2px -2px 0px #000,
                           2px -2px 0px #000,
                           -2px 2px 0px #000
                         `,
-                        imageRendering: "pixelated",
-                        letterSpacing: "2px",
+                        imageRendering: 'pixelated',
+                        letterSpacing: '2px',
                       }}
                     >
                       Demo startar om {countdown}s
@@ -460,41 +457,38 @@ export default function TechShowcaseSection() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    width: "100%",
-                    height: "100%",
-                    background: "rgba(0, 0, 0, 0.85)",
-                    imageRendering: "pixelated",
-                    border: "4px double #fff",
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    imageRendering: 'pixelated',
+                    border: '4px double #fff',
                   }}
                 >
                   <div className="text-center px-2 sm:px-4 max-w-full">
                     <h3
                       className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4"
                       style={{
-                        fontFamily:
-                          "var(--font-pixel), 'Press Start 2P', monospace",
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
                         textShadow: `
                           2px 2px 0px #000,
                           -2px -2px 0px #000,
                           2px -2px 0px #000,
                           -2px 2px 0px #000
                         `,
-                        imageRendering: "pixelated",
-                        letterSpacing: "2px",
-                        textTransform: "uppercase",
+                        imageRendering: 'pixelated',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
                       }}
                     >
-                      {gameStarted ? "PAUSAT" : "DEMO KLAR"}
+                      {gameStarted ? 'PAUSAT' : 'DEMO KLAR'}
                     </h3>
                     <p
                       className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-4 sm:mb-6"
                       style={{
-                        fontFamily:
-                          "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow:
-                          "1px 1px 0px #000, -1px -1px 0px #000",
-                        imageRendering: "pixelated",
-                        letterSpacing: "1px",
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: '1px 1px 0px #000, -1px -1px 0px #000',
+                        imageRendering: 'pixelated',
+                        letterSpacing: '1px',
                       }}
                     >
                       Vi kan bygga allt från spel till företagslösningar!
@@ -502,16 +496,13 @@ export default function TechShowcaseSection() {
                     <p
                       className="text-xs sm:text-sm md:text-base lg:text-lg text-white/80"
                       style={{
-                        fontFamily:
-                          "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow:
-                          "1px 1px 0px #000",
-                        imageRendering: "pixelated",
-                        letterSpacing: "0.5px",
+                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
+                        textShadow: '1px 1px 0px #000',
+                        imageRendering: 'pixelated',
+                        letterSpacing: '0.5px',
                       }}
                     >
-                      Tryck på <strong>Spela{hasPlayed ? " igen" : ""}</strong>{" "}
-                      för att fortsätta.
+                      Tryck på <strong>Spela{hasPlayed ? ' igen' : ''}</strong> för att fortsätta.
                     </p>
                   </div>
                 </motion.div>
@@ -524,16 +515,16 @@ export default function TechShowcaseSection() {
             <p
               className="text-base xl:text-lg font-black mb-3"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#0066CC",
+                fontFamily: 'var(--font-pixel)',
+                color: '#0066CC',
                 textShadow: `
                   2px 2px 0px #000,
                   -1px -1px 0px #000,
                   1px -1px 0px #000,
                   -1px 1px 0px #000
                 `,
-                imageRendering: "pixelated",
-                letterSpacing: "2px",
+                imageRendering: 'pixelated',
+                letterSpacing: '2px',
               }}
             >
               TEKNISKT
@@ -541,10 +532,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Datadriven
@@ -552,10 +543,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Funktionell
@@ -563,10 +554,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Interaktiv
@@ -578,16 +569,16 @@ export default function TechShowcaseSection() {
             <p
               className="text-base xl:text-lg font-black mb-3"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#FF0000",
+                fontFamily: 'var(--font-pixel)',
+                color: '#FF0000',
                 textShadow: `
                   2px 2px 0px #000,
                   -1px -1px 0px #000,
                   1px -1px 0px #000,
                   -1px 1px 0px #000
                 `,
-                imageRendering: "pixelated",
-                letterSpacing: "2px",
+                imageRendering: 'pixelated',
+                letterSpacing: '2px',
               }}
             >
               KREATIVT
@@ -595,10 +586,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Vacker
@@ -606,10 +597,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Animerad
@@ -617,10 +608,10 @@ export default function TechShowcaseSection() {
             <p
               className="text-xs xl:text-sm font-bold"
               style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#000",
-                textShadow: "1px 1px 0px #fff, -1px -1px 0px #fff",
-                imageRendering: "pixelated",
+                fontFamily: 'var(--font-pixel)',
+                color: '#000',
+                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
+                imageRendering: 'pixelated',
               }}
             >
               • Engagerande
@@ -628,15 +619,15 @@ export default function TechShowcaseSection() {
           </div>
         </motion.div>
       </motion.div>
-    );
-  };
+    )
+  }
 
   if (!mounted) {
     return (
       <section
         className="relative min-h-screen overflow-hidden"
         style={{
-          backgroundColor: "#0a0a0a",
+          backgroundColor: '#0a0a0a',
         }}
       >
         {/* Simple loading placeholder for SSR */}
@@ -644,18 +635,18 @@ export default function TechShowcaseSection() {
           <div className="text-white text-center">Loading...</div>
         </div>
       </section>
-    );
+    )
   }
 
   return (
     <motion.section
       ref={sectionRef}
       className="relative min-h-screen overflow-hidden"
-      initial={{ backgroundColor: "#ffffff" }}
-      animate={{ backgroundColor: "#0a0a0a" }}
+      initial={{ backgroundColor: '#ffffff' }}
+      animate={{ backgroundColor: '#0a0a0a' }}
       style={{
         // 8-bit Nintendo style dark background - full viewport coverage
-        backgroundColor: "#0a0a0a",
+        backgroundColor: '#0a0a0a',
       }}
     >
       {/* Matrix video background - replaces white overlay for portal effect */}
@@ -701,8 +692,8 @@ export default function TechShowcaseSection() {
               linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px)
             `,
-            backgroundSize: "8px 8px",
-            imageRendering: "pixelated",
+            backgroundSize: '8px 8px',
+            imageRendering: 'pixelated',
           }}
         />
         {/* Subtle 8-bit scanline effect */}
@@ -710,8 +701,8 @@ export default function TechShowcaseSection() {
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)",
-            imageRendering: "pixelated",
+              'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
+            imageRendering: 'pixelated',
           }}
         />
       </div>
@@ -734,7 +725,7 @@ export default function TechShowcaseSection() {
               <motion.h2
                 className="text-3xl md:text-5xl lg:text-6xl font-bold whitespace-pre-line text-center"
                 style={{
-                  color: "#FFFFFF",
+                  color: '#FFFFFF',
                   // Authentic NES 8-bit text shadow - thick black outline
                   textShadow: `
                     3px 3px 0px #000000,
@@ -750,22 +741,21 @@ export default function TechShowcaseSection() {
                     2px -2px 0px #000000,
                     -2px 2px 0px #000000
                   `,
-                  fontFamily:
-                    "var(--font-pixel), 'Press Start 2P', 'Courier New', monospace",
-                  letterSpacing: "6px",
-                  lineHeight: "1.2",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
+                  fontFamily: "var(--font-pixel), 'Press Start 2P', 'Courier New', monospace",
+                  letterSpacing: '6px',
+                  lineHeight: '1.2',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
                   // Force pixelated rendering
-                  imageRendering: "pixelated" as const,
+                  imageRendering: 'pixelated' as const,
                   // Disable font smoothing for pixelated look
-                  WebkitFontSmoothing: "none",
-                  MozOsxFontSmoothing: "none",
-                  textRendering: "optimizeSpeed",
+                  WebkitFontSmoothing: 'none',
+                  MozOsxFontSmoothing: 'none',
+                  textRendering: 'optimizeSpeed',
                   // Additional pixelated styling
-                  fontFeatureSettings: "normal",
-                  fontVariantLigatures: "none",
-                  fontKerning: "none",
+                  fontFeatureSettings: 'normal',
+                  fontVariantLigatures: 'none',
+                  fontKerning: 'none',
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -776,11 +766,10 @@ export default function TechShowcaseSection() {
                   <span
                     className="animate-pulse"
                     style={{
-                      color: "#FFFFFF",
+                      color: '#FFFFFF',
                       textShadow:
-                        "3px 3px 0px #000000, -3px -3px 0px #000000, 3px -3px 0px #000000, -3px 3px 0px #000000",
-                      fontFamily:
-                        "var(--font-pixel), 'Press Start 2P', monospace",
+                        '3px 3px 0px #000000, -3px -3px 0px #000000, 3px -3px 0px #000000, -3px 3px 0px #000000',
+                      fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
                     }}
                   >
                     |
@@ -802,14 +791,13 @@ export default function TechShowcaseSection() {
                 <motion.p
                   className="text-2xl md:text-4xl font-semibold tracking-wide text-center"
                   style={{
-                    marginTop: "200px",
-                    color: "#00ff00", // Matrix green color
-                    textShadow:
-                      "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00",
+                    marginTop: '200px',
+                    color: '#00ff00', // Matrix green color
+                    textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
                 >
                   Så skapar vi animationer som betyder något
                 </motion.p>
@@ -836,10 +824,10 @@ export default function TechShowcaseSection() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
-                backgroundSize: "cover",
-                backgroundPosition: "center center",
-                backgroundRepeat: "no-repeat",
-                filter: "saturate(0.3) contrast(1.1)",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                filter: 'saturate(0.3) contrast(1.1)',
               }}
             />
             {/* Dark overlay for better contrast with game */}
@@ -847,7 +835,7 @@ export default function TechShowcaseSection() {
 
             {/* Pacman game in overlay - centered */}
             <div className="relative z-10 w-full flex items-center justify-center">
-              {renderPacmanExperience("overlay")}
+              {renderPacmanExperience('overlay')}
             </div>
           </motion.div>
         )}
@@ -859,10 +847,10 @@ export default function TechShowcaseSection() {
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            filter: "saturate(0.3) contrast(1.1)",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'saturate(0.3) contrast(1.1)',
           }}
         />
       )}
@@ -871,17 +859,15 @@ export default function TechShowcaseSection() {
       {/* Centered container for inline Pacman */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full p-2 sm:p-4 md:p-8 pt-20 sm:pt-28 md:pt-32">
         {/* Dark overlay when inline Pacman is visible for better contrast */}
-        {showInlinePacman && (
-          <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-        )}
+        {showInlinePacman && <div className="absolute inset-0 bg-black/50 pointer-events-none" />}
         <AnimatePresence mode="wait">
           {showInlinePacman && (
             <div className="w-full flex items-center justify-center">
-              {renderPacmanExperience("inline")}
+              {renderPacmanExperience('inline')}
             </div>
           )}
         </AnimatePresence>
       </div>
     </motion.section>
-  );
+  )
 }

@@ -7,5 +7,5 @@ export default function SkipLink() {
     >
       Hoppa till huvudinnehåll
     </a>
-  );
+  )
 }

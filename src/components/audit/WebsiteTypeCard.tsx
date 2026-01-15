@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface WebsiteTypeCardProps {
-  recommendation: string;
+  recommendation: string
 }
 
 export default function WebsiteTypeCard({ recommendation }: WebsiteTypeCardProps) {
@@ -24,6 +24,5 @@ export default function WebsiteTypeCard({ recommendation }: WebsiteTypeCardProps
       </div>
       <p className="text-gray-200 leading-relaxed">{recommendation}</p>
     </motion.div>
-  );
+  )
 }
-

@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 interface LoadingStateProps {
-  stage: 'connecting' | 'scraping' | 'analyzing' | 'generating';
-  progress?: number;
-  onCancel?: () => void;
+  stage: 'connecting' | 'scraping' | 'analyzing' | 'generating'
+  progress?: number
+  onCancel?: () => void
 }
 
 export default function LoadingState({ stage, progress = 0, onCancel }: LoadingStateProps) {
@@ -14,44 +14,44 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
     return Array.from({ length: 5 }, (_, i) => ({
       id: i,
       x: Math.random() * 1920,
-      y: Math.random() * 1080
-    }));
-  });
+      y: Math.random() * 1080,
+    }))
+  })
 
   const stages = {
     connecting: {
       title: 'Ansluter till webbplatsen',
       description: 'Etablerar säker anslutning...',
       icon: '🔌',
-      color: 'blue'
+      color: 'blue',
     },
     scraping: {
       title: 'Skannar innehåll',
       description: 'Analyserar sidstruktur och innehåll...',
       icon: '🔍',
-      color: 'purple'
+      color: 'purple',
     },
     analyzing: {
       title: 'AI-analys pågår',
       description: 'Utför djupgående analys av webbplatsen...',
       icon: '🧠',
-      color: 'green'
+      color: 'green',
     },
     generating: {
       title: 'Genererar rapport',
       description: 'Sammanställer resultat och insikter...',
       icon: '📊',
-      color: 'yellow'
-    }
-  };
+      color: 'yellow',
+    },
+  }
 
-  const currentStage = stages[stage];
+  const currentStage = stages[stage]
   const colorMap: Record<string, string> = {
     blue: 'from-blue-500 to-blue-600',
     purple: 'from-purple-500 to-purple-600',
     green: 'from-green-500 to-green-600',
-    yellow: 'from-yellow-500 to-yellow-600'
-  };
+    yellow: 'from-yellow-500 to-yellow-600',
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -59,32 +59,32 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
       <motion.div
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", damping: 12, stiffness: 200 }}
+        transition={{ type: 'spring', damping: 12, stiffness: 200 }}
         className="relative mb-8"
       >
         <motion.div
           animate={{
             rotate: 360,
             scale: [1, 1.15, 1],
-            opacity: [0.3, 0.5, 0.3]
+            opacity: [0.3, 0.5, 0.3],
           }}
           transition={{
-            rotate: { duration: 15, repeat: Infinity, ease: "linear" },
-            scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-            opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+            rotate: { duration: 15, repeat: Infinity, ease: 'linear' },
+            scale: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+            opacity: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
           }}
           className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/20 to-tertiary/20 blur-3xl"
           style={{ width: 150, height: 150, margin: -25 }}
         />
         <motion.div
-          animate={{ 
+          animate={{
             y: [0, -12, 0],
-            rotate: [0, 5, -5, 0]
+            rotate: [0, 5, -5, 0],
           }}
-          transition={{ 
-            duration: 3, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut',
           }}
           className="relative text-7xl"
         >
@@ -121,19 +121,19 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-            style={{ willChange: "width" }}
+            style={{ willChange: 'width' }}
             className={`absolute left-0 top-0 h-full bg-gradient-to-r ${colorMap[currentStage.color]} rounded-full`}
           >
             <motion.div
               animate={{ x: ['-100%', '100%'] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
               style={{ width: '40%' }}
             />
           </motion.div>
           <motion.div
             animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-full"
           />
         </div>
@@ -147,36 +147,44 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
         className="mt-12 flex gap-8"
       >
         {Object.entries(stages).map(([key, stageInfo], index) => {
-          const isActive = key === stage;
-          const isPast = Object.keys(stages).indexOf(key) < Object.keys(stages).indexOf(stage);
+          const isActive = key === stage
+          const isPast = Object.keys(stages).indexOf(key) < Object.keys(stages).indexOf(stage)
 
           return (
             <motion.div
               key={key}
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: index * 0.1, type: "spring", stiffness: 200, damping: 15 }}
+              transition={{ delay: index * 0.1, type: 'spring', stiffness: 200, damping: 15 }}
               className={`flex flex-col items-center transition-all ${
                 isActive ? 'opacity-100' : isPast ? 'opacity-60' : 'opacity-30'
               }`}
             >
-              <motion.div 
+              <motion.div
                 className={`w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 ${
                   isActive ? 'bg-accent' : isPast ? 'bg-green-500' : 'bg-white/10'
                 }`}
-                animate={isActive ? {
-                  scale: [1, 1.15, 1],
-                  boxShadow: [
-                    "0 0 0px rgba(59, 130, 246, 0)",
-                    "0 0 20px rgba(59, 130, 246, 0.5)",
-                    "0 0 0px rgba(59, 130, 246, 0)"
-                  ]
-                } : {}}
-                transition={isActive ? {
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                } : {}}
+                animate={
+                  isActive
+                    ? {
+                        scale: [1, 1.15, 1],
+                        boxShadow: [
+                          '0 0 0px rgba(59, 130, 246, 0)',
+                          '0 0 20px rgba(59, 130, 246, 0.5)',
+                          '0 0 0px rgba(59, 130, 246, 0)',
+                        ],
+                      }
+                    : {}
+                }
+                transition={
+                  isActive
+                    ? {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }
+                    : {}
+                }
               >
                 {isPast ? '✓' : stageInfo.icon}
               </motion.div>
@@ -184,7 +192,7 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
                 {stageInfo.title.split(' ')[0]}
               </span>
             </motion.div>
-          );
+          )
         })}
       </motion.div>
 
@@ -194,7 +202,7 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.05, borderColor: "rgba(255, 255, 255, 0.3)" }}
+          whileHover={{ scale: 1.05, borderColor: 'rgba(255, 255, 255, 0.3)' }}
           whileTap={{ scale: 0.95 }}
           onClick={onCancel}
           className="mt-8 px-6 py-2 text-sm text-gray-400 hover:text-white transition-colors border border-white/10 hover:border-white/20 rounded-lg backdrop-blur-sm"
@@ -213,18 +221,18 @@ export default function LoadingState({ stage, progress = 0, onCancel }: LoadingS
               opacity: [0, 0.1, 0],
               scale: [0, 2, 0],
               x,
-              y
+              y,
             }}
             transition={{
               duration: 10,
               repeat: Infinity,
               delay: id * 2,
-              ease: "easeInOut"
+              ease: 'easeInOut',
             }}
             className="absolute w-64 h-64 bg-accent/10 rounded-full blur-3xl"
           />
         ))}
       </div>
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useState, FormEvent, useCallback } from "react"
-import Link from "next/link"
+import { useState, FormEvent, useCallback } from 'react'
+import Link from 'next/link'
 
 /**
  * Admin Dashboard - Statistics, contact messages, and content management
@@ -33,7 +33,7 @@ interface ContactEntry {
 interface ContentEntry {
   id: number
   key: string
-  type: "text" | "image" | "video"
+  type: 'text' | 'image' | 'video'
   section: string
   value: string
   label: string
@@ -49,14 +49,14 @@ interface VisitorStats {
   recentIpHashes?: { hash: string; lastSeen: string; prefix: string | null }[]
 }
 
-type TabType = "overview" | "contacts" | "content" | "audits"
+type TabType = 'overview' | 'contacts' | 'content' | 'audits'
 
 interface SavedAudit {
   id: string
   filename: string
   domain: string | null
   company: string | null
-  type: "audit" | "recommendation"
+  type: 'audit' | 'recommendation'
   timestamp: string
   scores: {
     seo?: number
@@ -75,26 +75,26 @@ function getAdminCredentials() {
   // Default to admin/admin if env vars not set (for development convenience)
   // In production, set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD
   return {
-    username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || "admin",
-    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin",
+    username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin',
+    password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin',
   }
 }
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [loginError, setLoginError] = useState("")
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
   const [contacts, setContacts] = useState<ContactEntry[]>([])
   const [content, setContent] = useState<ContentEntry[]>([])
   const [stats, setStats] = useState<VisitorStats | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [activeTab, setActiveTab] = useState<TabType>("overview")
+  const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [editingKey, setEditingKey] = useState<string | null>(null)
-  const [editValue, setEditValue] = useState("")
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
-  const [contentFilter, setContentFilter] = useState<string>("all")
+  const [editValue, setEditValue] = useState('')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [contentFilter, setContentFilter] = useState<string>('all')
   const [audits, setAudits] = useState<SavedAudit[]>([])
   const [auditsLoading, setAuditsLoading] = useState(false)
 
@@ -105,27 +105,27 @@ export default function AdminPage() {
 
     if (!creds.username || !creds.password) {
       setLoginError(
-        "Admin credentials not configured. Set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD."
+        'Admin credentials not configured. Set NEXT_PUBLIC_ADMIN_USERNAME and NEXT_PUBLIC_ADMIN_PASSWORD.'
       )
       return
     }
 
     if (username === creds.username && password === creds.password) {
       setIsLoggedIn(true)
-      setLoginError("")
+      setLoginError('')
       loadData()
     } else {
-      setLoginError("Felaktigt användarnamn eller lösenord")
+      setLoginError('Felaktigt användarnamn eller lösenord')
     }
   }
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    setError("")
+    setError('')
 
     // Load visitor stats from database
     try {
-      const response = await fetch("/api/stats")
+      const response = await fetch('/api/stats')
       if (response.ok) {
         const data = await response.json()
         setStats(data.stats || null)
@@ -137,42 +137,42 @@ export default function AdminPage() {
     // Load contacts
     try {
       const apiKey = process.env.NEXT_PUBLIC_CONTACTS_API_KEY
-      const headers: HeadersInit = { "Content-Type": "application/json" }
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`
+        headers['Authorization'] = `Bearer ${apiKey}`
       }
 
-      const response = await fetch("/api/contact", { headers })
+      const response = await fetch('/api/contact', { headers })
       if (response.ok) {
         const data = await response.json()
         setContacts(data.contacts || [])
       } else if (response.status === 401) {
-        setError("API-nyckel krävs för att hämta kontakter")
+        setError('API-nyckel krävs för att hämta kontakter')
       }
     } catch {
-      setError("Nätverksfel vid hämtning av kontakter")
+      setError('Nätverksfel vid hämtning av kontakter')
     }
 
     // Load content
     try {
-      const response = await fetch("/api/content")
+      const response = await fetch('/api/content')
       if (response.ok) {
         const data = await response.json()
         setContent(data.content || [])
       }
     } catch {
-      console.error("Failed to load content")
+      console.error('Failed to load content')
     }
 
     // Load audits
     try {
-      const response = await fetch("/api/audits")
+      const response = await fetch('/api/audits')
       if (response.ok) {
         const data = await response.json()
         setAudits(data.audits || [])
       }
     } catch {
-      console.error("Failed to load audits")
+      console.error('Failed to load audits')
     }
 
     setLoading(false)
@@ -181,24 +181,24 @@ export default function AdminPage() {
   const loadAudits = async () => {
     setAuditsLoading(true)
     try {
-      const response = await fetch("/api/audits")
+      const response = await fetch('/api/audits')
       if (response.ok) {
         const data = await response.json()
         setAudits(data.audits || [])
       }
     } catch {
-      console.error("Failed to load audits")
+      console.error('Failed to load audits')
     }
     setAuditsLoading(false)
   }
 
   const handleDeleteAudit = async (id: string) => {
-    if (!confirm("Är du säker på att du vill radera denna audit?")) return
+    if (!confirm('Är du säker på att du vill radera denna audit?')) return
 
     try {
-      const response = await fetch("/api/audits", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/audits', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       })
 
@@ -206,29 +206,29 @@ export default function AdminPage() {
         setAudits((prev) => prev.filter((a) => a.id !== id))
       }
     } catch {
-      console.error("Failed to delete audit")
+      console.error('Failed to delete audit')
     }
   }
 
   const handleEditContent = (entry: ContentEntry) => {
     setEditingKey(entry.key)
     setEditValue(entry.value)
-    setSaveStatus("idle")
+    setSaveStatus('idle')
   }
 
   const handleSaveContent = async () => {
     if (!editingKey) return
 
-    setSaveStatus("saving")
+    setSaveStatus('saving')
     try {
       const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY
-      const headers: HeadersInit = { "Content-Type": "application/json" }
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`
+        headers['Authorization'] = `Bearer ${apiKey}`
       }
 
-      const response = await fetch("/api/content", {
-        method: "PUT",
+      const response = await fetch('/api/content', {
+        method: 'PUT',
         headers,
         body: JSON.stringify({ key: editingKey, value: editValue }),
       })
@@ -243,33 +243,33 @@ export default function AdminPage() {
               : c
           )
         )
-        setSaveStatus("saved")
+        setSaveStatus('saved')
         setTimeout(() => {
           setEditingKey(null)
-          setSaveStatus("idle")
+          setSaveStatus('idle')
         }, 1500)
       } else {
-        setSaveStatus("error")
+        setSaveStatus('error')
       }
     } catch {
-      setSaveStatus("error")
+      setSaveStatus('error')
     }
   }
 
   const handleSeedDefaults = async () => {
-    if (!confirm("Vill du fylla i standardvärden för allt innehåll som saknas?")) return
+    if (!confirm('Vill du fylla i standardvärden för allt innehåll som saknas?')) return
 
     try {
       const apiKey = process.env.NEXT_PUBLIC_CONTENT_API_KEY
-      const headers: HeadersInit = { "Content-Type": "application/json" }
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
       if (apiKey) {
-        headers["Authorization"] = `Bearer ${apiKey}`
+        headers['Authorization'] = `Bearer ${apiKey}`
       }
 
-      const response = await fetch("/api/content", {
-        method: "POST",
+      const response = await fetch('/api/content', {
+        method: 'POST',
         headers,
-        body: JSON.stringify({ action: "seed" }),
+        body: JSON.stringify({ action: 'seed' }),
       })
 
       if (response.ok) {
@@ -278,14 +278,14 @@ export default function AdminPage() {
         loadData()
       }
     } catch {
-      alert("Kunde inte fylla i standardvärden")
+      alert('Kunde inte fylla i standardvärden')
     }
   }
 
   // Get unique sections for filter
   const sections = Array.from(new Set(content.map((c) => c.section))).sort()
   const filteredContent =
-    contentFilter === "all" ? content : content.filter((c) => c.section === contentFilter)
+    contentFilter === 'all' ? content : content.filter((c) => c.section === contentFilter)
 
   // Login form
   if (!isLoggedIn) {
@@ -353,26 +353,26 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
-          {(["overview", "contacts", "content", "audits"] as TabType[]).map((tab) => (
+          {(['overview', 'contacts', 'content', 'audits'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === tab
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
-              {tab === "overview" && "Översikt"}
-              {tab === "contacts" && `Meddelanden (${contacts.length})`}
-              {tab === "content" && `Innehåll (${content.length})`}
-              {tab === "audits" && `Audits (${audits.length})`}
+              {tab === 'overview' && 'Översikt'}
+              {tab === 'contacts' && `Meddelanden (${contacts.length})`}
+              {tab === 'content' && `Innehåll (${content.length})`}
+              {tab === 'audits' && `Audits (${audits.length})`}
             </button>
           ))}
         </div>
 
         {/* Overview Tab */}
-        {activeTab === "overview" && (
+        {activeTab === 'overview' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <div className="bg-gray-800 rounded-xl p-6">
@@ -438,11 +438,11 @@ export default function AdminPage() {
                 {stats?.recentIpHashes && stats.recentIpHashes.length > 0 ? (
                   <div className="space-y-2">
                     {stats.recentIpHashes.map((ip) => {
-                      const hashLabel = `${ip.hash.slice(0, 12)}${ip.hash.length > 12 ? "…" : ""}`
-                      const prefixLabel = ip.prefix ? ip.prefix : "okänt nät"
-                      const dateLabel = `${new Date(ip.lastSeen).toLocaleDateString("sv-SE")} ${new Date(
+                      const hashLabel = `${ip.hash.slice(0, 12)}${ip.hash.length > 12 ? '…' : ''}`
+                      const prefixLabel = ip.prefix ? ip.prefix : 'okänt nät'
+                      const dateLabel = `${new Date(ip.lastSeen).toLocaleDateString('sv-SE')} ${new Date(
                         ip.lastSeen
-                      ).toLocaleTimeString("sv-SE")}`
+                      ).toLocaleTimeString('sv-SE')}`
                       return (
                         <div key={ip.hash} className="flex justify-between text-sm">
                           <div className="flex flex-col">
@@ -463,7 +463,7 @@ export default function AdminPage() {
         )}
 
         {/* Contacts Tab */}
-        {activeTab === "contacts" && (
+        {activeTab === 'contacts' && (
           <div className="bg-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-white">Kontaktmeddelanden</h2>
@@ -472,7 +472,7 @@ export default function AdminPage() {
                 disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                {loading ? "Laddar..." : "Uppdatera"}
+                {loading ? 'Laddar...' : 'Uppdatera'}
               </button>
             </div>
 
@@ -503,13 +503,13 @@ export default function AdminPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-gray-400 text-sm">
-                          {new Date(contact.timestamp).toLocaleDateString("sv-SE")}
+                          {new Date(contact.timestamp).toLocaleDateString('sv-SE')}
                         </p>
                         <p className="text-gray-500 text-xs">
-                          {new Date(contact.timestamp).toLocaleTimeString("sv-SE")}
+                          {new Date(contact.timestamp).toLocaleTimeString('sv-SE')}
                         </p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-gray-600 text-gray-300 text-xs rounded">
-                          {contact.source || "website"}
+                          {contact.source || 'website'}
                         </span>
                       </div>
                     </div>
@@ -522,7 +522,7 @@ export default function AdminPage() {
         )}
 
         {/* Content Tab */}
-        {activeTab === "content" && (
+        {activeTab === 'content' && (
           <div className="bg-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
               <h2 className="text-xl font-bold text-white">Innehållshantering</h2>
@@ -550,7 +550,7 @@ export default function AdminPage() {
                   disabled={loading}
                   className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  {loading ? "Laddar..." : "Uppdatera"}
+                  {loading ? 'Laddar...' : 'Uppdatera'}
                 </button>
               </div>
             </div>
@@ -575,7 +575,7 @@ export default function AdminPage() {
                     <tr
                       key={entry.key}
                       className={`border-b border-gray-700/50 hover:bg-gray-700/30 cursor-pointer transition-colors ${
-                        editingKey === entry.key ? "bg-gray-700/50" : ""
+                        editingKey === entry.key ? 'bg-gray-700/50' : ''
                       }`}
                       onClick={() => handleEditContent(entry)}
                     >
@@ -583,11 +583,11 @@ export default function AdminPage() {
                       <td className="py-3">
                         <span
                           className={`px-2 py-1 rounded text-xs ${
-                            entry.type === "text"
-                              ? "bg-blue-900/50 text-blue-300"
-                              : entry.type === "image"
-                                ? "bg-green-900/50 text-green-300"
-                                : "bg-purple-900/50 text-purple-300"
+                            entry.type === 'text'
+                              ? 'bg-blue-900/50 text-blue-300'
+                              : entry.type === 'image'
+                                ? 'bg-green-900/50 text-green-300'
+                                : 'bg-purple-900/50 text-purple-300'
                           }`}
                         >
                           {entry.type}
@@ -611,7 +611,7 @@ export default function AdminPage() {
                     {content.find((c) => c.key === editingKey)?.label}
                   </p>
 
-                  {content.find((c) => c.key === editingKey)?.type === "text" ? (
+                  {content.find((c) => c.key === editingKey)?.type === 'text' ? (
                     <textarea
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
@@ -632,7 +632,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => {
                         setEditingKey(null)
-                        setSaveStatus("idle")
+                        setSaveStatus('idle')
                       }}
                       className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                     >
@@ -640,22 +640,22 @@ export default function AdminPage() {
                     </button>
                     <button
                       onClick={handleSaveContent}
-                      disabled={saveStatus === "saving"}
+                      disabled={saveStatus === 'saving'}
                       className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                        saveStatus === "saved"
-                          ? "bg-green-600 text-white"
-                          : saveStatus === "error"
-                            ? "bg-red-600 text-white"
-                            : "bg-blue-600 hover:bg-blue-700 text-white"
+                        saveStatus === 'saved'
+                          ? 'bg-green-600 text-white'
+                          : saveStatus === 'error'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
                       }`}
                     >
-                      {saveStatus === "saving"
-                        ? "Sparar..."
-                        : saveStatus === "saved"
-                          ? "Sparat!"
-                          : saveStatus === "error"
-                            ? "Fel!"
-                            : "Spara"}
+                      {saveStatus === 'saving'
+                        ? 'Sparar...'
+                        : saveStatus === 'saved'
+                          ? 'Sparat!'
+                          : saveStatus === 'error'
+                            ? 'Fel!'
+                            : 'Spara'}
                     </button>
                   </div>
                 </div>
@@ -665,7 +665,7 @@ export default function AdminPage() {
         )}
 
         {/* Audits Tab */}
-        {activeTab === "audits" && (
+        {activeTab === 'audits' && (
           <div className="bg-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">📊 Sparade Audits</h2>
@@ -674,16 +674,16 @@ export default function AdminPage() {
                 disabled={auditsLoading}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
               >
-                {auditsLoading ? "Laddar..." : "🔄 Uppdatera"}
+                {auditsLoading ? 'Laddar...' : '🔄 Uppdatera'}
               </button>
             </div>
 
             {audits.length === 0 ? (
               <p className="text-gray-400 text-center py-8">
-                Inga sparade audits ännu. Kör en audit på{" "}
+                Inga sparade audits ännu. Kör en audit på{' '}
                 <Link href="/utvardera" className="text-blue-400 hover:underline">
                   /utvardera
-                </Link>{" "}
+                </Link>{' '}
                 för att komma igång.
               </p>
             ) : (
@@ -696,13 +696,13 @@ export default function AdminPage() {
                   </div>
                   <div className="bg-gray-700/50 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-green-400">
-                      {audits.filter((a) => a.type === "audit").length}
+                      {audits.filter((a) => a.type === 'audit').length}
                     </p>
                     <p className="text-gray-400 text-sm">Webbaudits</p>
                   </div>
                   <div className="bg-gray-700/50 rounded-lg p-4 text-center">
                     <p className="text-2xl font-bold text-purple-400">
-                      {audits.filter((a) => a.type === "recommendation").length}
+                      {audits.filter((a) => a.type === 'recommendation').length}
                     </p>
                     <p className="text-gray-400 text-sm">Rekommendationer</p>
                   </div>
@@ -733,31 +733,31 @@ export default function AdminPage() {
                           <td className="py-3">
                             <span
                               className={`px-2 py-1 rounded text-xs font-medium ${
-                                audit.type === "audit"
-                                  ? "bg-blue-500/20 text-blue-400"
-                                  : "bg-purple-500/20 text-purple-400"
+                                audit.type === 'audit'
+                                  ? 'bg-blue-500/20 text-blue-400'
+                                  : 'bg-purple-500/20 text-purple-400'
                               }`}
                             >
-                              {audit.type === "audit" ? "🔍 Audit" : "💡 Rekommen."}
+                              {audit.type === 'audit' ? '🔍 Audit' : '💡 Rekommen.'}
                             </span>
                           </td>
                           <td className="py-3">
                             <span className="font-medium text-white">
-                              {audit.domain || audit.company || "—"}
+                              {audit.domain || audit.company || '—'}
                             </span>
                           </td>
                           <td className="py-3 text-gray-400">
-                            {new Date(audit.timestamp).toLocaleDateString("sv-SE")}
+                            {new Date(audit.timestamp).toLocaleDateString('sv-SE')}
                           </td>
                           <td className="py-3">
                             {audit.scores?.overall !== undefined ? (
                               <span
                                 className={`font-bold ${
                                   audit.scores.overall >= 70
-                                    ? "text-green-400"
+                                    ? 'text-green-400'
                                     : audit.scores.overall >= 50
-                                      ? "text-yellow-400"
-                                      : "text-red-400"
+                                      ? 'text-yellow-400'
+                                      : 'text-red-400'
                                 }`}
                               >
                                 {audit.scores.overall}/100
@@ -767,7 +767,7 @@ export default function AdminPage() {
                             )}
                           </td>
                           <td className="py-3 text-gray-400">
-                            {audit.cost?.sek?.toFixed(2) || "0.00"} kr
+                            {audit.cost?.sek?.toFixed(2) || '0.00'} kr
                           </td>
                           <td className="py-3">
                             <div className="flex gap-2">

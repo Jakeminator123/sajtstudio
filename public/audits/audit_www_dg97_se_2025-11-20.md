@@ -27,18 +27,21 @@
 ## Förbättringsförslag
 
 ### Improve site speed
+
 - **Påverkan:** high
 - **Svårighetsgrad:** medium
 - **Varför:** Slow loading time affects user experience and SEO rankings
 - **Hur:** Optimize images, enable caching, and minimize JavaScript
 
 ### Add ALT tags
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** low
 - **Varför:** Improves accessibility and SEO
 - **Hur:** Ensure all images have descriptive ALT tags
 
 ### Optimize meta descriptions
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** low
 - **Varför:** Enhances SEO and click-through rate
@@ -53,4 +56,3 @@
 
 - Improved SEO rankings
 - Better user engagement
-

@@ -1,62 +1,62 @@
-'use client';
+'use client'
 
-import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface PageTransitionProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export default function PageTransition({ children }: PageTransitionProps) {
-  const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const progressScale = useMotionValue(0);
-  const progressOpacity = useMotionValue(0);
+  const pathname = usePathname()
+  const [isLoading, setIsLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const progressScale = useMotionValue(0)
+  const progressOpacity = useMotionValue(0)
 
   useEffect(() => {
     // Use requestAnimationFrame to avoid setState in effect warning
     requestAnimationFrame(() => {
-      setMounted(true);
-    });
-  }, []);
+      setMounted(true)
+    })
+  }, [])
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
     // Use requestAnimationFrame to avoid setState in effect warning
     requestAnimationFrame(() => {
-      setIsLoading(true);
-    });
+      setIsLoading(true)
+    })
     // Scroll to top on route change - use requestAnimationFrame to avoid blocking
     if (typeof window !== 'undefined') {
       requestAnimationFrame(() => {
         // If the URL includes a hash, let hash-based navigation (anchor scroll) win.
         // This prevents "wrong section" behavior when landing on /#something.
-        const hasHash = Boolean(window.location.hash && window.location.hash !== '#');
-        if (hasHash) return;
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      });
+        const hasHash = Boolean(window.location.hash && window.location.hash !== '#')
+        if (hasHash) return
+        window.scrollTo({ top: 0, behavior: 'instant' })
+      })
     }
-    const timer = setTimeout(() => setIsLoading(false), 50);
-    return () => clearTimeout(timer);
-  }, [pathname, mounted]);
+    const timer = setTimeout(() => setIsLoading(false), 50)
+    return () => clearTimeout(timer)
+  }, [pathname, mounted])
 
   // Update progress bar animation after mount to avoid hydration mismatch
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
     if (isLoading) {
-      progressScale.set(0.7);
-      progressOpacity.set(1);
+      progressScale.set(0.7)
+      progressOpacity.set(1)
     } else {
-      progressScale.set(1);
-      progressOpacity.set(0);
+      progressScale.set(1)
+      progressOpacity.set(0)
     }
-  }, [mounted, isLoading, progressScale, progressOpacity]);
+  }, [mounted, isLoading, progressScale, progressOpacity])
 
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
-    return <>{children}</>;
+    return <>{children}</>
   }
 
   return (
@@ -70,18 +70,18 @@ export default function PageTransition({ children }: PageTransitionProps) {
         }}
         transition={{
           duration: isLoading ? 0.3 : 0.2,
-          ease: isLoading ? [0, 0.58, 1, 1] : [0.42, 0, 1, 1] // Use arrays instead of strings
+          ease: isLoading ? [0, 0.58, 1, 1] : [0.42, 0, 1, 1], // Use arrays instead of strings
         }}
       />
 
       {children}
     </div>
-  );
+  )
 }
 
 // Alternative fancy page transition with overlay
 export function FancyPageTransition({ children }: PageTransitionProps) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <AnimatePresence mode="wait">
@@ -107,18 +107,18 @@ export function FancyPageTransition({ children }: PageTransitionProps) {
               delay: 0.2,
               duration: 0.4,
               ease: [0.25, 0.1, 0.25, 1],
-            }
+            },
           }}
           exit={{
             opacity: 0,
             transition: {
               duration: 0.2,
-            }
+            },
           }}
         >
           {children}
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
+  )
 }

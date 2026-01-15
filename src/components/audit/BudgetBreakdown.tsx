@@ -1,25 +1,25 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 interface BudgetBreakdownProps {
   budget: {
-    low?: number;
-    high?: number;
-    immediate_fixes?: { low: number; high: number };
-    full_optimization?: { low: number; high: number };
-    ongoing_monthly?: { low: number; high: number };
-    initial_development?: { low: number; high: number };
-    annual_maintenance?: { low: number; high: number };
-    marketing_launch?: { low: number; high: number };
-    currency: string;
-    payment_structure?: string;
-  };
+    low?: number
+    high?: number
+    immediate_fixes?: { low: number; high: number }
+    full_optimization?: { low: number; high: number }
+    ongoing_monthly?: { low: number; high: number }
+    initial_development?: { low: number; high: number }
+    annual_maintenance?: { low: number; high: number }
+    marketing_launch?: { low: number; high: number }
+    currency: string
+    payment_structure?: string
+  }
 }
 
 export default function BudgetBreakdown({ budget }: BudgetBreakdownProps) {
-  const [selectedView, setSelectedView] = useState<'breakdown' | 'timeline'>('breakdown');
+  const [selectedView, setSelectedView] = useState<'breakdown' | 'timeline'>('breakdown')
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('sv-SE', {
@@ -27,22 +27,22 @@ export default function BudgetBreakdown({ budget }: BudgetBreakdownProps) {
       currency: budget.currency || 'SEK',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   const formatRange = (low: number, high: number) => {
-    return `${formatCurrency(low)} - ${formatCurrency(high)}`;
-  };
+    return `${formatCurrency(low)} - ${formatCurrency(high)}`
+  }
 
   // Calculate totals
   const calculateTotal = (type: 'low' | 'high') => {
-    let total = 0;
-    if (budget.immediate_fixes) total += budget.immediate_fixes[type];
-    if (budget.full_optimization) total += budget.full_optimization[type];
-    if (budget.initial_development) total += budget.initial_development[type];
-    if (budget.marketing_launch) total += budget.marketing_launch[type];
-    return total;
-  };
+    let total = 0
+    if (budget.immediate_fixes) total += budget.immediate_fixes[type]
+    if (budget.full_optimization) total += budget.full_optimization[type]
+    if (budget.initial_development) total += budget.initial_development[type]
+    if (budget.marketing_launch) total += budget.marketing_launch[type]
+    return total
+  }
 
   const budgetItems = [
     {
@@ -50,44 +50,44 @@ export default function BudgetBreakdown({ budget }: BudgetBreakdownProps) {
       data: budget.immediate_fixes,
       color: 'red',
       icon: '🚨',
-      description: 'Kritiska fixar som behövs omgående'
+      description: 'Kritiska fixar som behövs omgående',
     },
     {
       label: 'Full optimering',
       data: budget.full_optimization,
       color: 'blue',
       icon: '🚀',
-      description: 'Omfattande förbättringar för optimal prestanda'
+      description: 'Omfattande förbättringar för optimal prestanda',
     },
     {
       label: 'Initial utveckling',
       data: budget.initial_development,
       color: 'green',
       icon: '💻',
-      description: 'Utveckling av nya funktioner och design'
+      description: 'Utveckling av nya funktioner och design',
     },
     {
       label: 'Marknadsföring lansering',
       data: budget.marketing_launch,
       color: 'purple',
       icon: '📢',
-      description: 'Kampanjer och marknadsföring vid lansering'
+      description: 'Kampanjer och marknadsföring vid lansering',
     },
     {
       label: 'Månatlig drift',
       data: budget.ongoing_monthly,
       color: 'yellow',
       icon: '📅',
-      description: 'Löpande kostnader per månad'
+      description: 'Löpande kostnader per månad',
     },
     {
       label: 'Årligt underhåll',
       data: budget.annual_maintenance,
       color: 'orange',
       icon: '🔧',
-      description: 'Årliga underhållskostnader'
-    }
-  ].filter(item => item.data);
+      description: 'Årliga underhållskostnader',
+    },
+  ].filter((item) => item.data)
 
   return (
     <motion.div
@@ -178,21 +178,33 @@ export default function BudgetBreakdown({ budget }: BudgetBreakdownProps) {
       )}
 
       {selectedView === 'timeline' && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-6"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
           <div className="relative">
             {/* Timeline line */}
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-white/20" />
 
             {/* Timeline items */}
             {[
-              { month: 'Månad 1', items: ['Omedelbara åtgärder', 'Projektstart'], cost: budget.immediate_fixes },
-              { month: 'Månad 2-3', items: ['Utveckling', 'Design'], cost: budget.initial_development },
-              { month: 'Månad 4', items: ['Testning', 'Optimering'], cost: budget.full_optimization },
-              { month: 'Lansering', items: ['Marknadsföring', 'Kampanjer'], cost: budget.marketing_launch },
+              {
+                month: 'Månad 1',
+                items: ['Omedelbara åtgärder', 'Projektstart'],
+                cost: budget.immediate_fixes,
+              },
+              {
+                month: 'Månad 2-3',
+                items: ['Utveckling', 'Design'],
+                cost: budget.initial_development,
+              },
+              {
+                month: 'Månad 4',
+                items: ['Testning', 'Optimering'],
+                cost: budget.full_optimization,
+              },
+              {
+                month: 'Lansering',
+                items: ['Marknadsföring', 'Kampanjer'],
+                cost: budget.marketing_launch,
+              },
               { month: 'Löpande', items: ['Drift', 'Underhåll'], cost: budget.ongoing_monthly },
             ].map((phase, index) => (
               <motion.div
@@ -248,5 +260,5 @@ export default function BudgetBreakdown({ budget }: BudgetBreakdownProps) {
         </div>
       </motion.div>
     </motion.div>
-  );
+  )
 }

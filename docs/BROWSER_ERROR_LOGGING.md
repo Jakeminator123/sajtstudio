@@ -19,6 +19,7 @@ Detta system loggar automatiskt alla fel från webbläsaren till en fil som AI-a
 ## Filtrering
 
 Följande fel filtreras bort och loggas INTE:
+
 - D-ID chatbot-relaterade fel (CORS, network errors)
 - Antivirus-blockerade requests
 - Kända tredjepartsskript-fel
@@ -28,6 +29,7 @@ Följande fel filtreras bort och loggas INTE:
 Alla fel sparas i: `logs/browser-errors.json`
 
 Format:
+
 ```json
 [
   {
@@ -52,7 +54,7 @@ När du ser fel i webbläsaren:
    - Detta skapar en sammanfattning i `logs/errors-summary.txt`
    - AI-agenten läser automatiskt denna fil när du nämner fel
 
-2. **Säg till AI-agenten**: 
+2. **Säg till AI-agenten**:
    - "Jag har fel i webbläsaren" → AI-agenten läser automatiskt `logs/errors-summary.txt`
    - "Kolla browser-errors.json" → AI-agenten läser fullständig logg
    - "Analysera felen" → AI-agenten läser och analyserar alla fel
@@ -72,9 +74,11 @@ När du ser fel i webbläsaren:
 ## API Endpoints
 
 ### POST `/api/errors`
+
 Loggar ett nytt fel.
 
 Request body:
+
 ```json
 {
   "type": "error" | "warning" | "unhandled" | "boundary",
@@ -86,9 +90,11 @@ Request body:
 ```
 
 ### GET `/api/errors`
+
 Hämtar alla loggade fel.
 
 Response:
+
 ```json
 {
   "errors": [...]
@@ -102,4 +108,3 @@ Loggfilen begränsas till de senaste 100 felen för att förhindra att filen bli
 ## Utveckling
 
 I development mode loggas fel även till konsolen. I production loggas fel endast till filen.
-

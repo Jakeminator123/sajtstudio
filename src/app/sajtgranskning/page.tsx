@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import Footer from '@/components/layout/Footer';
-import HeaderNav from '@/components/layout/HeaderNav';
-import { motion } from 'framer-motion';
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import Footer from '@/components/layout/Footer'
+import HeaderNav from '@/components/layout/HeaderNav'
+import { motion } from 'framer-motion'
+import { useState, FormEvent } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function SajtgranskningPage() {
-  const [url, setUrl] = useState('');
-  const router = useRouter();
+  const [url, setUrl] = useState('')
+  const router = useRouter()
 
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!url.trim()) return;
+    e.preventDefault()
+    if (!url.trim()) return
 
     // Normalize URL
-    let normalizedUrl = url.trim();
+    let normalizedUrl = url.trim()
     if (!normalizedUrl.match(/^https?:\/\//i)) {
-      normalizedUrl = `https://${normalizedUrl}`;
+      normalizedUrl = `https://${normalizedUrl}`
     }
 
     // Redirect to utvardera page with audit mode and URL
-    router.push(`/utvardera?mode=audit&url=${encodeURIComponent(normalizedUrl)}`);
-  };
+    router.push(`/utvardera?mode=audit&url=${encodeURIComponent(normalizedUrl)}`)
+  }
 
   return (
     <>
@@ -36,9 +36,7 @@ export default function SajtgranskningPage() {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h1 className="text-5xl md:text-7xl font-bold mb-6">
-                Sajtgranskning
-              </h1>
+              <h1 className="text-5xl md:text-7xl font-bold mb-6">Sajtgranskning</h1>
               <p className="text-xl text-gray-400 max-w-xl mx-auto">
                 Ange en hemsideadress för att börja granskningen
               </p>
@@ -75,6 +73,5 @@ export default function SajtgranskningPage() {
       </main>
       <Footer />
     </>
-  );
+  )
 }
-

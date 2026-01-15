@@ -1,157 +1,153 @@
-"use client";
+'use client'
 
-import { useState, FormEvent, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, FormEvent, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const MAX_SEARCHES_PER_DAY = 3;
+const MAX_SEARCHES_PER_DAY = 3
 
 interface WebsiteAnalysis {
-  message?: string;
-  [key: string]: unknown; // Allow for future expansion
+  message?: string
+  [key: string]: unknown // Allow for future expansion
 }
 
 interface AnalysisState {
-  status: "idle" | "analyzing" | "success" | "error" | "rateLimited";
-  searchesRemaining?: number;
-  searchesUsed?: number;
-  resetAt?: string;
-  error?: string;
-  analysis?: WebsiteAnalysis;
+  status: 'idle' | 'analyzing' | 'success' | 'error' | 'rateLimited'
+  searchesRemaining?: number
+  searchesUsed?: number
+  resetAt?: string
+  error?: string
+  analysis?: WebsiteAnalysis
 }
 
 export default function WebsiteAnalyzer() {
-  const [url, setUrl] = useState("");
-  const [state, setState] = useState<AnalysisState>({ status: "idle" });
-  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [url, setUrl] = useState('')
+  const [state, setState] = useState<AnalysisState>({ status: 'idle' })
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (resetTimeoutRef.current) {
-        clearTimeout(resetTimeoutRef.current);
+        clearTimeout(resetTimeoutRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Hämta nuvarande status vid mount
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch("/api/analyze-website", {
-          method: "GET",
-          credentials: "include",
-        });
+        const res = await fetch('/api/analyze-website', {
+          method: 'GET',
+          credentials: 'include',
+        })
 
         if (res.ok) {
-          const data = await res.json();
+          const data = await res.json()
           if (data.searchesRemaining !== undefined) {
             setState({
-              status: "idle",
+              status: 'idle',
               searchesRemaining: data.searchesRemaining,
               searchesUsed: data.searchesUsed,
               resetAt: data.resetAt,
-            });
+            })
           }
         }
       } catch {
         // Ignorera fel vid hämtning av status - använd default värden
         // Silently handle initial status fetch errors
       }
-    };
-
-    fetchStatus();
-  }, []);
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!url.trim()) {
-      return;
     }
 
-    setState({ status: "analyzing" });
+    fetchStatus()
+  }, [])
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!url.trim()) {
+      return
+    }
+
+    setState({ status: 'analyzing' })
 
     try {
-      const response = await fetch("/api/analyze-website", {
-        method: "POST",
+      const response = await fetch('/api/analyze-website', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({ url }),
-      });
+      })
 
       if (!response.ok) {
-        let errorData;
+        let errorData
         try {
-          errorData = await response.json();
+          errorData = await response.json()
         } catch {
-          errorData = { error: "Ett fel uppstod" };
+          errorData = { error: 'Ett fel uppstod' }
         }
 
         if (response.status === 429) {
           // Rate limited
           setState({
-            status: "rateLimited",
+            status: 'rateLimited',
             error: errorData.error,
             resetAt: errorData.resetAt,
             searchesRemaining: 0,
             searchesUsed: MAX_SEARCHES_PER_DAY,
-          });
+          })
         } else {
           setState({
-            status: "error",
-            error: errorData.error || "Ett fel uppstod",
-          });
+            status: 'error',
+            error: errorData.error || 'Ett fel uppstod',
+          })
         }
-        return;
+        return
       }
 
-      const data = await response.json();
+      const data = await response.json()
 
       // Success
       setState({
-        status: "success",
+        status: 'success',
         searchesRemaining: data.searchesRemaining,
         searchesUsed: data.searchesUsed,
         resetAt: data.resetAt,
         analysis: data.analysis,
-      });
+      })
 
       // Återställ URL efter lyckad analys
       if (resetTimeoutRef.current) {
-        clearTimeout(resetTimeoutRef.current);
+        clearTimeout(resetTimeoutRef.current)
       }
       resetTimeoutRef.current = setTimeout(() => {
-        setUrl("");
+        setUrl('')
         setState((prev) => ({
           ...prev,
-          status: "idle",
-        }));
-      }, 5000);
+          status: 'idle',
+        }))
+      }, 5000)
     } catch (error) {
       // Only log errors in development, and only if it's not a network error
       // Note: In client-side code, we can't use process.env.NODE_ENV directly
       // So we'll just silently handle network errors
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
         // Silently handle network errors
-      } else if (
-        typeof window !== "undefined" &&
-        window.location.hostname === "localhost"
-      ) {
+      } else if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         // Only log in development (localhost)
-        console.error("Fetch error:", error);
+        console.error('Fetch error:', error)
       }
       setState({
-        status: "error",
-        error:
-          "Kunde inte ansluta till servern. Kontrollera din internetanslutning.",
-      });
+        status: 'error',
+        error: 'Kunde inte ansluta till servern. Kontrollera din internetanslutning.',
+      })
     }
-  };
+  }
 
-  const searchesRemaining = state.searchesRemaining ?? MAX_SEARCHES_PER_DAY;
-  const searchesUsed = state.searchesUsed ?? 0;
+  const searchesRemaining = state.searchesRemaining ?? MAX_SEARCHES_PER_DAY
+  const searchesUsed = state.searchesUsed ?? 0
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -179,8 +175,8 @@ export default function WebsiteAnalyzer() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Få en snabb analys av din hemsida. Du har {searchesRemaining} av{" "}
-            {MAX_SEARCHES_PER_DAY} sökningar kvar idag.
+            Få en snabb analys av din hemsida. Du har {searchesRemaining} av {MAX_SEARCHES_PER_DAY}{' '}
+            sökningar kvar idag.
           </motion.p>
 
           {/* Progress bar */}
@@ -225,17 +221,15 @@ export default function WebsiteAnalyzer() {
                   placeholder="https://example.com"
                   className="w-full px-4 py-4 border-2 border-gray-300 focus:border-accent focus:outline-none transition-colors text-lg"
                   required
-                  disabled={state.status === "analyzing"}
+                  disabled={state.status === 'analyzing'}
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                  🔍
-                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</div>
               </div>
             </div>
 
             <AnimatePresence mode="wait">
               {/* Success message */}
-              {state.status === "success" && (
+              {state.status === 'success' && (
                 <motion.div
                   key="success"
                   initial={{ opacity: 0, y: -10 }}
@@ -245,14 +239,14 @@ export default function WebsiteAnalyzer() {
                 >
                   <p className="font-semibold mb-1">Analys påbörjad!</p>
                   <p className="text-sm">
-                    Din analys kommer snart att visas här. Du har{" "}
-                    {state.searchesRemaining} sökningar kvar idag.
+                    Din analys kommer snart att visas här. Du har {state.searchesRemaining}{' '}
+                    sökningar kvar idag.
                   </p>
                 </motion.div>
               )}
 
               {/* Rate limited message */}
-              {state.status === "rateLimited" && (
+              {state.status === 'rateLimited' && (
                 <motion.div
                   key="rateLimited"
                   initial={{ opacity: 0, y: -10 }}
@@ -262,14 +256,14 @@ export default function WebsiteAnalyzer() {
                 >
                   <p className="font-semibold mb-1">Daglig gräns nådd</p>
                   <p className="text-sm">
-                    Du har använt alla {MAX_SEARCHES_PER_DAY} sökningar för
-                    idag. Kom tillbaka imorgon för att fortsätta.
+                    Du har använt alla {MAX_SEARCHES_PER_DAY} sökningar för idag. Kom tillbaka
+                    imorgon för att fortsätta.
                   </p>
                 </motion.div>
               )}
 
               {/* Error message */}
-              {state.status === "error" && (
+              {state.status === 'error' && (
                 <motion.div
                   key="error"
                   initial={{ opacity: 0, y: -10 }}
@@ -278,50 +272,40 @@ export default function WebsiteAnalyzer() {
                   className="p-4 bg-red-50 border-2 border-red-200 text-red-800 rounded-lg"
                 >
                   <p className="font-semibold mb-1">Fel uppstod</p>
-                  <p className="text-sm">
-                    {state.error || "Försök igen senare"}
-                  </p>
+                  <p className="text-sm">{state.error || 'Försök igen senare'}</p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <motion.button
               type="submit"
-              disabled={
-                state.status === "analyzing" ||
-                searchesRemaining === 0 ||
-                !url.trim()
-              }
+              disabled={state.status === 'analyzing' || searchesRemaining === 0 || !url.trim()}
               whileHover={
-                state.status !== "analyzing" && searchesRemaining > 0
-                  ? { scale: 1.02 }
-                  : {}
+                state.status !== 'analyzing' && searchesRemaining > 0 ? { scale: 1.02 } : {}
               }
               whileTap={
-                state.status !== "analyzing" && searchesRemaining > 0
-                  ? { scale: 0.98 }
-                  : {}
+                state.status !== 'analyzing' && searchesRemaining > 0 ? { scale: 0.98 } : {}
               }
               className="w-full px-8 py-4 bg-black text-white font-semibold hover:bg-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group shadow-lg"
             >
               {/* Shimmer effect */}
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
                 transition={{ duration: 0.6 }}
               />
               <span className="relative z-10">
-                {state.status === "analyzing"
-                  ? "Analyserar..."
+                {state.status === 'analyzing'
+                  ? 'Analyserar...'
                   : searchesRemaining === 0
-                  ? "Inga sökningar kvar"
-                  : "Analysera hemsida"}
+                    ? 'Inga sökningar kvar'
+                    : 'Analysera hemsida'}
               </span>
             </motion.button>
           </form>
         </div>
       </motion.div>
     </div>
-  );
+  )
 }

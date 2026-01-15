@@ -74,8 +74,7 @@ export function getServiceSchema() {
           itemOffered: {
             '@type': 'Service',
             name: 'Teknisk Excellens',
-            description:
-              'Varje hemsida är byggd med senaste tekniker för optimal prestanda',
+            description: 'Varje hemsida är byggd med senaste tekniker för optimal prestanda',
           },
         },
         {
@@ -105,9 +104,7 @@ export function getBreadcrumbSchema(items: { name: string; url: string }[]) {
 }
 
 // Helper function to inject schema into head
-export function generateSchemaScript(
-  schema: Record<string, unknown> | Record<string, unknown>[]
-) {
+export function generateSchemaScript(schema: Record<string, unknown> | Record<string, unknown>[]) {
   return {
     __html: JSON.stringify(schema),
   }

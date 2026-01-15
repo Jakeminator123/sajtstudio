@@ -1,12 +1,12 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import type { Service } from "@/data/services";
+import { motion } from 'framer-motion'
+import type { Service } from '@/data/services'
 
 interface ServiceCardProps {
-  service: Service;
-  index: number;
-  onClick: () => void;
+  service: Service
+  index: number
+  onClick: () => void
 }
 
 export default function ServiceCard({ service, index, onClick }: ServiceCardProps) {
@@ -14,7 +14,7 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, margin: '-100px' }}
       transition={{
         delay: index * 0.15,
         duration: 0.6,
@@ -23,8 +23,8 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
+          e.preventDefault()
+          onClick()
         }
       }}
       tabIndex={0}
@@ -40,7 +40,7 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
           scale: 1.03,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 300,
           damping: 20,
         }}
@@ -51,13 +51,13 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
           <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-accent-light/20 to-accent/30" />
           <div className="absolute inset-[1px] bg-white/10 backdrop-blur-xl" />
         </div>
-        
+
         {/* Glow effect */}
         <motion.div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           initial={false}
           animate={{
-            boxShadow: "0 0 40px rgba(0, 102, 255, 0.3), 0 0 80px rgba(0, 102, 255, 0.1)",
+            boxShadow: '0 0 40px rgba(0, 102, 255, 0.3), 0 0 80px rgba(0, 102, 255, 0.1)',
           }}
         />
 
@@ -82,7 +82,7 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
             transition={{ delay: index * 0.15 + 0.3 }}
             className="text-3xl md:text-4xl font-black mb-4 text-white group-hover:text-accent transition-colors duration-300"
             style={{
-              textShadow: "0 2px 20px rgba(0, 0, 0, 0.5)",
+              textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)',
             }}
           >
             {service.title}
@@ -131,6 +131,5 @@ export default function ServiceCard({ service, index, onClick }: ServiceCardProp
         </div>
       </motion.div>
     </motion.div>
-  );
+  )
 }
-

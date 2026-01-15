@@ -17,24 +17,24 @@
 
 ```javascript
 function add(a, b) {
-  return a + b;
+  return a + b
 }
 
-add(5, 3); // Fungerar: 8
-add("hej", "du"); // Fungerar: "hejdu" (men kanske inte vad du ville)
-add(5, "hej"); // Fungerar: "5hej" (fel!)
+add(5, 3) // Fungerar: 8
+add('hej', 'du') // Fungerar: "hejdu" (men kanske inte vad du ville)
+add(5, 'hej') // Fungerar: "5hej" (fel!)
 ```
 
 **TypeScript (med typer):**
 
 ```typescript
 function add(a: number, b: number): number {
-  return a + b;
+  return a + b
 }
 
-add(5, 3); // ✅ Fungerar: 8
-add("hej", "du"); // ❌ Fel! TypeScript säger: "Detta är inte ett nummer"
-add(5, "hej"); // ❌ Fel! TypeScript säger: "Detta är inte ett nummer"
+add(5, 3) // ✅ Fungerar: 8
+add('hej', 'du') // ❌ Fel! TypeScript säger: "Detta är inte ett nummer"
+add(5, 'hej') // ❌ Fel! TypeScript säger: "Detta är inte ett nummer"
 ```
 
 ## Varför använda TypeScript?
@@ -53,7 +53,7 @@ add(5, "hej"); // ❌ Fel! TypeScript säger: "Detta är inte ett nummer"
 ```javascript
 // Vad är "props"? Vad finns i den?
 function Button(props) {
-  return <button>{props.text}</button>; // Fungerar detta? Ingen vet!
+  return <button>{props.text}</button> // Fungerar detta? Ingen vet!
 }
 ```
 
@@ -164,10 +164,10 @@ npm install
 
 ```typescript
 // Förväntar sig string
-const name: string = 123; // ❌ Fel! 123 är inte en string
+const name: string = 123 // ❌ Fel! 123 är inte en string
 
 // Rätt:
-const name: string = "Sajtstudio"; // ✅
+const name: string = 'Sajtstudio' // ✅
 ```
 
 ## TypeScript i ditt projekt
@@ -186,19 +186,15 @@ const name: string = "Sajtstudio"; // ✅
 ```typescript
 // Definierar vad Button kan ta emot
 interface ButtonProps {
-  children: ReactNode; // Innehåll i knappen
-  href?: string; // Länk (valfritt)
-  variant?: "primary" | "secondary" | "outline" | "cta";
-  size?: "sm" | "md" | "lg";
+  children: ReactNode // Innehåll i knappen
+  href?: string // Länk (valfritt)
+  variant?: 'primary' | 'secondary' | 'outline' | 'cta'
+  size?: 'sm' | 'md' | 'lg'
   // ... fler props
 }
 
 // Använder interface
-export default function Button({
-  children,
-  href,
-  variant = "primary",
-}: ButtonProps) {
+export default function Button({ children, href, variant = 'primary' }: ButtonProps) {
   // ...
 }
 ```
@@ -230,12 +226,12 @@ export default function Button({
 ```typescript
 // Bra:
 function calculateTotal(items: { price: number; quantity: number }[]): number {
-  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 }
 
 // Mindre bra (fungerar men ingen typning):
 function calculateTotal(items) {
-  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 }
 ```
 

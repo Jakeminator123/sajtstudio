@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { ReactNode } from 'react'
+import { motion } from 'framer-motion'
 
 interface SectionTemplateProps {
-  children: ReactNode;
-  className?: string;
-  background?: 'white' | 'gray' | 'black';
-  padding?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
-  animate?: boolean;
+  children: ReactNode
+  className?: string
+  background?: 'white' | 'gray' | 'black'
+  padding?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
+  animate?: boolean
 }
 
 /**
  * SectionTemplate - Mall för sektioner på sidor
- * 
+ *
  * Ger konsistent container, padding och animationer för alla sektioner.
  */
 export default function SectionTemplate({
@@ -27,7 +27,7 @@ export default function SectionTemplate({
     white: 'bg-white',
     gray: 'bg-gray-50',
     black: 'bg-black text-white',
-  };
+  }
 
   const paddingClasses = {
     sm: 'py-12',
@@ -36,13 +36,11 @@ export default function SectionTemplate({
     xl: 'py-24 md:py-32',
     '2xl': 'py-32 md:py-40',
     '3xl': 'py-40 md:py-48',
-  };
+  }
 
   const content = (
-    <div className={`container mx-auto px-6 ${paddingClasses[padding]}`}>
-      {children}
-    </div>
-  );
+    <div className={`container mx-auto px-6 ${paddingClasses[padding]}`}>{children}</div>
+  )
 
   if (animate) {
     return (
@@ -56,13 +54,8 @@ export default function SectionTemplate({
           {content}
         </motion.div>
       </section>
-    );
+    )
   }
 
-  return (
-    <section className={`${backgroundClasses[background]} ${className}`}>
-      {content}
-    </section>
-  );
+  return <section className={`${backgroundClasses[background]} ${className}`}>{content}</section>
 }
-

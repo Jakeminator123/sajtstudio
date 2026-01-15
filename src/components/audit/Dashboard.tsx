@@ -1,71 +1,80 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import MetricsChart from './MetricsChart';
-import ImprovementMatrix from './ImprovementMatrix';
-import SecurityReport from './SecurityReport';
-import CompetitorInsights from './CompetitorInsights';
-import TechnicalRecommendations from './TechnicalRecommendations';
-import BudgetBreakdown from './BudgetBreakdown';
-import RoadmapView from './RoadmapView';
-import WebsiteTypeCard from './WebsiteTypeCard';
-import ContentStrategy from './ContentStrategy';
-import DesignDirection from './DesignDirection';
-import CompetitorBenchmark from './CompetitorBenchmark';
-import SuccessMetrics from './SuccessMetrics';
-import type { AuditResult } from '@/types/audit';
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import MetricsChart from './MetricsChart'
+import ImprovementMatrix from './ImprovementMatrix'
+import SecurityReport from './SecurityReport'
+import CompetitorInsights from './CompetitorInsights'
+import TechnicalRecommendations from './TechnicalRecommendations'
+import BudgetBreakdown from './BudgetBreakdown'
+import RoadmapView from './RoadmapView'
+import WebsiteTypeCard from './WebsiteTypeCard'
+import ContentStrategy from './ContentStrategy'
+import DesignDirection from './DesignDirection'
+import CompetitorBenchmark from './CompetitorBenchmark'
+import SuccessMetrics from './SuccessMetrics'
+import type { AuditResult } from '@/types/audit'
 
 interface DashboardProps {
-  result: AuditResult;
-  onDownloadPDF?: () => void;
-  onDownloadJSON?: () => void;
-  isGeneratingPDF?: boolean;
-  onCopyLink?: () => void;
+  result: AuditResult
+  onDownloadPDF?: () => void
+  onDownloadJSON?: () => void
+  isGeneratingPDF?: boolean
+  onCopyLink?: () => void
 }
 
-type ViewMode = 'overview' | 'technical' | 'business' | 'roadmap';
+type ViewMode = 'overview' | 'technical' | 'business' | 'roadmap'
 
-export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGeneratingPDF = false, onCopyLink }: DashboardProps) {
-  const [activeView, setActiveView] = useState<ViewMode>('overview');
+export default function Dashboard({
+  result,
+  onDownloadPDF,
+  onDownloadJSON,
+  isGeneratingPDF = false,
+  onCopyLink,
+}: DashboardProps) {
+  const [activeView, setActiveView] = useState<ViewMode>('overview')
 
   const viewModes = [
     { id: 'overview', label: 'Översikt', icon: '📊' },
     { id: 'technical', label: 'Teknisk', icon: '⚙️' },
     { id: 'business', label: 'Affär', icon: '💼' },
     { id: 'roadmap', label: 'Roadmap', icon: '🗺️' },
-  ];
+  ]
 
-  const hasAuditScores = result.audit_scores && Object.keys(result.audit_scores).length > 0;
-  const hasImprovements = result.improvements && result.improvements.length > 0;
-  const hasPriorityMatrix = result.priority_matrix;
-  const hasSecurityAnalysis = result.security_analysis;
-  const hasCompetitorInsights = result.competitor_insights;
-  const hasTechnicalRecs = result.technical_recommendations && result.technical_recommendations.length > 0;
-  const hasBudget = result.budget_estimate;
-  const hasRoadmap = result.implementation_roadmap;
-  const hasWebsiteType = Boolean(result.website_type_recommendation);
-  const hasContentStrategy = Boolean(result.content_strategy);
-  const hasDesignDirection = Boolean(result.design_direction);
-  const hasBenchmarking = Boolean(result.competitor_benchmarking);
-  const hasSuccessMetrics = Boolean(result.success_metrics);
-  const hasTechnicalContent = Boolean(hasSecurityAnalysis || hasTechnicalRecs || result.technical_architecture);
+  const hasAuditScores = result.audit_scores && Object.keys(result.audit_scores).length > 0
+  const hasImprovements = result.improvements && result.improvements.length > 0
+  const hasPriorityMatrix = result.priority_matrix
+  const hasSecurityAnalysis = result.security_analysis
+  const hasCompetitorInsights = result.competitor_insights
+  const hasTechnicalRecs =
+    result.technical_recommendations && result.technical_recommendations.length > 0
+  const hasBudget = result.budget_estimate
+  const hasRoadmap = result.implementation_roadmap
+  const hasWebsiteType = Boolean(result.website_type_recommendation)
+  const hasContentStrategy = Boolean(result.content_strategy)
+  const hasDesignDirection = Boolean(result.design_direction)
+  const hasBenchmarking = Boolean(result.competitor_benchmarking)
+  const hasSuccessMetrics = Boolean(result.success_metrics)
+  const hasTechnicalContent = Boolean(
+    hasSecurityAnalysis || hasTechnicalRecs || result.technical_architecture
+  )
   const hasBusinessContent = Boolean(
     hasCompetitorInsights ||
-      hasBudget ||
-      result.target_audience_analysis ||
-      hasContentStrategy ||
-      hasDesignDirection ||
-      hasBenchmarking ||
-      hasSuccessMetrics
-  );
+    hasBudget ||
+    result.target_audience_analysis ||
+    hasContentStrategy ||
+    hasDesignDirection ||
+    hasBenchmarking ||
+    hasSuccessMetrics
+  )
 
   return (
     <div className="space-y-8">
       {/* Header with Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <motion.h1 
+          <motion.h1
             className="text-4xl md:text-5xl lg:text-6xl font-black mb-3"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,7 +85,7 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
             </span>
           </motion.h1>
           {result.company && (
-            <motion.p 
+            <motion.p
               className="text-xl md:text-2xl text-gray-300 font-semibold"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -86,7 +95,7 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
             </motion.p>
           )}
           {result.domain && (
-            <motion.p 
+            <motion.p
               className="text-lg text-gray-400 mt-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -219,7 +228,7 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   <h3 className="text-2xl md:text-3xl font-black text-green-400 mb-6 flex items-center gap-3">
                     <motion.span
                       animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
                       ✅
                     </motion.span>
@@ -259,7 +268,7 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                   <h3 className="text-2xl md:text-3xl font-black text-red-400 mb-6 flex items-center gap-3">
                     <motion.span
                       animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
                       ⚠️
                     </motion.span>
@@ -291,17 +300,22 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
             </div>
 
             {/* Priority Matrix */}
-            {hasPriorityMatrix && hasImprovements && result.improvements && result.priority_matrix && (
-              <ImprovementMatrix
-                improvements={result.improvements}
-                priorityMatrix={result.priority_matrix as {
-                  quick_wins: string[]
-                  major_projects: string[]
-                  fill_ins: string[]
-                  thankless_tasks?: string[]
-                }}
-              />
-            )}
+            {hasPriorityMatrix &&
+              hasImprovements &&
+              result.improvements &&
+              result.priority_matrix && (
+                <ImprovementMatrix
+                  improvements={result.improvements}
+                  priorityMatrix={
+                    result.priority_matrix as {
+                      quick_wins: string[]
+                      major_projects: string[]
+                      fill_ins: string[]
+                      thankless_tasks?: string[]
+                    }
+                  }
+                />
+              )}
 
             {/* Expected Outcomes */}
             {result.expected_outcomes && result.expected_outcomes.length > 0 && (
@@ -313,7 +327,7 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                 <h3 className="text-2xl md:text-3xl font-black text-white mb-6 flex items-center gap-3">
                   <motion.span
                     animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                   >
                     🎯
                   </motion.span>
@@ -350,12 +364,16 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
             className="space-y-8"
           >
             {hasSecurityAnalysis && result.security_analysis && (
-              <SecurityReport securityAnalysis={result.security_analysis as {
-                https_status: string
-                headers_analysis: string
-                cookie_policy: string
-                vulnerabilities: string[]
-              }} />
+              <SecurityReport
+                securityAnalysis={
+                  result.security_analysis as {
+                    https_status: string
+                    headers_analysis: string
+                    cookie_policy: string
+                    vulnerabilities: string[]
+                  }
+                }
+              />
             )}
 
             {hasTechnicalRecs && result.technical_recommendations && (
@@ -381,47 +399,59 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
                         <span>Rekommenderad stack</span>
                       </h4>
                       <div className="grid md:grid-cols-2 gap-4">
-                        {Object.entries(result.technical_architecture.recommended_stack).map(([key, value]) => (
-                          <div key={key} className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                            <span className="text-gray-400 capitalize">{key}:</span>
-                            <span className="text-white font-medium">{value as string}</span>
-                          </div>
-                        ))}
+                        {Object.entries(result.technical_architecture.recommended_stack).map(
+                          ([key, value]) => (
+                            <div
+                              key={key}
+                              className="flex justify-between items-center p-3 bg-white/5 rounded-lg"
+                            >
+                              <span className="text-gray-400 capitalize">{key}:</span>
+                              <span className="text-white font-medium">{value as string}</span>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   )}
-                  {result.technical_architecture.integrations && result.technical_architecture.integrations.length > 0 && (
-                    <div>
-                      <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-purple-400">🔌</span>
-                        <span>Integrationer</span>
-                      </h4>
-                      <ul className="grid sm:grid-cols-2 gap-2 text-gray-300 text-sm">
-                        {result.technical_architecture.integrations.map((integration: string) => (
-                          <li key={integration} className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
-                            <span className="text-accent text-lg">🔌</span>
-                            {integration}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {result.technical_architecture.security_measures && result.technical_architecture.security_measures.length > 0 && (
-                    <div>
-                      <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-green-400">🔒</span>
-                        <span>Säkerhetsåtgärder</span>
-                      </h4>
-                      <ul className="space-y-2 text-gray-300 text-sm">
-                        {result.technical_architecture.security_measures.map((measure: string) => (
-                          <li key={measure} className="flex items-start gap-2">
-                            <span className="text-green-400 mt-0.5">•</span>
-                            {measure}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {result.technical_architecture.integrations &&
+                    result.technical_architecture.integrations.length > 0 && (
+                      <div>
+                        <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                          <span className="text-purple-400">🔌</span>
+                          <span>Integrationer</span>
+                        </h4>
+                        <ul className="grid sm:grid-cols-2 gap-2 text-gray-300 text-sm">
+                          {result.technical_architecture.integrations.map((integration: string) => (
+                            <li
+                              key={integration}
+                              className="flex items-center gap-2 p-2 rounded-lg bg-white/5"
+                            >
+                              <span className="text-accent text-lg">🔌</span>
+                              {integration}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  {result.technical_architecture.security_measures &&
+                    result.technical_architecture.security_measures.length > 0 && (
+                      <div>
+                        <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                          <span className="text-green-400">🔒</span>
+                          <span>Säkerhetsåtgärder</span>
+                        </h4>
+                        <ul className="space-y-2 text-gray-300 text-sm">
+                          {result.technical_architecture.security_measures.map(
+                            (measure: string) => (
+                              <li key={measure} className="flex items-start gap-2">
+                                <span className="text-green-400 mt-0.5">•</span>
+                                {measure}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
                 </div>
               </motion.div>
             )}
@@ -527,13 +557,13 @@ export default function Dashboard({ result, onDownloadPDF, onDownloadJSON, isGen
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }
 
 interface EmptyStateProps {
-  icon: string;
-  title: string;
-  description: string;
+  icon: string
+  title: string
+  description: string
 }
 
 function EmptyState({ icon, title, description }: EmptyStateProps) {
@@ -547,5 +577,5 @@ function EmptyState({ icon, title, description }: EmptyStateProps) {
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
       <p className="text-gray-400 text-sm">{description}</p>
     </motion.div>
-  );
+  )
 }

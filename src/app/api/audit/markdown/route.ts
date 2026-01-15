@@ -11,9 +11,7 @@ export async function POST(request: NextRequest) {
 
     // Generate markdown content
     let markdown = `# ${
-      result.audit_type === 'website_audit'
-        ? '📊 Webbplatsanalys'
-        : '🚀 Webbplatsrekommendationer'
+      result.audit_type === 'website_audit' ? '📊 Webbplatsanalys' : '🚀 Webbplatsrekommendationer'
     }\n\n`
 
     if (result.company) {
@@ -24,9 +22,10 @@ export async function POST(request: NextRequest) {
       markdown += `**🌐 Domän:** ${result.domain}\n\n`
     }
 
-    markdown += `**📅 Datum:** ${new Date(
-      result.timestamp || new Date()
-    ).toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}\n`
+    markdown += `**📅 Datum:** ${new Date(result.timestamp || new Date()).toLocaleDateString(
+      'sv-SE',
+      { year: 'numeric', month: 'long', day: 'numeric' }
+    )}\n`
     markdown += `**💰 Kostnad:** ${result.cost.sek.toFixed(2)} SEK (${result.cost.tokens} tokens)\n\n`
     markdown += `---\n\n`
 
@@ -34,8 +33,7 @@ export async function POST(request: NextRequest) {
       markdown += `## 📈 Poängöversikt\n\n`
       for (const [key, value] of Object.entries(result.audit_scores)) {
         const name =
-          key.replace(/_/g, ' ').charAt(0).toUpperCase() +
-          key.replace(/_/g, ' ').slice(1)
+          key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.replace(/_/g, ' ').slice(1)
         const score = value as number
         const emoji = score >= 80 ? '🟢' : score >= 60 ? '🟡' : '🔴'
         markdown += `- ${emoji} **${name}:** ${score}/100\n`
@@ -62,14 +60,17 @@ export async function POST(request: NextRequest) {
     if (result.improvements && result.improvements.length > 0) {
       markdown += `## 🎯 Förbättringsförslag\n\n`
       result.improvements.forEach((improvement: Improvement, index: number) => {
-        const impactEmoji = improvement.impact === 'high' ? '🔥' : improvement.impact === 'medium' ? '⚡' : '💡'
-        const effortEmoji = improvement.effort === 'low' ? '✅' : improvement.effort === 'medium' ? '⚠️' : '🔧'
+        const impactEmoji =
+          improvement.impact === 'high' ? '🔥' : improvement.impact === 'medium' ? '⚡' : '💡'
+        const effortEmoji =
+          improvement.effort === 'low' ? '✅' : improvement.effort === 'medium' ? '⚠️' : '🔧'
         markdown += `### ${index + 1}. ${improvement.item}\n\n`
         markdown += `${impactEmoji} **Påverkan:** ${improvement.impact === 'high' ? 'Hög' : improvement.impact === 'medium' ? 'Medel' : 'Låg'}\n`
         markdown += `${effortEmoji} **Svårighetsgrad:** ${improvement.effort === 'low' ? 'Låg' : improvement.effort === 'medium' ? 'Medel' : 'Hög'}\n`
         if (improvement.why) markdown += `\n**Varför:** ${improvement.why}\n`
         if (improvement.how) markdown += `\n**Hur:** ${improvement.how}\n`
-        if (improvement.estimated_time) markdown += `\n⏱️ **Tidsuppskattning:** ${improvement.estimated_time}\n`
+        if (improvement.estimated_time)
+          markdown += `\n⏱️ **Tidsuppskattning:** ${improvement.estimated_time}\n`
         markdown += '\n---\n\n'
       })
     }
@@ -125,9 +126,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Markdown generation error:', error)
-    return NextResponse.json(
-      { error: 'Kunde inte generera Markdown' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Kunde inte generera Markdown' }, { status: 500 })
   }
 }

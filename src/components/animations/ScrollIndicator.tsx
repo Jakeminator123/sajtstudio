@@ -1,24 +1,24 @@
-"use client";
+'use client'
 
-import { motion, useScroll } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useScroll } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 export default function ScrollIndicator() {
-  const [isVisible, setIsVisible] = useState(true);
-  const { scrollY } = useScroll();
+  const [isVisible, setIsVisible] = useState(true)
+  const { scrollY } = useScroll()
 
   // Hide indicator after scrolling
   useEffect(() => {
-    const unsubscribe = scrollY.on("change", (latest) => {
+    const unsubscribe = scrollY.on('change', (latest) => {
       if (latest > 200 && isVisible) {
-        setIsVisible(false);
+        setIsVisible(false)
       } else if (latest <= 100 && !isVisible) {
-        setIsVisible(true);
+        setIsVisible(true)
       }
-    });
+    })
 
-    return () => unsubscribe();
-  }, [scrollY, isVisible]);
+    return () => unsubscribe()
+  }, [scrollY, isVisible])
 
   return (
     <div className="relative">
@@ -37,7 +37,7 @@ export default function ScrollIndicator() {
           transition={{
             repeat: Infinity,
             duration: 1.5,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
           className="flex flex-col items-center gap-2 text-white/60 text-xs uppercase tracking-widest"
         >
@@ -57,5 +57,5 @@ export default function ScrollIndicator() {
         </motion.div>
       </motion.div>
     </div>
-  );
+  )
 }

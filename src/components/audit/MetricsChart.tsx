@@ -1,45 +1,44 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 interface MetricsChartProps {
   scores: {
-    [key: string]: number;
-  };
+    [key: string]: number
+  }
 }
 
 export default function MetricsChart({ scores }: MetricsChartProps) {
-  const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
+  const [hoveredMetric, setHoveredMetric] = useState<string | null>(null)
 
   const getColorForScore = (score: number) => {
-    if (score >= 80) return "#22c55e"; // green
-    if (score >= 60) return "#fbbf24"; // yellow
-    return "#ef4444"; // red
-  };
+    if (score >= 80) return '#22c55e' // green
+    if (score >= 60) return '#fbbf24' // yellow
+    return '#ef4444' // red
+  }
 
   const getGradeForScore = (score: number) => {
-    if (score >= 90) return "A";
-    if (score >= 80) return "B";
-    if (score >= 70) return "C";
-    if (score >= 60) return "D";
-    return "F";
-  };
+    if (score >= 90) return 'A'
+    if (score >= 80) return 'B'
+    if (score >= 70) return 'C'
+    if (score >= 60) return 'D'
+    return 'F'
+  }
 
   const metricLabels: { [key: string]: string } = {
-    seo: "SEO",
-    technical_seo: "Teknisk SEO",
-    ux: "Användarupplevelse",
-    content: "Innehåll",
-    performance: "Prestanda",
-    accessibility: "Tillgänglighet",
-    security: "Säkerhet",
-    mobile: "Mobilanpassning",
-  };
+    seo: 'SEO',
+    technical_seo: 'Teknisk SEO',
+    ux: 'Användarupplevelse',
+    content: 'Innehåll',
+    performance: 'Prestanda',
+    accessibility: 'Tillgänglighet',
+    security: 'Säkerhet',
+    mobile: 'Mobilanpassning',
+  }
 
   const averageScore =
-    Object.values(scores).reduce((a, b) => a + b, 0) /
-    Object.values(scores).length;
+    Object.values(scores).reduce((a, b) => a + b, 0) / Object.values(scores).length
 
   return (
     <motion.div
@@ -79,23 +78,21 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
                 fill="none"
                 strokeLinecap="round"
                 strokeDasharray={`${(averageScore / 100) * 502.4} 502.4`}
-                initial={{ strokeDasharray: "0 502.4" }}
+                initial={{ strokeDasharray: '0 502.4' }}
                 animate={{
                   strokeDasharray: `${(averageScore / 100) * 502.4} 502.4`,
                 }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: "spring" }}
+                transition={{ delay: 0.5, type: 'spring' }}
                 className="text-center"
               >
-                <span className="text-5xl font-bold text-white">
-                  {Math.round(averageScore)}
-                </span>
+                <span className="text-5xl font-bold text-white">{Math.round(averageScore)}</span>
                 <span className="text-lg text-gray-400 block">Snittpoäng</span>
                 <span
                   className="text-3xl font-bold"
@@ -113,13 +110,11 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
             transition={{ delay: 0.8 }}
             className="text-gray-400 text-center mt-4 max-w-xs"
           >
-            {averageScore >= 80 &&
-              "Utmärkt! Din sajt presterar över genomsnittet."}
+            {averageScore >= 80 && 'Utmärkt! Din sajt presterar över genomsnittet.'}
             {averageScore >= 60 &&
               averageScore < 80 &&
-              "Bra grund, men det finns utrymme för förbättringar."}
-            {averageScore < 60 &&
-              "Betydande förbättringsmöjligheter identifierade."}
+              'Bra grund, men det finns utrymme för förbättringar.'}
+            {averageScore < 60 && 'Betydande förbättringsmöjligheter identifierade.'}
           </motion.p>
         </div>
 
@@ -138,19 +133,14 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
               <div
                 className={`p-6 rounded-xl bg-white/5 border transition-all ${
                   hoveredMetric === key
-                    ? "border-white/30 bg-white/10 transform scale-105"
-                    : "border-white/10"
+                    ? 'border-white/30 bg-white/10 transform scale-105'
+                    : 'border-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-white">
-                    {metricLabels[key] || key}
-                  </h4>
+                  <h4 className="font-semibold text-white">{metricLabels[key] || key}</h4>
                   <div className="flex items-center gap-2">
-                    <span
-                      className="text-2xl font-bold"
-                      style={{ color: getColorForScore(score) }}
-                    >
+                    <span className="text-2xl font-bold" style={{ color: getColorForScore(score) }}>
                       {score}
                     </span>
                     <span className="text-sm text-gray-500">/100</span>
@@ -173,7 +163,7 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
                   <motion.div
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.8 + index * 0.1, type: "spring" }}
+                    transition={{ delay: 0.8 + index * 0.1, type: 'spring' }}
                     className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-lg"
                     style={{ backgroundColor: getColorForScore(score) }}
                   >
@@ -190,11 +180,9 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
                   className="absolute bottom-full mb-2 left-0 right-0 p-3 bg-gray-900 rounded-lg shadow-xl z-10"
                 >
                   <p className="text-sm text-gray-300">
-                    {score >= 80 && "Utmärkt prestanda inom detta område"}
-                    {score >= 60 &&
-                      score < 80 &&
-                      "Acceptabel nivå med förbättringspotential"}
-                    {score < 60 && "Prioritera förbättringar inom detta område"}
+                    {score >= 80 && 'Utmärkt prestanda inom detta område'}
+                    {score >= 60 && score < 80 && 'Acceptabel nivå med förbättringspotential'}
+                    {score < 60 && 'Prioritera förbättringar inom detta område'}
                   </p>
                 </motion.div>
               )}
@@ -230,5 +218,5 @@ export default function MetricsChart({ scores }: MetricsChartProps) {
         </div>
       </motion.div>
     </motion.div>
-  );
+  )
 }

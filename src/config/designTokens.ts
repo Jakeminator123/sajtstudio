@@ -1,6 +1,6 @@
 /**
  * Design Tokens för Sajtstudio.se
- * 
+ *
  * Detta är den centrala konfigurationen för alla designval i projektet.
  * Ändra här för att uppdatera färger, typsnitt, spacing etc genom hela sajten.
  */
@@ -13,7 +13,7 @@ export const designTokens = {
       black: '#000000',
       white: '#FFFFFF',
     },
-    
+
     // Accentfärger - Mer mättad blå
     accent: {
       DEFAULT: '#0066FF', // Blå - primär accentfärg (mer mättad)
@@ -21,7 +21,7 @@ export const designTokens = {
       light: '#3385FF',
       dark: '#0047B3',
     },
-    
+
     // Tredjefärg - Röd (används sparsamt)
     tertiary: {
       DEFAULT: '#FF0033', // Röd - sekundär accentfärg
@@ -29,7 +29,7 @@ export const designTokens = {
       light: '#FF3366',
       dark: '#CC0029',
     },
-    
+
     // Neutrala färger - Mjukare gråskala
     gray: {
       50: '#FAFAFA',
@@ -43,7 +43,7 @@ export const designTokens = {
       800: '#303030',
       900: '#181818',
     },
-    
+
     // Bakgrundsfärger
     background: {
       light: '#FFFFFF',
@@ -51,7 +51,7 @@ export const designTokens = {
       section: '#FAFAFA',
       overlay: 'rgba(0, 0, 0, 0.6)',
     },
-    
+
     // Textfärger
     text: {
       primary: '#000000',
@@ -69,20 +69,20 @@ export const designTokens = {
       sans: 'var(--font-sans)', // Inter från Google Fonts (set in layout.tsx)
       mono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
     },
-    
+
     // Fontstorlekar (responsiva med clamp) - Större och mer kraftfulla
     fontSize: {
-      display: 'clamp(4rem, 10vw, 10rem)',     // Hero rubriker - större
-      hero: 'clamp(2.5rem, 6vw, 5rem)',        // Stora rubriker - större
-      h1: 'clamp(2.5rem, 5vw, 4.5rem)',        // H1
-      h2: 'clamp(2rem, 4vw, 3.5rem)',          // H2
-      h3: 'clamp(1.75rem, 3vw, 2.5rem)',       // H3
-      h4: 'clamp(1.5rem, 2.5vw, 2rem)',        // H4
+      display: 'clamp(4rem, 10vw, 10rem)', // Hero rubriker - större
+      hero: 'clamp(2.5rem, 6vw, 5rem)', // Stora rubriker - större
+      h1: 'clamp(2.5rem, 5vw, 4.5rem)', // H1
+      h2: 'clamp(2rem, 4vw, 3.5rem)', // H2
+      h3: 'clamp(1.75rem, 3vw, 2.5rem)', // H3
+      h4: 'clamp(1.5rem, 2.5vw, 2rem)', // H4
       body: 'clamp(1.125rem, 1.5vw, 1.25rem)', // Body text - något större
-      small: 'clamp(0.875rem, 1vw, 1rem)',     // Small text
-      lead: 'clamp(1.25rem, 2vw, 1.5rem)',     // Lead text
+      small: 'clamp(0.875rem, 1vw, 1rem)', // Small text
+      lead: 'clamp(1.25rem, 2vw, 1.5rem)', // Lead text
     },
-    
+
     // Fontvikter
     fontWeight: {
       light: 300,
@@ -92,15 +92,15 @@ export const designTokens = {
       bold: 700,
       black: 900,
     },
-    
+
     // Line heights - Tightare för mer impact
     lineHeight: {
-      tight: 0.9,      // Mycket tight för rubriker
-      snug: 1.1,       // Tight
+      tight: 0.9, // Mycket tight för rubriker
+      snug: 1.1, // Tight
       normal: 1.5,
       relaxed: 1.75,
     },
-    
+
     // Letter spacing
     letterSpacing: {
       tight: '-0.03em',
@@ -111,14 +111,14 @@ export const designTokens = {
 
   // Spacing system (8px bas)
   spacing: {
-    xs: '0.5rem',   // 8px
-    sm: '1rem',     // 16px
-    md: '1.5rem',   // 24px
-    lg: '2rem',     // 32px
-    xl: '3rem',     // 48px
-    '2xl': '4rem',  // 64px
-    '3xl': '6rem',  // 96px
-    '4xl': '8rem',  // 128px
+    xs: '0.5rem', // 8px
+    sm: '1rem', // 16px
+    md: '1.5rem', // 24px
+    lg: '2rem', // 32px
+    xl: '3rem', // 48px
+    '2xl': '4rem', // 64px
+    '3xl': '6rem', // 96px
+    '4xl': '8rem', // 128px
   },
 
   // Breakpoints (mobil-först)
@@ -201,8 +201,7 @@ export const designTokens = {
     xl: '1rem',
     full: '9999px',
   },
-} as const;
+} as const
 
 // Export för användning i komponenter
-export type DesignTokens = typeof designTokens;
-
+export type DesignTokens = typeof designTokens

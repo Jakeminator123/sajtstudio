@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface CompetitorInsightsProps {
   insights: {
-    industry_standards: string;
-    missing_features: string;
-    unique_strengths: string;
-  };
+    industry_standards: string
+    missing_features: string
+    unique_strengths: string
+  }
 }
 
 export default function CompetitorInsights({ insights }: CompetitorInsightsProps) {
@@ -71,11 +71,11 @@ export default function CompetitorInsights({ insights }: CompetitorInsightsProps
       >
         <h4 className="text-lg font-semibold text-white mb-3">Strategisk rekommendation</h4>
         <p className="text-gray-300">
-          Baserat på konkurrentanalysen rekommenderar vi att fokusera på era unika styrkor samtidigt som ni
-          adresserar de saknade funktionerna. Prioritera de funktioner som är standard i branschen men som
-          saknas på er sajt för att säkerställa konkurrenskraft.
+          Baserat på konkurrentanalysen rekommenderar vi att fokusera på era unika styrkor samtidigt
+          som ni adresserar de saknade funktionerna. Prioritera de funktioner som är standard i
+          branschen men som saknas på er sajt för att säkerställa konkurrenskraft.
         </p>
       </motion.div>
     </motion.div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 
 /**
  * TEMPORARY COMPONENT - Under Construction Banner
@@ -13,15 +13,15 @@ import { useState, useEffect } from 'react';
  * 2. Remove <UnderConstructionBanner /> from wherever it's imported
  */
 export default function UnderConstructionBanner() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 8000); // 8 seconds delay
+      setIsVisible(true)
+    }, 8000) // 8 seconds delay
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <div
@@ -45,18 +45,19 @@ export default function UnderConstructionBanner() {
           backdrop-blur-sm
         "
       >
-        <p className="
+        <p
+          className="
           text-white text-xl md:text-2xl lg:text-3xl font-bold
           tracking-wide
           text-center
           whitespace-nowrap
           drop-shadow-lg
           animate-pulse
-        ">
+        "
+        >
           🚧 Vi är nystartade – sajt under konstruktion. Håll till godo! 😊 🚧
         </p>
       </div>
     </div>
-  );
+  )
 }
-

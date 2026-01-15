@@ -1,69 +1,85 @@
-"use client";
+'use client'
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface OfferModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 const offerOptions = [
   {
-    id: "sajtmaskin",
-    title: "Skapa din egen sajt",
-    description: "Generera och bygg din hemsida själv med vår AI-drivna plattform Sajtmaskin.",
-    href: "/sajtmaskin",
+    id: 'sajtmaskin',
+    title: 'Skapa din egen sajt',
+    description: 'Generera och bygg din hemsida själv med vår AI-drivna plattform Sajtmaskin.',
+    href: '/sajtmaskin',
     external: false,
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        />
       </svg>
     ),
-    gradient: "from-blue-500 to-cyan-400",
-    glowColor: "blue-500/30",
+    gradient: 'from-blue-500 to-cyan-400',
+    glowColor: 'blue-500/30',
   },
   {
-    id: "radgivning",
-    title: "Rådgivning & Support",
-    description: "Få hjälp att utveckla och optimera ditt befintliga projekt med professionell vägledning.",
-    href: "/kontakt?subject=radgivning",
+    id: 'radgivning',
+    title: 'Rådgivning & Support',
+    description:
+      'Få hjälp att utveckla och optimera ditt befintliga projekt med professionell vägledning.',
+    href: '/kontakt?subject=radgivning',
     external: false,
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+        />
       </svg>
     ),
-    gradient: "from-emerald-500 to-teal-400",
-    glowColor: "emerald-500/30",
+    gradient: 'from-emerald-500 to-teal-400',
+    glowColor: 'emerald-500/30',
   },
   {
-    id: "projektutveckling",
-    title: "Projektutveckling",
-    description: "Kontakta oss för skräddarsydd webbutveckling och större projektsamarbeten.",
-    href: "/kontakt?subject=projekt",
+    id: 'projektutveckling',
+    title: 'Projektutveckling',
+    description: 'Kontakta oss för skräddarsydd webbutveckling och större projektsamarbeten.',
+    href: '/kontakt?subject=projekt',
     external: false,
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
+        />
       </svg>
     ),
-    gradient: "from-violet-500 to-purple-400",
-    glowColor: "violet-500/30",
+    gradient: 'from-violet-500 to-purple-400',
+    glowColor: 'violet-500/30',
   },
-];
+]
 
 export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
   const handleOptionClick = (href: string, external: boolean) => {
     if (external) {
-      window.open(href, "_blank", "noopener,noreferrer");
+      window.open(href, '_blank', 'noopener,noreferrer')
     } else {
-      onClose();
+      onClose()
       // Navigate after modal starts closing
       setTimeout(() => {
-        window.location.href = href;
-      }, 100);
+        window.location.href = href
+      }, 100)
     }
-  };
+  }
 
   return (
     <AnimatePresence>
@@ -91,7 +107,7 @@ export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
                 initial={{ opacity: 0, y: 20, scale: 0.8 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.8 }}
-                transition={{ delay: 0.1, type: "spring", damping: 20, stiffness: 300 }}
+                transition={{ delay: 0.1, type: 'spring', damping: 20, stiffness: 300 }}
                 whileHover={{ scale: 1.15, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
@@ -103,12 +119,12 @@ export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
                   className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500 to-rose-600 shadow-lg"
                   animate={{
                     boxShadow: [
-                      "0 0 20px rgba(239, 68, 68, 0.5)",
-                      "0 0 35px rgba(239, 68, 68, 0.7)",
-                      "0 0 20px rgba(239, 68, 68, 0.5)",
+                      '0 0 20px rgba(239, 68, 68, 0.5)',
+                      '0 0 35px rgba(239, 68, 68, 0.7)',
+                      '0 0 20px rgba(239, 68, 68, 0.5)',
                     ],
                   }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 />
                 {/* X icon */}
                 <svg
@@ -127,7 +143,7 @@ export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 className="relative w-full max-w-2xl bg-gradient-to-br from-gray-900 via-gray-950 to-black border border-gray-700/50 rounded-3xl shadow-2xl overflow-hidden"
               >
                 {/* Top gradient accent */}
@@ -191,10 +207,10 @@ export default function OfferModal({ isOpen, onClose }: OfferModalProps) {
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }
 
-function OptionCard({ option }: { option: typeof offerOptions[0] }) {
+function OptionCard({ option }: { option: (typeof offerOptions)[0] }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
@@ -207,7 +223,7 @@ function OptionCard({ option }: { option: typeof offerOptions[0] }) {
       <div
         className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500
           bg-gradient-to-r ${option.gradient} blur-3xl -z-10`}
-        style={{ transform: "scale(0.8)" }}
+        style={{ transform: 'scale(0.8)' }}
       />
 
       <div className="flex items-center gap-5">
@@ -261,6 +277,5 @@ function OptionCard({ option }: { option: typeof offerOptions[0] }) {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
-

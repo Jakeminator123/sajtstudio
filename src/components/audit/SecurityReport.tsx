@@ -1,47 +1,47 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface SecurityReportProps {
   securityAnalysis: {
-    https_status: string;
-    headers_analysis: string;
-    cookie_policy: string;
-    vulnerabilities: string[];
-  };
+    https_status: string
+    headers_analysis: string
+    cookie_policy: string
+    vulnerabilities: string[]
+  }
 }
 
 export default function SecurityReport({ securityAnalysis }: SecurityReportProps) {
   const getStatusColor = (status: string) => {
     if (status.toLowerCase().includes('ok') || status.toLowerCase().includes('bra')) {
-      return 'text-green-400';
+      return 'text-green-400'
     }
     if (status.toLowerCase().includes('varning') || status.toLowerCase().includes('förbättra')) {
-      return 'text-yellow-400';
+      return 'text-yellow-400'
     }
-    return 'text-red-400';
-  };
+    return 'text-red-400'
+  }
 
   const securityItems = [
     {
       icon: '🔒',
       label: 'HTTPS Status',
       value: securityAnalysis.https_status,
-      description: 'Säker anslutning och SSL-certifikat'
+      description: 'Säker anslutning och SSL-certifikat',
     },
     {
       icon: '🛡️',
       label: 'Säkerhetshuvuden',
       value: securityAnalysis.headers_analysis,
-      description: 'HTTP-säkerhetshuvuden och CSP'
+      description: 'HTTP-säkerhetshuvuden och CSP',
     },
     {
       icon: '🍪',
       label: 'Cookie & GDPR',
       value: securityAnalysis.cookie_policy,
-      description: 'Cookie-hantering och integritetspolicy'
-    }
-  ];
+      description: 'Cookie-hantering och integritetspolicy',
+    },
+  ]
 
   return (
     <motion.div
@@ -67,9 +67,7 @@ export default function SecurityReport({ securityAnalysis }: SecurityReportProps
               <span className="text-3xl">{item.icon}</span>
               <h4 className="font-semibold text-gray-300">{item.label}</h4>
             </div>
-            <p className={`text-lg font-medium ${getStatusColor(item.value)} mb-2`}>
-              {item.value}
-            </p>
+            <p className={`text-lg font-medium ${getStatusColor(item.value)} mb-2`}>{item.value}</p>
             <p className="text-sm text-gray-500">{item.description}</p>
           </motion.div>
         ))}
@@ -139,5 +137,5 @@ export default function SecurityReport({ securityAnalysis }: SecurityReportProps
         </ul>
       </motion.div>
     </motion.div>
-  );
+  )
 }

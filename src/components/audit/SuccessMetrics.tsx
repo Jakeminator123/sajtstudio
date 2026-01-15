@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface SuccessMetricsProps {
   metrics: {
-    kpis: string[];
-    tracking_setup: string;
-    review_schedule: string;
-  };
+    kpis: string[]
+    tracking_setup: string
+    review_schedule: string
+  }
 }
 
 export default function SuccessMetrics({ metrics }: SuccessMetricsProps) {
@@ -49,6 +49,5 @@ export default function SuccessMetrics({ metrics }: SuccessMetricsProps) {
         </div>
       )}
     </motion.div>
-  );
+  )
 }
-

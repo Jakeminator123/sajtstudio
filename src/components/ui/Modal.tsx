@@ -1,78 +1,72 @@
-"use client";
+'use client'
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef } from "react";
-import Image from "next/image";
-import { trapFocus } from "@/lib/focusUtils";
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { trapFocus } from '@/lib/focusUtils'
 
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "full";
+  isOpen: boolean
+  onClose: () => void
+  children: React.ReactNode
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
 
-export default function Modal({
-  isOpen,
-  onClose,
-  children,
-  maxWidth = "lg",
-}: ModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
+export default function Modal({ isOpen, onClose, children, maxWidth = 'lg' }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
 
   // Handle escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isOpen) {
-        onClose();
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
       }
-    };
+    }
 
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
 
   // Lock body scroll and trap focus when modal is open
   useEffect(() => {
     if (isOpen) {
       // Lock body scroll - use getComputedStyle to get actual values
-      const computedStyle = window.getComputedStyle(document.body);
-      const originalOverflow = computedStyle.overflow;
-      const originalPaddingRight = computedStyle.paddingRight;
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
+      const computedStyle = window.getComputedStyle(document.body)
+      const originalOverflow = computedStyle.overflow
+      const originalPaddingRight = computedStyle.paddingRight
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
 
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden'
       if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
+        document.body.style.paddingRight = `${scrollbarWidth}px`
       }
 
       // Trap focus after a small delay to ensure modal is rendered
-      let cleanupFocusTrap: (() => void) | undefined;
+      let cleanupFocusTrap: (() => void) | undefined
       const focusTrapTimeout = setTimeout(() => {
         if (modalRef.current) {
-          cleanupFocusTrap = trapFocus(modalRef.current);
+          cleanupFocusTrap = trapFocus(modalRef.current)
         }
-      }, 100);
+      }, 100)
 
       return () => {
-        document.body.style.overflow = originalOverflow;
-        document.body.style.paddingRight = originalPaddingRight;
-        clearTimeout(focusTrapTimeout);
+        document.body.style.overflow = originalOverflow
+        document.body.style.paddingRight = originalPaddingRight
+        clearTimeout(focusTrapTimeout)
         if (cleanupFocusTrap) {
-          cleanupFocusTrap();
+          cleanupFocusTrap()
         }
-      };
+      }
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const maxWidthClasses = {
-    sm: "max-w-md",
-    md: "max-w-2xl",
-    lg: "max-w-4xl",
-    xl: "max-w-6xl",
-    full: "max-w-full mx-4",
-  };
+    sm: 'max-w-md',
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl',
+    full: 'max-w-full mx-4',
+  }
 
   return (
     <AnimatePresence>
@@ -80,9 +74,9 @@ export default function Modal({
         <>
           {/* Enhanced backdrop with gradient blur */}
           <motion.div
-            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-            animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
-            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             onClick={onClose}
             className="fixed inset-0 z-50 bg-gradient-to-br from-black/90 via-black/85 to-gray-900/90"
@@ -106,7 +100,7 @@ export default function Modal({
               transition={{
                 duration: 0.5,
                 ease: [0.34, 1.56, 0.64, 1],
-                type: "spring",
+                type: 'spring',
                 stiffness: 300,
                 damping: 30,
               }}
@@ -121,8 +115,8 @@ export default function Modal({
                 transition={{ delay: 0.2, duration: 0.5 }}
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(0, 102, 255, 0.2) 0%, rgba(75, 85, 99, 0.1) 50%, rgba(0, 102, 255, 0.2) 100%)",
-                  borderRadius: "inherit",
+                    'linear-gradient(135deg, rgba(0, 102, 255, 0.2) 0%, rgba(75, 85, 99, 0.1) 50%, rgba(0, 102, 255, 0.2) 100%)',
+                  borderRadius: 'inherit',
                 }}
               >
                 <div className="absolute inset-0 border-2 border-transparent bg-gradient-to-r from-accent/30 via-gray-400/20 to-accent/30 rounded-[inherit]" />
@@ -147,7 +141,7 @@ export default function Modal({
                 whileHover={{
                   scale: 1.1,
                   rotate: 90,
-                  backgroundColor: "#f3f4f6",
+                  backgroundColor: '#f3f4f6',
                 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
@@ -187,24 +181,24 @@ export default function Modal({
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }
 
 // Project Details Modal Component
 interface ProjectModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   project: {
-    id: string;
-    title: string;
-    category: string;
-    description: string;
-    longDescription?: string;
-    color: string;
-    image?: string;
-    technologies?: string[];
-    link?: string;
-  };
+    id: string
+    title: string
+    category: string
+    description: string
+    longDescription?: string
+    color: string
+    image?: string
+    technologies?: string[]
+    link?: string
+  }
 }
 
 export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
@@ -265,7 +259,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
               className="text-display font-black mb-4 leading-[0.9]"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
             >
               {project.title}
             </motion.h1>
@@ -381,7 +375,7 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                   rel="noopener noreferrer"
                   whileHover={{
                     scale: 1.05,
-                    boxShadow: "0 0 30px rgba(0, 102, 255, 0.3)",
+                    boxShadow: '0 0 30px rgba(0, 102, 255, 0.3)',
                   }}
                   whileTap={{ scale: 0.95 }}
                   className="inline-block px-8 py-4 bg-black text-white font-semibold hover:bg-accent transition-all duration-300 relative overflow-hidden group shadow-lg"
@@ -389,8 +383,8 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
                   {/* Shimmer effect */}
                   <motion.span
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "100%" }}
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
                     transition={{ duration: 0.6 }}
                   />
                   <span className="relative z-10">Besök hemsidan</span>
@@ -401,5 +395,5 @@ export function ProjectModal({ isOpen, onClose, project }: ProjectModalProps) {
         </div>
       </div>
     </Modal>
-  );
+  )
 }

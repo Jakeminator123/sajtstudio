@@ -1,30 +1,30 @@
-"use client";
+'use client'
 
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { useEffect } from "react";
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import { useEffect } from 'react'
 
 interface CaseStudy {
-  id: string;
-  title: string;
-  client: string;
-  thumbnail: string;
-  hero: string;
-  problem: string;
-  solution: string;
-  results: string[];
-  tech: string[];
-  images: string[];
+  id: string
+  title: string
+  client: string
+  thumbnail: string
+  hero: string
+  problem: string
+  solution: string
+  results: string[]
+  tech: string[]
+  images: string[]
 }
 
 interface CaseStudyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  caseStudy: CaseStudy;
-  onNext?: () => void;
-  onPrev?: () => void;
-  hasNext?: boolean;
-  hasPrev?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  caseStudy: CaseStudy
+  onNext?: () => void
+  onPrev?: () => void
+  hasNext?: boolean
+  hasPrev?: boolean
 }
 
 export default function CaseStudyModal({
@@ -40,35 +40,35 @@ export default function CaseStudyModal({
   // const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const handleScroll = (_e: Event) => {
       // Scroll tracking currently unused
       // const target = _e.target as HTMLDivElement;
       // setScrollPosition(target.scrollTop);
-    };
+    }
 
-    const modalContent = document.getElementById("case-study-content");
-    modalContent?.addEventListener("scroll", handleScroll, { passive: true });
+    const modalContent = document.getElementById('case-study-content')
+    modalContent?.addEventListener('scroll', handleScroll, { passive: true })
 
-    return () => modalContent?.removeEventListener("scroll", handleScroll);
-  }, [isOpen]);
+    return () => modalContent?.removeEventListener('scroll', handleScroll)
+  }, [isOpen])
 
   // Keyboard navigation
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" && hasNext && onNext) {
-        onNext();
-      } else if (e.key === "ArrowLeft" && hasPrev && onPrev) {
-        onPrev();
+      if (e.key === 'ArrowRight' && hasNext && onNext) {
+        onNext()
+      } else if (e.key === 'ArrowLeft' && hasPrev && onPrev) {
+        onPrev()
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, hasNext, hasPrev, onNext, onPrev]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, hasNext, hasPrev, onNext, onPrev])
 
   return (
     <AnimatePresence>
@@ -90,7 +90,7 @@ export default function CaseStudyModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{
-              type: "spring",
+              type: 'spring',
               stiffness: 300,
               damping: 30,
             }}
@@ -272,7 +272,7 @@ export default function CaseStudyModal({
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
                             className="relative aspect-video overflow-hidden w-full"
-                            style={{ minHeight: "200px" }}
+                            style={{ minHeight: '200px' }}
                           >
                             <Image
                               src={img}
@@ -321,9 +321,7 @@ export default function CaseStudyModal({
                           >
                             <path d="M5 13l4 4L19 7" />
                           </svg>
-                          <span className="text-lg text-gray-700">
-                            {result}
-                          </span>
+                          <span className="text-lg text-gray-700">{result}</span>
                         </motion.div>
                       ))}
                     </div>
@@ -363,5 +361,5 @@ export default function CaseStudyModal({
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }

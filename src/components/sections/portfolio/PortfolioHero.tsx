@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import WordReveal from "@/components/animations/WordReveal";
-import OptimizedVideo from "@/components/shared/OptimizedVideo";
+import { motion } from 'framer-motion'
+import WordReveal from '@/components/animations/WordReveal'
+import OptimizedVideo from '@/components/shared/OptimizedVideo'
 
 export default function PortfolioHero() {
   return (
@@ -47,6 +47,5 @@ export default function PortfolioHero() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }
-

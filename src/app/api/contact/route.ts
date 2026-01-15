@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { Resend } from "resend"
-import fs from "fs/promises"
-import path from "path"
-import { siteConfig } from "@/config/siteConfig"
+import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
+import fs from 'fs/promises'
+import path from 'path'
+import { siteConfig } from '@/config/siteConfig'
 
 // Contact entry type
 interface ContactEntry {
@@ -15,10 +15,10 @@ interface ContactEntry {
 }
 
 // Path to contacts data file
-const CONTACTS_FILE = path.join(process.cwd(), "data", "contacts.json")
+const CONTACTS_FILE = path.join(process.cwd(), 'data', 'contacts.json')
 
 // Ensure data directory exists and save contact to file
-async function saveContact(contact: Omit<ContactEntry, "id">) {
+async function saveContact(contact: Omit<ContactEntry, 'id'>) {
   try {
     // Ensure data directory exists
     const dataDir = path.dirname(CONTACTS_FILE)
@@ -27,7 +27,7 @@ async function saveContact(contact: Omit<ContactEntry, "id">) {
     // Read existing contacts
     let contacts: ContactEntry[] = []
     try {
-      const data = await fs.readFile(CONTACTS_FILE, "utf-8")
+      const data = await fs.readFile(CONTACTS_FILE, 'utf-8')
       contacts = JSON.parse(data)
     } catch {
       // File doesn't exist yet, start with empty array
@@ -45,12 +45,12 @@ async function saveContact(contact: Omit<ContactEntry, "id">) {
     contacts.push(newContact)
 
     // Save to file
-    await fs.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2), "utf-8")
+    await fs.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2), 'utf-8')
 
     console.log(`✅ Contact saved to ${CONTACTS_FILE}:`, { id, email: contact.email })
     return newContact
   } catch (error) {
-    console.error("Error saving contact to file:", error)
+    console.error('Error saving contact to file:', error)
     // Don't throw - we don't want to fail the request just because file save failed
     return null
   }
@@ -71,25 +71,25 @@ export async function POST(request: NextRequest) {
     const { name, email, message, source } = body
 
     // Trim and validate required fields
-    const trimmedName = typeof name === "string" ? name.trim() : ""
-    const trimmedEmail = typeof email === "string" ? email.trim() : ""
-    const trimmedMessage = typeof message === "string" ? message.trim() : ""
-    const contactSource = typeof source === "string" ? source : "website"
+    const trimmedName = typeof name === 'string' ? name.trim() : ''
+    const trimmedEmail = typeof email === 'string' ? email.trim() : ''
+    const trimmedMessage = typeof message === 'string' ? message.trim() : ''
+    const contactSource = typeof source === 'string' ? source : 'website'
 
     // Message is required, but name and email can be optional (use defaults)
     if (!trimmedMessage) {
-      return NextResponse.json({ error: "Meddelandet är obligatoriskt" }, { status: 400 })
+      return NextResponse.json({ error: 'Meddelandet är obligatoriskt' }, { status: 400 })
     }
 
     // Use defaults if name or email is missing
-    const finalName = trimmedName || "Anonym besökare"
-    const finalEmail = trimmedEmail || "anonym@sajtstudio.se"
+    const finalName = trimmedName || 'Anonym besökare'
+    const finalEmail = trimmedEmail || 'anonym@sajtstudio.se'
 
     // Validate email format (only if email is provided and not anonymous)
-    if (trimmedEmail && finalEmail !== "anonym@sajtstudio.se") {
+    if (trimmedEmail && finalEmail !== 'anonym@sajtstudio.se') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(trimmedEmail)) {
-        return NextResponse.json({ error: "Ogiltig e-postadress" }, { status: 400 })
+        return NextResponse.json({ error: 'Ogiltig e-postadress' }, { status: 400 })
       }
     }
 
@@ -107,14 +107,14 @@ export async function POST(request: NextRequest) {
     if (!resend) {
       // No Resend API key configured - contact is already saved, just return success
       return NextResponse.json(
-        { success: true, message: "Strålande, vi återkommer inom kort!" },
+        { success: true, message: 'Strålande, vi återkommer inom kort!' },
         { status: 200 }
       )
     }
 
     try {
       const { data, error } = await resend.emails.send({
-        from: "Sajtstudio Kontaktformulär <onboarding@resend.dev>", // You'll need to verify your domain with Resend
+        from: 'Sajtstudio Kontaktformulär <onboarding@resend.dev>', // You'll need to verify your domain with Resend
         to: [siteConfig.contact.email],
         subject: `Nytt meddelande från ${finalName} - Sajtstudio`,
         html: `
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
               <h3 style="color: #000; margin-top: 0;">Meddelande:</h3>
               <p style="color: #333; white-space: pre-wrap;">${trimmedMessage.replace(
                 /\n/g,
-                "<br>"
+                '<br>'
               )}</p>
             </div>
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
@@ -138,20 +138,20 @@ export async function POST(request: NextRequest) {
             </div>
           </div>
         `,
-        replyTo: finalEmail !== "anonym@sajtstudio.se" ? finalEmail : undefined, // So you can reply directly to the sender
+        replyTo: finalEmail !== 'anonym@sajtstudio.se' ? finalEmail : undefined, // So you can reply directly to the sender
       })
 
       if (error) {
-        console.error("Resend error:", error)
+        console.error('Resend error:', error)
         // In development, still log and return success
-        if (process.env.NODE_ENV === "development") {
-          console.log("Contact form submission (email failed):", {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Contact form submission (email failed):', {
             name: finalName,
             email: finalEmail,
             message: trimmedMessage,
           })
           return NextResponse.json(
-            { success: true, message: "Strålande, vi återkommer inom kort!" },
+            { success: true, message: 'Strålande, vi återkommer inom kort!' },
             { status: 200 }
           )
         }
@@ -159,9 +159,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Log in development
-      if (process.env.NODE_ENV === "development") {
-        console.log("Email sent successfully:", data)
-        console.log("Contact form submission:", {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Email sent successfully:', data)
+        console.log('Contact form submission:', {
           name: finalName,
           email: finalEmail,
           message: trimmedMessage,
@@ -169,21 +169,21 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { success: true, message: "Strålande, vi återkommer inom kort!" },
+        { success: true, message: 'Strålande, vi återkommer inom kort!' },
         { status: 200 }
       )
     } catch (emailError) {
-      console.error("Email sending error:", emailError)
+      console.error('Email sending error:', emailError)
 
       // In development, still return success even if email fails
-      if (process.env.NODE_ENV === "development") {
-        console.log("Contact form submission (email failed, dev mode):", {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Contact form submission (email failed, dev mode):', {
           name: finalName,
           email: finalEmail,
           message: trimmedMessage,
         })
         return NextResponse.json(
-          { success: true, message: "Strålande, vi återkommer inom kort!" },
+          { success: true, message: 'Strålande, vi återkommer inom kort!' },
           { status: 200 }
         )
       }
@@ -192,8 +192,8 @@ export async function POST(request: NextRequest) {
       throw emailError
     }
   } catch (error) {
-    console.error("Error processing contact form:", error)
-    return NextResponse.json({ error: "Något gick fel. Försök igen senare." }, { status: 500 })
+    console.error('Error processing contact form:', error)
+    return NextResponse.json({ error: 'Något gick fel. Försök igen senare.' }, { status: 500 })
   }
 }
 
@@ -201,17 +201,17 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Simple API key protection - require CONTACTS_API_KEY env var
-    const authHeader = request.headers.get("Authorization")
+    const authHeader = request.headers.get('Authorization')
     const apiKey = process.env.CONTACTS_API_KEY
 
     // If API key is set, require it for access
     if (apiKey && authHeader !== `Bearer ${apiKey}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Read contacts from file
     try {
-      const data = await fs.readFile(CONTACTS_FILE, "utf-8")
+      const data = await fs.readFile(CONTACTS_FILE, 'utf-8')
       const contacts: ContactEntry[] = JSON.parse(data)
 
       // Sort by timestamp, newest first
@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error("Error reading contacts:", error)
-    return NextResponse.json({ error: "Could not read contacts" }, { status: 500 })
+    console.error('Error reading contacts:', error)
+    return NextResponse.json({ error: 'Could not read contacts' }, { status: 500 })
   }
 }

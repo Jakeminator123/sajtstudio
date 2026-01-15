@@ -27,9 +27,7 @@ export function useTouchInteraction(
   }: TouchInteractionOptions
 ) {
   const [isTouching, setIsTouching] = useState(false)
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(
-    null
-  )
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null)
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -79,12 +77,7 @@ export function useTouchInteraction(
       const deltaTime = Date.now() - touchStartRef.current.time
 
       // Check for tap (minimal movement and quick)
-      if (
-        Math.abs(deltaX) < 10 &&
-        Math.abs(deltaY) < 10 &&
-        deltaTime < 200 &&
-        onTap
-      ) {
+      if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && deltaTime < 200 && onTap) {
         onTap()
         return
       }

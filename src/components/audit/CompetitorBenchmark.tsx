@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface CompetitorBenchmarkProps {
   benchmarking: {
-    industry_leaders: string[];
-    common_features: string[];
-    differentiation_opportunities: string[];
-  };
+    industry_leaders: string[]
+    common_features: string[]
+    differentiation_opportunities: string[]
+  }
 }
 
 const sections = [
   { key: 'industry_leaders', label: 'Ledande aktörer', icon: '🏆' },
   { key: 'common_features', label: 'Standardfunktioner', icon: '🧩' },
   { key: 'differentiation_opportunities', label: 'Möjligheter att sticka ut', icon: '🚀' },
-] as const;
+] as const
 
 export default function CompetitorBenchmark({ benchmarking }: CompetitorBenchmarkProps) {
   return (
@@ -29,8 +29,8 @@ export default function CompetitorBenchmark({ benchmarking }: CompetitorBenchmar
       </div>
       <div className="grid md:grid-cols-3 gap-4">
         {sections.map((section) => {
-          const values = benchmarking[section.key];
-          if (!values || values.length === 0) return null;
+          const values = benchmarking[section.key]
+          if (!values || values.length === 0) return null
 
           return (
             <motion.div
@@ -52,10 +52,9 @@ export default function CompetitorBenchmark({ benchmarking }: CompetitorBenchmar
                 ))}
               </ul>
             </motion.div>
-          );
+          )
         })}
       </div>
     </motion.div>
-  );
+  )
 }
-

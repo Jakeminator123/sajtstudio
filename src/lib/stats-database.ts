@@ -2,10 +2,10 @@
  * Stats Database - SQLite-based storage for visitor statistics
  */
 
-import Database from "better-sqlite3"
-import path from "path"
+import Database from 'better-sqlite3'
+import path from 'path'
 
-const dbPath = path.join(process.cwd(), "data", "db", "stats.db")
+const dbPath = path.join(process.cwd(), 'data', 'db', 'stats.db')
 
 // Create database connection
 const statsDb = new Database(dbPath)
@@ -70,7 +70,7 @@ export interface StatsData {
  */
 export function recordPageView(
   visitorId: string,
-  page: string = "/",
+  page: string = '/',
   ipHash?: string | null,
   ipPrefix?: string | null
 ): void {
@@ -99,7 +99,7 @@ export function recordPageView(
  * Get statistics for admin dashboard
  */
 export function getStats(): StatsData {
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split('T')[0]
 
   const totalStmt = statsDb.prepare(`SELECT COUNT(*) as count FROM page_views`)
   const totalPageViews = (totalStmt.get() as { count: number }).count

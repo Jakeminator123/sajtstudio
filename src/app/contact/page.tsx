@@ -24,5 +24,5 @@
 
 // For now, export nothing - this route will 404 via catch-all
 export default function DeprecatedContactPage() {
-  return null;
+  return null
 }

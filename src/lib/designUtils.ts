@@ -14,10 +14,7 @@ export function getColor(path: string): string {
   for (const part of parts) {
     value = (value as Record<string, unknown>)?.[part]
     if (value === undefined) {
-      if (
-        typeof window !== 'undefined' &&
-        process.env.NODE_ENV === 'development'
-      ) {
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
         console.warn(`Color path "${path}" not found in design tokens`)
       }
       return '#000000'
@@ -37,27 +34,21 @@ export function getSpacing(size: keyof typeof designTokens.spacing): string {
 /**
  * Hämta fontstorlek från design tokens
  */
-export function getFontSize(
-  size: keyof typeof designTokens.typography.fontSize
-): string {
+export function getFontSize(size: keyof typeof designTokens.typography.fontSize): string {
   return designTokens.typography.fontSize[size]
 }
 
 /**
  * Hämta animation duration
  */
-export function getAnimationDuration(
-  speed: keyof typeof designTokens.animation.duration
-): string {
+export function getAnimationDuration(speed: keyof typeof designTokens.animation.duration): string {
   return designTokens.animation.duration[speed]
 }
 
 /**
  * Hämta breakpoint värde
  */
-export function getBreakpoint(
-  size: keyof typeof designTokens.breakpoints
-): string {
+export function getBreakpoint(size: keyof typeof designTokens.breakpoints): string {
   return designTokens.breakpoints[size]
 }
 

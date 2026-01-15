@@ -1,55 +1,52 @@
-"use client";
+'use client'
 
-import { Component, ReactNode } from "react";
-import dynamic from "next/dynamic";
+import { Component, ReactNode } from 'react'
+import dynamic from 'next/dynamic'
 
 // Dynamically import Button to avoid SSR issues
-const Button = dynamic(() => import("@/components/ui/Button"), { ssr: false });
+const Button = dynamic(() => import('@/components/ui/Button'), { ssr: false })
 
 interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
+  children: ReactNode
+  fallback?: ReactNode
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
+  hasError: boolean
+  error: Error | null
 }
 
-class ErrorBoundaryComponent extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
+    super(props)
+    this.state = { hasError: false, error: null }
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('ErrorBoundary caught an error:', error, errorInfo)
     }
 
     // Log error to API endpoint
-    this.logErrorToAPI(error, errorInfo);
+    this.logErrorToAPI(error, errorInfo)
   }
 
   private logErrorToAPI(error: Error, errorInfo: React.ErrorInfo) {
     // Use setTimeout to avoid blocking error handling
     setTimeout(() => {
       try {
-        if (typeof window !== "undefined" && typeof fetch !== "undefined") {
-          fetch("/api/errors", {
-            method: "POST",
+        if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
+          fetch('/api/errors', {
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              type: "boundary",
+              type: 'boundary',
               message: error.message || error.toString(),
               stack: error.stack,
               componentStack: errorInfo.componentStack,
@@ -57,18 +54,18 @@ class ErrorBoundaryComponent extends Component<
             }),
           }).catch(() => {
             // Silently fail if API is not available
-          });
+          })
         }
       } catch {
         // Silently fail if fetch is not available
       }
-    }, 0);
+    }, 0)
   }
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return <>{this.props.fallback}</>;
+        return <>{this.props.fallback}</>
       }
 
       return (
@@ -110,7 +107,7 @@ class ErrorBoundaryComponent extends Component<
               Ladda om sidan
             </Button>
 
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-8 text-left text-sm text-gray-500">
                 <summary className="cursor-pointer hover:text-gray-700">
                   Teknisk information
@@ -123,28 +120,28 @@ class ErrorBoundaryComponent extends Component<
             )}
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 
 // Export as default with SSR safety check
 const ErrorBoundary =
-  typeof window !== "undefined"
+  typeof window !== 'undefined'
     ? ErrorBoundaryComponent
-    : ({ children }: { children: ReactNode }) => <>{children}</>;
+    : ({ children }: { children: ReactNode }) => <>{children}</>
 
-export default ErrorBoundary;
+export default ErrorBoundary
 
 // Hook to reset error boundary
 export function useErrorBoundary() {
   return {
     resetErrorBoundary: () => {
-      if (typeof window !== "undefined") {
-        window.location.reload();
+      if (typeof window !== 'undefined') {
+        window.location.reload()
       }
     },
-  };
+  }
 }

@@ -1,86 +1,79 @@
-"use client";
+'use client'
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import Image from "next/image";
-import { useState, useRef } from "react";
+import { motion, useScroll, useTransform } from 'framer-motion'
+import Image from 'next/image'
+import { useState, useRef } from 'react'
 
 const portfolioProjects = [
   {
     id: 1,
-    title: "Digital Innovation",
-    category: "Web Design",
-    image: "/images/portfolio/portfolio_1.webp",
-    description: "Modern webbdesign för framtidens företag",
-    color: "from-blue-600 to-purple-600",
+    title: 'Digital Innovation',
+    category: 'Web Design',
+    image: '/images/portfolio/portfolio_1.webp',
+    description: 'Modern webbdesign för framtidens företag',
+    color: 'from-blue-600 to-purple-600',
   },
   {
     id: 2,
-    title: "Creative Solutions",
-    category: "Branding",
-    image: "/images/portfolio/portfolio_2.webp",
-    description: "Visuell identitet som står ut",
-    color: "from-purple-600 to-pink-600",
+    title: 'Creative Solutions',
+    category: 'Branding',
+    image: '/images/portfolio/portfolio_2.webp',
+    description: 'Visuell identitet som står ut',
+    color: 'from-purple-600 to-pink-600',
   },
   {
     id: 3,
-    title: "Tech Showcase",
-    category: "Development",
-    image: "/images/portfolio/portfolio_3.webp",
-    description: "Kraftfulla tekniska lösningar",
-    color: "from-pink-600 to-red-600",
+    title: 'Tech Showcase',
+    category: 'Development',
+    image: '/images/portfolio/portfolio_3.webp',
+    description: 'Kraftfulla tekniska lösningar',
+    color: 'from-pink-600 to-red-600',
   },
   {
     id: 4,
-    title: "Design System",
-    category: "Architecture",
-    image:
-      "/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp",
-    description: "Skalbar arkitektur och design",
-    color: "from-red-600 to-orange-600",
+    title: 'Design System',
+    category: 'Architecture',
+    image: '/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp',
+    description: 'Skalbar arkitektur och design',
+    color: 'from-red-600 to-orange-600',
   },
   {
     id: 5,
-    title: "Visual Stories",
-    category: "UI/UX",
-    image: "/images/portfolio/portfolio_5.webp",
-    description: "Användarupplevelser som berör",
-    color: "from-green-600 to-teal-600",
+    title: 'Visual Stories',
+    category: 'UI/UX',
+    image: '/images/portfolio/portfolio_5.webp',
+    description: 'Användarupplevelser som berör',
+    color: 'from-green-600 to-teal-600',
   },
   {
     id: 6,
-    title: "Brand Evolution",
-    category: "Strategy",
-    image: "/images/portfolio/portfolio_6.webp",
-    description: "Strategisk varumärkesutveckling",
-    color: "from-orange-600 to-yellow-600",
+    title: 'Brand Evolution',
+    category: 'Strategy',
+    image: '/images/portfolio/portfolio_6.webp',
+    description: 'Strategisk varumärkesutveckling',
+    color: 'from-orange-600 to-yellow-600',
   },
-];
+]
 
 export default function PortfolioGallery() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [selectedProject, setSelectedProject] = useState<
-    (typeof portfolioProjects)[0] | null
-  >(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [selectedProject, setSelectedProject] = useState<(typeof portfolioProjects)[0] | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "end start"],
+    offset: ['start end', 'end start'],
     layoutEffect: false,
-  });
+  })
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(
-    scrollYProgress,
-    [0, 0.2, 0.8, 1],
-    [0.8, 1, 1, 0.8]
-  );
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8])
 
   return (
     <section
       ref={containerRef}
       className="relative py-32 overflow-hidden"
-      style={{ position: "relative" }}
+      style={{ position: 'relative' }}
     >
       {/* Background gradient */}
       <motion.div className="absolute inset-0 opacity-30" style={{ opacity }}>
@@ -102,8 +95,7 @@ export default function PortfolioGallery() {
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Utforska vårt portfolio av innovativa webbupplevelser och digitala
-            lösningar
+            Utforska vårt portfolio av innovativa webbupplevelser och digitala lösningar
           </p>
         </motion.div>
 
@@ -126,7 +118,7 @@ export default function PortfolioGallery() {
             >
               <div
                 className="relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/3] w-full"
-                style={{ minHeight: "200px" }}
+                style={{ minHeight: '200px' }}
               >
                 {/* Image */}
                 <Image
@@ -150,21 +142,15 @@ export default function PortfolioGallery() {
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={
-                      hoveredId === project.id
-                        ? { y: 0, opacity: 1 }
-                        : { y: 20, opacity: 0 }
+                      hoveredId === project.id ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }
                     }
                     transition={{ duration: 0.3 }}
                   >
                     <span className="text-sm text-gray-300 font-medium uppercase tracking-wider">
                       {project.category}
                     </span>
-                    <h3 className="text-2xl font-bold text-white mt-2 mb-3">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-200 text-sm">
-                      {project.description}
-                    </p>
+                    <h3 className="text-2xl font-bold text-white mt-2 mb-3">{project.title}</h3>
+                    <p className="text-gray-200 text-sm">{project.description}</p>
                   </motion.div>
                 </div>
 
@@ -172,9 +158,7 @@ export default function PortfolioGallery() {
                 <motion.div
                   className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"
                   animate={
-                    hoveredId === project.id
-                      ? { scale: 1.2, rotate: 90 }
-                      : { scale: 1, rotate: 0 }
+                    hoveredId === project.id ? { scale: 1.2, rotate: 90 } : { scale: 1, rotate: 0 }
                   }
                   transition={{ duration: 0.3 }}
                 >
@@ -266,12 +250,8 @@ export default function PortfolioGallery() {
               <span className="text-sm text-gray-400 font-medium uppercase tracking-wider">
                 {selectedProject.category}
               </span>
-              <h3 className="text-3xl font-bold text-white mt-2 mb-4">
-                {selectedProject.title}
-              </h3>
-              <p className="text-gray-300 text-lg mb-6">
-                {selectedProject.description}
-              </p>
+              <h3 className="text-3xl font-bold text-white mt-2 mb-4">{selectedProject.title}</h3>
+              <p className="text-gray-300 text-lg mb-6">{selectedProject.description}</p>
               <button
                 className={`px-6 py-3 bg-gradient-to-r ${selectedProject.color} text-white font-semibold rounded-lg hover:scale-105 transition-transform`}
               >
@@ -282,5 +262,5 @@ export default function PortfolioGallery() {
         </motion.div>
       )}
     </section>
-  );
+  )
 }

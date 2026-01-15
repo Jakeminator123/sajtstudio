@@ -1,43 +1,45 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 
 interface TechnicalRecommendation {
-  area: string;
-  current_state: string;
-  recommendation: string;
-  implementation?: string;
+  area: string
+  current_state: string
+  recommendation: string
+  implementation?: string
 }
 
 interface TechnicalRecommendationsProps {
-  recommendations: TechnicalRecommendation[];
+  recommendations: TechnicalRecommendation[]
 }
 
-export default function TechnicalRecommendations({ recommendations }: TechnicalRecommendationsProps) {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [copiedCode, setCopiedCode] = useState<number | null>(null);
+export default function TechnicalRecommendations({
+  recommendations,
+}: TechnicalRecommendationsProps) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
+  const [copiedCode, setCopiedCode] = useState<number | null>(null)
 
   const getAreaIcon = (area: string) => {
-    const areaLower = area.toLowerCase();
-    if (areaLower.includes('seo')) return '🔍';
-    if (areaLower.includes('performance') || areaLower.includes('prestanda')) return '⚡';
-    if (areaLower.includes('security') || areaLower.includes('säkerhet')) return '🔒';
-    if (areaLower.includes('mobile') || areaLower.includes('mobil')) return '📱';
-    if (areaLower.includes('accessibility') || areaLower.includes('tillgänglighet')) return '♿';
-    if (areaLower.includes('ux') || areaLower.includes('design')) return '🎨';
-    return '⚙️';
-  };
+    const areaLower = area.toLowerCase()
+    if (areaLower.includes('seo')) return '🔍'
+    if (areaLower.includes('performance') || areaLower.includes('prestanda')) return '⚡'
+    if (areaLower.includes('security') || areaLower.includes('säkerhet')) return '🔒'
+    if (areaLower.includes('mobile') || areaLower.includes('mobil')) return '📱'
+    if (areaLower.includes('accessibility') || areaLower.includes('tillgänglighet')) return '♿'
+    if (areaLower.includes('ux') || areaLower.includes('design')) return '🎨'
+    return '⚙️'
+  }
 
   const copyToClipboard = async (code: string, index: number) => {
     try {
-      await navigator.clipboard.writeText(code);
-      setCopiedCode(index);
-      setTimeout(() => setCopiedCode(null), 2000);
+      await navigator.clipboard.writeText(code)
+      setCopiedCode(index)
+      setTimeout(() => setCopiedCode(null), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error('Failed to copy:', err)
     }
-  };
+  }
 
   return (
     <motion.div
@@ -78,7 +80,12 @@ export default function TechnicalRecommendations({ recommendations }: TechnicalR
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </motion.svg>
               </div>
             </button>
@@ -87,7 +94,7 @@ export default function TechnicalRecommendations({ recommendations }: TechnicalR
               {expandedIndex === index && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
+                  animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
                   className="border-t border-white/10"
@@ -107,20 +114,42 @@ export default function TechnicalRecommendations({ recommendations }: TechnicalR
                             Implementation
                           </h5>
                           <button
-                            onClick={() => rec.implementation && copyToClipboard(rec.implementation, index)}
+                            onClick={() =>
+                              rec.implementation && copyToClipboard(rec.implementation, index)
+                            }
                             className="text-xs text-gray-500 hover:text-white transition-colors flex items-center gap-1"
                           >
                             {copiedCode === index ? (
                               <>
-                                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                <svg
+                                  className="w-4 h-4 text-green-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
                                 </svg>
                                 Kopierat!
                               </>
                             ) : (
                               <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                  />
                                 </svg>
                                 Kopiera kod
                               </>
@@ -129,7 +158,9 @@ export default function TechnicalRecommendations({ recommendations }: TechnicalR
                         </div>
                         <div className="relative">
                           <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto">
-                            <code className="text-sm text-gray-300 font-mono">{rec.implementation}</code>
+                            <code className="text-sm text-gray-300 font-mono">
+                              {rec.implementation}
+                            </code>
                           </pre>
                         </div>
                       </div>
@@ -172,5 +203,5 @@ export default function TechnicalRecommendations({ recommendations }: TechnicalR
         </ul>
       </motion.div>
     </motion.div>
-  );
+  )
 }

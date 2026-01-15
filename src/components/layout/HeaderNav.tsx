@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 /**
  * HeaderNav Component
@@ -39,186 +39,186 @@
  * @see RESPONSIVE_DESIGN_GUIDE.md - For responsive patterns
  */
 
-import Button from "@/components/ui/Button";
-import ThemeToggle from "@/components/ui/ThemeToggle";
-import { siteConfig } from "@/config/siteConfig";
-import { useTheme } from "@/hooks/useTheme";
-import { useOfferModal } from "@/hooks/useOfferModal";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import MobileMenu from "./MobileMenu";
+import Button from '@/components/ui/Button'
+import ThemeToggle from '@/components/ui/ThemeToggle'
+import { siteConfig } from '@/config/siteConfig'
+import { useTheme } from '@/hooks/useTheme'
+import { useOfferModal } from '@/hooks/useOfferModal'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import MobileMenu from './MobileMenu'
 
 type NavLink = {
-  href: string;
-  label: string;
-  hash?: string;
-};
+  href: string
+  label: string
+  hash?: string
+}
 
 export default function HeaderNav() {
-  const pathname = usePathname();
-  const headerRef = useRef<HTMLElement | null>(null);
-  const didInitialHashScrollRef = useRef(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { isLight } = useTheme();
-  const { openModal } = useOfferModal();
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [currentHash, setCurrentHash] = useState("");
-  const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null);
-  const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname()
+  const headerRef = useRef<HTMLElement | null>(null)
+  const didInitialHashScrollRef = useRef(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { isLight } = useTheme()
+  const { openModal } = useOfferModal()
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [currentHash, setCurrentHash] = useState('')
+  const [shimmeringIndex, setShimmeringIndex] = useState<number | null>(null)
+  const shimmerIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const scrollToSection = (hash: string) => {
-    if (typeof window === "undefined") return;
-    const id = hash.startsWith("#") ? hash.slice(1) : hash;
-    if (!id) return;
+    if (typeof window === 'undefined') return
+    const id = hash.startsWith('#') ? hash.slice(1) : hash
+    if (!id) return
 
     // Update URL without letting the browser "jump" before the element exists
-    window.history.pushState(null, "", `/#${id}`);
+    window.history.pushState(null, '', `/#${id}`)
     // Keep local state in sync (pushState doesn't trigger hashchange)
-    setCurrentHash(`#${id}`);
+    setCurrentHash(`#${id}`)
 
-    let attempts = 0;
-    const maxAttempts = 220; // allow lazy sections to mount (~3-4s worst case)
+    let attempts = 0
+    const maxAttempts = 220 // allow lazy sections to mount (~3-4s worst case)
     const tryScroll = () => {
-      const el = document.getElementById(id);
+      const el = document.getElementById(id)
       if (el) {
         const computeHeaderOffset = () => {
-          const rootStyle = getComputedStyle(document.documentElement);
-          const headerHeightRaw = rootStyle.getPropertyValue("--header-height").trim();
-          const headerHeight = Number.parseInt(headerHeightRaw || "0", 10) || 80;
-          return headerHeight + 16;
-        };
+          const rootStyle = getComputedStyle(document.documentElement)
+          const headerHeightRaw = rootStyle.getPropertyValue('--header-height').trim()
+          const headerHeight = Number.parseInt(headerHeightRaw || '0', 10) || 80
+          return headerHeight + 16
+        }
 
         const scrollToEl = () => {
-          const offset = computeHeaderOffset();
-          const top = el.getBoundingClientRect().top + window.scrollY - offset;
-          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-        };
+          const offset = computeHeaderOffset()
+          const top = el.getBoundingClientRect().top + window.scrollY - offset
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+        }
 
         // First scroll
-        scrollToEl();
+        scrollToEl()
 
         // Re-align a few times to survive layout shifts from lazy-loaded sections
-        let settle = 0;
-        const settleMax = 10;
+        let settle = 0
+        const settleMax = 10
         const settleTick = () => {
-          settle++;
-          const offset = computeHeaderOffset();
-          const rectTop = el.getBoundingClientRect().top;
-          const delta = rectTop - offset;
-          if (Math.abs(delta) < 8) return;
-          scrollToEl();
+          settle++
+          const offset = computeHeaderOffset()
+          const rectTop = el.getBoundingClientRect().top
+          const delta = rectTop - offset
+          if (Math.abs(delta) < 8) return
+          scrollToEl()
           if (settle < settleMax) {
-            window.setTimeout(settleTick, 120);
+            window.setTimeout(settleTick, 120)
           }
-        };
-        window.setTimeout(settleTick, 120);
-        return;
+        }
+        window.setTimeout(settleTick, 120)
+        return
       }
-      attempts++;
-      if (attempts < maxAttempts) requestAnimationFrame(tryScroll);
-    };
-    requestAnimationFrame(tryScroll);
-  };
+      attempts++
+      if (attempts < maxAttempts) requestAnimationFrame(tryScroll)
+    }
+    requestAnimationFrame(tryScroll)
+  }
 
   // If we land directly on a hash (e.g. /#portfolio), wait for lazy sections to mount then scroll.
   useEffect(() => {
-    if (!mounted) return;
-    if (pathname !== "/") return;
-    if (didInitialHashScrollRef.current) return;
-    if (typeof window === "undefined") return;
+    if (!mounted) return
+    if (pathname !== '/') return
+    if (didInitialHashScrollRef.current) return
+    if (typeof window === 'undefined') return
 
-    const hash = window.location.hash;
-    if (!hash) return;
+    const hash = window.location.hash
+    if (!hash) return
 
-    didInitialHashScrollRef.current = true;
-    scrollToSection(hash);
-  }, [mounted, pathname]);
+    didInitialHashScrollRef.current = true
+    scrollToSection(hash)
+  }, [mounted, pathname])
 
   // Ensure hydration safety - only track scroll after mount
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   // Expose header height as CSS variable so layout can offset fixed header without magic numbers.
   // Includes safe-area padding (iOS) because we apply it to the header element.
   useEffect(() => {
-    if (!mounted || typeof window === "undefined") return;
+    if (!mounted || typeof window === 'undefined') return
 
-    const root = document.documentElement;
+    const root = document.documentElement
 
     const update = () => {
-      const el = headerRef.current;
-      if (!el) return;
-      const next = Math.round(el.getBoundingClientRect().height);
+      const el = headerRef.current
+      if (!el) return
+      const next = Math.round(el.getBoundingClientRect().height)
       if (next > 0) {
-        root.style.setProperty("--header-height", `${next}px`);
+        root.style.setProperty('--header-height', `${next}px`)
       }
-    };
+    }
 
-    update();
+    update()
 
     // Prefer ResizeObserver for accurate updates (font swap, breakpoint changes, etc.)
     // Use `typeof ResizeObserver` instead of `"ResizeObserver" in window` to avoid TS narrowing issues in some setups.
-    if (typeof ResizeObserver !== "undefined") {
+    if (typeof ResizeObserver !== 'undefined') {
       const ro = new ResizeObserver(() => {
         // Avoid synchronous layout thrash when ResizeObserver fires frequently
-        requestAnimationFrame(update);
-      });
-      if (headerRef.current) ro.observe(headerRef.current);
-      window.addEventListener("resize", update, { passive: true });
+        requestAnimationFrame(update)
+      })
+      if (headerRef.current) ro.observe(headerRef.current)
+      window.addEventListener('resize', update, { passive: true })
       return () => {
-        ro.disconnect();
-        window.removeEventListener("resize", update);
-      };
+        ro.disconnect()
+        window.removeEventListener('resize', update)
+      }
     }
 
-    window.addEventListener("resize", update, { passive: true });
-    return () => window.removeEventListener("resize", update);
-  }, [mounted]);
+    window.addEventListener('resize', update, { passive: true })
+    return () => window.removeEventListener('resize', update)
+  }, [mounted])
 
   // Track scroll position (avoids Framer Motion scroll container warnings)
   useEffect(() => {
-    if (!mounted || typeof window === "undefined") return;
+    if (!mounted || typeof window === 'undefined') return
 
     const update = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+      setIsScrolled(window.scrollY > 50)
+    }
 
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [mounted]);
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [mounted])
 
   // Track current hash - only after mount to prevent hydration mismatch
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return
 
     const updateHash = () => {
-      setCurrentHash(window.location.hash);
-    };
+      setCurrentHash(window.location.hash)
+    }
 
     // Set initial hash after mount
-    updateHash();
-    window.addEventListener("hashchange", updateHash);
-    return () => window.removeEventListener("hashchange", updateHash);
-  }, []);
+    updateHash()
+    window.addEventListener('hashchange', updateHash)
+    return () => window.removeEventListener('hashchange', updateHash)
+  }, [])
 
   // Lock body scroll when menu is open
   useEffect(() => {
     if (menuOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = ''
     }
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
 
   /**
    * Navigation links construction
@@ -233,16 +233,14 @@ export default function HeaderNav() {
    * - This ensures consistent navigation behavior across the site
    */
   const navLinks = useMemo<NavLink[]>(() => {
-    const baseLinks = siteConfig.nav.links;
-    const homeLink = baseLinks.find((link) => link.href === "/");
-    const otherLinks = baseLinks.filter((link) => link.href !== "/");
+    const baseLinks = siteConfig.nav.links
+    const homeLink = baseLinks.find((link) => link.href === '/')
+    const otherLinks = baseLinks.filter((link) => link.href !== '/')
 
     // Convert anchor links to full URLs (/#anchor) so they work from any page
     const anchorLinks =
       siteConfig.nav.homeAnchors?.map((anchor) => {
-        const normalizedHash = anchor.href.startsWith("#")
-          ? anchor.href
-          : `#${anchor.href}`;
+        const normalizedHash = anchor.href.startsWith('#') ? anchor.href : `#${anchor.href}`
 
         return {
           label: anchor.label,
@@ -250,46 +248,42 @@ export default function HeaderNav() {
           // Always link to home page with anchor, so it works from any page
           // Format: "/#tjanster" navigates to homepage then scrolls to #tjanster section
           href: `/${normalizedHash}`,
-        };
-      }) ?? [];
+        }
+      }) ?? []
 
     // Navigation order: Home → Anchor links → Other page links
-    return [
-      ...(homeLink ? [{ ...homeLink }] : []),
-      ...anchorLinks,
-      ...otherLinks,
-    ];
-  }, []);
+    return [...(homeLink ? [{ ...homeLink }] : []), ...anchorLinks, ...otherLinks]
+  }, [])
 
   // Deterministic shimmer effect on nav links - only after mount to avoid hydration mismatch
   useEffect(() => {
-    if (navLinks.length === 0) return;
+    if (navLinks.length === 0) return
 
     // Small delay to ensure hydration is complete
     const timeout = setTimeout(() => {
-      let shimmerCounter = 0;
+      let shimmerCounter = 0
       shimmerIntervalRef.current = setInterval(() => {
         // Use deterministic seed based on counter and pathname for consistent behavior
-        const seed = (shimmerCounter * 0.618033988749895 + pathname.length) % 1; // Golden ratio for better distribution
-        const deterministicIndex = Math.floor(seed * navLinks.length);
-        setShimmeringIndex(deterministicIndex);
-        shimmerCounter++;
+        const seed = (shimmerCounter * 0.618033988749895 + pathname.length) % 1 // Golden ratio for better distribution
+        const deterministicIndex = Math.floor(seed * navLinks.length)
+        setShimmeringIndex(deterministicIndex)
+        shimmerCounter++
 
         // Clear shimmer after animation
         setTimeout(() => {
-          setShimmeringIndex(null);
-        }, 3000);
-      }, 8000); // Trigger every 8 seconds
-    }, 100);
+          setShimmeringIndex(null)
+        }, 3000)
+      }, 8000) // Trigger every 8 seconds
+    }, 100)
 
     return () => {
-      clearTimeout(timeout);
+      clearTimeout(timeout)
       if (shimmerIntervalRef.current) {
-        clearInterval(shimmerIntervalRef.current);
-        shimmerIntervalRef.current = null;
+        clearInterval(shimmerIntervalRef.current)
+        shimmerIntervalRef.current = null
       }
-    };
-  }, [navLinks.length, pathname]);
+    }
+  }, [navLinks.length, pathname])
 
   return (
     <>
@@ -308,13 +302,13 @@ export default function HeaderNav() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           mounted && isScrolled
             ? isLight
-              ? "bg-gradient-to-r from-[#fef9e7]/95 via-[#fff5e6]/95 to-[#f0f7ff]/95 backdrop-blur-2xl border-b border-amber-200/40 shadow-xl shadow-amber-100/30"
-              : "bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50"
-            : "bg-transparent"
+              ? 'bg-gradient-to-r from-[#fef9e7]/95 via-[#fff5e6]/95 to-[#f0f7ff]/95 backdrop-blur-2xl border-b border-amber-200/40 shadow-xl shadow-amber-100/30'
+              : 'bg-black/95 backdrop-blur-2xl border-b border-white/10 shadow-2xl shadow-black/50'
+            : 'bg-transparent'
         }`}
         style={{
           // Keep header content below the device notch/status bar on iOS.
-          paddingTop: "var(--header-safe-top)",
+          paddingTop: 'var(--header-safe-top)',
         }}
         suppressHydrationWarning
       >
@@ -322,14 +316,14 @@ export default function HeaderNav() {
         <motion.div
           className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent"
           animate={{
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "linear",
+            ease: 'linear',
           }}
-          style={{ backgroundSize: "200% 100%" }}
+          style={{ backgroundSize: '200% 100%' }}
         />
 
         {/* Red accent glow on scroll */}
@@ -364,7 +358,7 @@ export default function HeaderNav() {
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                      ease: 'easeInOut',
                     }}
                   />
                   <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-accent to-tertiary p-0.5">
@@ -383,16 +377,14 @@ export default function HeaderNav() {
                 {/* Text logo */}
                 <div className="relative">
                   <span
-                    className={`text-xl font-black ${
-                      isLight ? "text-gray-900" : "text-white"
-                    }`}
+                    className={`text-xl font-black ${isLight ? 'text-gray-900' : 'text-white'}`}
                   >
                     Sajtstudio
                   </span>
                   <motion.span
                     className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-accent to-tertiary"
-                    initial={{ width: "0%" }}
-                    whileHover={{ width: "100%" }}
+                    initial={{ width: '0%' }}
+                    whileHover={{ width: '100%' }}
                     transition={{ duration: 0.3 }}
                   />
                 </div>
@@ -408,14 +400,14 @@ export default function HeaderNav() {
             <nav className="hidden lg:flex items-center gap-8 relative">
               <div className="flex items-center gap-1 relative">
                 {navLinks.map((link, index) => {
-                  const isAnchorLink = Boolean(link.hash);
+                  const isAnchorLink = Boolean(link.hash)
                   const isActive =
                     (!isAnchorLink && pathname === link.href) ||
-                    (isAnchorLink && pathname === "/" && currentHash === link.hash) ||
+                    (isAnchorLink && pathname === '/' && currentHash === link.hash) ||
                     // Special-case: on homepage we keep Portfolio/Kontakt as in-page sections
-                    (pathname === "/" &&
-                      (link.href === "/portfolio" || link.href === "/kontakt") &&
-                      currentHash === (link.href === "/portfolio" ? "#portfolio" : "#kontakt"));
+                    (pathname === '/' &&
+                      (link.href === '/portfolio' || link.href === '/kontakt') &&
+                      currentHash === (link.href === '/portfolio' ? '#portfolio' : '#kontakt'))
 
                   return (
                     <motion.div
@@ -423,7 +415,7 @@ export default function HeaderNav() {
                       onHoverStart={() => setHoveredIndex(index)}
                       onHoverEnd={() => setHoveredIndex(null)}
                       className="relative"
-                      style={{ position: "relative" }}
+                      style={{ position: 'relative' }}
                     >
                       <Link
                         href={link.href}
@@ -433,17 +425,20 @@ export default function HeaderNav() {
                            */
 
                           // Handle Erbjudande link - opens modal instead of navigation
-                          if (link.href === "#erbjudande") {
-                            e.preventDefault();
-                            openModal();
-                            return;
+                          if (link.href === '#erbjudande') {
+                            e.preventDefault()
+                            openModal()
+                            return
                           }
 
                           // Homepage convenience: keep users on the one-pager for Portfolio/Kontakt
-                          if (pathname === "/" && (link.href === "/portfolio" || link.href === "/kontakt")) {
-                            e.preventDefault();
-                            scrollToSection(link.href === "/portfolio" ? "#portfolio" : "#kontakt");
-                            return;
+                          if (
+                            pathname === '/' &&
+                            (link.href === '/portfolio' || link.href === '/kontakt')
+                          ) {
+                            e.preventDefault()
+                            scrollToSection(link.href === '/portfolio' ? '#portfolio' : '#kontakt')
+                            return
                           }
 
                           /**
@@ -456,31 +451,31 @@ export default function HeaderNav() {
                            *
                            * This ensures anchor links work correctly from any page on the site.
                            */
-                          if (isAnchorLink && pathname !== "/") {
-                            e.preventDefault();
+                          if (isAnchorLink && pathname !== '/') {
+                            e.preventDefault()
                             // Use window.location.href for full page navigation with anchor
                             // This ensures browser scrolls to anchor after page load
-                            window.location.href = link.href;
-                            return;
+                            window.location.href = link.href
+                            return
                           }
 
                           // Anchor links on homepage: do smooth scroll (and wait for lazy sections if needed)
-                          if (isAnchorLink && pathname === "/" && link.hash) {
-                            e.preventDefault();
-                            scrollToSection(link.hash);
-                            return;
+                          if (isAnchorLink && pathname === '/' && link.hash) {
+                            e.preventDefault()
+                            scrollToSection(link.hash)
+                            return
                           }
                           // Allow normal Next.js navigation for regular page links
                         }}
                         className={`nav-link-shimmer block px-4 py-2 text-sm font-semibold transition-all duration-300 z-10 relative ${
                           isActive
                             ? isLight
-                              ? "text-gray-900"
-                              : "text-white"
+                              ? 'text-gray-900'
+                              : 'text-white'
                             : isLight
-                            ? "text-gray-600 hover:text-gray-900"
-                            : "text-gray-400 hover:text-white"
-                        } ${shimmeringIndex === index ? "shimmer-active" : ""}`}
+                              ? 'text-gray-600 hover:text-gray-900'
+                              : 'text-gray-400 hover:text-white'
+                        } ${shimmeringIndex === index ? 'shimmer-active' : ''}`}
                         suppressHydrationWarning
                       >
                         {link.label}
@@ -490,7 +485,7 @@ export default function HeaderNav() {
                           <motion.div
                             layoutId="activeTab"
                             className="absolute inset-0 bg-gradient-to-r from-accent/20 to-tertiary/20 rounded-lg border border-accent/30"
-                            transition={{ type: "spring", duration: 0.5 }}
+                            transition={{ type: 'spring', duration: 0.5 }}
                           />
                         )}
 
@@ -506,7 +501,7 @@ export default function HeaderNav() {
                         )}
                       </Link>
                     </motion.div>
-                  );
+                  )
                 })}
               </div>
             </nav>
@@ -522,12 +517,7 @@ export default function HeaderNav() {
             <div className="hidden lg:flex items-center gap-3">
               <ThemeToggle />
               <div className="cta-button-header">
-                <Button
-                  onClick={openModal}
-                  variant="cta"
-                  size="sm"
-                  ariaLabel="Starta projekt"
-                >
+                <Button onClick={openModal} variant="cta" size="sm" ariaLabel="Starta projekt">
                   Starta projekt
                 </Button>
               </div>
@@ -543,7 +533,7 @@ export default function HeaderNav() {
               whileTap={{ scale: 0.9 }}
               onClick={() => setMenuOpen(!menuOpen)}
               className="lg:hidden relative w-10 h-10 flex items-center justify-center"
-              aria-label={menuOpen ? "Stäng meny" : "Öppna meny"}
+              aria-label={menuOpen ? 'Stäng meny' : 'Öppna meny'}
             >
               <div className="relative w-6 h-5 flex flex-col justify-between">
                 <motion.span
@@ -551,27 +541,21 @@ export default function HeaderNav() {
                     rotate: menuOpen ? 45 : 0,
                     y: menuOpen ? 8 : 0,
                   }}
-                  className={`w-full h-0.5 origin-left ${
-                    isLight ? "bg-gray-900" : "bg-white"
-                  }`}
+                  className={`w-full h-0.5 origin-left ${isLight ? 'bg-gray-900' : 'bg-white'}`}
                 />
                 <motion.span
                   animate={{
                     opacity: menuOpen ? 0 : 1,
                     scaleX: menuOpen ? 0 : 1,
                   }}
-                  className={`w-full h-0.5 ${
-                    isLight ? "bg-gray-900" : "bg-white"
-                  }`}
+                  className={`w-full h-0.5 ${isLight ? 'bg-gray-900' : 'bg-white'}`}
                 />
                 <motion.span
                   animate={{
                     rotate: menuOpen ? -45 : 0,
                     y: menuOpen ? -8 : 0,
                   }}
-                  className={`w-full h-0.5 origin-left ${
-                    isLight ? "bg-gray-900" : "bg-white"
-                  }`}
+                  className={`w-full h-0.5 origin-left ${isLight ? 'bg-gray-900' : 'bg-white'}`}
                 />
               </div>
             </motion.button>
@@ -582,11 +566,7 @@ export default function HeaderNav() {
       {/* ============================================
          MOBILE MENU
          ============================================ */}
-      <MobileMenu
-        isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        navLinks={navLinks}
-      />
+      <MobileMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} navLinks={navLinks} />
     </>
-  );
+  )
 }

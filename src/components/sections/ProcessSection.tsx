@@ -1,106 +1,116 @@
-"use client";
+'use client'
 
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useMemo, useRef } from "react";
-import { useContentSection } from "@/hooks/useContent";
-import { useMounted } from "@/hooks/useMounted";
-import { useTheme } from "@/hooks/useTheme";
-import WordReveal from "@/components/animations/WordReveal";
-import SmokeEffect from "@/components/animations/SmokeEffect";
-import { designTokens } from "@/config/designTokens";
+import Image from 'next/image'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useMemo, useRef } from 'react'
+import { useContentSection } from '@/hooks/useContent'
+import { useMounted } from '@/hooks/useMounted'
+import { useTheme } from '@/hooks/useTheme'
+import WordReveal from '@/components/animations/WordReveal'
+import SmokeEffect from '@/components/animations/SmokeEffect'
+import { designTokens } from '@/config/designTokens'
 
 const defaultProcessSteps = [
   {
-    number: "01",
-    title: "Upptäckt",
+    number: '01',
+    title: 'Upptäckt',
     description:
-      "Vi börjar med att förstå ditt företag, dina mål och din målgrupp. Genom research och workshops identifierar vi möjligheter och utmaningar.",
+      'Vi börjar med att förstå ditt företag, dina mål och din målgrupp. Genom research och workshops identifierar vi möjligheter och utmaningar.',
   },
   {
-    number: "02",
-    title: "Design",
+    number: '02',
+    title: 'Design',
     description:
-      "Vi skapar wireframes och prototyper som visualiserar din framtida hemsida. Varje pixel är genomtänkt för att maximera användarupplevelsen.",
+      'Vi skapar wireframes och prototyper som visualiserar din framtida hemsida. Varje pixel är genomtänkt för att maximera användarupplevelsen.',
   },
   {
-    number: "03",
-    title: "Utveckling",
+    number: '03',
+    title: 'Utveckling',
     description:
-      "Vi bygger din hemsida med modern teknologi som Next.js och React. Resultatet är snabbt, säkert och skalbart.",
+      'Vi bygger din hemsida med modern teknologi som Next.js och React. Resultatet är snabbt, säkert och skalbart.',
   },
   {
-    number: "04",
-    title: "Lansering",
+    number: '04',
+    title: 'Lansering',
     description:
-      "Vi testar noggrant, optimerar för SEO och prestanda, och lanserar din nya hemsida. Men det slutar inte där - vi fortsätter att stötta dig.",
+      'Vi testar noggrant, optimerar för SEO och prestanda, och lanserar din nya hemsida. Men det slutar inte där - vi fortsätter att stötta dig.',
   },
-];
+]
 
 export default function ProcessSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const mounted = useMounted();
-  const { isLight } = useTheme();
-  
+  const sectionRef = useRef<HTMLElement>(null)
+  const mounted = useMounted()
+  const { isLight } = useTheme()
+
   // Fetch content from CMS - enables live updates from /admin
-  const { getValue } = useContentSection("process");
-  
+  const { getValue } = useContentSection('process')
+
   // Build process steps from CMS with fallbacks
-  const processSteps = useMemo(() => [
-    {
-      number: "01",
-      title: getValue("T33", defaultProcessSteps[0].title),
-      description: getValue("T37", defaultProcessSteps[0].description),
-    },
-    {
-      number: "02",
-      title: getValue("T34", defaultProcessSteps[1].title),
-      description: getValue("T38", defaultProcessSteps[1].description),
-    },
-    {
-      number: "03",
-      title: getValue("T35", defaultProcessSteps[2].title),
-      description: getValue("T39", defaultProcessSteps[2].description),
-    },
-    {
-      number: "04",
-      title: getValue("T36", defaultProcessSteps[3].title),
-      description: getValue("T40", defaultProcessSteps[3].description),
-    },
-  ], [getValue]);
-  
+  const processSteps = useMemo(
+    () => [
+      {
+        number: '01',
+        title: getValue('T33', defaultProcessSteps[0].title),
+        description: getValue('T37', defaultProcessSteps[0].description),
+      },
+      {
+        number: '02',
+        title: getValue('T34', defaultProcessSteps[1].title),
+        description: getValue('T38', defaultProcessSteps[1].description),
+      },
+      {
+        number: '03',
+        title: getValue('T35', defaultProcessSteps[2].title),
+        description: getValue('T39', defaultProcessSteps[2].description),
+      },
+      {
+        number: '04',
+        title: getValue('T36', defaultProcessSteps[3].title),
+        description: getValue('T40', defaultProcessSteps[3].description),
+      },
+    ],
+    [getValue]
+  )
+
   // Get background image from CMS
-  const bgImage = getValue("B2", "/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp");
+  const bgImage = getValue(
+    'B2',
+    '/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp'
+  )
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
-  });
+    offset: ['start end', 'end start'],
+  })
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3]);
-  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95]);
-  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-5, 0, 5]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.3, 1, 1, 0.3])
+  const scale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.95, 1, 1, 0.95])
+  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-5, 0, 5])
 
   return (
     <motion.section
       ref={sectionRef}
       className={`section-spacing-md relative overflow-hidden transition-colors duration-500 ${
         isLight
-          ? "bg-gradient-to-br from-sky-50 via-amber-50 to-rose-50 text-gray-900"
-          : "bg-black text-white"
+          ? 'bg-gradient-to-br from-sky-50 via-amber-50 to-rose-50 text-gray-900'
+          : 'bg-black text-white'
       }`}
-      style={mounted ? {
-        opacity,
-        scale,
-        perspective: 1000,
-        rotateY
-      } : {
-        opacity: 1,
-        scale: 1,
-        perspective: 1000,
-        rotateY: 0
-      }}
+      style={
+        mounted
+          ? {
+              opacity,
+              scale,
+              perspective: 1000,
+              rotateY,
+            }
+          : {
+              opacity: 1,
+              scale: 1,
+              perspective: 1000,
+              rotateY: 0,
+            }
+      }
       suppressHydrationWarning
     >
       {/* Background layers */}
@@ -133,11 +143,13 @@ export default function ProcessSection() {
         )}
 
         {/* Overlay for readability */}
-        <div className={`absolute inset-0 ${
-          isLight
-            ? "bg-gradient-to-br from-blue-100/40 via-transparent to-amber-100/40"
-            : "bg-black/85"
-        }`} />
+        <div
+          className={`absolute inset-0 ${
+            isLight
+              ? 'bg-gradient-to-br from-blue-100/40 via-transparent to-amber-100/40'
+              : 'bg-black/85'
+          }`}
+        />
 
         {/* Light mode decorative elements */}
         {isLight && (
@@ -160,7 +172,7 @@ export default function ProcessSection() {
           viewport={{ once: true }}
           transition={{
             duration: Number(designTokens.animation.duration.slow.replace('s', '')),
-            ease: designTokens.animation.framerEasing.smooth
+            ease: designTokens.animation.framerEasing.smooth,
           }}
         >
           <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
@@ -186,7 +198,7 @@ export default function ProcessSection() {
               key={step.number}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: '-100px' }}
               transition={{
                 delay: index * 0.15,
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
@@ -240,5 +252,5 @@ export default function ProcessSection() {
         </div>
       </div>
     </motion.section>
-  );
+  )
 }

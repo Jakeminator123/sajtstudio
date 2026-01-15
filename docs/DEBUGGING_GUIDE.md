@@ -138,13 +138,11 @@ För att låta AI-agenten automatiskt debugga:
 ### Teoretisk Implementation:
 
 1. **Browser Automation API**
-
    - Använd Puppeteer eller Playwright
    - AI-agenten kan öppna sidan och testa
    - Kan läsa console logs och errors
 
 2. **Error Monitoring**
-
    - Integrera Sentry eller liknande
    - AI-agenten kan läsa errors automatiskt
    - Kan föreslå fixes baserat på errors
@@ -176,10 +174,10 @@ AI-agenten kan då:
 
 ```typescript
 // I komponenter
-console.log("Component rendered", { props, state });
+console.log('Component rendered', { props, state })
 
 // I server-side kod
-console.log("API called", { params, result });
+console.log('API called', { params, result })
 ```
 
 ### 2. Använd React DevTools

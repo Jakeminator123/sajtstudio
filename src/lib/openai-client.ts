@@ -1,44 +1,44 @@
 export interface WebsiteContent {
-  url: string;
-  title: string;
-  description: string;
-  headings: string[];
-  text: string;
-  images: number;
+  url: string
+  title: string
+  description: string
+  headings: string[]
+  text: string
+  images: number
   links: {
-    internal: number;
-    external: number;
-  };
+    internal: number
+    external: number
+  }
   meta: {
-    keywords?: string;
-    author?: string;
-    viewport?: string;
-    robots?: string;
-  };
-  hasSSL: boolean;
-  responseTime: number;
-  wordCount: number;
-  textPreview: string;
+    keywords?: string
+    author?: string
+    viewport?: string
+    robots?: string
+  }
+  hasSSL: boolean
+  responseTime: number
+  wordCount: number
+  textPreview: string
 }
 
 export interface QuestionAnswers {
-  industry: string;
-  industryDescription: string;
-  purpose: string;
-  audience: string;
-  content: string[];
-  features: string[];
-  budget?: string;
-  timeline?: string;
+  industry: string
+  industryDescription: string
+  purpose: string
+  audience: string
+  content: string[]
+  features: string[]
+  budget?: string
+  timeline?: string
 }
 
 export type PromptMessage = {
-  role: "system" | "user";
+  role: 'system' | 'user'
   content: Array<{
-    type: "text";
-    text: string;
-  }>;
-};
+    type: 'text'
+    text: string
+  }>
+}
 
 const AUDIT_SYSTEM_PROMPT = `Du är en senior webb- och teknikrevisor. Gör alltid en tydlig teknisk analys av webbplatsen och leverera ENDAST giltig JSON utan Markdown.
 
@@ -140,7 +140,7 @@ LEVERERA JSON MED FÖLJANDE FÄLT (FYLL ALLTID I, ÄVEN OM DU MÅSTE GÖRA EN KV
   }
 }
 
-Var särskilt noga med den tekniska delen: identifiera brister i prestanda, tillgänglighet, säkerhet, kodstruktur och hosting. Ange alltid minst ett konkret tekniskt förbättringsförslag även om informationen är begränsad.`;
+Var särskilt noga med den tekniska delen: identifiera brister i prestanda, tillgänglighet, säkerhet, kodstruktur och hosting. Ange alltid minst ett konkret tekniskt förbättringsförslag även om informationen är begränsad.`
 
 export function buildAuditPromptForReasoning(
   websiteContent: WebsiteContent,
@@ -152,10 +152,10 @@ export function buildAuditPromptForReasoning(
       ? `\n\nYTTERLIGARE SIDOR ANALYSERADE:\n${multiPageContent
           .map(
             (page, i) =>
-              `\n[Sida ${i + 2}: ${page.url}]\n- Titel: ${page.title}\n- Rubriker: ${page.headings.slice(0, 3).join(", ")}`
+              `\n[Sida ${i + 2}: ${page.url}]\n- Titel: ${page.title}\n- Rubriker: ${page.headings.slice(0, 3).join(', ')}`
           )
-          .join("")}`
-      : "";
+          .join('')}`
+      : ''
 
   return `Du är en expert på webbanalys. Analysera webbplatsen grundligt och leverera ENDAST ett komplett JSON-objekt enligt schemat nedan. Var extremt noggrann och detaljerad i din analys. Tänk steg för steg igenom varje område.
 
@@ -163,14 +163,14 @@ WEBBPLATS ATT ANALYSERA: ${url}
 
 SIDINNEHÅLL:
 - Titel: ${websiteContent.title}
-- Beskrivning: ${websiteContent.description || "Saknas"}
-- SSL: ${websiteContent.hasSSL ? "Ja" : "Nej"}
+- Beskrivning: ${websiteContent.description || 'Saknas'}
+- SSL: ${websiteContent.hasSSL ? 'Ja' : 'Nej'}
 - Svarstid: ${websiteContent.responseTime}ms
 - Antal bilder: ${websiteContent.images}
 - Antal länkar: Interna: ${websiteContent.links.internal}, Externa: ${websiteContent.links.external}
 
 HUVUDRUBRIKER:
-${websiteContent.headings.slice(0, 10).join("\n")}
+${websiteContent.headings.slice(0, 10).join('\n')}
 
 TEXTINNEHÅLL (första 500 ord):
 ${websiteContent.textPreview}${allPagesAnalysis}
@@ -284,41 +284,38 @@ LEVERERA EXAKT DETTA JSON-SCHEMA:
   }
 }
 
-Var EXTREMT detaljerad och ge minst 10-15 förbättringsförslag sorterade efter prioritet. Inkludera konkreta kodexempel där det är relevant.`;
+Var EXTREMT detaljerad och ge minst 10-15 förbättringsförslag sorterade efter prioritet. Inkludera konkreta kodexempel där det är relevant.`
 }
 
-export function buildAuditPrompt(
-  websiteContent: WebsiteContent,
-  url: string
-): PromptMessage[] {
+export function buildAuditPrompt(websiteContent: WebsiteContent, url: string): PromptMessage[] {
   return [
     {
-      role: "system",
+      role: 'system',
       content: [
         {
-          type: "text",
+          type: 'text',
           text: AUDIT_SYSTEM_PROMPT,
         },
       ],
     },
     {
-      role: "user",
+      role: 'user',
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `Analysera första sidan av: ${url}
 
 BASIC INFO:
 - Titel: ${websiteContent.title}
-- Beskrivning: ${websiteContent.description || "Saknas"}
-- SSL: ${websiteContent.hasSSL ? "Ja" : "Nej"}
+- Beskrivning: ${websiteContent.description || 'Saknas'}
+- SSL: ${websiteContent.hasSSL ? 'Ja' : 'Nej'}
 - Svarstid: ${websiteContent.responseTime}ms
 
 RUBRIKER:
-${websiteContent.headings.slice(0, 5).join("\n")}
+${websiteContent.headings.slice(0, 5).join('\n')}
 
 TEXT (första 300 ord):
-${(websiteContent.textPreview || "").substring(0, 500)}
+${(websiteContent.textPreview || '').substring(0, 500)}
 
 Bedöm snabbt:
 - SEO basics (meta, rubriker)
@@ -332,12 +329,10 @@ Svara ENDAST med JSON.`,
         },
       ],
     },
-  ];
+  ]
 }
 
-export function buildRecommendationPromptForReasoning(
-  answers: QuestionAnswers
-): string {
+export function buildRecommendationPromptForReasoning(answers: QuestionAnswers): string {
   return `Du är en senior webb-konsult och UX-expert. Analysera företagets behov och leverera ENDAST ett komplett JSON-objekt med detaljerade rekommendationer. Tänk djupt och strategiskt.
 
 FÖRETAGSPROFIL:
@@ -345,8 +340,8 @@ FÖRETAGSPROFIL:
 - Verksamhet: ${answers.industryDescription}
 - Hemsidans syfte: ${answers.purpose}
 - Målgrupp: ${answers.audience}
-- Innehåll som ska visas: ${answers.content.join(", ")}
-- Önskade funktioner: ${answers.features.join(", ")}
+- Innehåll som ska visas: ${answers.content.join(', ')}
+- Önskade funktioner: ${answers.features.join(', ')}
 
 ANALYSERA:
 1. Branschspecifika krav och förväntningar
@@ -428,18 +423,16 @@ LEVERERA DETTA JSON-SCHEMA:
   }
 }
 
-Ge MINST 15 detaljerade förbättringsförslag. Var extremt specifik och inkludera moderna best practices.`;
+Ge MINST 15 detaljerade förbättringsförslag. Var extremt specifik och inkludera moderna best practices.`
 }
 
-export function buildRecommendationPrompt(
-  answers: QuestionAnswers
-): PromptMessage[] {
+export function buildRecommendationPrompt(answers: QuestionAnswers): PromptMessage[] {
   return [
     {
-      role: "system",
+      role: 'system',
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `Du är en senior webb-konsult som hjälper företag planera nya hemsidor.
 Baserat på kundens svar, leverera ENDAST giltig JSON enligt schemat nedan.
 
@@ -468,10 +461,10 @@ LEVERERA JSON MED FÖLJANDE FORM:
       ],
     },
     {
-      role: "user",
+      role: 'user',
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `Ett företag behöver en ny hemsida med följande profil:
 
 FÖRETAGSPROFIL:
@@ -485,10 +478,10 @@ MÅLGRUPP:
 ${answers.audience}
 
 INNEHÅLL SOM SKA VISAS:
-${answers.content.join(", ")}
+${answers.content.join(', ')}
 
 ÖNSKADE FUNKTIONER:
-${answers.features.join(", ")}
+${answers.features.join(', ')}
 
 Baserat på denna information:
 
@@ -509,5 +502,5 @@ Svara ENDAST med JSON enligt schemat ovan.`,
         },
       ],
     },
-  ];
+  ]
 }

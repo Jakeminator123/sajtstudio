@@ -1,59 +1,56 @@
-"use client";
+'use client'
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 
 interface UnderConstructionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
-export default function UnderConstructionModal({
-  isOpen,
-  onClose,
-}: UnderConstructionModalProps) {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+export default function UnderConstructionModal({ isOpen, onClose }: UnderConstructionModalProps) {
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus("idle");
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
+      const response = await fetch('/api/contact', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: "Intressent (Sajtmaskin)",
+          name: 'Intressent (Sajtmaskin)',
           email: email || undefined,
-          message: message || "Jag är intresserad av Sajtmaskin-tjänsten.",
-          source: "sajtmaskin_modal",
+          message: message || 'Jag är intresserad av Sajtmaskin-tjänsten.',
+          source: 'sajtmaskin_modal',
         }),
-      });
+      })
 
       if (response.ok) {
-        setSubmitStatus("success");
-        setEmail("");
-        setMessage("");
+        setSubmitStatus('success')
+        setEmail('')
+        setMessage('')
         // Close modal after success
         setTimeout(() => {
-          onClose();
-          setSubmitStatus("idle");
-        }, 2500);
+          onClose()
+          setSubmitStatus('idle')
+        }, 2500)
       } else {
-        setSubmitStatus("error");
+        setSubmitStatus('error')
       }
     } catch {
-      setSubmitStatus("error");
+      setSubmitStatus('error')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <AnimatePresence>
@@ -73,13 +70,13 @@ export default function UnderConstructionModal({
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed inset-0 flex items-center justify-center z-[101] p-4"
           >
             <div className="relative w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-950 to-black border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden">
               {/* Decorative gradient */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-tertiary to-accent" />
-              
+
               {/* Close button */}
               <button
                 onClick={onClose}
@@ -133,13 +130,13 @@ export default function UnderConstructionModal({
 
                 {/* Description */}
                 <p className="text-gray-400 text-center mb-6 leading-relaxed">
-                  Sidan du tänkte besöka är under utveckling. 
-                  <span className="text-white font-medium"> Hör av dig</span> om du är 
-                  intresserad av våra tjänster så återkommer vi!
+                  Sidan du tänkte besöka är under utveckling.
+                  <span className="text-white font-medium"> Hör av dig</span> om du är intresserad
+                  av våra tjänster så återkommer vi!
                 </p>
 
                 {/* Form */}
-                {submitStatus === "success" ? (
+                {submitStatus === 'success' ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -167,7 +164,10 @@ export default function UnderConstructionModal({
                   <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email input */}
                     <div>
-                      <label htmlFor="modal-email" className="block text-sm font-medium text-gray-400 mb-1.5">
+                      <label
+                        htmlFor="modal-email"
+                        className="block text-sm font-medium text-gray-400 mb-1.5"
+                      >
                         Din e-post
                       </label>
                       <input
@@ -183,7 +183,10 @@ export default function UnderConstructionModal({
 
                     {/* Message input */}
                     <div>
-                      <label htmlFor="modal-message" className="block text-sm font-medium text-gray-400 mb-1.5">
+                      <label
+                        htmlFor="modal-message"
+                        className="block text-sm font-medium text-gray-400 mb-1.5"
+                      >
                         Meddelande <span className="text-gray-600">(valfritt)</span>
                       </label>
                       <textarea
@@ -197,7 +200,7 @@ export default function UnderConstructionModal({
                     </div>
 
                     {/* Error message */}
-                    {submitStatus === "error" && (
+                    {submitStatus === 'error' && (
                       <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -265,6 +268,5 @@ export default function UnderConstructionModal({
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }
-

@@ -1,22 +1,24 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface ContentStrategyProps {
   strategy: {
-    key_pages: string[];
-    content_types: string[];
-    seo_foundation: string;
-    conversion_paths: string[];
-  };
+    key_pages: string[]
+    content_types: string[]
+    seo_foundation: string
+    conversion_paths: string[]
+  }
 }
 
 export default function ContentStrategy({ strategy }: ContentStrategyProps) {
   const renderList = (items?: string[], label?: string) => {
-    if (!items || items.length === 0 || !label) return null;
+    if (!items || items.length === 0 || !label) return null
     return (
       <div>
-        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">{label}</h4>
+        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">
+          {label}
+        </h4>
         <ul className="space-y-1 text-sm text-gray-300">
           {items.map((item) => (
             <li key={item} className="flex items-start gap-2">
@@ -26,8 +28,8 @@ export default function ContentStrategy({ strategy }: ContentStrategyProps) {
           ))}
         </ul>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <motion.div
@@ -51,6 +53,5 @@ export default function ContentStrategy({ strategy }: ContentStrategyProps) {
       )}
       {renderList(strategy.conversion_paths, 'Konverteringsflöden')}
     </motion.div>
-  );
+  )
 }
-

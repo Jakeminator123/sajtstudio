@@ -1,24 +1,24 @@
-"use client";
+'use client'
 
-import { useTheme } from "@/hooks/useTheme";
-import { motion } from "framer-motion";
+import { useTheme } from '@/hooks/useTheme'
+import { motion } from 'framer-motion'
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === 'dark'
 
   return (
     <motion.button
       onClick={toggleTheme}
       className={`relative w-10 h-10 rounded-full flex items-center justify-center overflow-hidden group transition-colors ${
         isDark
-          ? "bg-gradient-to-br from-white/10 to-white/5 border border-white/20 hover:border-accent/50"
-          : "bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-gray-600/50 hover:border-yellow-500/50"
+          ? 'bg-gradient-to-br from-white/10 to-white/5 border border-white/20 hover:border-accent/50'
+          : 'bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-gray-600/50 hover:border-yellow-500/50'
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      aria-label={isDark ? "Byt till ljust läge" : "Byt till mörkt läge"}
-      title={isDark ? "Ljust läge" : "Mörkt läge"}
+      aria-label={isDark ? 'Byt till ljust läge' : 'Byt till mörkt läge'}
+      title={isDark ? 'Ljust läge' : 'Mörkt läge'}
       suppressHydrationWarning
     >
       {/* Sun icon */}
@@ -32,7 +32,7 @@ export default function ThemeToggle() {
           rotate: isDark ? -90 : 0,
           opacity: isDark ? 0 : 1,
         }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
         <path
           fillRule="evenodd"
@@ -52,7 +52,7 @@ export default function ThemeToggle() {
           rotate: isDark ? 0 : 90,
           opacity: isDark ? 1 : 0,
         }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
       </motion.svg>
@@ -63,11 +63,11 @@ export default function ThemeToggle() {
         initial={false}
         animate={{
           background: isDark
-            ? "radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%)"
-            : "radial-gradient(circle, rgba(250, 204, 21, 0.3) 0%, transparent 70%)",
+            ? 'radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(250, 204, 21, 0.3) 0%, transparent 70%)',
         }}
         transition={{ duration: 0.3 }}
       />
     </motion.button>
-  );
+  )
 }

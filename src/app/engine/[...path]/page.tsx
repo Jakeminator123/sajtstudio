@@ -1,38 +1,36 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
-const ENGINE_URL = "https://sajtmaskin-1.onrender.com";
+const ENGINE_URL = 'https://sajtmaskin-1.onrender.com'
 
 type PageProps = {
-  params: Promise<{ path: string[] }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
+  params: Promise<{ path: string[] }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
 
 function toQueryString(searchParams: Record<string, string | string[] | undefined> | undefined) {
-  if (!searchParams) return "";
-  const usp = new URLSearchParams();
+  if (!searchParams) return ''
+  const usp = new URLSearchParams()
   for (const [k, v] of Object.entries(searchParams)) {
-    if (v === undefined) continue;
+    if (v === undefined) continue
     if (Array.isArray(v)) {
-      for (const item of v) usp.append(k, item);
+      for (const item of v) usp.append(k, item)
     } else {
-      usp.set(k, v);
+      usp.set(k, v)
     }
   }
-  const qs = usp.toString();
-  return qs ? `?${qs}` : "";
+  const qs = usp.toString()
+  return qs ? `?${qs}` : ''
 }
 
 export default async function EnginePathPage({ params, searchParams }: PageProps) {
-  const { path } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const { path } = await params
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
 
-  const pathPart = path?.length ? `/${path.map(encodeURIComponent).join("/")}` : "";
-  const query = toQueryString(resolvedSearchParams);
-  const target = `${ENGINE_URL}${pathPart}${query}`;
+  const pathPart = path?.length ? `/${path.map(encodeURIComponent).join('/')}` : ''
+  const query = toQueryString(resolvedSearchParams)
+  const target = `${ENGINE_URL}${pathPart}${query}`
 
-  redirect(target);
+  redirect(target)
 }
-
-

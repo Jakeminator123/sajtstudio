@@ -34,8 +34,8 @@
 
 ```typescript
 // ❌ Detta fungerar INTE på servern
-const { scrollYProgress } = useScroll({ target: sectionRef });
-const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+const { scrollYProgress } = useScroll({ target: sectionRef })
+const opacity = useTransform(scrollYProgress, [0, 1], [0, 1])
 
 // På servern: scrollYProgress = undefined → opacity = undefined
 // På klienten: scrollYProgress = 0.5 → opacity = 0.5
@@ -48,8 +48,8 @@ const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
 ```typescript
 // Problem: useScroll och useTransform skapar dynamiska värden
-const { scrollYProgress } = useScroll({ target: sectionRef });
-const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
+const { scrollYProgress } = useScroll({ target: sectionRef })
+const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50])
 
 // Server: textY = undefined (ingen scroll på server)
 // Client: textY = MotionValue(0) (scroll finns på client)
@@ -60,7 +60,7 @@ const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
 
 ```typescript
 // Problem: Tiden ändras kontinuerligt
-const time = new Date(); // Server: 10:30:45, Client: 10:30:47
+const time = new Date() // Server: 10:30:45, Client: 10:30:47
 // → Text skiljer sig → Hydration Error
 ```
 
@@ -113,15 +113,15 @@ return <AnimatedContent />; // Bara på client
 ### 3. **Client-only Components** (ssr: false)
 
 ```typescript
-const Component = dynamic(() => import("./Component"), { ssr: false });
+const Component = dynamic(() => import('./Component'), { ssr: false })
 ```
 
 ### 4. **Deterministiska Värden**
 
 ```typescript
 // Istället för Math.random()
-const seed = index * 0.618033988749895; // Deterministisk
-const value = (seed * 100) % 100;
+const seed = index * 0.618033988749895 // Deterministisk
+const value = (seed * 100) % 100
 ```
 
 ## Varför Detta Är Ett Återkommande Problem
@@ -180,16 +180,12 @@ const value = (seed * 100) % 100;
 // ServicesSection.tsx - Rad 21-28
 const { scrollYProgress } = useScroll({
   target: sectionRef,
-  offset: ["start end", "end start"],
-});
+  offset: ['start end', 'end start'],
+})
 
-const videoOpacity = useTransform(
-  scrollYProgress,
-  [0, 0.3, 0.7, 1],
-  [0.4, 0.6, 0.5, 0.3]
-);
-const videoScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05]);
-const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
+const videoOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.4, 0.6, 0.5, 0.3])
+const videoScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.1, 1.05])
+const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50])
 
 // På SERVER:
 // - scrollYProgress = undefined (useScroll returnerar inget på server)
@@ -228,15 +224,11 @@ const textY = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
 
 ```typescript
 // OpticScrollShowcase.tsx - Rad 85-100
-const parallaxBackY = useTransform(progress, [0, 1], ["0%", "-40%"]);
-const parallaxMidY = useTransform(progress, [0, 1], ["0%", "-20%"]);
-const parallaxFrontY = useTransform(progress, [0, 1], ["0%", "20%"]);
-const starOpacity = useTransform(progress, [0, 0.5, 1], [0.2, 0.6, 1]);
-const haloScale = useTransform(
-  progress,
-  [0, 0.3, 0.6, 1],
-  [0.8, 1.0, 1.15, 1.25]
-);
+const parallaxBackY = useTransform(progress, [0, 1], ['0%', '-40%'])
+const parallaxMidY = useTransform(progress, [0, 1], ['0%', '-20%'])
+const parallaxFrontY = useTransform(progress, [0, 1], ['0%', '20%'])
+const starOpacity = useTransform(progress, [0, 0.5, 1], [0.2, 0.6, 1])
+const haloScale = useTransform(progress, [0, 0.3, 0.6, 1], [0.8, 1.0, 1.15, 1.25])
 
 // På SERVER:
 // - progress = undefined (från useScroll)
@@ -273,7 +265,7 @@ const haloScale = useTransform(
 
 ```typescript
 // TechShowcaseSection.tsx - Rad 10
-const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 
 // På SERVER:
 // - useInView returnerar false (ingen IntersectionObserver på server)
@@ -303,8 +295,8 @@ const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
 ```typescript
 // PageTransition.tsx - Rad 15-16
-const progressScale = useMotionValue(0);
-const progressOpacity = useMotionValue(0);
+const progressScale = useMotionValue(0)
+const progressOpacity = useMotionValue(0)
 
 // På SERVER:
 // - useMotionValue(0) skapar MotionValue(0)
@@ -331,7 +323,7 @@ const progressOpacity = useMotionValue(0);
 
 ```typescript
 // Clock component - INNAN fix
-const [time, setTime] = useState(new Date());
+const [time, setTime] = useState(new Date())
 
 // På SERVER (klockan 10:30:45):
 // → Renderar: <div>10:30:45</div>

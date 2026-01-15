@@ -13,12 +13,15 @@
 ## Snabböversikt
 
 ### Mobil-specifika Komponenter
+
 - `src/components/layout/MobileMenu.tsx` - Mobilmeny (slide-in från höger)
 
 ### Desktop-specifika Komponenter
+
 - Inga helt separerade desktop-komponenter - desktop-kod finns i samma komponenter med `hidden lg:flex` etc.
 
 ### Hybrid-komponenter (Både Mobil och Desktop)
+
 - `src/components/layout/HeaderNav.tsx` - Innehåller både desktop navigation och mobile menu button
 - Alla sektion-komponenter (`src/components/sections/`) - Använder responsive breakpoints
 
@@ -27,19 +30,24 @@
 ### Layout-komponenter (`src/components/layout/`)
 
 #### HeaderNav.tsx
+
 **Mobil:**
+
 - Mobile menu button (hamburger) - `lg:hidden`
 - MobileMenu-komponenten anropas när meny öppnas
 
 **Desktop:**
+
 - Desktop navigation links - `hidden lg:flex`
 - Desktop CTA button - synlig på desktop
 
 **Båda:**
+
 - Logo - synlig på båda
 - Header container - fungerar på båda
 
 **Markering i kod:**
+
 ```tsx
 {/* ============================================
    DESKTOP NAVIGATION
@@ -53,7 +61,9 @@
 ```
 
 #### MobileMenu.tsx
+
 **100% Mobil:**
+
 - Slide-in meny från höger
 - Används endast på mobil-enheter
 - Innehåller navigation links och CTA button
@@ -65,6 +75,7 @@
 Alla sektion-komponenter använder responsive breakpoints för att anpassa sig:
 
 **Vanliga patterns:**
+
 - `flex-col sm:flex-row` - Stack vertikalt på mobil, horisontellt på desktop
 - `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` - Grid som anpassar sig
 - `text-center md:text-left` - Centrerad på mobil, vänsterjusterad på desktop
@@ -75,7 +86,9 @@ Alla sektion-komponenter använder responsive breakpoints för att anpassa sig:
 ### UI-komponenter (`src/components/ui/`)
 
 #### Button.tsx
+
 **Responsive sizes:**
+
 - `sm`: `px-6 py-2.5 text-sm`
 - `md`: `px-8 py-3.5 sm:px-10 sm:py-4 text-base sm:text-lg`
 - `lg`: `px-10 py-4 sm:px-12 sm:py-5 text-lg sm:text-xl`
@@ -85,6 +98,7 @@ Alla sektion-komponenter använder responsive breakpoints för att anpassa sig:
 ## Responsive Patterns i Projektet
 
 ### Breakpoints
+
 - `sm: 640px` - Stor mobil
 - `md: 768px` - Tablet
 - `lg: 1024px` - **Desktop (huvudbreakpoint för mobil/desktop separation)**
@@ -94,57 +108,64 @@ Alla sektion-komponenter använder responsive breakpoints för att anpassa sig:
 ### Vanliga Responsive Patterns
 
 #### Visa/Dölj
+
 ```tsx
 // Desktop only
-className="hidden lg:flex"
-className="hidden lg:block"
+className = 'hidden lg:flex'
+className = 'hidden lg:block'
 
 // Mobile only
-className="lg:hidden"
-className="block lg:hidden"
+className = 'lg:hidden'
+className = 'block lg:hidden'
 ```
 
 #### Layout
+
 ```tsx
 // Column to row
-className="flex-col sm:flex-row"
+className = 'flex-col sm:flex-row'
 
 // Grid adaptation
-className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+className = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
 ```
 
 #### Spacing
+
 ```tsx
 // Responsive padding
-className="px-4 sm:px-6 lg:px-8"
+className = 'px-4 sm:px-6 lg:px-8'
 
 // Responsive gap
-className="gap-4 sm:gap-6 lg:gap-8"
+className = 'gap-4 sm:gap-6 lg:gap-8'
 ```
 
 #### Typography
+
 ```tsx
 // Responsive text size
-className="text-2xl sm:text-3xl md:text-4xl"
+className = 'text-2xl sm:text-3xl md:text-4xl'
 
 // Or use clamp-based sizes
-className="text-h1" // Automatically responsive
+className = 'text-h1' // Automatically responsive
 ```
 
 ## Sökstrategier för AI-agenter
 
 ### För att hitta mobil-specifik kod:
+
 1. Sök efter `lg:hidden` - element som visas endast på mobil
 2. Sök efter `MobileMenu` - mobilmeny-komponenten
 3. Sök efter kommentarer med "MOBILE" i stora bokstäver
 4. Kolla filnamn som innehåller "Mobile"
 
 ### För att hitta desktop-specifik kod:
+
 1. Sök efter `hidden lg:` - element som visas endast på desktop
 2. Sök efter kommentarer med "DESKTOP" i stora bokstäver
 3. Sök efter hover-effekter (desktop-specifikt)
 
 ### För att hitta responsive patterns:
+
 1. Sök efter Tailwind breakpoints: `sm:`, `md:`, `lg:`, `xl:`, `2xl:`
 2. Sök efter `responsive` från `responsiveUtils.ts`
 3. Kolla `RESPONSIVE_DESIGN_GUIDE.md` för patterns
@@ -187,4 +208,3 @@ A: Endast `MobileMenu.tsx` - alla andra är responsiva eller hybrid
 
 **Q: Vilka komponenter är endast för desktop?**
 A: Inga - desktop-kod finns i samma komponenter med `hidden lg:` patterns
-

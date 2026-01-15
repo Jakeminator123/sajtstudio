@@ -48,8 +48,8 @@ export function lazyLoadImage(img: HTMLImageElement) {
   }
 
   const observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
+    (entries) => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const image = entry.target as HTMLImageElement
           if (image.dataset.src) {
@@ -131,7 +131,8 @@ export function isMobileDevice(): boolean {
 
   // Check for slow connection on mobile
   const connection = (navigator as { connection?: { effectiveType?: string } }).connection
-  const isSlowConnection = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
+  const isSlowConnection =
+    connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g'
 
   return isSmallScreen || (isTouchDevice && isSlowConnection)
 }
@@ -144,8 +145,7 @@ export function getConnectionSpeed(): 'slow' | 'fast' | 'unknown' {
     return 'unknown'
   }
 
-  const connection = (navigator as { connection?: { effectiveType?: string } })
-    .connection
+  const connection = (navigator as { connection?: { effectiveType?: string } }).connection
   if (!connection) return 'unknown'
 
   const effectiveType = connection.effectiveType

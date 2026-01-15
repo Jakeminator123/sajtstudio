@@ -1,56 +1,57 @@
-"use client";
+'use client'
 
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { useState, useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import { useState, useRef } from 'react'
 
 // Showcase data för framtida projekt
 const showcaseProjects = [
   {
-    id: "showcase1",
-    title: "E-commerce Platform",
-    client: "Fashion Brand",
-    year: "2024",
-    image: "/images/portfolio/showcase_1.webp",
-    description: "Modern e-handelsplattform med AI-driven personalisering",
-    technologies: ["Next.js", "TypeScript", "Tailwind", "Stripe"],
-    features: ["AI Recommendations", "Real-time Analytics", "Mobile First"],
-    url: "#",
+    id: 'showcase1',
+    title: 'E-commerce Platform',
+    client: 'Fashion Brand',
+    year: '2024',
+    image: '/images/portfolio/showcase_1.webp',
+    description: 'Modern e-handelsplattform med AI-driven personalisering',
+    technologies: ['Next.js', 'TypeScript', 'Tailwind', 'Stripe'],
+    features: ['AI Recommendations', 'Real-time Analytics', 'Mobile First'],
+    url: '#',
   },
   {
-    id: "showcase2",
-    title: "SaaS Dashboard",
-    client: "Tech Startup",
-    year: "2024",
-    image: "/images/portfolio/showcase_2.webp",
-    description: "Skalbar SaaS-lösning med avancerad datavisualisering",
-    technologies: ["React", "Node.js", "MongoDB", "D3.js"],
-    features: ["Real-time Data", "Custom Charts", "Team Collaboration"],
-    url: "#",
+    id: 'showcase2',
+    title: 'SaaS Dashboard',
+    client: 'Tech Startup',
+    year: '2024',
+    image: '/images/portfolio/showcase_2.webp',
+    description: 'Skalbar SaaS-lösning med avancerad datavisualisering',
+    technologies: ['React', 'Node.js', 'MongoDB', 'D3.js'],
+    features: ['Real-time Data', 'Custom Charts', 'Team Collaboration'],
+    url: '#',
   },
-];
+]
 
 export default function PortfolioShowcase() {
-  const [activeProject, setActiveProject] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeProject, setActiveProject] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "end start"],
+    offset: ['start end', 'end start'],
     layoutEffect: false,
-  });
+  })
 
-  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100])
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
 
   return (
-    <section ref={containerRef} className="relative py-32 overflow-hidden bg-gradient-to-b from-black via-gray-900 to-black" style={{ position: 'relative' }}>
+    <section
+      ref={containerRef}
+      className="relative py-32 overflow-hidden bg-gradient-to-b from-black via-gray-900 to-black"
+      style={{ position: 'relative' }}
+    >
       {/* Animated background */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ opacity }}
-      >
+      <motion.div className="absolute inset-0" style={{ opacity }}>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.15),transparent_50%)]" />
         <motion.div
           className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.15),transparent_50%)]"
@@ -61,7 +62,7 @@ export default function PortfolioShowcase() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
         />
       </motion.div>
@@ -91,10 +92,7 @@ export default function PortfolioShowcase() {
         {/* Showcase Layout */}
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Project details */}
-          <motion.div
-            style={{ y }}
-            className="space-y-8"
-          >
+          <motion.div style={{ y }} className="space-y-8">
             {/* Project selector */}
             <div className="flex gap-4 mb-8">
               {showcaseProjects.map((project, index) => (
@@ -103,8 +101,8 @@ export default function PortfolioShowcase() {
                   onClick={() => setActiveProject(index)}
                   className={`px-6 py-3 rounded-full font-semibold transition-all ${
                     activeProject === index
-                      ? "bg-white text-black"
-                      : "bg-white/10 text-white hover:bg-white/20"
+                      ? 'bg-white text-black'
+                      : 'bg-white/10 text-white hover:bg-white/20'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -212,7 +210,7 @@ export default function PortfolioShowcase() {
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500"
-                    initial={{ x: "100%" }}
+                    initial={{ x: '100%' }}
                     whileHover={{ x: 0 }}
                     transition={{ duration: 0.3 }}
                   />
@@ -274,9 +272,7 @@ export default function PortfolioShowcase() {
                 animate={isHovered ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                 transition={{ duration: 0.3 }}
               >
-                <span className="text-sm text-white font-medium">
-                  Klicka för detaljer
-                </span>
+                <span className="text-sm text-white font-medium">Klicka för detaljer</span>
               </motion.div>
             </motion.div>
 
@@ -290,7 +286,7 @@ export default function PortfolioShowcase() {
               transition={{
                 duration: 3,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
             />
             <motion.div
@@ -302,7 +298,7 @@ export default function PortfolioShowcase() {
               transition={{
                 duration: 4,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
             />
           </motion.div>
@@ -317,11 +313,10 @@ export default function PortfolioShowcase() {
           className="mt-32 text-center"
         >
           <div className="inline-block p-8 bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Lägg till dina egna projekt
-            </h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Lägg till dina egna projekt</h3>
             <p className="text-gray-400 mb-6 max-w-md">
-              Detta är en showcase-mall där du enkelt kan lägga till och visa upp dina kommande projekt
+              Detta är en showcase-mall där du enkelt kan lägga till och visa upp dina kommande
+              projekt
             </p>
             <button className="px-6 py-3 bg-white/10 text-white border border-white/20 rounded-lg hover:bg-white/20 transition-colors">
               + Lägg till projekt
@@ -330,5 +325,5 @@ export default function PortfolioShowcase() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

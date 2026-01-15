@@ -3,5 +3,5 @@
  */
 
 interface Window {
-  __didStatus?: 'pending' | 'loaded' | 'error' | 'disabled';
+  __didStatus?: 'pending' | 'loaded' | 'error' | 'disabled'
 }

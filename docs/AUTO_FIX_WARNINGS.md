@@ -50,7 +50,6 @@ Följande behålls eftersom de är nödvändiga:
    ```
 
 2. **Om det fortfarande finns varningar:**
-
    - Kopiera varningarna och ge till mig (AI-agenten)
    - Jag kan analysera och fixa dem manuellt
 
@@ -74,11 +73,11 @@ Om du vill lägga till fler automatiska fixes, redigera `scripts/auto-fix-warnin
 const fixes = [
   {
     pattern: /din-regex-här/g,
-    replacement: "din-ersättning",
-    description: "Beskrivning",
+    replacement: 'din-ersättning',
+    description: 'Beskrivning',
   },
   // Lägg till fler här...
-];
+]
 ```
 
 ## Tips

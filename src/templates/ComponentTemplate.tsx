@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { ReactNode } from 'react';
-import { motion, MotionProps } from 'framer-motion';
+import { ReactNode } from 'react'
+import { motion, MotionProps } from 'framer-motion'
 
 interface ComponentTemplateProps {
-  children: ReactNode;
-  className?: string;
-  animate?: boolean;
-  animationProps?: MotionProps;
+  children: ReactNode
+  className?: string
+  animate?: boolean
+  animationProps?: MotionProps
 }
 
 /**
  * ComponentTemplate - Mall för återanvändbara komponenter
- * 
+ *
  * Använd denna mall när du skapar nya komponenter för att säkerställa
  * konsistent struktur, animationer och styling.
- * 
+ *
  * @example
  * ```tsx
  * export default function MyComponent({ title }: { title: string }) {
@@ -42,9 +42,8 @@ export default function ComponentTemplate({
       <motion.div className={className} {...animationProps}>
         {children}
       </motion.div>
-    );
+    )
   }
 
-  return <div className={className}>{children}</div>;
+  return <div className={className}>{children}</div>
 }
-

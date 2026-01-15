@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next";
+import { MetadataRoute } from 'next'
 
 /**
  * Sitemap configuration for SEO
@@ -10,38 +10,38 @@ import { MetadataRoute } from "next";
  * - Utvardera & Sajtgranskning: Medium priority (0.6) - service pages
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://www.sajtstudio.se";
+  const baseUrl = 'https://www.sajtstudio.se'
 
   return [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 1,
     },
     {
       url: `${baseUrl}/portfolio`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/kontakt`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/utvardera`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/sajtgranskning`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
-  ];
+  ]
 }

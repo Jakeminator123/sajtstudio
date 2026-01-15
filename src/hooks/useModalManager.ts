@@ -16,16 +16,13 @@ export function useModalManager<TData extends Record<string, unknown> = Record<s
   })
 
   // Define modal functions first so they can be used in useEffect
-  const openModal = useCallback(
-    (modalId: string, data?: TData) => {
-      setModalState({
-        isOpen: true,
-        modalId,
-        data,
-      })
-    },
-    []
-  )
+  const openModal = useCallback((modalId: string, data?: TData) => {
+    setModalState({
+      isOpen: true,
+      modalId,
+      data,
+    })
+  }, [])
 
   const closeModal = useCallback(() => {
     setModalState({

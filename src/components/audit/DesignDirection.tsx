@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface DesignDirectionProps {
   direction: {
-    style: string;
-    color_psychology: string;
-    ui_patterns: string[];
-    accessibility_level: string;
-  };
+    style: string
+    color_psychology: string
+    ui_patterns: string[]
+    accessibility_level: string
+  }
 }
 
 export default function DesignDirection({ direction }: DesignDirectionProps) {
-  const patternList = direction.ui_patterns || [];
+  const patternList = direction.ui_patterns || []
 
   return (
     <motion.div
@@ -37,7 +37,9 @@ export default function DesignDirection({ direction }: DesignDirectionProps) {
         </div>
         {patternList.length > 0 && (
           <div>
-            <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">Rekommenderade UI-mönster</p>
+            <p className="text-xs uppercase tracking-wider text-gray-400 mb-2">
+              Rekommenderade UI-mönster
+            </p>
             <div className="flex flex-wrap gap-2">
               {patternList.map((pattern) => (
                 <span
@@ -56,6 +58,5 @@ export default function DesignDirection({ direction }: DesignDirectionProps) {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }
-

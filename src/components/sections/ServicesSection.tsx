@@ -10,13 +10,7 @@ import { useContentSection } from '@/hooks/useContent'
 import { useModalManager } from '@/hooks/useModalManager'
 import { useMounted } from '@/hooks/useMounted'
 import { useTheme } from '@/hooks/useTheme'
-import {
-  MotionValue,
-  motion,
-  useMotionValue,
-  useScroll,
-  useTransform,
-} from 'framer-motion'
+import { MotionValue, motion, useMotionValue, useScroll, useTransform } from 'framer-motion'
 import React, { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 type ServiceModalPayload = {
@@ -83,8 +77,7 @@ function FloatingParticle({
 }
 
 export default function ServicesSection() {
-  const { isOpen, modalId, data, openModal, closeModal } =
-    useModalManager<ServiceModalPayload>()
+  const { isOpen, modalId, data, openModal, closeModal } = useModalManager<ServiceModalPayload>()
   const mounted = useMounted()
   const { isLight } = useTheme()
   const sectionRef = useRef<HTMLElement>(null)
@@ -92,38 +85,41 @@ export default function ServicesSection() {
   const [shouldPlayVideo, setShouldPlayVideo] = useState(false)
 
   // Fetch content from CMS - enables live updates from /admin
-  const { getValue } = useContentSection("services")
-  
+  const { getValue } = useContentSection('services')
+
   // Build services from CMS with fallbacks to defaults
-  const services: Service[] = useMemo(() => [
-    {
-      ...defaultServices[0],
-      title: getValue("T21", defaultServices[0].title),
-      shortDesc: getValue("T25", defaultServices[0].shortDesc),
-      longDesc: getValue("T29", defaultServices[0].longDesc),
-    },
-    {
-      ...defaultServices[1],
-      title: getValue("T22", defaultServices[1].title),
-      shortDesc: getValue("T26", defaultServices[1].shortDesc),
-      longDesc: getValue("T30", defaultServices[1].longDesc),
-    },
-    {
-      ...defaultServices[2],
-      title: getValue("T23", defaultServices[2].title),
-      shortDesc: getValue("T27", defaultServices[2].shortDesc),
-      longDesc: getValue("T31", defaultServices[2].longDesc),
-    },
-    {
-      ...defaultServices[3],
-      title: getValue("T24", defaultServices[3].title),
-      shortDesc: getValue("T28", defaultServices[3].shortDesc),
-      longDesc: getValue("T32", defaultServices[3].longDesc),
-    },
-  ], [getValue])
-  
+  const services: Service[] = useMemo(
+    () => [
+      {
+        ...defaultServices[0],
+        title: getValue('T21', defaultServices[0].title),
+        shortDesc: getValue('T25', defaultServices[0].shortDesc),
+        longDesc: getValue('T29', defaultServices[0].longDesc),
+      },
+      {
+        ...defaultServices[1],
+        title: getValue('T22', defaultServices[1].title),
+        shortDesc: getValue('T26', defaultServices[1].shortDesc),
+        longDesc: getValue('T30', defaultServices[1].longDesc),
+      },
+      {
+        ...defaultServices[2],
+        title: getValue('T23', defaultServices[2].title),
+        shortDesc: getValue('T27', defaultServices[2].shortDesc),
+        longDesc: getValue('T31', defaultServices[2].longDesc),
+      },
+      {
+        ...defaultServices[3],
+        title: getValue('T24', defaultServices[3].title),
+        shortDesc: getValue('T28', defaultServices[3].shortDesc),
+        longDesc: getValue('T32', defaultServices[3].longDesc),
+      },
+    ],
+    [getValue]
+  )
+
   // Get video URL from CMS
-  const videoUrl = getValue("V2", "/videos/background_vid.mp4")
+  const videoUrl = getValue('V2', '/videos/background_vid.mp4')
 
   // Scroll-based parallax effects
   const { scrollYProgress } = useScroll({
@@ -188,7 +184,17 @@ export default function ServicesSection() {
       unsubscribeVideo()
       unsubscribeScale()
     }
-  }, [mounted, accentGradientOpacity, gridOpacity, videoOpacity, videoScale, finalAccentOpacity, finalGridOpacity, finalVideoOpacity, finalVideoScale])
+  }, [
+    mounted,
+    accentGradientOpacity,
+    gridOpacity,
+    videoOpacity,
+    videoScale,
+    finalAccentOpacity,
+    finalGridOpacity,
+    finalVideoOpacity,
+    finalVideoScale,
+  ])
 
   // Only load/play background video when the section is near the viewport.
   // This prevents offscreen videos from dominating network/CPU and hurting Lighthouse.
@@ -231,9 +237,7 @@ export default function ServicesSection() {
   const particleIndexes: number[] = Array.from({ length: 20 }, (_, i) => i)
 
   const serviceModalData: ServiceModalPayload | null =
-    isOpen && modalId?.startsWith('service-') && data
-      ? (data as ServiceModalPayload)
-      : null
+    isOpen && modalId?.startsWith('service-') && data ? (data as ServiceModalPayload) : null
 
   const serviceModal: ReactNode =
     serviceModalData !== null ? (
@@ -250,8 +254,8 @@ export default function ServicesSection() {
       ref={sectionRef}
       className={`section-spacing-md relative overflow-hidden min-h-screen flex items-center transition-colors duration-500 ${
         isLight
-          ? "bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50 text-gray-900"
-          : "bg-black text-white"
+          ? 'bg-gradient-to-br from-amber-50 via-orange-50/50 to-sky-50 text-gray-900'
+          : 'bg-black text-white'
       }`}
     >
       {/* Light mode decorative elements */}
@@ -310,14 +314,16 @@ export default function ServicesSection() {
 
       <SmokeEffect count={6} speed={20} opacity={0.15} />
       <div className="absolute inset-0 z-10 pointer-events-none">
-        {particleIndexes.map((i: number): ReactNode => (
-          <FloatingParticle
-            key={i}
-            index={i}
-            scrollYProgress={scrollYProgress}
-            mounted={mounted}
-          />
-        ))}
+        {particleIndexes.map(
+          (i: number): ReactNode => (
+            <FloatingParticle
+              key={i}
+              index={i}
+              scrollYProgress={scrollYProgress}
+              mounted={mounted}
+            />
+          )
+        )}
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-20">
@@ -332,8 +338,7 @@ export default function ServicesSection() {
             style={
               mounted
                 ? {
-                    textShadow:
-                      '0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)',
+                    textShadow: '0 0 80px rgba(0, 102, 255, 0.5), 0 0 120px rgba(0, 102, 255, 0.3)',
                   }
                 : undefined
             }
@@ -368,25 +373,27 @@ export default function ServicesSection() {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          {services.map((service: Service, index: number): ReactNode => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{
-                duration: 0.6,
-                delay: index * 0.15,
-                ease: [0.25, 0.1, 0.25, 1],
-              }}
-            >
-              <ServiceCard
-                service={service}
-                index={index}
-                onClick={() => handleOpenModal(service, index)}
-              />
-            </motion.div>
-          ))}
+          {services.map(
+            (service: Service, index: number): ReactNode => (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{
+                  duration: 0.6,
+                  delay: index * 0.15,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+              >
+                <ServiceCard
+                  service={service}
+                  index={index}
+                  onClick={() => handleOpenModal(service, index)}
+                />
+              </motion.div>
+            )
+          )}
         </motion.div>
       </div>
 

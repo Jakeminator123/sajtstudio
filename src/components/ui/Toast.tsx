@@ -1,39 +1,39 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 interface ToastProps {
-  message: string;
-  type?: ToastType;
-  duration?: number;
-  onClose: () => void;
+  message: string
+  type?: ToastType
+  duration?: number
+  onClose: () => void
 }
 
 export default function Toast({ message, type = 'info', duration = 5000, onClose }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      onClose();
-    }, duration);
+      onClose()
+    }, duration)
 
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+    return () => clearTimeout(timer)
+  }, [duration, onClose])
 
   const icons = {
     success: '✅',
     error: '❌',
     info: 'ℹ️',
     warning: '⚠️',
-  };
+  }
 
   const colors = {
     success: 'bg-green-500/20 border-green-400/30 text-green-200',
     error: 'bg-red-500/20 border-red-400/30 text-red-200',
     info: 'bg-blue-500/20 border-blue-400/30 text-blue-200',
     warning: 'bg-yellow-500/20 border-yellow-400/30 text-yellow-200',
-  };
+  }
 
   return (
     <motion.div
@@ -57,12 +57,12 @@ export default function Toast({ message, type = 'info', duration = 5000, onClose
         </button>
       </div>
     </motion.div>
-  );
+  )
 }
 
 interface ToastContainerProps {
-  toasts: Array<{ id: string; message: string; type?: ToastType; duration?: number }>;
-  onRemove: (id: string) => void;
+  toasts: Array<{ id: string; message: string; type?: ToastType; duration?: number }>
+  onRemove: (id: string) => void
 }
 
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
@@ -81,6 +81,5 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
         ))}
       </AnimatePresence>
     </div>
-  );
+  )
 }
-

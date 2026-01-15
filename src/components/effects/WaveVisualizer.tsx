@@ -1,41 +1,38 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 interface WaveVisualizerProps {
-  variant?: "sound" | "ocean" | "pulse";
-  color?: string;
-  height?: number;
+  variant?: 'sound' | 'ocean' | 'pulse'
+  color?: string
+  height?: number
 }
 
 export default function WaveVisualizer({
-  variant = "sound",
-  color = "#3b82f6",
+  variant = 'sound',
+  color = '#3b82f6',
   height = 200,
 }: WaveVisualizerProps) {
-  const [bars, setBars] = useState<number[]>([]);
+  const [bars, setBars] = useState<number[]>([])
 
   useEffect(() => {
-    if (variant === "sound") {
+    if (variant === 'sound') {
       // Generate random bar heights for sound wave effect
       const generateBars = () => {
-        const newBars = Array.from({ length: 50 }, () => Math.random() * 100);
-        setBars(newBars);
-      };
+        const newBars = Array.from({ length: 50 }, () => Math.random() * 100)
+        setBars(newBars)
+      }
 
-      generateBars();
-      const interval = setInterval(generateBars, 200);
-      return () => clearInterval(interval);
+      generateBars()
+      const interval = setInterval(generateBars, 200)
+      return () => clearInterval(interval)
     }
-  }, [variant]);
+  }, [variant])
 
-  if (variant === "sound") {
+  if (variant === 'sound') {
     return (
-      <div
-        className="flex items-center justify-center gap-1"
-        style={{ height }}
-      >
+      <div className="flex items-center justify-center gap-1" style={{ height }}>
         {bars.map((barHeight, i) => (
           <motion.div
             key={i}
@@ -49,15 +46,15 @@ export default function WaveVisualizer({
             }}
             transition={{
               duration: 0.3,
-              ease: "easeOut",
+              ease: 'easeOut',
             }}
           />
         ))}
       </div>
-    );
+    )
   }
 
-  if (variant === "ocean") {
+  if (variant === 'ocean') {
     return (
       <div className="relative w-full" style={{ height }}>
         <svg
@@ -73,31 +70,28 @@ export default function WaveVisualizer({
               d="M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
               animate={{
                 d: [
-                  "M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
-                  "M0,160L48,149.3C96,139,192,117,288,133.3C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,122.7C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
-                  "M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,149.3C960,139,1056,149,1152,176C1248,203,1344,245,1392,266.7L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
-                  "M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
+                  'M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
+                  'M0,160L48,149.3C96,139,192,117,288,133.3C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,122.7C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
+                  'M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,149.3C960,139,1056,149,1152,176C1248,203,1344,245,1392,266.7L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
+                  'M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,112C672,107,768,149,864,165.3C960,181,1056,171,1152,149.3C1248,128,1344,96,1392,80L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z',
                 ],
               }}
               transition={{
                 duration: 8 + index * 2,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: 'easeInOut',
                 delay: index * 0.5,
               }}
             />
           ))}
         </svg>
       </div>
-    );
+    )
   }
 
   // Pulse variant
   return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{ height }}
-    >
+    <div className="relative flex items-center justify-center" style={{ height }}>
       {[0, 1, 2, 3].map((index) => (
         <motion.div
           key={index}
@@ -114,7 +108,7 @@ export default function WaveVisualizer({
           transition={{
             duration: 2 + index * 0.5,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
             delay: index * 0.2,
           }}
         />
@@ -132,9 +126,9 @@ export default function WaveVisualizer({
         transition={{
           duration: 2,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
       />
     </div>
-  );
+  )
 }

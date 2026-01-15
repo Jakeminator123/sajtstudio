@@ -27,18 +27,21 @@
 ## Förbättringsförslag
 
 ### Lägga till metabeskrivning
+
 - **Påverkan:** high
 - **Svårighetsgrad:** low
 - **Varför:** Förbättrar sökresultat och CTR
 - **Hur:** Skapa en kort och relevant metabeskrivning
 
 ### Förbättra rubrikstruktur
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** medium
 - **Varför:** Hjälper SEO och användarnavigering
 - **Hur:** Använd H1, H2-system mer effektivt
 
 ### Optimera bilder
+
 - **Påverkan:** medium
 - **Svårighetsgrad:** medium
 - **Varför:** Snabbare laddning och bättre prestanda
@@ -53,4 +56,3 @@
 
 - Ökad synlighet i sökmotorer
 - Bättre användarupplevelse
-
