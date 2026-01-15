@@ -58,7 +58,6 @@ INPUT_DOC_FOR_CURSOR/
 cleaner.py
 cleaner2.py
 node_modules
-.next
 old/
 
 # Environment files with secrets
