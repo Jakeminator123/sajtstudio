@@ -1,12 +1,16 @@
 import type { Metadata } from 'next'
 
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import EmbedPasswordGate from '@/components/preview/EmbedPasswordGate'
 import PreviewWrapper from '@/components/preview/PreviewWrapper'
 import { getEmbedCookieName, verifyEmbedSessionToken } from '@/lib/embed-auth'
-import { getProtectedEmbedBySlug, updateProtectedEmbedLastAccessed } from '@/lib/preview-database'
+import {
+  getProtectedEmbedBySlug,
+  updateProtectedEmbedLastAccessed,
+  logEmbedVisit,
+} from '@/lib/preview-database'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -61,9 +65,29 @@ export default async function JuiceFactoryEmbedPage({ params, searchParams }: Pa
   const query = toQueryString(resolvedSearchParams)
   const sourceUrl = `${embed.target_url}${pathPart}${query}`
 
-  // Track access (best-effort)
+  // Track access and log visit (best-effort)
   try {
     updateProtectedEmbedLastAccessed(SLUG)
+
+    // Get visitor info from headers
+    const headersList = await headers()
+    const ip =
+      headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      headersList.get('x-real-ip') ||
+      headersList.get('cf-connecting-ip') ||
+      'unknown'
+    const userAgent = headersList.get('user-agent') || undefined
+    const referer = headersList.get('referer') || undefined
+
+    // Log the visit with full IP address
+    logEmbedVisit({
+      slug: SLUG,
+      ip_address: ip,
+      user_agent: userAgent,
+      referer: referer,
+      path: pathPart || '/',
+      query_string: query || undefined,
+    })
   } catch {
     // Ignore - not critical
   }

@@ -50,6 +50,28 @@ previewDb.exec(`
   CREATE INDEX IF NOT EXISTS idx_protected_embed_slug ON protected_embeds(slug)
 `)
 
+// Initialize embed visits table (tracks visitors to protected embeds)
+previewDb.exec(`
+  CREATE TABLE IF NOT EXISTS embed_visits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL,
+    ip_address TEXT NOT NULL,
+    user_agent TEXT,
+    referer TEXT,
+    path TEXT,
+    query_string TEXT,
+    visited_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`)
+
+previewDb.exec(`
+  CREATE INDEX IF NOT EXISTS idx_embed_visits_slug ON embed_visits(slug)
+`)
+
+previewDb.exec(`
+  CREATE INDEX IF NOT EXISTS idx_embed_visits_visited_at ON embed_visits(visited_at)
+`)
+
 // Types
 export interface Preview {
   id: number
@@ -80,6 +102,26 @@ export interface NewProtectedEmbed {
   title?: string
   target_url: string
   password: string
+}
+
+export interface EmbedVisit {
+  id: number
+  slug: string
+  ip_address: string
+  user_agent: string | null
+  referer: string | null
+  path: string | null
+  query_string: string | null
+  visited_at: string
+}
+
+export interface NewEmbedVisit {
+  slug: string
+  ip_address: string
+  user_agent?: string
+  referer?: string
+  path?: string
+  query_string?: string
 }
 
 // Default previews - seed data from kungorelser_20251219.json
@@ -392,6 +434,118 @@ export function seedDefaultProtectedEmbeds(): number {
 
   transaction()
   return insertedCount
+}
+
+// ============================================================================
+// EMBED VISITS (track visitors to protected embeds)
+// ============================================================================
+
+/**
+ * Log a visit to a protected embed page
+ * Stores full IP address for admin tracking
+ */
+export function logEmbedVisit(visit: NewEmbedVisit): EmbedVisit | null {
+  const stmt = previewDb.prepare(`
+    INSERT INTO embed_visits (slug, ip_address, user_agent, referer, path, query_string)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+
+  try {
+    const result = stmt.run(
+      visit.slug,
+      visit.ip_address,
+      visit.user_agent || null,
+      visit.referer || null,
+      visit.path || null,
+      visit.query_string || null
+    )
+
+    if (result.lastInsertRowid) {
+      return getEmbedVisitById(Number(result.lastInsertRowid))
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Get a visit by ID
+ */
+export function getEmbedVisitById(id: number): EmbedVisit | null {
+  const stmt = previewDb.prepare('SELECT * FROM embed_visits WHERE id = ?')
+  const result = stmt.get(id) as EmbedVisit | undefined
+  return result || null
+}
+
+/**
+ * Get all visits for a specific slug
+ */
+export function getEmbedVisitsBySlug(slug: string, limit = 100): EmbedVisit[] {
+  const stmt = previewDb.prepare(`
+    SELECT * FROM embed_visits 
+    WHERE slug = ? 
+    ORDER BY visited_at DESC 
+    LIMIT ?
+  `)
+  return stmt.all(slug, limit) as EmbedVisit[]
+}
+
+/**
+ * Get all visits across all embeds (for admin)
+ */
+export function getAllEmbedVisits(limit = 200): EmbedVisit[] {
+  const stmt = previewDb.prepare(`
+    SELECT * FROM embed_visits 
+    ORDER BY visited_at DESC 
+    LIMIT ?
+  `)
+  return stmt.all(limit) as EmbedVisit[]
+}
+
+/**
+ * Get visit statistics for embeds
+ */
+export function getEmbedVisitStats(): {
+  totalVisits: number
+  uniqueIps: number
+  todayVisits: number
+  visitsBySlug: { slug: string; count: number }[]
+} {
+  const totalStmt = previewDb.prepare('SELECT COUNT(*) as count FROM embed_visits')
+  const totalVisits = (totalStmt.get() as { count: number }).count
+
+  const uniqueStmt = previewDb.prepare(
+    'SELECT COUNT(DISTINCT ip_address) as count FROM embed_visits'
+  )
+  const uniqueIps = (uniqueStmt.get() as { count: number }).count
+
+  const todayStmt = previewDb.prepare(`
+    SELECT COUNT(*) as count FROM embed_visits 
+    WHERE visited_at > datetime('now', '-1 day')
+  `)
+  const todayVisits = (todayStmt.get() as { count: number }).count
+
+  const bySlugStmt = previewDb.prepare(`
+    SELECT slug, COUNT(*) as count FROM embed_visits 
+    GROUP BY slug 
+    ORDER BY count DESC
+  `)
+  const visitsBySlug = bySlugStmt.all() as { slug: string; count: number }[]
+
+  return { totalVisits, uniqueIps, todayVisits, visitsBySlug }
+}
+
+/**
+ * Delete old visits (cleanup)
+ */
+export function deleteOldEmbedVisits(daysOld = 90): number {
+  const stmt = previewDb.prepare(`
+    DELETE FROM embed_visits 
+    WHERE visited_at < datetime('now', '-' || ? || ' days')
+  `)
+  const result = stmt.run(daysOld)
+  return result.changes
 }
 
 // Auto-seed on module load

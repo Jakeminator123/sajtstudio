@@ -49,7 +49,7 @@ interface VisitorStats {
   recentIpHashes?: { hash: string; lastSeen: string; prefix: string | null }[]
 }
 
-type TabType = 'overview' | 'contacts' | 'content' | 'audits'
+type TabType = 'overview' | 'contacts' | 'content' | 'audits' | 'embeds'
 
 interface SavedAudit {
   id: string
@@ -68,6 +68,33 @@ interface SavedAudit {
     sek: number
     tokens: number
   }
+}
+
+interface EmbedVisit {
+  id: number
+  slug: string
+  ip_address: string
+  user_agent: string | null
+  referer: string | null
+  path: string | null
+  query_string: string | null
+  visited_at: string
+}
+
+interface EmbedVisitStats {
+  totalVisits: number
+  uniqueIps: number
+  todayVisits: number
+  visitsBySlug: { slug: string; count: number }[]
+}
+
+interface ProtectedEmbed {
+  id: number
+  slug: string
+  title: string | null
+  target_url: string
+  created_at: string
+  last_accessed: string
 }
 
 // Get admin credentials from env or fallback to defaults
@@ -97,6 +124,10 @@ export default function AdminPage() {
   const [contentFilter, setContentFilter] = useState<string>('all')
   const [audits, setAudits] = useState<SavedAudit[]>([])
   const [auditsLoading, setAuditsLoading] = useState(false)
+  const [embedVisits, setEmbedVisits] = useState<EmbedVisit[]>([])
+  const [embedStats, setEmbedStats] = useState<EmbedVisitStats | null>(null)
+  const [protectedEmbeds, setProtectedEmbeds] = useState<ProtectedEmbed[]>([])
+  const [embedsLoading, setEmbedsLoading] = useState(false)
 
   // Login handler with env-based credentials
   const handleLogin = (e: FormEvent) => {
@@ -175,6 +206,19 @@ export default function AdminPage() {
       console.error('Failed to load audits')
     }
 
+    // Load embed visits
+    try {
+      const response = await fetch('/api/embed-visits')
+      if (response.ok) {
+        const data = await response.json()
+        setEmbedVisits(data.visits || [])
+        setEmbedStats(data.stats || null)
+        setProtectedEmbeds(data.embeds || [])
+      }
+    } catch {
+      console.error('Failed to load embed visits')
+    }
+
     setLoading(false)
   }, [])
 
@@ -190,6 +234,22 @@ export default function AdminPage() {
       console.error('Failed to load audits')
     }
     setAuditsLoading(false)
+  }
+
+  const loadEmbedVisits = async () => {
+    setEmbedsLoading(true)
+    try {
+      const response = await fetch('/api/embed-visits')
+      if (response.ok) {
+        const data = await response.json()
+        setEmbedVisits(data.visits || [])
+        setEmbedStats(data.stats || null)
+        setProtectedEmbeds(data.embeds || [])
+      }
+    } catch {
+      console.error('Failed to load embed visits')
+    }
+    setEmbedsLoading(false)
   }
 
   const handleDeleteAudit = async (id: string) => {
@@ -352,8 +412,8 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {(['overview', 'contacts', 'content', 'audits'] as TabType[]).map((tab) => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {(['overview', 'contacts', 'content', 'audits', 'embeds'] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -367,6 +427,7 @@ export default function AdminPage() {
               {tab === 'contacts' && `Meddelanden (${contacts.length})`}
               {tab === 'content' && `Innehåll (${content.length})`}
               {tab === 'audits' && `Audits (${audits.length})`}
+              {tab === 'embeds' && `Embed-besök (${embedVisits.length})`}
             </button>
           ))}
         </div>
@@ -808,9 +869,122 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Embeds Tab */}
+        {activeTab === 'embeds' && (
+          <div className="bg-gray-800 rounded-xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">🔒 Protected Embed Besök</h2>
+              <button
+                onClick={loadEmbedVisits}
+                disabled={embedsLoading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                {embedsLoading ? 'Laddar...' : 'Uppdatera'}
+              </button>
+            </div>
+
+            {/* Stats */}
+            {embedStats && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-blue-400">{embedStats.totalVisits}</p>
+                  <p className="text-gray-400 text-sm">Totala besök</p>
+                </div>
+                <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-green-400">{embedStats.uniqueIps}</p>
+                  <p className="text-gray-400 text-sm">Unika IP</p>
+                </div>
+                <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-amber-400">{embedStats.todayVisits}</p>
+                  <p className="text-gray-400 text-sm">Besök idag</p>
+                </div>
+                <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                  <p className="text-2xl font-bold text-purple-400">{protectedEmbeds.length}</p>
+                  <p className="text-gray-400 text-sm">Embeds</p>
+                </div>
+              </div>
+            )}
+
+            {/* Embeds list */}
+            {protectedEmbeds.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-3">Registrerade Embeds</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {protectedEmbeds.map((embed) => {
+                    const visitCount =
+                      embedStats?.visitsBySlug.find((v) => v.slug === embed.slug)?.count || 0
+                    return (
+                      <div
+                        key={embed.id}
+                        className="bg-gray-700/50 rounded-lg p-4 border border-gray-600"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-blue-400 font-mono">/{embed.slug}</span>
+                          <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
+                            {visitCount} besök
+                          </span>
+                        </div>
+                        <p className="text-white font-medium">{embed.title || '(Ingen titel)'}</p>
+                        <p className="text-gray-400 text-sm truncate">{embed.target_url}</p>
+                        <p className="text-gray-500 text-xs mt-2">
+                          Senast: {new Date(embed.last_accessed).toLocaleString('sv-SE')}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Visits table */}
+            <h3 className="text-lg font-semibold text-white mb-3">Besökslogg (senaste 200)</h3>
+            {embedVisits.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">Inga besök registrerade ännu</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-gray-400 text-left border-b border-gray-700">
+                      <th className="pb-3 font-medium">Tid</th>
+                      <th className="pb-3 font-medium">Slug</th>
+                      <th className="pb-3 font-medium">IP-adress</th>
+                      <th className="pb-3 font-medium">Path</th>
+                      <th className="pb-3 font-medium">Referrer</th>
+                      <th className="pb-3 font-medium">User Agent</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {embedVisits.map((visit) => (
+                      <tr key={visit.id} className="hover:bg-gray-700/30">
+                        <td className="py-3 text-gray-300 whitespace-nowrap">
+                          {new Date(visit.visited_at).toLocaleString('sv-SE')}
+                        </td>
+                        <td className="py-3">
+                          <span className="text-blue-400 font-mono">/{visit.slug}</span>
+                        </td>
+                        <td className="py-3">
+                          <span className="text-amber-400 font-mono">{visit.ip_address}</span>
+                        </td>
+                        <td className="py-3 text-gray-300">{visit.path || '/'}</td>
+                        <td className="py-3 text-gray-400 max-w-[150px] truncate">
+                          {visit.referer || '-'}
+                        </td>
+                        <td className="py-3 text-gray-500 max-w-[200px] truncate text-xs">
+                          {visit.user_agent || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Footer note */}
         <p className="text-gray-500 text-sm mt-4 text-center">
-          Besökarstatistik, kontaktmeddelanden, innehåll och audits hämtas från servern.
+          Besökarstatistik, kontaktmeddelanden, innehåll, audits och embed-besök hämtas från
+          servern.
         </p>
       </div>
     </div>
