@@ -15,20 +15,83 @@ interface ContactEntry {
   source: string
 }
 
-// Path to contacts data file
-const CONTACTS_FILE = path.join(getDataDir(), 'contacts.json')
+// Get contacts file path dynamically (not cached at module level)
+function getContactsFile(): string {
+  return path.join(getDataDir(), 'contacts.json')
+}
+
+// Get default/legacy contacts file path (for migration)
+function getLegacyContactsFile(): string {
+  return path.join(process.cwd(), 'data', 'contacts.json')
+}
+
+// Migrate contacts from legacy location to current location if needed
+async function migrateContactsIfNeeded(currentFile: string): Promise<void> {
+  // Only migrate if current file doesn't exist and we're not already using the default location
+  try {
+    await fs.access(currentFile)
+    // File exists, no migration needed
+    return
+  } catch {
+    // Current file doesn't exist, check if legacy file exists
+  }
+
+  const legacyFile = getLegacyContactsFile()
+  
+  // If current and legacy are the same, no migration needed
+  if (currentFile === legacyFile) {
+    return
+  }
+
+  try {
+    const legacyData = await fs.readFile(legacyFile, 'utf-8')
+    const contacts = JSON.parse(legacyData)
+    
+    if (Array.isArray(contacts) && contacts.length > 0) {
+      // Ensure current directory exists
+      const currentDir = path.dirname(currentFile)
+      await fs.mkdir(currentDir, { recursive: true })
+      
+      // Copy contacts to new location
+      await fs.writeFile(currentFile, JSON.stringify(contacts, null, 2), 'utf-8')
+      
+      console.log(
+        `✅ Migrated ${contacts.length} contacts from ${legacyFile} to ${currentFile}`
+      )
+      
+      // Optionally backup the legacy file (rename it)
+      try {
+        const backupFile = `${legacyFile}.migrated-${Date.now()}`
+        await fs.rename(legacyFile, backupFile)
+        console.log(`✅ Backed up legacy file to ${backupFile}`)
+      } catch {
+        // Backup failed, but migration succeeded - that's okay
+      }
+    }
+  } catch (error) {
+    // Legacy file doesn't exist or is invalid - that's fine, no migration needed
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      console.warn('Could not migrate contacts from legacy location:', error)
+    }
+  }
+}
 
 // Ensure data directory exists and save contact to file
 async function saveContact(contact: Omit<ContactEntry, 'id'>) {
   try {
+    const contactsFile = getContactsFile()
+    
+    // Migrate contacts from legacy location if needed
+    await migrateContactsIfNeeded(contactsFile)
+    
     // Ensure data directory exists
-    const dataDir = path.dirname(CONTACTS_FILE)
+    const dataDir = path.dirname(contactsFile)
     await fs.mkdir(dataDir, { recursive: true })
 
     // Read existing contacts
     let contacts: ContactEntry[] = []
     try {
-      const data = await fs.readFile(CONTACTS_FILE, 'utf-8')
+      const data = await fs.readFile(contactsFile, 'utf-8')
       contacts = JSON.parse(data)
     } catch {
       // File doesn't exist yet, start with empty array
@@ -46,9 +109,9 @@ async function saveContact(contact: Omit<ContactEntry, 'id'>) {
     contacts.push(newContact)
 
     // Save to file
-    await fs.writeFile(CONTACTS_FILE, JSON.stringify(contacts, null, 2), 'utf-8')
+    await fs.writeFile(contactsFile, JSON.stringify(contacts, null, 2), 'utf-8')
 
-    console.log(`✅ Contact saved to ${CONTACTS_FILE}:`, { id, email: contact.email })
+    console.log(`✅ Contact saved to ${contactsFile}:`, { id, email: contact.email })
     return newContact
   } catch (error) {
     console.error('Error saving contact to file:', error)
@@ -210,9 +273,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get contacts file path and migrate if needed
+    const contactsFile = getContactsFile()
+    await migrateContactsIfNeeded(contactsFile)
+
     // Read contacts from file
     try {
-      const data = await fs.readFile(CONTACTS_FILE, 'utf-8')
+      const data = await fs.readFile(contactsFile, 'utf-8')
       const contacts: ContactEntry[] = JSON.parse(data)
 
       // Sort by timestamp, newest first
