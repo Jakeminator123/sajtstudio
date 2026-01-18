@@ -47,6 +47,7 @@ export default function DidChatbotLoader() {
   const didOrientation = process.env.NEXT_PUBLIC_DID_ORIENTATION?.trim() || 'horizontal'
   const didPosition = process.env.NEXT_PUBLIC_DID_POSITION?.trim() || 'right'
   const didDebug = parseEnvBool(process.env.NEXT_PUBLIC_DID_DEBUG) ?? (isProd ? false : true)
+  const didMonitor = parseEnvBool(process.env.NEXT_PUBLIC_DID_MONITOR) ?? isProd
 
   const shouldLoad =
     !isPreviewPage && (didChatbotFlag ?? (isProd ? false : true)) && !!didClientKey && !!didAgentId
@@ -93,7 +94,7 @@ export default function DidChatbotLoader() {
         script.setAttribute('data-client-key', didClientKey!)
         script.setAttribute('data-agent-id', didAgentId!)
         script.setAttribute('data-name', 'did-agent')
-        script.setAttribute('data-monitor', 'true')
+        script.setAttribute('data-monitor', didMonitor ? 'true' : 'false')
         script.setAttribute('data-orientation', didOrientation)
         script.setAttribute('data-position', didPosition)
 
@@ -172,6 +173,7 @@ export default function DidChatbotLoader() {
     didClientKey,
     didDebug,
     didMode,
+    didMonitor,
     didOrientation,
     didPosition,
     pathname,

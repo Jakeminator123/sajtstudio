@@ -5,6 +5,7 @@ import NattenWords from '@/components/animations/NattenWords'
 import { useContentSection } from '@/hooks/useContent'
 import { useTheme } from '@/hooks/useTheme'
 import { useOfferModal } from '@/hooks/useOfferModal'
+import { useMobileDetection } from '@/hooks/useMobileDetection'
 import { prefersReducedMotion } from '@/lib/performance'
 import { MotionValue, motion, useScroll, useTransform } from 'framer-motion'
 import Image from 'next/image'
@@ -408,13 +409,17 @@ function AnimatedText({
   mounted: boolean
 }) {
   // Use transform and opacity only - GPU-composited, no layout work
-  const y = useTransform(scrollProgress, [0, 0.5, 1], [0, -50, -100])
-  const opacity = useTransform(scrollProgress, [0, 0.5, 0.9], [1, 1, 0])
-  const scale = useTransform(scrollProgress, [0, 0.5, 0.95], [1, 1, 0.8])
+  const y = useTransform(scrollProgress, [0, 0.18, 0.45], [0, 40, 120])
+  const opacity = useTransform(scrollProgress, [0, 0.14, 0.3], [1, 1, 0])
+  const scale = useTransform(scrollProgress, [0, 0.18, 0.4], [1, 0.98, 0.9])
 
   // Only apply animations when mounted to prevent hydration mismatch
   if (!mounted || shouldReduceMotion) {
-    return <span className={className}>{text}</span>
+    return (
+      <span className={className} suppressHydrationWarning>
+        {text}
+      </span>
+    )
   }
 
   return (
@@ -426,6 +431,7 @@ function AnimatedText({
         scale: scale ?? 1,
         display: 'inline-block',
       }}
+      suppressHydrationWarning
     >
       {text}
     </motion.span>
@@ -519,17 +525,19 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
     if (typeof window === 'undefined') return false
     return window.matchMedia('(min-width: 1024px)').matches
   })
+  const isMobile = useMobileDetection()
 
   // Theme hook for light/dark mode
   const { isLight } = useTheme()
 
   // Check for reduced motion preference and mobile device
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), [])
+  const allowHeavyEffects = mounted && !shouldReduceMotion && !isMobile
 
   // Delay background video to avoid stealing bandwidth/CPU from LCP.
   // Keeps the design (poster + animated overlays) while improving Lighthouse.
   useEffect(() => {
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion || isMobile) return
     if (typeof window === 'undefined') return
 
     type NetworkInformation = { saveData?: boolean; effectiveType?: string }
@@ -542,7 +550,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
 
     const t = window.setTimeout(() => setEnableBackgroundVideo(true), 2500)
     return () => window.clearTimeout(t)
-  }, [shouldReduceMotion])
+  }, [shouldReduceMotion, isMobile])
 
   // Desktop hero timing: start the hero text sequence a bit earlier on larger screens.
   // This is mount-based (not scroll-triggered), so we scale delays deterministically.
@@ -569,7 +577,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const pendingUpdateRef = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion || isMobile) return
 
     const handleMouseMove = (e: MouseEvent) => {
       // Prevent multiple simultaneous updates
@@ -651,7 +659,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       isUpdatingRef.current = false
       pendingUpdateRef.current = null
     }
-  }, [shouldReduceMotion])
+  }, [shouldReduceMotion, isMobile])
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -672,12 +680,14 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
   const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -30])
 
-  // Trigger text animations sooner so visitors don’t have to scroll as far
-  // Use hero section progress (not global page scroll) so the effect starts earlier.
-  const headingX = useTransform(sectionScrollProgress, [0, 0.35], [0, -200])
-  const headingOpacity = useTransform(sectionScrollProgress, [0, 0.22], [1, 0])
-  const subtitleX = useTransform(sectionScrollProgress, [0, 0.35], [0, 200])
-  const subtitleOpacity = useTransform(sectionScrollProgress, [0, 0.22], [1, 0])
+  // Trigger text animations early and make them more dynamic on scroll
+  const headingX = useTransform(sectionScrollProgress, [0, 0.18], [0, -320])
+  const headingY = useTransform(sectionScrollProgress, [0, 0.18], [0, 90])
+  const headingRotate = useTransform(sectionScrollProgress, [0, 0.18], [0, -6])
+  const headingOpacity = useTransform(sectionScrollProgress, [0, 0.16], [1, 0])
+  const subtitleX = useTransform(sectionScrollProgress, [0, 0.18], [0, 240])
+  const subtitleY = useTransform(sectionScrollProgress, [0, 0.18], [0, 60])
+  const subtitleOpacity = useTransform(sectionScrollProgress, [0, 0.16], [1, 0])
 
   // Generate stable particle positions (only on client) - memoized for performance
   const particles = useMemo(() => {
@@ -759,7 +769,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       }}
     >
       {/* Floating geometric shapes */}
-      {mounted && !shouldReduceMotion && (
+      {allowHeavyEffects && (
         <div className="absolute inset-0 pointer-events-none z-[2]">
           {Array.from({ length: 6 }).map((_, i) => {
             const size = 100 + (i % 3) * 50
@@ -797,7 +807,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       )}
 
       {/* Animated mesh gradient background */}
-      {mounted && !shouldReduceMotion && (
+      {allowHeavyEffects && (
         <div className="absolute inset-0 z-[1] pointer-events-none opacity-30">
           <div
             className="w-full h-full"
@@ -813,9 +823,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       )}
 
       {/* Cursor trail particles - optimized version */}
-      {mounted && !shouldReduceMotion && !isHoveringButton && (
-        <CursorTrail mousePosition={mousePosition} />
-      )}
+      {allowHeavyEffects && !isHoveringButton && <CursorTrail mousePosition={mousePosition} />}
       {/* Dynamic background with image overlays - only render on client */}
       {/* Fixed positioning with z-[1] - video at bottom, image on top */}
       {mounted && (
@@ -928,7 +936,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               }}
             />
             {/* Lightning flash effect - random intervals (dark mode only) */}
-            {!shouldReduceMotion && !isLight && <LightningFlash />}
+            {allowHeavyEffects && !isLight && <LightningFlash />}
           </motion.div>
 
           {/* Elegant overlay with gradient - adapts to theme */}
@@ -941,7 +949,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
           />
 
           {/* Rain effect - only in dark mode */}
-          {mounted && !shouldReduceMotion && !isLight && (
+          {allowHeavyEffects && !isLight && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
               {rainDrops.map((drop, i) => (
                 <div
@@ -959,10 +967,10 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
           )}
 
           {/* Window flash effect - only in light mode */}
-          {mounted && !shouldReduceMotion && isLight && <WindowFlash />}
+          {allowHeavyEffects && isLight && <WindowFlash />}
 
           {/* Flying birds - only in light mode */}
-          {mounted && !shouldReduceMotion && isLight && (
+          {allowHeavyEffects && isLight && (
             <>
               <FlyingBird delay={0} startY={15} />
               <FlyingBird delay={5} startY={25} />
@@ -1013,7 +1021,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       )}
 
       {/* Floating particles effect */}
-      {mounted && (
+      {allowHeavyEffects && (
         <div className="absolute inset-0 z-0 overflow-hidden">
           {particles.map((particle, i) => (
             <motion.div
@@ -1072,10 +1080,17 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
                         ? headingOpacity
                         : (headingOpacity?.get?.() ?? 1),
                     x: typeof headingX === 'number' ? headingX : (headingX?.get?.() ?? 0),
+                    y: typeof headingY === 'number' ? headingY : (headingY?.get?.() ?? 0),
+                    rotate:
+                      typeof headingRotate === 'number'
+                        ? headingRotate
+                        : (headingRotate?.get?.() ?? 0),
                   }
                 : {
                     opacity: 1,
                     x: 0,
+                    y: 0,
+                    rotate: 0,
                   }
             }
             className="text-5xl sm:text-6xl md:text-7xl lg:text-display font-black leading-[0.9] tracking-tight mb-6 sm:mb-8 text-white text-center relative overflow-visible"
@@ -1202,10 +1217,12 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
                         ? subtitleOpacity
                         : (subtitleOpacity?.get?.() ?? 1),
                     x: typeof subtitleX === 'number' ? subtitleX : (subtitleX?.get?.() ?? 0),
+                    y: typeof subtitleY === 'number' ? subtitleY : (subtitleY?.get?.() ?? 0),
                   }
                 : {
                     opacity: 1,
                     x: 0,
+                    y: 0,
                   }
             }
             className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 text-center leading-relaxed relative group"
@@ -1217,7 +1234,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               transition={{ duration: 0.2 }}
             >
               <AnimatedText
-                text="Vi skapar skräddarsydda webbplatser och AI-genererade sajter"
+                text="Vi bygger skräddarsydda webbplatser och AI-drivna sajter"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
@@ -1229,7 +1246,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               transition={{ duration: 0.2 }}
             >
               <AnimatedText
-                text="för företag som vill sticka ut eller snabbt komma igång"
+                text="för företag som vill sticka ut och komma igång snabbare"
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}
@@ -1241,7 +1258,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               transition={{ duration: 0.2 }}
             >
               <AnimatedText
-                text="och leda inom sin bransch."
+                text="med en närvaro som driver resultat."
                 scrollProgress={sectionScrollProgress}
                 shouldReduceMotion={shouldReduceMotion}
                 mounted={mounted}

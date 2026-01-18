@@ -37,7 +37,7 @@ async function migrateContactsIfNeeded(currentFile: string): Promise<void> {
   }
 
   const legacyFile = getLegacyContactsFile()
-  
+
   // If current and legacy are the same, no migration needed
   if (currentFile === legacyFile) {
     return
@@ -46,19 +46,17 @@ async function migrateContactsIfNeeded(currentFile: string): Promise<void> {
   try {
     const legacyData = await fs.readFile(legacyFile, 'utf-8')
     const contacts = JSON.parse(legacyData)
-    
+
     if (Array.isArray(contacts) && contacts.length > 0) {
       // Ensure current directory exists
       const currentDir = path.dirname(currentFile)
       await fs.mkdir(currentDir, { recursive: true })
-      
+
       // Copy contacts to new location
       await fs.writeFile(currentFile, JSON.stringify(contacts, null, 2), 'utf-8')
-      
-      console.log(
-        `✅ Migrated ${contacts.length} contacts from ${legacyFile} to ${currentFile}`
-      )
-      
+
+      console.log(`✅ Migrated ${contacts.length} contacts from ${legacyFile} to ${currentFile}`)
+
       // Optionally backup the legacy file (rename it)
       try {
         const backupFile = `${legacyFile}.migrated-${Date.now()}`
@@ -80,10 +78,10 @@ async function migrateContactsIfNeeded(currentFile: string): Promise<void> {
 async function saveContact(contact: Omit<ContactEntry, 'id'>) {
   try {
     const contactsFile = getContactsFile()
-    
+
     // Migrate contacts from legacy location if needed
     await migrateContactsIfNeeded(contactsFile)
-    
+
     // Ensure data directory exists
     const dataDir = path.dirname(contactsFile)
     await fs.mkdir(dataDir, { recursive: true })
@@ -140,22 +138,24 @@ export async function POST(request: NextRequest) {
     const trimmedMessage = typeof message === 'string' ? message.trim() : ''
     const contactSource = typeof source === 'string' ? source : 'website'
 
-    // Message is required, but name and email can be optional (use defaults)
+    // Message is required
     if (!trimmedMessage) {
       return NextResponse.json({ error: 'Meddelandet är obligatoriskt' }, { status: 400 })
     }
 
-    // Use defaults if name or email is missing
-    const finalName = trimmedName || 'Anonym besökare'
-    const finalEmail = trimmedEmail || 'anonym@sajtstudio.se'
-
-    // Validate email format (only if email is provided and not anonymous)
-    if (trimmedEmail && finalEmail !== 'anonym@sajtstudio.se') {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(trimmedEmail)) {
-        return NextResponse.json({ error: 'Ogiltig e-postadress' }, { status: 400 })
-      }
+    // Email is required and must be valid
+    if (!trimmedEmail) {
+      return NextResponse.json({ error: 'E-postadress är obligatorisk' }, { status: 400 })
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      return NextResponse.json({ error: 'Ogiltig e-postadress' }, { status: 400 })
+    }
+
+    // Use default name if missing
+    const finalName = trimmedName || 'Okänd avsändare'
+    const finalEmail = trimmedEmail
 
     // Save contact to JSON file (always, regardless of email sending status)
     await saveContact({
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
             </div>
           </div>
         `,
-        replyTo: finalEmail !== 'anonym@sajtstudio.se' ? finalEmail : undefined, // So you can reply directly to the sender
+        replyTo: finalEmail, // So you can reply directly to the sender
       })
 
       if (error) {

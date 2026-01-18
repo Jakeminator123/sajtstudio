@@ -14,17 +14,17 @@ import path from 'path'
  */
 export function getDataDir(): string {
   const envDir = process.env.DATA_DIR?.trim()
-  
+
   // In development, warn if DATA_DIR is set (this is usually a mistake)
   if (process.env.NODE_ENV === 'development' && envDir) {
     const defaultDir = path.join(process.cwd(), 'data')
     console.warn(
       `⚠️  WARNING: DATA_DIR=${envDir} is set in development mode.\n` +
-      `   This will save data to ${envDir} instead of ${defaultDir}.\n` +
-      `   Comment out DATA_DIR in .env.local to use the default location.`
+        `   This will save data to ${envDir} instead of ${defaultDir}.\n` +
+        `   Comment out DATA_DIR in .env.local to use the default location.`
     )
   }
-  
+
   if (envDir) {
     // Render mounts the persistent disk at runtime, but it may not exist during build.
     // Fall back to <repo>/data if the env dir can't be created/accessed.
@@ -34,10 +34,7 @@ export function getDataDir(): string {
     } catch (error) {
       // Fall back to default location if DATA_DIR can't be accessed
       const defaultDir = path.join(process.cwd(), 'data')
-      console.warn(
-        `⚠️  Could not access DATA_DIR=${envDir}, falling back to ${defaultDir}`,
-        error
-      )
+      console.warn(`⚠️  Could not access DATA_DIR=${envDir}, falling back to ${defaultDir}`, error)
     }
   }
   return path.join(process.cwd(), 'data')

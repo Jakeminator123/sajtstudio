@@ -2,8 +2,10 @@
 
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import { PerspectiveCamera, ContactShadows, Text } from '@react-three/drei'
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react'
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import * as THREE from 'three'
+import { getConnectionSpeed, prefersReducedMotion } from '@/lib/performance'
+import { useMobileDetection } from '@/hooks/useMobileDetection'
 
 // Types
 interface KeyData {
@@ -356,6 +358,10 @@ export default function Keyboard3DBackground() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set())
   const [isVisible, setIsVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const isMobile = useMobileDetection()
+  const connectionSpeed = useMemo(() => getConnectionSpeed(), [])
+  const shouldReduceMotion = prefersReducedMotion()
+  const disable3D = shouldReduceMotion || isMobile || connectionSpeed === 'slow'
 
   // Ensure component is mounted before rendering Canvas (fixes addEventListener null error)
   // Using requestAnimationFrame to avoid synchronous setState in effect warning
@@ -368,13 +374,14 @@ export default function Keyboard3DBackground() {
 
   // Fade in on mount
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || disable3D) return
     const timer = setTimeout(() => setIsVisible(true), 100)
     return () => clearTimeout(timer)
-  }, [mounted])
+  }, [mounted, disable3D])
 
   // Handle keyboard events
   useEffect(() => {
+    if (disable3D) return
     const handleKeyDown = (e: KeyboardEvent) => {
       setActiveKeys((prev) => new Set(prev).add(e.code))
     }
@@ -394,11 +401,19 @@ export default function Keyboard3DBackground() {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [])
+  }, [disable3D])
 
   // Don't render Canvas until mounted to avoid SSR/hydration issues
   if (!mounted) {
     return <div className="absolute inset-0 bg-black" />
+  }
+
+  if (disable3D) {
+    return (
+      <div className="absolute inset-0 bg-black pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black to-black/80" />
+      </div>
+    )
   }
 
   return (

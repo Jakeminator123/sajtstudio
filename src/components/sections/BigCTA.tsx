@@ -34,6 +34,7 @@ export default function BigCTA() {
 
   // Get content from CMS with fallbacks
   const phoneImage = getValue('B3', '/images/contact_phone.webp')
+  const phoneHref = `tel:${siteConfig.contact.phone.replace(/[^\d+]/g, '')}`
 
   return (
     <section
@@ -123,8 +124,7 @@ export default function BigCTA() {
               isLight ? 'text-gray-500' : 'text-white/50'
             }`}
           >
-            Klicka på tangenterna nedan för att skriva ditt meddelande, eller aktivera ditt eget
-            tangentbord.
+            Skriv på 3D-tangentbordet eller aktivera ditt eget för att skriva snabbare.
           </motion.p>
         </motion.div>
       </div>
@@ -154,7 +154,7 @@ export default function BigCTA() {
 
         {/* Clickable Phone - positioned to the left (desktop only) */}
         <a
-          href="tel:+34654161231"
+          href={phoneHref}
           className="absolute z-20 left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 hidden md:block group"
         >
           <motion.div
@@ -186,23 +186,18 @@ export default function BigCTA() {
           </motion.div>
         </a>
 
-        {/* Matrix Contact Form - positioned to the right (desktop) */}
-        <div className="absolute z-20 right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 hidden md:block">
-          <MatrixContactForm email={siteConfig.contact.email} />
-        </div>
-
-        {/* Mobile: Form and Phone button */}
-        <div className="absolute z-20 bottom-4 left-4 right-4 md:hidden space-y-4">
+        {/* Matrix Contact Form - single instance (responsive position) */}
+        <div className="absolute z-20 left-4 right-4 bottom-4 md:left-auto md:right-16 md:top-1/2 md:-translate-y-1/2 md:bottom-auto flex flex-col gap-4">
           <MatrixContactForm email={siteConfig.contact.email} />
 
           {/* Mobile phone call button */}
           <motion.a
-            href="tel:+34654161231"
+            href={phoneHref}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-accent to-blue-600 rounded-lg font-bold text-white shadow-lg shadow-accent/30"
+            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-accent to-blue-600 rounded-lg font-bold text-white shadow-lg shadow-accent/30 md:hidden"
           >
             <Image
               src={phoneImage}
@@ -260,7 +255,7 @@ export default function BigCTA() {
 
           {/* Phone */}
           <motion.a
-            href="tel:+34654161231"
+            href={phoneHref}
             className={`group flex items-center gap-3 hover:text-accent transition-colors ${
               isLight ? 'text-gray-600' : 'text-white/60'
             }`}
@@ -277,7 +272,7 @@ export default function BigCTA() {
             >
               <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
-            <span className="font-mono text-sm">+34 654 161 231</span>
+            <span className="font-mono text-sm">{siteConfig.contact.phone}</span>
           </motion.a>
 
           {/* Divider */}
@@ -285,7 +280,7 @@ export default function BigCTA() {
 
           {/* Fun note */}
           <span className={`text-xs italic ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
-            😎 På semester i Spanien
+            Svarar vanligtvis inom 24 timmar
           </span>
         </motion.div>
       </div>

@@ -24,8 +24,8 @@ export default function NattenWords({
   const progress = scrollProgress || fallbackProgress
 
   // Scroll-based animations - tuned to start earlier while the hero is still in view
-  const yTransform = useTransform(progress, [0, 0.2, 0.6, 1], [0, -8, -60, -95])
-  const opacityTransform = useTransform(progress, [0, 0.25, 0.55], [1, 1, 0])
+  const yTransform = useTransform(progress, [0, 0.12, 0.35, 0.7], [0, 14, 60, 105])
+  const opacityTransform = useTransform(progress, [0, 0.12, 0.35], [1, 1, 0])
 
   const y = scrollProgress ? yTransform : undefined
   const opacity = scrollProgress ? opacityTransform : undefined

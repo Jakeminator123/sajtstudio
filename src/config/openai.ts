@@ -12,7 +12,7 @@ export interface ModelOption {
 }
 
 /**
- * Simplified model options based on OpenAI documentation.
+ * Simplified model options based on  documentation.
  *
  * According to the docs:
  * - GPT-5 family: gpt-5, gpt-5-mini, gpt-5-nano (best for complex reasoning)

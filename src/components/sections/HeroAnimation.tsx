@@ -1655,18 +1655,20 @@ export default function HeroAnimation() {
             }`}
           />
           <div className="absolute inset-0">
-            <Image
-              src={
-                isLight
-                  ? '/images/backgrounds/section-background-sunny.webp'
-                  : '/images/backgrounds/section-background.webp'
-              }
-              alt=""
-              fill
-              className={`object-cover ${isLight ? 'opacity-40' : 'opacity-20'}`}
-              loading="eager"
-              sizes="(min-width: 1280px) 1200px, 100vw"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={
+                  isLight
+                    ? '/images/backgrounds/section-background-sunny.webp'
+                    : '/images/backgrounds/section-background.webp'
+                }
+                alt=""
+                fill
+                className={`object-cover ${isLight ? 'opacity-40' : 'opacity-20'}`}
+                loading="eager"
+                sizes="(min-width: 1280px) 1200px, 100vw"
+              />
+            </div>
           </div>
         </div>
 

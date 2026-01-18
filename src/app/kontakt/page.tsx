@@ -101,6 +101,7 @@ function Clock() {
 export default function ContactPage() {
   const sectionRef = useRef<HTMLElement>(null)
   const { isLight } = useTheme()
+  const phoneHref = `tel:${siteConfig.contact.phone.replace(/[^\d+]/g, '')}`
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
@@ -221,8 +222,8 @@ export default function ContactPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
               >
-                Låt oss skapa något{' '}
-                <span className="text-blue-500 font-semibold">extraordinärt</span> tillsammans
+                Låt oss skapa något <span className="text-blue-500 font-semibold">som märks</span>{' '}
+                tillsammans
               </motion.p>
 
               {/* Decorative line animation */}
@@ -258,7 +259,7 @@ export default function ContactPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <span className={isLight ? 'text-gray-800' : 'text-white'}>Låt oss </span>
-                  <span className="text-blue-500">connecta</span>
+                  <span className="text-blue-500">ta kontakt</span>
                 </motion.h2>
 
                 <div className="space-y-6">
@@ -296,12 +297,12 @@ export default function ContactPage() {
                       Telefon
                     </p>
                     <a
-                      href="tel:+46701234567"
+                      href={phoneHref}
                       className={`text-xl md:text-2xl group-hover:text-blue-500 transition-all duration-300 flex items-center gap-2 ${
                         isLight ? 'text-gray-800' : 'text-white'
                       }`}
                     >
-                      +46 70 123 45 67
+                      {siteConfig.contact.phone}
                       <motion.span
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500"
                         initial={{ x: -10 }}
@@ -393,7 +394,7 @@ export default function ContactPage() {
                   transition={{ delay: 0.6 }}
                 >
                   <span className={isLight ? 'text-gray-800' : 'text-white'}>Skicka </span>
-                  <span className="text-blue-500">meddelande</span>
+                  <span className="text-blue-500">ett meddelande</span>
                 </motion.h2>
 
                 <ContactForm />

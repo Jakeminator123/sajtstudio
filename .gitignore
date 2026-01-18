@@ -65,3 +65,7 @@ old/
 .env
 .env.*
 !.env.example
+
+old
+data/db/
+data/contacts.json

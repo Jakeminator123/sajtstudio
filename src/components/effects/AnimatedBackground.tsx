@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState, useMemo } from 'react'
+import { useMobileDetection } from '@/hooks/useMobileDetection'
+import { prefersReducedMotion } from '@/lib/performance'
 
 interface AnimatedBackgroundProps {
   variant?: 'aurora' | 'nebula' | 'matrix' | 'waves'
@@ -16,6 +18,9 @@ function seededRandom(seed: number): number {
 export default function AnimatedBackground({ variant = 'aurora' }: AnimatedBackgroundProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [mounted, setMounted] = useState(false)
+  const isMobile = useMobileDetection()
+  const shouldReduceMotion = prefersReducedMotion()
+  const useStaticBackground = shouldReduceMotion || isMobile
 
   // Mount check to prevent hydration mismatches
   // Use requestAnimationFrame to avoid setState in effect warning
@@ -72,13 +77,24 @@ export default function AnimatedBackground({ variant = 'aurora' }: AnimatedBackg
   }, [mounted])
 
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || useStaticBackground) return
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY })
     }
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [mounted])
+  }, [mounted, useStaticBackground])
+
+  if (useStaticBackground) {
+    const staticBackgroundClass =
+      variant === 'matrix'
+        ? 'bg-black'
+        : variant === 'waves'
+          ? 'bg-gradient-to-b from-blue-950 via-slate-950 to-slate-900'
+          : 'bg-gradient-to-b from-slate-900 via-slate-950 to-black'
+
+    return <div className={`fixed inset-0 -z-10 overflow-hidden ${staticBackgroundClass}`} />
+  }
 
   if (variant === 'aurora') {
     return (

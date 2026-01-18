@@ -1,8 +1,9 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMobileDetection } from '@/hooks/useMobileDetection'
+import { prefersReducedMotion } from '@/lib/performance'
 
 interface MatrixContactFormProps {
   onKeyboardModeChange?: (useKeyboard: boolean) => void
@@ -75,12 +76,13 @@ export default function MatrixContactForm({
   email = 'erik@sajtstudio.se',
 }: MatrixContactFormProps) {
   const isMobile = useMobileDetection()
+  const shouldReduceMotion = prefersReducedMotion()
+  const showMatrixRain = !isMobile && !shouldReduceMotion
   const [message, setMessage] = useState('')
   const [senderEmail, setSenderEmail] = useState('')
   const [useRealKeyboard, setUseRealKeyboard] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [sent, setSent] = useState(false)
-  const [showEmailInput, setShowEmailInput] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const emailInputRef = useRef<HTMLInputElement>(null)
 
@@ -89,8 +91,9 @@ export default function MatrixContactForm({
     if (useRealKeyboard) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only process if it's from our virtual keyboard (has our marker)
-      // or any keyboard input when in virtual mode
+      // Only process virtual keyboard events (non-trusted synthetic events).
+      // This prevents physical keyboard input from typing into the message unless enabled.
+      if (e.isTrusted) return
 
       if (e.code === 'Backspace') {
         setMessage((prev) => prev.slice(0, -1))
@@ -160,6 +163,18 @@ export default function MatrixContactForm({
   // Send message via API
   const handleSend = useCallback(async () => {
     if (!message.trim()) return
+    const trimmedEmail = senderEmail.trim()
+
+    if (!trimmedEmail) {
+      alert('Ange en giltig e-postadress.')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      alert('Ange en giltig e-postadress.')
+      return
+    }
 
     setIsSending(true)
 
@@ -171,9 +186,10 @@ export default function MatrixContactForm({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: senderEmail ? senderEmail.split('@')[0] : 'Anonym besökare',
-          email: senderEmail || 'anonym@sajtstudio.se',
+          name: trimmedEmail.split('@')[0] || 'Okänd avsändare',
+          email: trimmedEmail,
           message: message,
+          source: 'matrix',
         }),
       })
 
@@ -188,7 +204,6 @@ export default function MatrixContactForm({
           setSent(false)
           setMessage('')
           setSenderEmail('')
-          setShowEmailInput(false)
         }, 3000)
       } else {
         // Error handling
@@ -201,8 +216,6 @@ export default function MatrixContactForm({
       alert('Något gick fel. Försök igen senare.')
     }
   }, [message, senderEmail])
-
-  const isEmailInputVisible = isMobile || showEmailInput
 
   // Clear message
   const handleClear = useCallback(() => {
@@ -218,7 +231,7 @@ export default function MatrixContactForm({
       style={{ minWidth: '320px', maxWidth: '400px' }}
     >
       {/* Matrix rain background */}
-      <MatrixRain />
+      {showMatrixRain && <MatrixRain />}
 
       {/* Header */}
       <div className="relative z-10 px-4 py-3 border-b border-green-500/30 flex items-center justify-between">
@@ -242,41 +255,19 @@ export default function MatrixContactForm({
         </div>
       </div>
 
-      {/* Email input (optional) */}
-      {isMobile ? (
-        <div className="relative z-10 px-4 pb-2">
-          <input
-            ref={emailInputRef}
-            type="email"
-            value={senderEmail}
-            onChange={(e) => setSenderEmail(e.target.value)}
-            inputMode="email"
-            placeholder="Din e-post (valfritt)"
-            className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
-          />
-        </div>
-      ) : (
-        <AnimatePresence>
-          {showEmailInput && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="relative z-10 px-4 pb-2"
-            >
-              <input
-                ref={emailInputRef}
-                type="email"
-                value={senderEmail}
-                onChange={(e) => setSenderEmail(e.target.value)}
-                inputMode="email"
-                placeholder="Din e-post (valfritt)"
-                className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
+      {/* Email input (required) */}
+      <div className="relative z-10 px-4 pb-2">
+        <input
+          ref={emailInputRef}
+          type="email"
+          value={senderEmail}
+          onChange={(e) => setSenderEmail(e.target.value)}
+          inputMode="email"
+          placeholder="Din e-post"
+          className="w-full bg-black/50 border border-green-500/30 rounded px-3 py-2 text-green-400 font-mono text-sm placeholder:text-green-500/30 focus:outline-none focus:border-green-500/50"
+          required
+        />
+      </div>
 
       {/* Hidden input for real keyboard mode */}
       {useRealKeyboard && (
@@ -313,18 +304,7 @@ export default function MatrixContactForm({
             {useRealKeyboard ? 'TANGENTBORD AKTIVT' : 'ANVÄND EGET TANGENTBORD'}
           </button>
 
-          {!isMobile && (
-            <button
-              onClick={() => setShowEmailInput(!showEmailInput)}
-              className={`px-3 py-1.5 rounded text-xs font-mono transition-all border ${
-                isEmailInputVisible
-                  ? 'bg-green-500/20 text-green-400 border-green-500/50'
-                  : 'bg-transparent text-green-500/50 border-green-500/20 hover:border-green-500/40'
-              }`}
-            >
-              {isEmailInputVisible ? 'DÖLJ E-POST' : 'LÄGG TILL E-POST'}
-            </button>
-          )}
+          {!isMobile && <span className="text-green-500/40 text-xs font-mono">E-post krävs</span>}
         </div>
 
         {/* Action buttons */}
@@ -339,7 +319,7 @@ export default function MatrixContactForm({
 
           <motion.button
             onClick={handleSend}
-            disabled={!message.trim() || isSending}
+            disabled={!message.trim() || !senderEmail.trim() || isSending}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`flex-1 px-4 py-2 rounded font-mono text-sm font-bold transition-all ${
