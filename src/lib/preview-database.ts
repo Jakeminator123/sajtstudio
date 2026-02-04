@@ -21,6 +21,7 @@ previewDb.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT UNIQUE NOT NULL,
     source_slug TEXT,
+    target_url TEXT,
     company_name TEXT,
     domain TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -31,6 +32,13 @@ previewDb.exec(`
 // Migration: Add source_slug column if it doesn't exist (for existing databases)
 try {
   previewDb.exec(`ALTER TABLE previews ADD COLUMN source_slug TEXT`)
+} catch {
+  // Column already exists, ignore
+}
+
+// Migration: Add target_url column if it doesn't exist (for non-vusercontent URLs)
+try {
+  previewDb.exec(`ALTER TABLE previews ADD COLUMN target_url TEXT`)
 } catch {
   // Column already exists, ignore
 }
@@ -86,6 +94,8 @@ export interface Preview {
   slug: string
   /** Optional: the actual vusercontent slug if different from slug (for nice URLs) */
   source_slug: string | null
+  /** Optional: direct URL to embed (for non-vusercontent sites like Vercel apps) */
+  target_url: string | null
   company_name: string | null
   domain: string | null
   created_at: string
@@ -96,6 +106,8 @@ export interface NewPreview {
   slug: string
   /** Optional: the actual vusercontent slug if different from slug (for nice URLs) */
   source_slug?: string
+  /** Optional: direct URL to embed (for non-vusercontent sites like Vercel apps) */
+  target_url?: string
   company_name?: string
   domain?: string
 }
@@ -184,6 +196,12 @@ const defaultPreviews: NewPreview[] = [
     company_name: 'Bostadservice AB',
     domain: 'bostadservice.se',
   },
+  {
+    slug: 'mts',
+    target_url: 'https://v0-architecture-website-design-nu-nine.vercel.app',
+    company_name: 'MTS Måleriteknik Specialister',
+    domain: 'mts.se',
+  },
 ]
 
 /**
@@ -220,12 +238,13 @@ export function getAllPreviews(): Preview[] {
 export function addPreview(preview: NewPreview): Preview | null {
   try {
     const stmt = previewDb.prepare(`
-      INSERT INTO previews (slug, source_slug, company_name, domain)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO previews (slug, source_slug, target_url, company_name, domain)
+      VALUES (?, ?, ?, ?, ?)
     `)
     const result = stmt.run(
       preview.slug,
       preview.source_slug || null,
+      preview.target_url || null,
       preview.company_name || null,
       preview.domain || null
     )
@@ -260,8 +279,8 @@ export function seedDefaultPreviews(): number {
   )
 
   const insertStmt = previewDb.prepare(`
-    INSERT OR IGNORE INTO previews (slug, source_slug, company_name, domain)
-    VALUES (?, ?, ?, ?)
+    INSERT OR IGNORE INTO previews (slug, source_slug, target_url, company_name, domain)
+    VALUES (?, ?, ?, ?, ?)
   `)
 
   let insertedCount = 0
@@ -272,6 +291,7 @@ export function seedDefaultPreviews(): number {
         const result = insertStmt.run(
           preview.slug,
           preview.source_slug || null,
+          preview.target_url || null,
           preview.company_name || null,
           preview.domain || null
         )

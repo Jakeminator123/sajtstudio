@@ -171,15 +171,21 @@ export default async function PreviewPage({ params }: PageProps) {
   // Build path string from segments
   const pathString = pathSegments?.length ? `/${pathSegments.join('/')}` : ''
 
-  // Use source_slug if available (allows nice URLs like /bostadservice-ab)
-  // Otherwise fall back to the URL slug itself
-  const vusercontentSlug = preview.source_slug || slug
+  // Determine the source URL:
+  // 1. If target_url exists, use it directly (for non-vusercontent sites like Vercel apps)
+  // 2. Otherwise, build URL from source_slug or slug + vusercontent.net
+  let sourceUrl: string
+  if (preview.target_url) {
+    // Direct URL to external site (e.g., Vercel app)
+    sourceUrl = `${preview.target_url}${pathString}`
+  } else {
+    // Use source_slug if available (allows nice URLs like /bostadsservice-ab)
+    const vusercontentSlug = preview.source_slug || slug
+    sourceUrl = `https://${vusercontentSlug}${VUSERCONTENT_DOMAIN}${pathString}`
+  }
 
-  // Direct URL to vusercontent.net (no proxy needed!)
-  const sourceUrl = `https://${vusercontentSlug}${VUSERCONTENT_DOMAIN}${pathString}`
-
-  // Find optional screenshot for fallback (check both nice slug and source slug)
-  const previewImageSrc = findPreviewImage(slug) || findPreviewImage(vusercontentSlug)
+  // Find optional screenshot for fallback
+  const previewImageSrc = findPreviewImage(slug) || (preview.source_slug ? findPreviewImage(preview.source_slug) : null)
 
   // ---- RENDER ----
 
