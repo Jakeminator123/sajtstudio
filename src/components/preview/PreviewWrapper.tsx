@@ -86,7 +86,6 @@ export default function PreviewWrapper({
   const [isLoading, setIsLoading] = useState(initialMode === 'iframe') // Only loading if iframe mode
   const [hasError, setHasError] = useState(false)
   const [showSlowHint, setShowSlowHint] = useState(false)
-  const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const { openModal } = useOfferModal()
 
@@ -330,10 +329,9 @@ export default function PreviewWrapper({
             <span className="hidden sm:inline">Till hemsidan</span>
           </Link>
 
-          {/* Download site button */}
-          <button
-            type="button"
-            onClick={() => setShowDownloadModal(true)}
+          {/* Download site button - links to contact page */}
+          <Link
+            href="/kontakt"
             className="px-5 py-2.5 text-sm font-semibold text-white bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-gray-500 rounded-lg transition-all flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,7 +343,7 @@ export default function PreviewWrapper({
               />
             </svg>
             <span className="hidden sm:inline">Ladda hem din sajt</span>
-          </button>
+          </Link>
 
           {/* Create your own site - open OfferModal (3 choices) */}
           <button
@@ -358,17 +356,6 @@ export default function PreviewWrapper({
         </div>
       </motion.footer>
 
-      {/* ================================================================
-          DOWNLOAD MODAL - only render on client
-          ================================================================ */}
-      {isMounted && (
-        <DownloadModal
-          isOpen={showDownloadModal}
-          onClose={() => setShowDownloadModal(false)}
-          companyName={preview.company_name}
-          slug={preview.slug}
-        />
-      )}
     </div>
   )
 }
@@ -474,174 +461,3 @@ function ErrorOverlay({ sourceUrl }: { sourceUrl: string }) {
   )
 }
 
-/** Download modal - shows instructions for getting the site */
-function DownloadModal({
-  isOpen,
-  onClose,
-  companyName,
-  slug,
-}: {
-  isOpen: boolean
-  onClose: () => void
-  companyName: string | null
-  slug: string
-}) {
-  const [isSending, setIsSending] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // Send download request to backend
-  const handleSendRequest = async () => {
-    setIsSending(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: companyName || 'Demo-förfrågan',
-          email: 'demo-request@sajtstudio.se',
-          message: `Hej! Jag vill ladda hem min demosajt.\n\nSlug: ${slug}\nFöretag: ${companyName || 'Ej angivet'}\n\nSkicka gärna sajten till mig!`,
-          subject: `Demo-nedladdning: ${slug}`,
-          type: 'demo_download',
-        }),
-      })
-
-      if (response.ok) {
-        setSent(true)
-      } else {
-        setError('Något gick fel. Skicka ett mejl direkt till hej@sajtstudio.se')
-      }
-    } catch {
-      setError('Kunde inte skicka. Skicka ett mejl direkt till hej@sajtstudio.se')
-    } finally {
-      setIsSending(false)
-    }
-  }
-
-  if (!isOpen) return null
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gray-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-800"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-
-        {!sent ? (
-          <>
-            {/* Header */}
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/20 to-tertiary/20 flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-accent"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">Ladda hem din sajt! 🎉</h2>
-              <p className="text-gray-400 text-sm">
-                Vi håller precis på att kicka igång med automatiska nedladdningar.
-              </p>
-            </div>
-
-            {/* Content */}
-            <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
-              <p className="text-gray-300 text-sm leading-relaxed">
-                Skicka ett mejl till{' '}
-                <a
-                  href={`mailto:hej@sajtstudio.se?subject=Ladda hem: ${slug}&body=Hej! Jag vill ladda hem min demosajt (${slug}). Tack!`}
-                  className="text-accent hover:underline font-medium"
-                >
-                  hej@sajtstudio.se
-                </a>{' '}
-                så skickar vi sajten till dig! 😊
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col gap-3">
-              <a
-                href={`mailto:hej@sajtstudio.se?subject=Ladda hem: ${slug}&body=Hej! Jag vill ladda hem min demosajt (${slug}). Tack!`}
-                className="w-full px-5 py-3 text-sm font-semibold text-white bg-gradient-to-r from-accent to-tertiary hover:from-accent/90 hover:to-tertiary/90 rounded-lg text-center transition-all"
-              >
-                📧 Öppna mejlklient
-              </a>
-
-              <button
-                onClick={handleSendRequest}
-                disabled={isSending}
-                className="w-full px-5 py-3 text-sm font-medium text-gray-300 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-all disabled:opacity-50"
-              >
-                {isSending ? 'Skickar...' : 'Eller klicka här så meddelar vi dig'}
-              </button>
-
-              {error && <p className="text-red-400 text-xs text-center">{error}</p>}
-            </div>
-          </>
-        ) : (
-          /* Success state */
-          <div className="text-center py-4">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-white mb-2">Tack! 🎉</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              Vi har mottagit din förfrågan och återkommer snart!
-            </p>
-            <button
-              onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-all"
-            >
-              Stäng
-            </button>
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
-  )
-}

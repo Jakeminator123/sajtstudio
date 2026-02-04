@@ -20,12 +20,20 @@ previewDb.exec(`
   CREATE TABLE IF NOT EXISTS previews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT UNIQUE NOT NULL,
+    source_slug TEXT,
     company_name TEXT,
     domain TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `)
+
+// Migration: Add source_slug column if it doesn't exist (for existing databases)
+try {
+  previewDb.exec(`ALTER TABLE previews ADD COLUMN source_slug TEXT`)
+} catch {
+  // Column already exists, ignore
+}
 
 // Create index for faster slug lookups
 previewDb.exec(`
@@ -76,6 +84,8 @@ previewDb.exec(`
 export interface Preview {
   id: number
   slug: string
+  /** Optional: the actual vusercontent slug if different from slug (for nice URLs) */
+  source_slug: string | null
   company_name: string | null
   domain: string | null
   created_at: string
@@ -84,6 +94,8 @@ export interface Preview {
 
 export interface NewPreview {
   slug: string
+  /** Optional: the actual vusercontent slug if different from slug (for nice URLs) */
+  source_slug?: string
   company_name?: string
   domain?: string
 }
@@ -166,6 +178,12 @@ const defaultPreviews: NewPreview[] = [
     company_name: 'Peter Wallgren Sollefteå AB',
     domain: 'peterwallgrensolleftea.se',
   },
+  {
+    slug: 'bostadsservice-ab',
+    source_slug: 'demo-kzmpc9tk45vsovp4cme1',
+    company_name: 'Bostadservice AB',
+    domain: 'bostadservice.se',
+  },
 ]
 
 /**
@@ -202,10 +220,15 @@ export function getAllPreviews(): Preview[] {
 export function addPreview(preview: NewPreview): Preview | null {
   try {
     const stmt = previewDb.prepare(`
-      INSERT INTO previews (slug, company_name, domain)
-      VALUES (?, ?, ?)
+      INSERT INTO previews (slug, source_slug, company_name, domain)
+      VALUES (?, ?, ?, ?)
     `)
-    const result = stmt.run(preview.slug, preview.company_name || null, preview.domain || null)
+    const result = stmt.run(
+      preview.slug,
+      preview.source_slug || null,
+      preview.company_name || null,
+      preview.domain || null
+    )
 
     if (result.lastInsertRowid) {
       return getPreviewBySlug(preview.slug)
@@ -237,8 +260,8 @@ export function seedDefaultPreviews(): number {
   )
 
   const insertStmt = previewDb.prepare(`
-    INSERT INTO previews (slug, company_name, domain)
-    VALUES (?, ?, ?)
+    INSERT INTO previews (slug, source_slug, company_name, domain)
+    VALUES (?, ?, ?, ?)
   `)
 
   let insertedCount = 0
@@ -248,6 +271,7 @@ export function seedDefaultPreviews(): number {
       if (!existingSlugs.has(preview.slug)) {
         const result = insertStmt.run(
           preview.slug,
+          preview.source_slug || null,
           preview.company_name || null,
           preview.domain || null
         )
@@ -483,9 +507,9 @@ export function getEmbedVisitById(id: number): EmbedVisit | null {
  */
 export function getEmbedVisitsBySlug(slug: string, limit = 100): EmbedVisit[] {
   const stmt = previewDb.prepare(`
-    SELECT * FROM embed_visits 
-    WHERE slug = ? 
-    ORDER BY visited_at DESC 
+    SELECT * FROM embed_visits
+    WHERE slug = ?
+    ORDER BY visited_at DESC
     LIMIT ?
   `)
   return stmt.all(slug, limit) as EmbedVisit[]
@@ -496,8 +520,8 @@ export function getEmbedVisitsBySlug(slug: string, limit = 100): EmbedVisit[] {
  */
 export function getAllEmbedVisits(limit = 200): EmbedVisit[] {
   const stmt = previewDb.prepare(`
-    SELECT * FROM embed_visits 
-    ORDER BY visited_at DESC 
+    SELECT * FROM embed_visits
+    ORDER BY visited_at DESC
     LIMIT ?
   `)
   return stmt.all(limit) as EmbedVisit[]
@@ -521,14 +545,14 @@ export function getEmbedVisitStats(): {
   const uniqueIps = (uniqueStmt.get() as { count: number }).count
 
   const todayStmt = previewDb.prepare(`
-    SELECT COUNT(*) as count FROM embed_visits 
+    SELECT COUNT(*) as count FROM embed_visits
     WHERE visited_at > datetime('now', '-1 day')
   `)
   const todayVisits = (todayStmt.get() as { count: number }).count
 
   const bySlugStmt = previewDb.prepare(`
-    SELECT slug, COUNT(*) as count FROM embed_visits 
-    GROUP BY slug 
+    SELECT slug, COUNT(*) as count FROM embed_visits
+    GROUP BY slug
     ORDER BY count DESC
   `)
   const visitsBySlug = bySlugStmt.all() as { slug: string; count: number }[]
@@ -541,7 +565,7 @@ export function getEmbedVisitStats(): {
  */
 export function deleteOldEmbedVisits(daysOld = 90): number {
   const stmt = previewDb.prepare(`
-    DELETE FROM embed_visits 
+    DELETE FROM embed_visits
     WHERE visited_at < datetime('now', '-' || ? || ' days')
   `)
   const result = stmt.run(daysOld)

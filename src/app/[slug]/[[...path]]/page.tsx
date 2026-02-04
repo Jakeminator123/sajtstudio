@@ -171,11 +171,15 @@ export default async function PreviewPage({ params }: PageProps) {
   // Build path string from segments
   const pathString = pathSegments?.length ? `/${pathSegments.join('/')}` : ''
 
-  // Direct URL to vusercontent.net (no proxy needed!)
-  const sourceUrl = `https://${slug}${VUSERCONTENT_DOMAIN}${pathString}`
+  // Use source_slug if available (allows nice URLs like /bostadservice-ab)
+  // Otherwise fall back to the URL slug itself
+  const vusercontentSlug = preview.source_slug || slug
 
-  // Find optional screenshot for fallback
-  const previewImageSrc = findPreviewImage(slug)
+  // Direct URL to vusercontent.net (no proxy needed!)
+  const sourceUrl = `https://${vusercontentSlug}${VUSERCONTENT_DOMAIN}${pathString}`
+
+  // Find optional screenshot for fallback (check both nice slug and source slug)
+  const previewImageSrc = findPreviewImage(slug) || findPreviewImage(vusercontentSlug)
 
   // ---- RENDER ----
 
