@@ -260,7 +260,7 @@ export function seedDefaultPreviews(): number {
   )
 
   const insertStmt = previewDb.prepare(`
-    INSERT INTO previews (slug, source_slug, company_name, domain)
+    INSERT OR IGNORE INTO previews (slug, source_slug, company_name, domain)
     VALUES (?, ?, ?, ?)
   `)
 
@@ -426,7 +426,7 @@ export function seedDefaultProtectedEmbeds(): number {
   )
 
   const insertStmt = previewDb.prepare(`
-    INSERT INTO protected_embeds (slug, title, target_url, password_salt, password_hash)
+    INSERT OR IGNORE INTO protected_embeds (slug, title, target_url, password_salt, password_hash)
     VALUES (?, ?, ?, ?, ?)
   `)
 
@@ -572,8 +572,29 @@ export function deleteOldEmbedVisits(daysOld = 90): number {
   return result.changes
 }
 
-// Auto-seed on module load
-seedDefaultPreviews()
-seedDefaultProtectedEmbeds()
+// Auto-seed on module load - but ONLY at runtime, not during Next.js build
+// During build, NEXT_PHASE is set to 'phase-production-build'
+const isBuilding = process.env.NEXT_PHASE === 'phase-production-build'
+
+if (!isBuilding) {
+  // Wrap in try-catch to handle race conditions during parallel module loading
+  try {
+    seedDefaultPreviews()
+  } catch (e) {
+    // Ignore UNIQUE constraint errors from parallel seeding
+    if (!(e instanceof Error && e.message.includes('UNIQUE constraint'))) {
+      console.error('Failed to seed previews:', e)
+    }
+  }
+
+  try {
+    seedDefaultProtectedEmbeds()
+  } catch (e) {
+    // Ignore UNIQUE constraint errors from parallel seeding
+    if (!(e instanceof Error && e.message.includes('UNIQUE constraint'))) {
+      console.error('Failed to seed protected embeds:', e)
+    }
+  }
+}
 
 export default previewDb
