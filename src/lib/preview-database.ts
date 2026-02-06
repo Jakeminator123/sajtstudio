@@ -717,7 +717,14 @@ export function getLandingStats(): {
   `)
   const hourlyPageviews = hourlyStmt.all() as { hour: string; count: number }[]
 
-  return { totalPageviews, uniqueVisitors, todayPageviews, clicksByDestination, recentEvents, hourlyPageviews }
+  return {
+    totalPageviews,
+    uniqueVisitors,
+    todayPageviews,
+    clicksByDestination,
+    recentEvents,
+    hourlyPageviews,
+  }
 }
 
 // Auto-seed on module load - but ONLY at runtime, not during Next.js build

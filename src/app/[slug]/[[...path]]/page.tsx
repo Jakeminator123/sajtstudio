@@ -185,7 +185,8 @@ export default async function PreviewPage({ params }: PageProps) {
   }
 
   // Find optional screenshot for fallback
-  const previewImageSrc = findPreviewImage(slug) || (preview.source_slug ? findPreviewImage(preview.source_slug) : null)
+  const previewImageSrc =
+    findPreviewImage(slug) || (preview.source_slug ? findPreviewImage(preview.source_slug) : null)
 
   // ---- RENDER ----
 

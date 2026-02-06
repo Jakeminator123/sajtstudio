@@ -23,7 +23,7 @@ const ALLOWED_ORIGINS = [
 ]
 
 function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((o) => origin.startsWith(o))
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin)
   return {
     'Access-Control-Allow-Origin': allowed ? origin! : ALLOWED_ORIGINS[0],
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -78,6 +78,10 @@ export async function POST(req: NextRequest) {
       destination: destination || undefined,
     })
 
+    if (!event) {
+      return NextResponse.json({ error: 'Failed to log event' }, { status: 500, headers })
+    }
+
     return NextResponse.json({ ok: true, event }, { headers })
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400, headers })
@@ -92,10 +96,7 @@ export async function GET(req: NextRequest) {
   try {
     const stats = getLandingStats()
     return NextResponse.json(stats, { headers })
-  } catch (e) {
-    return NextResponse.json(
-      { error: 'Failed to fetch stats' },
-      { status: 500, headers }
-    )
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500, headers })
   }
 }

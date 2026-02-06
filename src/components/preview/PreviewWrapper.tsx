@@ -355,7 +355,6 @@ export default function PreviewWrapper({
           </button>
         </div>
       </motion.footer>
-
     </div>
   )
 }
@@ -460,4 +459,3 @@ function ErrorOverlay({ sourceUrl }: { sourceUrl: string }) {
     </div>
   )
 }
-

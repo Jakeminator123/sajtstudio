@@ -1,0 +1,133 @@
+Tack. jag har en hemsida också. Den har en backend som får lite jsonfiler som svar typ av mail. Skulle vilja koppla på det med. kan du ine  sammanfatta allt här ca 1 -2 a4 motsvarande till en anna nAI-agent?
+
+Här är en sammanfattning du kan klistra till en annan AI-agent. Jag har skrivit den som en “uppdragsbeskrivning” med nuläge + mål + krav + vad som redan är gjort.
+
+Vi har satt upp en lokal prototyp på Windows 11 som läser inkommande mejl från ett privat Gmail-konto via Gmail API med OAuth2 (inte IMAP/SMTP-lösen). Appen ska “sålla” bland olästa mejl med hjälp av OpenAI och vid positiva leads vidarebefordra mejlet till en specifik adress. Nästa steg är att även koppla det till en befintlig webb-backend som tar emot JSON (t.ex. POST av klassificeringen eller mailmetadata) så att hemsidan kan visa/hantera leadsen.
+
+Mål
+
+Läsa inkommande mejl i Gmail-inboxen (olästa i INBOX) automatiskt.
+
+Skicka en begränsad del av mail-innehållet (subject/from/date/body-trunkering) till en liten OpenAI-modell som returnerar en strukturerad bedömning.
+
+Om bedömningen indikerar att det är en lead (positiv/neutral och “vill fortsätta dialog”) så:
+
+forwarda mail (eller en sammanfattning) till jakob.olof.eberg@gmail.com
+
+samt POST:a ett JSON-objekt till min hemsidas backend (endpoint) för lagring/visning.
+
+Om inte lead: logga och/eller markera som läst, men inte forwarda.
+
+Nuläge
+
+Google Cloud-projekt: nytt, rent projekt skapat (“gmail-watcher-local”).
+
+Gmail API är aktiverat.
+
+Google Auth Platform är konfigurerat:
+
+Audience = External, Publishing status = Testing
+
+Test user tillagd: erik@sajtstudio.se (det konto vars mailbox ska läsas)
+
+Scopes tillagda:
+
+https://www.googleapis.com/auth/gmail.modify
+
+https://www.googleapis.com/auth/gmail.send
+
+OAuth Desktop client skapad och JSON laddad ner. Filen döpt till client_secret.json och ligger bredvid scriptet.
+
+OAuth-flödet kördes och godkändes (“The authentication flow has completed. You may close this window.”). Token ska sparas lokalt som token.json.
+
+Vi kör utan venv på Win11 med py -m pip install --user ....
+
+Scriptbeteende (nuvarande)
+
+Scriptet kör lokalt (PowerShell), läser .env i samma mapp.
+
+Pollar Gmail med query in:inbox is:unread och hämtar upp till 10 åt gången.
+
+Plockar ut subject/from/to/date och body (text/plain helst) och trunkerar till t.ex. 5000 tecken.
+
+Skickar detta som input till OpenAI Responses API med prompt som returnerar JSON:
+{ "forward": true/false, "summary": "...", "reason": "..." }
+
+Skriver ut ✅ om forward=true annars —.
+
+Vid ✅ skapar den ett nytt mail (“FW: …”) och skickar via Gmail API users.messages.send till FORWARD_TO.
+
+Markerar originalmejlet som läst genom att removeLabelIds: ["UNREAD"] (kräver gmail.modify).
+
+Konfiguration (.env)
+
+Vi använder ungefär:
+
+OPENAI_API_KEY=...
+
+OPENAI_MODEL=gpt-5-mini (valfri “liten” modell)
+
+GMAIL_CLIENT_SECRETS=client_secret.json
+
+GMAIL_TOKEN_FILE=token.json
+
+GMAIL_SCOPES=https://www.googleapis.com/auth/gmail.modify,https://www.googleapis.com/auth/gmail.send
+
+FORWARD_TO=jakob.olof.eberg@gmail.com
+
+POLL_INTERVAL_SEC=20
+
+MAX_EMAIL_CHARS=5000
+
+STATE_FILE=processed_ids.json
+
+LOG_FILE=gmail_watcher.log
+
+Observerade resultat
+
+Scriptet listade flera olästa mejl och klassade de flesta som “—” (t.ex. tydliga nej-tack).
+
+Ett autosvar blev felaktigt klassat som ✅, vilket visar att vi bör hård-filtrera autosvar/spam/no-reply innan vi frågar modellen eller skärpa prompt/regler.
+
+Krav / önskemål för nästa steg
+
+Koppling till befintlig backend (hemsidan) som tar emot JSON:
+
+När ett mail processas (särskilt när forward=true) ska scriptet göra en HTTP POST till en endpoint.
+
+Payload bör innehålla:
+
+messageId (Gmail), threadId om möjligt
+
+from, subject, date
+
+truncated body (eller en hash + summary, beroende på integritet)
+
+model verdict: forward, summary, reason
+
+ev. kategorisering (lead/spam/decline/autosvar)
+
+Backend-länk/endpoint ska ligga i .env, t.ex. WEBHOOK_URL=... och ev. WEBHOOK_TOKEN=... för auth.
+
+Pre-filter innan OpenAI:
+
+Om subject innehåller “Autosvar”, “Automatic reply”, “Out of office”
+
+Eller from innehåller “noreply/no-reply”
+=> tvinga forward=false och/eller kategorisera som “auto/spam”.
+
+Behåll enkel drift på Win11, utan venv (pip --user).
+
+Önskad output / leverans
+
+Uppdaterat Python-script med:
+
+robust OAuth token-hantering (använd token.json om den finns)
+
+lead-klassning (OpenAI)
+
+forward vid lead
+
+POST till backend
+
+logg + state-file så inga dubletter
