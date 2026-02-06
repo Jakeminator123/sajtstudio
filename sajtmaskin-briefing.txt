@@ -1,0 +1,90 @@
+BRIEFING: Hur användare kommer till Sajtmaskin
+================================================
+
+Sajtmaskin (sajtmaskin.vercel.app) nås från tre ingångar.
+Alla tre skickar användare direkt till Vercel-URL:en.
+
+
+INGÅNG 1: "Utvärdera din sajt" (sajtstudio.se)
+-----------------------------------------------
+Knappen på sajtstudios hemsida länkar direkt hit:
+
+  https://sajtmaskin.vercel.app?mode=audit
+
+Förväntat beteende: Audit-fliken/modalen ska vara förvald.
+Användaren vill analysera sin befintliga sajt.
+
+
+INGÅNG 2: "Bygg din sajt nu" (sajtstudio.se)
+---------------------------------------------
+Via OfferModal på sajtstudio länkas användaren till:
+
+  https://sajtmaskin.vercel.app
+
+Förväntat beteende: Normal landning, användaren väljer själv.
+
+
+INGÅNG 3: Landningssidan (sajtstudio.se/start)
+-----------------------------------------------
+En Three.js partikelanimation som visar "SajtStudio" med två
+navigeringskort. Sajtmaskin-kortet länkar direkt:
+
+  https://sajtmaskin.vercel.app
+
+Planerad framtida ändring - Landningssidan kommer skicka med
+en token via query param:
+
+  https://sajtmaskin.vercel.app?token=L_demo-kzmpc9tk45vsovp4cme1
+
+
+TOKEN-SYSTEMET (planerat)
+=========================
+Sajtstudio har ett slug/token-system i en SQLite-databas (previews.db).
+Varje genererad demo-sajt har en slug, t.ex. demo-kzmpc9tk45vsovp4cme1.
+
+Planen är att sluggar med prefixet "L_" ska slussas genom landningssidan
+istället för att visas direkt:
+
+  1. Användare besöker:    sajtstudio.se/L_demo-abc123
+  2. Sajtstudio redirect:  sajtstudio.se/start?token=demo-abc123
+  3. Landningssidan (iframe) läser token
+  4. Klick på "Sajtmaskin": sajtmaskin.vercel.app?token=demo-abc123
+
+Token-format: "demo-" + alfanumerisk sträng (t.ex. demo-kzmpc9tk45vsovp4cme1).
+Denna token representerar en specifik kundgenererad sajt och kan användas för att:
+- Ge användaren "skjuts" (förifylld info, prioritering)
+- Koppla ihop sessionen med sajtstudios analytics
+
+
+VAD SOM BEHÖVER IMPLEMENTERAS I SAJTMASKIN
+==========================================
+
+1. ?mode=audit
+   Läs query-param vid sidladdning och förväl audit-fliken.
+   HomePage-komponenten i src/components/layout/home-page.tsx styr
+   flikarna via activeBuildMethod state. Lägg till useSearchParams()
+   och sätt activeBuildMethod till "audit" om ?mode=audit finns.
+
+2. ?token=xxx (framtida)
+   Läs och spara token i sessionStorage. Kan användas för att koppla
+   ihop med sajtstudios kunddatabas.
+
+
+ARKITEKTUR
+==========
+
+sajtstudio.se (Render, Next.js)
+  /                    -> Hemsida med CTAs
+  /start               -> Iframe: landningssida.vercel.app
+  /sajtmaskin           -> Redirect till sajtmaskin.vercel.app
+  /bostadsservice-ab    -> Iframe: demo på vusercontent.net
+  /mts                  -> Iframe: Vercel-app
+  /api/landing-events   -> Analytics API (SQLite)
+
+landningssida.vercel.app (Vercel, Next.js)
+  /                    -> Partikelanimation + 2 nav-kort
+  /admin               -> Analytics-dashboard
+
+sajtmaskin.vercel.app (Vercel, Next.js)
+  /                    -> AI webbplatsgenerator
+  ?mode=audit          -> (Behöver implementeras) Förväl audit-flik
