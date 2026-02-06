@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-const SAJTMASKIN_URL = 'https://sajtmaskin-1.onrender.com'
+const SAJTMASKIN_URL = 'https://sajtmaskin.vercel.app'
 
 type PageProps = {
   params: Promise<{ path: string[] }>
