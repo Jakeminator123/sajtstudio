@@ -44,7 +44,9 @@ export async function POST(req: NextRequest) {
   const headers = corsHeaders(origin)
 
   try {
-    const body = await req.json()
+    // Accept both application/json and text/plain (sendBeacon uses text/plain to skip CORS preflight)
+    const text = await req.text()
+    const body = JSON.parse(text)
     const { session_id, event_type, destination } = body
 
     if (!session_id || !event_type) {
