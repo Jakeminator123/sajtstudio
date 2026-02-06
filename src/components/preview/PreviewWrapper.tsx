@@ -305,14 +305,14 @@ export default function PreviewWrapper({
         transition={
           shouldAnimateChrome ? { duration: 0.4, ease: 'easeOut', delay: 0.2 } : { duration: 0 }
         }
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-t border-gray-800/50 z-20"
+        className="flex flex-col items-center gap-3 px-4 py-4 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-t border-gray-800/50 z-20"
       >
-        <p className="text-gray-400 text-sm text-center sm:text-left">
+        <p className="text-gray-400 text-sm text-center">
           <span className="hidden sm:inline">Gillar du vad du ser? </span>
           <span className="text-white font-medium">Vi kan bygga något liknande för dig.</span>
         </p>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3 flex-wrap">
           {/* Back to homepage */}
           <Link
             href="/"
