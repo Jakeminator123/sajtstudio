@@ -1,0 +1,223 @@
+================================================================================
+ENTRY FLOW SCHEMA
+================================================================================
+Hur användare slussas genom sajtstudio → landningssida → sajtmaskin.
+
+Senast uppdaterad: 2026-02-05
+
+
+================================================================================
+1. URL-STRUKTUR
+================================================================================
+
+  sajtstudio.se/start/{foretag-slug}
+
+  Exempel:
+    sajtstudio.se/start/alfa-rekrytering-ab
+    sajtstudio.se/start/bostadservice-ab
+    sajtstudio.se/start/mts-maleriteknik
+
+  Utan företag (generell landningssida):
+    sajtstudio.se/start
+
+
+================================================================================
+2. SLUG-FORMAT
+================================================================================
+
+  Regler:
+    - Gemener (lowercase)
+    - Bindestreck (-) istället för mellanslag
+    - Inga specialtecken (å, ä, ö ersätts med a, a, o)
+    - Vanliga suffix: -ab, -hb, -kb (konverteras till AB, HB, KB vid visning)
+
+  Konvertering slug → visningsnamn:
+    alfa-rekrytering-ab     → "Alfa Rekrytering AB"
+    bostadservice-ab        → "Bostadservice AB"
+    mts-maleriteknik        → "Mts Maleriteknik"
+    pretty-good-ab          → "Pretty Good AB"
+
+  Regler för konvertering:
+    1. Splitta på "-"
+    2. Capitalize varje ord (första bokstaven stor)
+    3. Suffix "ab", "hb", "kb" → helversaler (AB, HB, KB)
+
+
+================================================================================
+3. ROUTING: SAJTSTUDIO → LANDNINGSSIDA
+================================================================================
+
+  Sajtstudios catch-all route:  src/app/[slug]/[[...path]]/page.tsx
+
+  1. Användare besöker:   sajtstudio.se/start/alfa-rekrytering-ab
+  2. [slug] = "start"     → finns i previews-databasen (target_url)
+  3. [[...path]] = ["alfa-rekrytering-ab"]
+  4. sourceUrl byggs:      landningssida.vercel.app/alfa-rekrytering-ab
+  5. PreviewWrapper visar iframe med den URL:en
+
+  Databas-entry (preview-database.ts → defaultPreviews):
+    {
+      slug: 'start',
+      target_url: 'https://landningssida.vercel.app',
+      company_name: 'SajtStudio',
+      domain: 'sajtstudio.se',
+    }
+
+
+================================================================================
+4. LANDNINGSSIDAN: VAD SOM VISAS
+================================================================================
+
+  Repo:    github.com/Jakeminator123/landningssida
+  Deploy:  landningssida.vercel.app
+
+  UTAN företag (landningssida.vercel.app/):
+    - Partikelanimation: "SajtStudio"
+    - Två navigationskort:
+      1. Sajtstudio (blå)  → www.sajtstudio.se
+      2. Sajtmaskin (guld) → sajtmaskin.vercel.app
+
+  MED företag (landningssida.vercel.app/alfa-rekrytering-ab):
+    - Partikelanimation: "SajtStudio"
+    - Välkomsttext:
+        "Välkommen" (cyan)
+        "Alfa Rekrytering AB" (vit, stor)
+        "Din hemsida förbereds... klicka nedan för att få den gratis"
+    - Två valkort:
+      1. "Jag har en sajt idag" (grön)  → AUDIT-flöde
+      2. "Jag vill ha en ny sajt" (lila) → ANALYSERAD-flöde
+    - Under: Samma Sajtstudio/Sajtmaskin-kort som ovan
+
+
+================================================================================
+5. UTGÅENDE LÄNKAR TILL SAJTMASKIN
+================================================================================
+
+  Alla URL:er pekar på: sajtmaskin.vercel.app
+
+  ── Val 1: "Jag har en sajt idag" ─────────────────────────────────────────
+
+    URL:  sajtmaskin.vercel.app?mode=audit&company={slug}&ref=sajtstudio
+
+    Exempel:
+      sajtmaskin.vercel.app?mode=audit&company=alfa-rekrytering-ab&ref=sajtstudio
+
+    Vad som händer på sajtmaskin:
+      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB"
+      2. Demovideo + CTA-knapp
+      3. Efter klick: audit-sektionen expanderas
+
+  ── Val 2: "Jag vill ha en ny sajt" ───────────────────────────────────────
+
+    URL:  sajtmaskin.vercel.app?mode=analyserad&company={slug}&ref=sajtstudio
+
+    Exempel:
+      sajtmaskin.vercel.app?mode=analyserad&company=alfa-rekrytering-ab&ref=sajtstudio
+
+    Vad som händer på sajtmaskin:
+      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB"
+      2. CTA-knapp
+      3. Efter klick: AI-wizard öppnas med "Alfa Rekrytering AB" förifyllt
+
+
+================================================================================
+6. ALLA SAJTMASKIN QUERY-PARAMETRAR
+================================================================================
+
+  Parameter     Värden                    Beskrivning
+  ------------- ------------------------- -------------------------------------------
+  mode          audit                     Expandera audit-sektionen direkt
+                analyserad                Öppna AI-wizard (Analyserad)
+                wizard                    Visa EntryModal → wizard
+                freeform                  Visa EntryModal → fritext-sektion
+
+  company       {slug}                    Företagsslug, t.ex. alfa-rekrytering-ab
+                                          → Visar WelcomeOverlay + förifyllt namn
+
+  token         {demo-slug}               Sparas i sessionStorage, t.ex.
+                                          demo-kzmpc9tk45vsovp4cme1
+
+  ref           sajtstudio                Visar partner-badge i EntryModal
+
+  Kombinationer (alla kan blandas fritt):
+    ?mode=audit
+    ?mode=audit&company=alfa-rekrytering-ab
+    ?mode=analyserad&company=mitt-foretag-ab&ref=sajtstudio
+    ?mode=analyserad&company=ab-foretaget&token=demo-abc123&ref=sajtstudio
+    ?mode=wizard
+    ?mode=freeform
+    ?token=demo-kzmpc9tk45vsovp4cme1
+
+
+================================================================================
+7. EXEMPELFLÖDEN
+================================================================================
+
+  ── Exempel A: Ny kund via brev ────────────────────────────────────────────
+
+    1. Kund får länk:  sajtstudio.se/start/alfa-rekrytering-ab
+    2. Sajtstudio iframe:ar landningssida.vercel.app/alfa-rekrytering-ab
+    3. Kund ser "Välkommen Alfa Rekrytering AB" + valkort
+    4. Klickar "Jag har en sajt idag"
+    5. → sajtmaskin.vercel.app?mode=audit&company=alfa-rekrytering-ab&ref=sajtstudio
+    6. Sajtmaskin visar WelcomeOverlay → audit startar
+
+  ── Exempel B: Kund vill ha ny sajt ───────────────────────────────────────
+
+    1. Samma som ovan, steg 1-3
+    4. Klickar "Jag vill ha en ny sajt"
+    5. → sajtmaskin.vercel.app?mode=analyserad&company=alfa-rekrytering-ab&ref=sajtstudio
+    6. Sajtmaskin visar WelcomeOverlay → wizard med förifyllt namn
+
+  ── Exempel C: Generell besökare ──────────────────────────────────────────
+
+    1. Besöker sajtstudio.se/start (utan företag)
+    2. Ser partikelanimation + Sajtstudio/Sajtmaskin-kort
+    3. Klickar "Sajtmaskin"
+    4. → sajtmaskin.vercel.app (ingen extra parameter)
+
+  ── Exempel D: Direkt från sajtstudios hemsida ────────────────────────────
+
+    1. Besöker sajtstudio.se
+    2. Klickar "Utvärdera din sajt"
+    3. → sajtmaskin.vercel.app?mode=audit
+    4. Audit startar direkt (ingen WelcomeOverlay utan company)
+
+  ── Exempel E: "Bygg din sajt nu" ────────────────────────────────────────
+
+    1. Besöker sajtstudio.se
+    2. Klickar "BYGG DIN SAJT NU!"
+    3. → sajtmaskin.vercel.app (generell landning)
+
+
+================================================================================
+8. ARKITEKTUR
+================================================================================
+
+  sajtstudio.se (Render)
+    │
+    ├── /                     Hemsida med CTA-knappar
+    │   ├── "Utvärdera"  ──→  sajtmaskin.vercel.app?mode=audit
+    │   └── "Bygg din sajt" → sajtmaskin.vercel.app
+    │
+    ├── /start                iframe: landningssida.vercel.app
+    │   └── /start/{company}  iframe: landningssida.vercel.app/{company}
+    │
+    ├── /bostadsservice-ab    iframe: demo-xxx.vusercontent.net
+    ├── /mts                  iframe: v0-architecture-xxx.vercel.app
+    └── /api/landing-events   Analytics-API (SQLite)
+
+  landningssida.vercel.app (Vercel)
+    │
+    ├── /                     Generell: partiklar + 2 kort
+    ├── /{company}            Personaliserad: partiklar + välkomst + 2 valkort + 2 kort
+    └── /admin                Analytics-dashboard
+
+  sajtmaskin.vercel.app (Vercel)
+    │
+    ├── /                     AI webbplatsgenerator
+    ├── ?mode=audit           Audit direkt
+    ├── ?mode=analyserad      Wizard direkt
+    ├── ?company={slug}       WelcomeOverlay + förifyllt namn
+    ├── ?token={demo-slug}    Sparas i sessionStorage
+    └── ?ref=sajtstudio       Partner-badge
