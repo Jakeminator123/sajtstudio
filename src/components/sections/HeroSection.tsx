@@ -4,7 +4,6 @@ import HemsidorWords from '@/components/animations/HemsidorWords'
 import NattenWords from '@/components/animations/NattenWords'
 import { useContentSection } from '@/hooks/useContent'
 import { useTheme } from '@/hooks/useTheme'
-import { useOfferModal } from '@/hooks/useOfferModal'
 import { useMobileDetection } from '@/hooks/useMobileDetection'
 import { prefersReducedMotion } from '@/lib/performance'
 import { MotionValue, motion, useScroll, useTransform } from 'framer-motion'
@@ -492,7 +491,6 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
 export default function HeroSection({ content: propContent }: { content?: HeroContent }) {
   // Fetch content from CMS - this enables live updates from /admin
   const { getValue } = useContentSection('hero')
-  const { openModal } = useOfferModal()
 
   // Build content object from CMS with fallbacks to props then defaults
   const content: HeroContent = useMemo(
@@ -1357,9 +1355,10 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               </span>
             </MagneticButton>
 
-            {/* Secondary CTA: Build website - Opens modal for under construction site */}
+            {/* Secondary CTA: Build website - Direct link to Sajtmaskin */}
             <MagneticButton
-              onClick={openModal}
+              href="https://sajtmaskin.vercel.app"
+              external={true}
               className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
