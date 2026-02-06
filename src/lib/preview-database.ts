@@ -598,6 +598,128 @@ export function deleteOldEmbedVisits(daysOld = 90): number {
   return result.changes
 }
 
+// ============================================================================
+// LANDING PAGE EVENTS (track visitors and interactions on the landing page)
+// ============================================================================
+
+previewDb.exec(`
+  CREATE TABLE IF NOT EXISTS landing_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    ip_address TEXT,
+    user_agent TEXT,
+    referrer TEXT,
+    destination TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`)
+
+previewDb.exec(`
+  CREATE INDEX IF NOT EXISTS idx_landing_events_session ON landing_events(session_id)
+`)
+
+previewDb.exec(`
+  CREATE INDEX IF NOT EXISTS idx_landing_events_created ON landing_events(created_at)
+`)
+
+export interface LandingEvent {
+  id: number
+  session_id: string
+  event_type: string
+  ip_address: string | null
+  user_agent: string | null
+  referrer: string | null
+  destination: string | null
+  created_at: string
+}
+
+export interface NewLandingEvent {
+  session_id: string
+  event_type: 'pageview' | 'click' | 'leave'
+  ip_address?: string
+  user_agent?: string
+  referrer?: string
+  /** Which link was clicked (e.g. "sajtstudio", "sajtmaskin") */
+  destination?: string
+}
+
+/**
+ * Log a landing page event
+ */
+export function logLandingEvent(event: NewLandingEvent): LandingEvent | null {
+  const stmt = previewDb.prepare(`
+    INSERT INTO landing_events (session_id, event_type, ip_address, user_agent, referrer, destination)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+
+  try {
+    const result = stmt.run(
+      event.session_id,
+      event.event_type,
+      event.ip_address || null,
+      event.user_agent || null,
+      event.referrer || null,
+      event.destination || null
+    )
+    if (result.lastInsertRowid) {
+      const getStmt = previewDb.prepare('SELECT * FROM landing_events WHERE id = ?')
+      return getStmt.get(Number(result.lastInsertRowid)) as LandingEvent
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Get landing page analytics
+ */
+export function getLandingStats(): {
+  totalPageviews: number
+  uniqueVisitors: number
+  todayPageviews: number
+  clicksByDestination: { destination: string; count: number }[]
+  recentEvents: LandingEvent[]
+  hourlyPageviews: { hour: string; count: number }[]
+} {
+  const totalStmt = previewDb.prepare(
+    "SELECT COUNT(*) as count FROM landing_events WHERE event_type = 'pageview'"
+  )
+  const totalPageviews = (totalStmt.get() as { count: number }).count
+
+  const uniqueStmt = previewDb.prepare(
+    'SELECT COUNT(DISTINCT ip_address) as count FROM landing_events WHERE ip_address IS NOT NULL'
+  )
+  const uniqueVisitors = (uniqueStmt.get() as { count: number }).count
+
+  const todayStmt = previewDb.prepare(
+    "SELECT COUNT(*) as count FROM landing_events WHERE event_type = 'pageview' AND created_at > datetime('now', '-1 day')"
+  )
+  const todayPageviews = (todayStmt.get() as { count: number }).count
+
+  const clicksStmt = previewDb.prepare(`
+    SELECT destination, COUNT(*) as count FROM landing_events
+    WHERE event_type = 'click' AND destination IS NOT NULL
+    GROUP BY destination ORDER BY count DESC
+  `)
+  const clicksByDestination = clicksStmt.all() as { destination: string; count: number }[]
+
+  const recentStmt = previewDb.prepare(
+    'SELECT * FROM landing_events ORDER BY created_at DESC LIMIT 50'
+  )
+  const recentEvents = recentStmt.all() as LandingEvent[]
+
+  const hourlyStmt = previewDb.prepare(`
+    SELECT strftime('%Y-%m-%d %H:00', created_at) as hour, COUNT(*) as count
+    FROM landing_events WHERE event_type = 'pageview' AND created_at > datetime('now', '-7 days')
+    GROUP BY hour ORDER BY hour DESC
+  `)
+  const hourlyPageviews = hourlyStmt.all() as { hour: string; count: number }[]
+
+  return { totalPageviews, uniqueVisitors, todayPageviews, clicksByDestination, recentEvents, hourlyPageviews }
+}
+
 // Auto-seed on module load - but ONLY at runtime, not during Next.js build
 // During build, NEXT_PHASE is set to 'phase-production-build'
 const isBuilding = process.env.NEXT_PHASE === 'phase-production-build'
