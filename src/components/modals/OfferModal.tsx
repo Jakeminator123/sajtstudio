@@ -12,8 +12,8 @@ const offerOptions = [
     id: 'sajtmaskin',
     title: 'Skapa din egen sajt',
     description: 'Generera och bygg din hemsida själv med vår AI-drivna plattform Sajtmaskin.',
-    href: '/sajtmaskin',
-    external: false,
+    href: 'https://sajtmaskin.vercel.app',
+    external: true,
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path

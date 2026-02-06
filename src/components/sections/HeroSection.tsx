@@ -1282,8 +1282,8 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
           >
             {/* Primary CTA: Website evaluation - Blue with cool animations */}
             <MagneticButton
-              href="/utvardera"
-              external={false}
+              href="https://sajtmaskin.vercel.app?mode=audit"
+              external={true}
               className="px-10 py-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg rounded-lg hover:from-blue-500 hover:via-cyan-500 hover:to-blue-600 transition-all duration-500 shadow-[0_0_30px_rgba(0,102,255,0.5)] hover:shadow-[0_0_50px_rgba(0,102,255,0.8)] relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
