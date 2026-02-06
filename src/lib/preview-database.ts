@@ -202,6 +202,12 @@ const defaultPreviews: NewPreview[] = [
     company_name: 'MTS Måleriteknik Specialister',
     domain: 'mts.se',
   },
+  {
+    slug: 'start',
+    target_url: 'https://landningssida.vercel.app',
+    company_name: 'SajtStudio',
+    domain: 'sajtstudio.se',
+  },
 ]
 
 /**
