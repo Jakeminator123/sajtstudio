@@ -103,9 +103,9 @@ Senast uppdaterad: 2026-02-05
       sajtmaskin.vercel.app?mode=audit&company=alfa-rekrytering-ab&ref=sajtstudio
 
     Vad som händer på sajtmaskin:
-      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB"
-      2. Demovideo + CTA-knapp
-      3. Efter klick: audit-sektionen expanderas
+      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB" + demovideo + CTA
+      2. Klick "Fortsätt" → overlayen stängs
+      3. Audit-sektionen expanderas direkt
 
   ── Val 2: "Jag vill ha en ny sajt" ───────────────────────────────────────
 
@@ -115,9 +115,18 @@ Senast uppdaterad: 2026-02-05
       sajtmaskin.vercel.app?mode=analyserad&company=alfa-rekrytering-ab&ref=sajtstudio
 
     Vad som händer på sajtmaskin:
-      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB"
-      2. CTA-knapp
-      3. Efter klick: AI-wizard öppnas med "Alfa Rekrytering AB" förifyllt
+      1. WelcomeOverlay visas: "Välkommen, Alfa Rekrytering AB" + demovideo + CTA
+      2. Klick "Fortsätt" → overlayen stängs
+      3. AI-wizard öppnas med "Alfa Rekrytering AB" förifyllt i företagsfältet
+
+  ── Utan company-param ─────────────────────────────────────────────────────
+
+    ?mode=audit       → Audit-sektionen expanderas direkt (ingen WelcomeOverlay)
+    ?mode=analyserad  → Wizard öppnas direkt (ingen WelcomeOverlay)
+
+  ── Med company-param ──────────────────────────────────────────────────────
+
+    WelcomeOverlay visas ALLTID först som mellansteg innan sektion/wizard.
 
 
 ================================================================================
