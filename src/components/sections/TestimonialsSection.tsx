@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useMemo, useRef } from 'react'
 import WordReveal from '@/components/animations/WordReveal'
@@ -10,27 +11,21 @@ import { useTheme } from '@/hooks/useTheme'
 const defaultTestimonials = [
   {
     quote:
+      'They built exactly what we envisioned — an AI-powered platform that gives our users a real competitive edge. Professional, fast, and technically brilliant.',
+    author: 'Martin Arnold',
+    company: 'prometheuspoker.com',
+    role: 'CEO, Prometheus Poker',
+    highlight: 'Framkant',
+    image: '/images/PrometheusPoker.webp',
+  },
+  {
+    quote:
       'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
     author: 'Joakim Hallsten',
     company: 'raymondmedia.se',
     role: 'VD, Raymond Media AB',
     highlight: 'Lyft vår närvaro',
-  },
-  {
-    quote:
-      'Our platform runs flawlessly. They delivered a scalable, AI-ready architecture that just works.',
-    author: 'PYNN Team',
-    company: 'pynn.ai',
-    role: 'AI Innovation Platform',
-    highlight: 'Felfri drift',
-  },
-  {
-    quote:
-      'Cutting edge tech combined with real poker knowledge. They built exactly what we envisioned.',
-    author: 'Prometheus Team',
-    company: 'prometheuspoker.com',
-    role: 'AI Poker Analytics',
-    highlight: 'Framkant',
+    image: '/images/RaymondMedia.webp',
   },
   {
     quote:
@@ -39,6 +34,7 @@ const defaultTestimonials = [
     company: 'dg97.se',
     role: 'Kontorshotell, Stockholm',
     highlight: 'Överträffade förväntningarna',
+    image: '/images/BilenochJag.webp',
   },
 ]
 
@@ -58,6 +54,7 @@ export default function TestimonialsSection() {
         company: getValue('T47', defaultTestimonials[0].company),
         role: defaultTestimonials[0].role,
         highlight: defaultTestimonials[0].highlight,
+        image: defaultTestimonials[0].image,
       },
       {
         quote: getValue('T42', defaultTestimonials[1].quote),
@@ -65,6 +62,7 @@ export default function TestimonialsSection() {
         company: getValue('T48', defaultTestimonials[1].company),
         role: defaultTestimonials[1].role,
         highlight: defaultTestimonials[1].highlight,
+        image: defaultTestimonials[1].image,
       },
       {
         quote: getValue('T43', defaultTestimonials[2].quote),
@@ -72,13 +70,7 @@ export default function TestimonialsSection() {
         company: getValue('T49', defaultTestimonials[2].company),
         role: defaultTestimonials[2].role,
         highlight: defaultTestimonials[2].highlight,
-      },
-      {
-        quote: defaultTestimonials[3].quote,
-        author: defaultTestimonials[3].author,
-        company: defaultTestimonials[3].company,
-        role: defaultTestimonials[3].role,
-        highlight: defaultTestimonials[3].highlight,
+        image: defaultTestimonials[2].image,
       },
     ],
     [getValue]
@@ -166,7 +158,7 @@ export default function TestimonialsSection() {
         </motion.div>
 
         {/* Testimonials grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
@@ -184,14 +176,41 @@ export default function TestimonialsSection() {
                   : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-accent/50'
               }`}
             >
+              {/* Client site screenshot */}
+              {testimonial.image && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 + 0.15 }}
+                  className="relative w-full h-40 mb-5 rounded-lg overflow-hidden"
+                >
+                  <Image
+                    src={testimonial.image}
+                    alt={`${testimonial.author} - ${testimonial.company}`}
+                    fill
+                    className="object-cover object-top"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    loading="lazy"
+                  />
+                  <div
+                    className={`absolute inset-0 ${
+                      isLight
+                        ? 'bg-gradient-to-t from-white/30 to-transparent'
+                        : 'bg-gradient-to-t from-black/40 to-transparent'
+                    }`}
+                  />
+                </motion.div>
+              )}
+
               {/* Highlight badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className={`inline-block px-4 py-2 mb-6 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-accent to-tertiary text-white rounded-full ${
-                  isLight ? 'shadow-md' : 'shadow-[0_0_30px_rgba(0,102,255,0.4)]'
+                className={`inline-block px-4 py-2 mb-5 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-accent to-tertiary text-white rounded-full ${
+                  isLight ? 'shadow-md' : 'shadow-[0_0_20px_rgba(0,102,255,0.3)]'
                 }`}
               >
                 {testimonial.highlight}

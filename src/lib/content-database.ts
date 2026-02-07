@@ -322,57 +322,57 @@ const hardcodedDefaults: Record<string, Omit<NewContentEntry, 'key'>> = {
     type: 'text',
     section: 'testimonials',
     value:
-      'Sajtstudio skapade en hemsida som inte bara ser fantastisk ut, utan också genererar riktiga resultat. Vår konvertering ökade med 40% efter lanseringen.',
+      'They built exactly what we envisioned — an AI-powered platform that gives our users a real competitive edge. Professional, fast, and technically brilliant.',
     label: 'Testimonial 1 citat',
   },
   T42: {
     type: 'text',
     section: 'testimonials',
     value:
-      'Professionellt arbete från början till slut. De förstod vår vision och förvandlade den till en verklighet som överträffade våra förväntningar.',
+      'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
     label: 'Testimonial 2 citat',
   },
   T43: {
     type: 'text',
     section: 'testimonials',
     value:
-      'AI-drivet och data-baserat – precis vad vi behövde. Vår nya sajt rankar högt på Google och genererar kvalificerade leads dagligen.',
+      'En modern sajt som speglar kvaliteten i vår verksamhet. Resultatet överträffade förväntningarna.',
     label: 'Testimonial 3 citat',
   },
   T44: {
     type: 'text',
     section: 'testimonials',
-    value: 'Anna Andersson',
+    value: 'Martin Arnold',
     label: 'Testimonial 1 namn',
   },
   T45: {
     type: 'text',
     section: 'testimonials',
-    value: 'Marcus Larsson',
+    value: 'Joakim Hallsten',
     label: 'Testimonial 2 namn',
   },
   T46: {
     type: 'text',
     section: 'testimonials',
-    value: 'Emma Johansson',
+    value: 'DG97',
     label: 'Testimonial 3 namn',
   },
   T47: {
     type: 'text',
     section: 'testimonials',
-    value: 'VD, TechCorp',
+    value: 'CEO, Prometheus Poker',
     label: 'Testimonial 1 företag/roll',
   },
   T48: {
     type: 'text',
     section: 'testimonials',
-    value: 'Grundare, Creative Studio',
+    value: 'VD, Raymond Media AB',
     label: 'Testimonial 2 företag/roll',
   },
   T49: {
     type: 'text',
     section: 'testimonials',
-    value: 'CMO, StartupXYZ',
+    value: 'Kontorshotell, Stockholm',
     label: 'Testimonial 3 företag/roll',
   },
 

@@ -14,29 +14,29 @@ export interface Testimonial {
 export const testimonials: Testimonial[] = [
   {
     id: '1',
-    name: 'Anna Andersson',
-    company: 'TechCorp',
-    role: 'VD',
+    name: 'Martin Arnold',
+    company: 'Prometheus Poker',
+    role: 'CEO',
     quote:
-      'Sajtstudio skapade en hemsida som inte bara ser fantastisk ut, utan också genererar riktiga resultat. Vår konvertering ökade med 40% efter lanseringen.',
+      'They built exactly what we envisioned — an AI-powered platform that gives our users a real competitive edge. Professional, fast, and technically brilliant.',
     rating: 5,
   },
   {
     id: '2',
-    name: 'Marcus Larsson',
-    company: 'Creative Studio',
-    role: 'Grundare',
+    name: 'Joakim Hallsten',
+    company: 'Raymond Media AB',
+    role: 'VD',
     quote:
-      'Professionellt arbete från början till slut. De förstod vår vision och förvandlade den till en verklighet som överträffade våra förväntningar.',
+      'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
     rating: 5,
   },
   {
     id: '3',
-    name: 'Emma Johansson',
-    company: 'StartupXYZ',
-    role: 'CMO',
+    name: 'DG97',
+    company: 'dg97.se',
+    role: 'Kontorshotell, Stockholm',
     quote:
-      'AI-drivet och data-baserat – precis vad vi behövde. Vår nya sajt rankar högt på Google och genererar kvalificerade leads dagligen.',
+      'En modern sajt som speglar kvaliteten i vår verksamhet. Resultatet överträffade förväntningarna.',
     rating: 5,
   },
 ]
