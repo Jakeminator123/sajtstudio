@@ -4,14 +4,17 @@ import path from 'path'
 /**
  * Resolve runtime storage locations for files that should live outside the build output.
  *
- * In production on Render, mount a persistent disk (commonly at /var/data) and set:
- *   DATA_DIR=/var/data
+ * On Vercel (serverless): filesystem is read-only except /tmp. SQLite databases are
+ * placed in /tmp and are ephemeral (recreated each cold start). This is fine for
+ * caching/CMS defaults but NOT for persistent user data.
  *
- * Locally, this defaults to <repo>/data to preserve existing structure.
+ * On Render: mount a persistent disk and set DATA_DIR=/var/data.
  *
- * IMPORTANT: In development, DATA_DIR should NOT be set. It will cause data to be saved
- * in the wrong location (e.g., /var/data on Windows) instead of the project's data/ folder.
+ * Locally: defaults to <repo>/data to preserve existing structure.
  */
+
+const isVercel = !!process.env.VERCEL
+
 export function getDataDir(): string {
   const envDir = process.env.DATA_DIR?.trim()
 
@@ -26,17 +29,26 @@ export function getDataDir(): string {
   }
 
   if (envDir) {
-    // Render mounts the persistent disk at runtime, but it may not exist during build.
-    // Fall back to <repo>/data if the env dir can't be created/accessed.
     try {
       fs.mkdirSync(envDir, { recursive: true })
       return envDir
     } catch (error) {
-      // Fall back to default location if DATA_DIR can't be accessed
       const defaultDir = path.join(process.cwd(), 'data')
       console.warn(`⚠️  Could not access DATA_DIR=${envDir}, falling back to ${defaultDir}`, error)
     }
   }
+
+  // On Vercel, the regular filesystem is read-only — use /tmp for ephemeral SQLite
+  if (isVercel) {
+    const tmpDir = path.join('/tmp', 'sajtstudio-data')
+    try {
+      fs.mkdirSync(tmpDir, { recursive: true })
+    } catch {
+      // /tmp should always be writable on Vercel
+    }
+    return tmpDir
+  }
+
   return path.join(process.cwd(), 'data')
 }
 
@@ -49,7 +61,7 @@ export function getDbPath(filename: string): string {
   try {
     fs.mkdirSync(dbDir, { recursive: true })
   } catch {
-    // Ignore mkdir failures (e.g. read-only FS). The DB open will fail if needed.
+    // Ignore mkdir failures. The DB open will fail with a clear error if needed.
   }
   return path.join(dbDir, filename)
 }
