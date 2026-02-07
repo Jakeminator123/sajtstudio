@@ -1,6 +1,5 @@
 'use client'
 
-import { useMounted } from '@/hooks/useMounted'
 import { useTheme } from '@/hooks/useTheme'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
@@ -104,20 +103,12 @@ function TechCard({
       </div>
 
       {/* Name */}
-      <h3
-        className={`text-xl font-bold mb-2 ${
-          isLight ? 'text-gray-900' : 'text-white'
-        }`}
-      >
+      <h3 className={`text-xl font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
         {tech.name}
       </h3>
 
       {/* Description */}
-      <p
-        className={`text-sm leading-relaxed ${
-          isLight ? 'text-gray-500' : 'text-gray-400'
-        }`}
-      >
+      <p className={`text-sm leading-relaxed ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
         {tech.description}
       </p>
 
@@ -129,7 +120,6 @@ function TechCard({
 
 export default function TechShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const mounted = useMounted()
   const { isLight } = useTheme()
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 
@@ -190,20 +180,15 @@ export default function TechShowcaseSection() {
               isLight ? 'text-gray-500' : 'text-gray-400'
             }`}
           >
-            Vi använder de bästa verktygen och ramverken för att bygga snabba,
-            skalbara och vackra webbplatser.
+            Vi använder de bästa verktygen och ramverken för att bygga snabba, skalbara och vackra
+            webbplatser.
           </p>
         </motion.div>
 
         {/* Tech stack grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {techStack.map((tech, index) => (
-            <TechCard
-              key={tech.name}
-              tech={tech}
-              index={index}
-              isLight={isLight}
-            />
+            <TechCard key={tech.name} tech={tech} index={index} isLight={isLight} />
           ))}
         </div>
 
@@ -212,9 +197,7 @@ export default function TechShowcaseSection() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className={`text-center mt-16 text-sm ${
-            isLight ? 'text-gray-400' : 'text-gray-500'
-          }`}
+          className={`text-center mt-16 text-sm ${isLight ? 'text-gray-400' : 'text-gray-500'}`}
         >
           ...och mycket mer. Varje projekt får den stack som passar bäst.
         </motion.p>

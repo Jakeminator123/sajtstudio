@@ -223,11 +223,23 @@ export default function BigCTA() {
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center"
                 >
-                  <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </motion.div>
-                <h3 className={`text-xl font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                <h3
+                  className={`text-xl font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}
+                >
                   Tack för ditt meddelande!
                 </h3>
                 <p className={`text-sm ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -242,7 +254,9 @@ export default function BigCTA() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <h3 className={`text-lg font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                <h3
+                  className={`text-lg font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}
+                >
                   Skicka ett meddelande
                 </h3>
                 <div>

@@ -507,25 +507,27 @@ export default function AboutSection() {
                   className="group relative"
                 >
                   {/* Modern glassmorphism card */}
-                  <div className={`relative backdrop-blur-xl rounded-2xl p-8 md:p-12 overflow-hidden transition-all duration-500 ${
-                    isLight
-                      ? 'bg-white/70 border border-gray-200 group-hover:bg-white/90 group-hover:border-blue-300 group-hover:shadow-lg group-hover:shadow-blue-100/50'
-                      : 'bg-white/8 border border-white/20 group-hover:bg-white/12 group-hover:border-accent/70 group-hover:shadow-lg group-hover:shadow-accent/20'
-                  }`}>
+                  <div
+                    className={`relative backdrop-blur-xl rounded-2xl p-8 md:p-12 overflow-hidden transition-all duration-500 ${
+                      isLight
+                        ? 'bg-white/70 border border-gray-200 group-hover:bg-white/90 group-hover:border-blue-300 group-hover:shadow-lg group-hover:shadow-blue-100/50'
+                        : 'bg-white/8 border border-white/20 group-hover:bg-white/12 group-hover:border-accent/70 group-hover:shadow-lg group-hover:shadow-accent/20'
+                    }`}
+                  >
                     {/* Gradient border glow on hover - dark mode only */}
                     {!isLight && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div
-                        className="absolute inset-0 rounded-2xl"
-                        style={{
-                          background:
-                            stat.color === 'accent'
-                              ? 'linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent, rgba(0, 102, 255, 0.2))'
-                              : 'linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent, rgba(255, 0, 51, 0.2))',
-                        }}
-                      />
-                      <div className="absolute inset-[1px] bg-black/50 backdrop-blur-xl rounded-2xl" />
-                    </div>
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div
+                          className="absolute inset-0 rounded-2xl"
+                          style={{
+                            background:
+                              stat.color === 'accent'
+                                ? 'linear-gradient(to bottom right, rgba(0, 102, 255, 0.3), transparent, rgba(0, 102, 255, 0.2))'
+                                : 'linear-gradient(to bottom right, rgba(255, 0, 51, 0.3), transparent, rgba(255, 0, 51, 0.2))',
+                          }}
+                        />
+                        <div className="absolute inset-[1px] bg-black/50 backdrop-blur-xl rounded-2xl" />
+                      </div>
                     )}
 
                     {/* Subtle glow effect - reduced for sharper look */}
@@ -703,48 +705,51 @@ export default function AboutSection() {
       )}
 
       {/* Floor/ceiling transition to next section - dark mode only */}
-      {!isLight && <motion.div
-        className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-[90] overflow-hidden"
-        style={
-          mounted
-            ? {
-                opacity:
-                  typeof floorOpacity === 'number' ? floorOpacity : (floorOpacity?.get?.() ?? 0),
-              }
-            : { opacity: 0 }
-        }
-        suppressHydrationWarning
-      >
+      {!isLight && (
         <motion.div
-          className="w-full h-full"
+          className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-[90] overflow-hidden"
           style={
             mounted
               ? {
-                  backgroundImage: `linear-gradient(to top,
-              rgba(0, 102, 255, 0.6) 0%,
-              rgba(255, 0, 51, 0.5) 30%,
-              rgba(0, 102, 255, 0.3) 60%,
-              transparent 100%
-            )`,
-                  scaleY: typeof floorScale === 'number' ? floorScale : (floorScale?.get?.() ?? 0),
-                  transformOrigin: 'bottom',
-                  filter: 'blur(50px)',
+                  opacity:
+                    typeof floorOpacity === 'number' ? floorOpacity : (floorOpacity?.get?.() ?? 0),
                 }
-              : {
-                  backgroundImage: `linear-gradient(to top,
-              rgba(0, 102, 255, 0.6) 0%,
-              rgba(255, 0, 51, 0.5) 30%,
-              rgba(0, 102, 255, 0.3) 60%,
-              transparent 100%
-            )`,
-                  scaleY: 0,
-                  transformOrigin: 'bottom',
-                  filter: 'blur(50px)',
-                }
+              : { opacity: 0 }
           }
           suppressHydrationWarning
-        />
-      </motion.div>}
+        >
+          <motion.div
+            className="w-full h-full"
+            style={
+              mounted
+                ? {
+                    backgroundImage: `linear-gradient(to top,
+              rgba(0, 102, 255, 0.6) 0%,
+              rgba(255, 0, 51, 0.5) 30%,
+              rgba(0, 102, 255, 0.3) 60%,
+              transparent 100%
+            )`,
+                    scaleY:
+                      typeof floorScale === 'number' ? floorScale : (floorScale?.get?.() ?? 0),
+                    transformOrigin: 'bottom',
+                    filter: 'blur(50px)',
+                  }
+                : {
+                    backgroundImage: `linear-gradient(to top,
+              rgba(0, 102, 255, 0.6) 0%,
+              rgba(255, 0, 51, 0.5) 30%,
+              rgba(0, 102, 255, 0.3) 60%,
+              transparent 100%
+            )`,
+                    scaleY: 0,
+                    transformOrigin: 'bottom',
+                    filter: 'blur(50px)',
+                  }
+            }
+            suppressHydrationWarning
+          />
+        </motion.div>
+      )}
     </section>
   )
 }

@@ -1,0 +1,51 @@
+Komplett guide: Kostnadsfri-flödet
+Vad det är
+Ett system där du skapar en unik, lösenordsskyddad URL för ett företag. Företaget får länken + lösenordet i ett mail, besvarar 3 snabba frågor, och får en hemsida genererad automatiskt.
+Steg 1: Env-variabler (sätts en gång)
+Du behöver sätta dessa i .env.local (lokal dev) och i Vercel-dashboardet (produktion):
+KOSTNADSFRI_API_KEY=valfri-hemlig-nyckel-for-api-anropKOSTNADSFRI_PASSWORD_SEED=valfri-hemlig-nyckel-for-losenord
+Vad är KOSTNADSFRI_API_KEY?
+En nyckel du hittar på själv (t.ex. kf-abc123xyz). Den krävs som header x-api-key i varje API-anrop som skapar en ny sida. Skyddar så att inte vem som helst kan skapa sidor.
+Vad är KOSTNADSFRI_PASSWORD_SEED?
+En hemlig nyckel som används för att beräkna lösenord deterministiskt. Tänk på den som en "master-nyckel" — med samma seed + samma företagsnamn får du alltid samma lösenord. Det betyder:
+Du behöver aldrig spara lösenord i en lista
+Du kan räkna ut lösenordet igen när som helst
+Python-skriptet och Node-backend använder exakt samma algoritm
+Om du byter seed slutar alla gamla lösenord att fungera. Välj en gång, spara säkert.
+Steg 2: Skapa en sida för ett företag
+Alternativ A: Python-skript (enklast)
+# Förhandsgranska (skapar inget, visar bara slug + lösenord)python scripts/kostnadsfri_generator.py "Café Södermalm" --dry-run# Skapa på riktigt (kräver att appen kör)python scripts/kostnadsfri_generator.py "Café Södermalm" --industry cafe --website https://cafesoder.se
+Alternativ B: API-anrop direkt
+curl -X POST https://sajtmaskin.vercel.app/api/kostnadsfri \  -H "Content-Type: application/json" \  -H "x-api-key: din-KOSTNADSFRI_API_KEY" \  -d '{    "companyName": "Café Södermalm",    "industry": "cafe",    "website": "https://cafesoder.se",    "contactEmail": "info@cafesoder.se"  }'
+Lösenord utelämnas = auto-genereras. Svaret innehåller:
+{  "success": true,  "page": {    "slug": "cafe-sodermalm",    "companyName": "Café Södermalm",    "password": "G7R4qxSN",    "url": "https://sajtmaskin.vercel.app/kostnadsfri/cafe-sodermalm"  }}
+Steg 3: Skicka till företaget
+Skicka i mailet:
+Länk: https://sajtmaskin.vercel.app/kostnadsfri/cafe-sodermalm
+Lösenord: G7R4qxSN
+Steg 4: Vad företaget upplever
+1. Klickar på länken   → Ser: "Café Södermalm" + lösenordsfält2. Skriver in lösenordet   → Verifieras mot databasen3. 3-stegs wizard visas:   Steg 1: Bekräfta företagsinfo (namn förfyllt) + plats + beskrivning   Steg 2: Välj mål (Sälja/Leads/Portfolio etc.) + målgrupp + USP   Steg 3: Välj designstil + färgpalett4. Klickar "Skapa webbplats"   → Animerad tänkar-snurra visas5. Redirectas till /builder   → Hemsidan börjar genereras med all insamlad data
+Bransch-ID:n (för industry-fältet)
+ID	Bransch
+cafe	Café/Konditori
+restaurant	Restaurang/Bar
+retail	Butik/Detaljhandel
+tech	Tech/IT-företag
+consulting	Konsult/Tjänster
+health	Hälsa/Wellness
+creative	Kreativ byrå
+education	Utbildning
+ecommerce	E-handel
+realestate	Fastigheter
+other	Annat
+Batch-skapande (många företag)
+Skapa en CSV-fil companies.csv:
+companyName,industry,website,contactEmail,contactNameCafé Södermalm,cafe,https://cafesoder.se,info@cafesoder.se,AnnaIKEA AB,retail,https://ikea.se,kontakt@ikea.se,ErikMitt Konsultbolag,consulting,,jan@konsult.se,Jan
+Kör:
+python scripts/kostnadsfri_generator.py --batch companies.csv
+Sammanfattning: vad det andra projektet behöver
+Tillgång till KOSTNADSFRI_API_KEY (för att skapa sidor)
+Tillgång till KOSTNADSFRI_PASSWORD_SEED (för att räkna ut lösenord lokalt utan API)
+Python-skriptet ELLER kunskap om API-endpointen
+Veta att URL-formatet är: https://sajtmaskin.vercel.app/kostnadsfri/{slug}
+Veta att sluggen genereras från företagsnamnet: "IKEA AB" becomes ikea-ab

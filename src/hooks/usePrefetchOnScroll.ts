@@ -47,9 +47,7 @@ export function usePrefetchOnScroll(enabled: boolean = true) {
 
       // Prefetch images for ProcessSection
       if (selector === '#process') {
-        const images = [
-          '/images/portfolio/prometheus_hero.webp',
-        ]
+        const images = ['/images/portfolio/prometheus_hero.webp']
         images.forEach((src) => {
           if (!document.querySelector(`link[rel="prefetch"][href="${src}"]`)) {
             const imageLink = document.createElement('link')

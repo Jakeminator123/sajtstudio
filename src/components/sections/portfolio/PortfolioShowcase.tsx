@@ -12,7 +12,8 @@ const showcaseProjects = [
     client: 'Prometheus Team',
     year: '2024',
     image: '/images/portfolio/showcase_prometheus.webp',
-    description: 'AI-driven pokeranalysplattform med preflop/postflop-verktyg, battle mode och power ranking',
+    description:
+      'AI-driven pokeranalysplattform med preflop/postflop-verktyg, battle mode och power ranking',
     technologies: ['React', 'Node.js', 'AI/ML', 'WebSocket'],
     features: ['AI-driven analys', 'Realtidsberäkningar', 'Power Ranking'],
     url: 'https://prometheuspoker.com',
@@ -34,7 +35,8 @@ const showcaseProjects = [
     client: 'PYNN',
     year: '2025',
     image: '/images/portfolio/pynn_hero.webp',
-    description: 'White-label AI-plattform för investerare, inkubatorer och acceleratorer i innovationsekosystemet',
+    description:
+      'White-label AI-plattform för investerare, inkubatorer och acceleratorer i innovationsekosystemet',
     technologies: ['Next.js', 'TypeScript', 'AI/ML', 'PostgreSQL'],
     features: ['AI-analys', 'Dealflow Management', 'Global Marketplace'],
     url: 'https://pynn.ai',

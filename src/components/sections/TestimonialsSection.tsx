@@ -9,28 +9,32 @@ import { useTheme } from '@/hooks/useTheme'
 
 const defaultTestimonials = [
   {
-    quote: 'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
+    quote:
+      'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
     author: 'Joakim Hallsten',
     company: 'raymondmedia.se',
     role: 'VD, Raymond Media AB',
     highlight: 'Lyft vår närvaro',
   },
   {
-    quote: 'Our platform runs flawlessly. They delivered a scalable, AI-ready architecture that just works.',
+    quote:
+      'Our platform runs flawlessly. They delivered a scalable, AI-ready architecture that just works.',
     author: 'PYNN Team',
     company: 'pynn.ai',
     role: 'AI Innovation Platform',
     highlight: 'Felfri drift',
   },
   {
-    quote: 'Cutting edge tech combined with real poker knowledge. They built exactly what we envisioned.',
+    quote:
+      'Cutting edge tech combined with real poker knowledge. They built exactly what we envisioned.',
     author: 'Prometheus Team',
     company: 'prometheuspoker.com',
     role: 'AI Poker Analytics',
     highlight: 'Framkant',
   },
   {
-    quote: 'En modern sajt som speglar kvaliteten i vår verksamhet. Resultatet överträffade förväntningarna.',
+    quote:
+      'En modern sajt som speglar kvaliteten i vår verksamhet. Resultatet överträffade förväntningarna.',
     author: 'DG97',
     company: 'dg97.se',
     role: 'Kontorshotell, Stockholm',
@@ -212,7 +216,9 @@ export default function TestimonialsSection() {
                 transition={{ delay: index * 0.15 + 0.4 }}
                 className={`border-t pt-6 ${isLight ? 'border-gray-200' : 'border-white/20'}`}
               >
-                <div className={`font-bold text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>{testimonial.author}</div>
+                <div className={`font-bold text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                  {testimonial.author}
+                </div>
                 <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/60'}`}>
                   {testimonial.role}, {testimonial.company}
                 </div>

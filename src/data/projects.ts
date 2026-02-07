@@ -82,8 +82,7 @@ export const projects: Project[] = [
     id: '6',
     title: 'DG97 Kontorsrum',
     category: 'Business',
-    description:
-      'Visningssidor för DG97:s kontorsrum med 360-vyer och bokningsfunktionalitet.',
+    description: 'Visningssidor för DG97:s kontorsrum med 360-vyer och bokningsfunktionalitet.',
     color: 'bg-tertiary',
     image: '/images/portfolio/dg97_rooms.webp',
     url: 'https://www.dg97.se',

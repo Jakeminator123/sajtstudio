@@ -72,10 +72,7 @@ export default function ProcessSection() {
   )
 
   // Get background image from CMS
-  const bgImage = getValue(
-    'B2',
-    '/images/portfolio/prometheus_hero.webp'
-  )
+  const bgImage = getValue('B2', '/images/portfolio/prometheus_hero.webp')
 
   // Scroll-based animations
   const { scrollYProgress } = useScroll({
@@ -173,7 +170,9 @@ export default function ProcessSection() {
               }`}
             />
           </h2>
-          <p className={`text-2xl md:text-3xl max-w-3xl mx-auto font-medium ${isLight ? 'text-gray-600' : 'text-white/80'}`}>
+          <p
+            className={`text-2xl md:text-3xl max-w-3xl mx-auto font-medium ${isLight ? 'text-gray-600' : 'text-white/80'}`}
+          >
             <WordReveal
               text="Från idé till lansering - så jobbar vi"
               delay={0.3}
