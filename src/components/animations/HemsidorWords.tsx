@@ -104,20 +104,19 @@ export default function HemsidorWords({
         {letters.map((letter, index) => (
           <motion.span
             key={index}
-            className="inline-block relative mx-0.5 md:mx-1"
+            className="inline-block relative"
             aria-hidden="true"
-            initial={{ opacity: 0, y: 60, rotateX: -90, scale: 0.5 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+            initial={{ opacity: 0, y: 40, rotateX: -60 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{
-              delay: index * 0.08,
-              duration: 0.8,
+              delay: index * 0.07,
+              duration: 0.7,
               ease: [0.25, 0.1, 0.25, 1],
             }}
             whileHover={{
-              scale: 1.4,
-              y: -20,
-              rotateY: 15,
-              transition: { duration: 0.3, type: 'spring', stiffness: 300 },
+              scale: 1.15,
+              y: -8,
+              transition: { duration: 0.2, type: 'spring', stiffness: 400 },
             }}
             style={{
               display: 'inline-block',
@@ -129,8 +128,8 @@ export default function HemsidorWords({
               className="relative z-20 bg-clip-text text-transparent font-black"
               style={{
                 backgroundImage:
-                  'linear-gradient(135deg, #0066FF, #3385FF, #66B3FF, #0066FF, #3385FF)',
-                backgroundSize: '300% 300%',
+                  'linear-gradient(135deg, #0066FF, #3385FF, #66B3FF, #0066FF)',
+                backgroundSize: '200% 200%',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -140,68 +139,25 @@ export default function HemsidorWords({
                   : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }
               }
               transition={
-                useSimpleAnimations ? undefined : { duration: 4, repeat: Infinity, ease: 'linear' }
+                useSimpleAnimations ? undefined : { duration: 6, repeat: Infinity, ease: 'linear' }
               }
               suppressHydrationWarning
             >
               {letter === ' ' ? '\u00A0' : letter}
             </motion.span>
 
-            {/* Strong glowing shadow effect behind each letter - DESKTOP ONLY */}
+            {/* Soft glow behind each letter - DESKTOP ONLY */}
             {!useSimpleAnimations && (
               <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-accent via-accent-light to-accent blur-lg opacity-70 -z-10"
+                className="absolute inset-0 bg-accent/30 blur-xl -z-10 rounded-full"
                 animate={{
-                  opacity: [0.5, 0.9, 0.5],
-                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.6, 0.3],
                 }}
                 transition={{
-                  duration: 2.5 + index * 0.15,
+                  duration: 3 + index * 0.2,
                   repeat: Infinity,
                   ease: 'easeInOut',
-                  delay: index * 0.12,
-                }}
-              />
-            )}
-
-            {/* Outer glow ring that pulses - DESKTOP ONLY */}
-            {!useSimpleAnimations && (
-              <motion.span
-                className="absolute inset-0 rounded-lg border-2 border-accent/60"
-                animate={{
-                  opacity: [0, 0.8, 0],
-                  scale: [1, 1.6, 1.6],
-                  boxShadow: [
-                    '0 0 0px rgba(0, 102, 255, 0)',
-                    '0 0 20px rgba(0, 102, 255, 0.6)',
-                    '0 0 0px rgba(0, 102, 255, 0)',
-                  ],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: 'easeOut',
-                  delay: index * 0.18,
-                }}
-              />
-            )}
-
-            {/* Subtle shimmer effect - DESKTOP ONLY */}
-            {!useSimpleAnimations && (
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -z-5"
-                style={{
-                  transform: 'skewX(-20deg)',
-                }}
-                animate={{
-                  x: ['-100%', '200%'],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: 'linear',
-                  delay: index * 0.2,
-                  repeatDelay: 1,
+                  delay: index * 0.1,
                 }}
               />
             )}

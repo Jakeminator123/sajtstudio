@@ -1,873 +1,224 @@
 'use client'
 
 import { useMounted } from '@/hooks/useMounted'
-import { AnimatePresence, motion, useInView } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
-import dynamic from 'next/dynamic'
-import { isMobileDevice } from '@/lib/performance'
+import { useTheme } from '@/hooks/useTheme'
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
 
-// Dynamically import PacmanGame to avoid SSR issues
-const PacmanGame = dynamic(() => import('@/components/games/PacmanGame'), {
-  ssr: false,
-  loading: () => <div className="text-white text-center">Loading Pacman...</div>,
-})
+// Tech stack items with SVG icons
+const techStack = [
+  {
+    name: 'React',
+    description: 'Komponentbaserad UI-arkitektur för interaktiva gränssnitt.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M12 10.11c1.03 0 1.87.84 1.87 1.89 0 1-.84 1.85-1.87 1.85S10.13 13 10.13 12c0-1.05.84-1.89 1.87-1.89M7.37 20c.63.38 2.01-.2 3.6-1.7-.52-.59-1.03-1.23-1.51-1.9a22.7 22.7 0 01-2.4-.36c-.51 2.14-.32 3.61.31 3.96m.71-5.74l-.29-.51c-.11.29-.22.58-.29.86.27.06.57.11.88.16l-.3-.51m6.54-.76l.81-1.5-.81-1.5c-.3-.53-.62-1-.91-1.47C13.17 9 12.6 9 12 9c-.6 0-1.17 0-1.71.03-.29.47-.61.94-.91 1.47L8.57 12l.81 1.5c.3.53.62 1 .91 1.47.54.03 1.11.03 1.71.03.6 0 1.17 0 1.71-.03.29-.47.61-.94.91-1.47M12 6.78c-.19.22-.39.45-.59.72h1.18c-.2-.27-.4-.5-.59-.72m0 10.44c.19-.22.39-.45.59-.72h-1.18c.2.27.4.5.59.72M16.62 4c-.62-.38-2 .2-3.59 1.7.52.59 1.03 1.23 1.51 1.9.82.08 1.63.2 2.4.36.51-2.14.32-3.61-.32-3.96m-.7 5.74l.29.51c.11-.29.22-.58.29-.86-.27-.06-.57-.11-.88-.16l.3.51m1.45-7.05c1.47.84 1.63 3.05 1.01 5.63 2.54.75 4.37 1.99 4.37 3.68 0 1.69-1.83 2.93-4.37 3.68.62 2.58.46 4.79-1.01 5.63-1.46.84-3.45-.12-5.37-1.95-1.92 1.83-3.91 2.79-5.38 1.95-1.46-.84-1.62-3.05-1-5.63-2.54-.75-4.37-1.99-4.37-3.68 0-1.69 1.83-2.93 4.37-3.68-.62-2.58-.46-4.79 1-5.63 1.47-.84 3.46.12 5.38 1.95 1.92-1.83 3.91-2.79 5.37-1.95M17.08 12c.34.75.64 1.5.89 2.26 2.1-.63 3.28-1.53 3.28-2.26 0-.73-1.18-1.63-3.28-2.26-.25.76-.55 1.51-.89 2.26M6.92 12c-.34-.75-.64-1.5-.89-2.26-2.1.63-3.28 1.53-3.28 2.26 0 .73 1.18 1.63 3.28 2.26.25-.76.55-1.51.89-2.26m9 2.26l-.3.51c.31-.05.61-.1.88-.16-.07-.28-.18-.57-.29-.86l-.29.51m-2.89 4.04c1.59 1.5 2.97 2.08 3.59 1.7.64-.35.83-1.82.32-3.96-.77.16-1.58.28-2.4.36-.48.67-.99 1.31-1.51 1.9M8.08 9.74l.3-.51c-.31.05-.61.1-.88.16.07.28.18.57.29.86l.29-.51m2.89-4.04C9.38 4.2 8 3.62 7.37 4c-.63.35-.82 1.82-.31 3.96a22.7 22.7 0 012.4-.36c.48-.67.99-1.31 1.51-1.9" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Next.js',
+    description: 'Fullstack-framework för snabba, SEO-vänliga webbapplikationer.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 01-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 00-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 00-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 01-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 01-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 01.174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 004.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 002.466-2.163 11.944 11.944 0 002.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 00-2.499-.523A33.119 33.119 0 0011.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 01.237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 01.233-.296c.096-.05.13-.054.5-.054z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'TypeScript',
+    description: 'Typsäkerhet som minskar buggar och förbättrar utvecklarupplevelsen.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 011.306.34v2.458a3.95 3.95 0 00-.643-.361 5.093 5.093 0 00-.717-.26 5.453 5.453 0 00-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 00-.623.242c-.17.104-.3.229-.393.374a.888.888 0 00-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 01-1.012 1.085 4.38 4.38 0 01-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 01-1.84-.164 5.544 5.544 0 01-1.512-.493v-2.63a5.033 5.033 0 003.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 00-.074-1.089 2.12 2.12 0 00-.537-.5 5.597 5.597 0 00-.807-.444 27.72 27.72 0 00-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 011.47-.629 7.536 7.536 0 011.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'AI / OpenAI',
+    description: 'AI-driven innehållsgenerering och smart webbplatsoptimering.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M22.282 9.821a5.985 5.985 0 00-.516-4.91 6.046 6.046 0 00-6.51-2.9A6.065 6.065 0 0011.67.248 6.067 6.067 0 005.186 2.68 5.986 5.986 0 001.07 5.49 6.05 6.05 0 001.73 12.2a5.985 5.985 0 00.516 4.911 6.046 6.046 0 006.51 2.9A6.065 6.065 0 0012.33 23.75a6.067 6.067 0 006.484-2.43 5.985 5.985 0 004.116-2.813 6.05 6.05 0 00-.648-6.686zM12.33 22.12a4.507 4.507 0 01-2.9-1.054l.144-.08 4.815-2.78a.783.783 0 00.396-.682V10.97l2.035 1.175a.072.072 0 01.04.056v5.622a4.527 4.527 0 01-4.53 4.297zM3.68 18.13a4.503 4.503 0 01-.539-3.03l.144.084 4.815 2.78a.783.783 0 00.787 0l5.879-3.395v2.35a.072.072 0 01-.029.062l-4.869 2.81a4.527 4.527 0 01-6.188-1.66zM2.45 7.94a4.503 4.503 0 012.36-1.978V11.6a.783.783 0 00.396.681l5.879 3.394-2.035 1.175a.072.072 0 01-.069.006l-4.87-2.813A4.527 4.527 0 012.45 7.94zM19.37 11.6l-5.879-3.394 2.035-1.175a.072.072 0 01.069-.006l4.87 2.813a4.527 4.527 0 01-.47 8.121V12.28a.783.783 0 00-.396-.681zM21.396 8.9l-.144-.084-4.815-2.78a.783.783 0 00-.787 0L9.771 9.43V7.08a.072.072 0 01.029-.062l4.87-2.812a4.527 4.527 0 016.726 4.694zM8.68 13.03l-2.035-1.175a.072.072 0 01-.04-.056V6.176a4.527 4.527 0 017.43-3.473l-.143.08-4.815 2.78a.783.783 0 00-.396.682v6.785zm1.104-2.38l2.618-1.512 2.617 1.512v3.023l-2.617 1.512-2.618-1.512z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Tailwind CSS',
+    description: 'Utility-first CSS för snabb, konsekvent och responsiv design.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Framer Motion',
+    description: 'Professionella animationer som ger liv åt gränssnittet.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+        <path d="M4 0h16v8h-8zM4 8h8l8 8H4zM4 16h8v8z" />
+      </svg>
+    ),
+  },
+]
+
+function TechCard({
+  tech,
+  index,
+  isLight,
+}: {
+  tech: (typeof techStack)[0]
+  index: number
+  isLight: boolean
+}) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-50px' })
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      transition={{
+        delay: index * 0.1,
+        duration: 0.6,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className={`group relative rounded-2xl p-6 md:p-8 transition-all duration-300 ${
+        isLight
+          ? 'bg-white/70 backdrop-blur-sm border border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-50'
+          : 'bg-white/5 backdrop-blur-sm border border-white/10 hover:border-accent/40 hover:bg-white/8'
+      }`}
+    >
+      {/* Icon */}
+      <div
+        className={`mb-4 transition-colors duration-300 ${
+          isLight
+            ? 'text-gray-600 group-hover:text-accent'
+            : 'text-gray-400 group-hover:text-accent'
+        }`}
+      >
+        {tech.icon}
+      </div>
+
+      {/* Name */}
+      <h3
+        className={`text-xl font-bold mb-2 ${
+          isLight ? 'text-gray-900' : 'text-white'
+        }`}
+      >
+        {tech.name}
+      </h3>
+
+      {/* Description */}
+      <p
+        className={`text-sm leading-relaxed ${
+          isLight ? 'text-gray-500' : 'text-gray-400'
+        }`}
+      >
+        {tech.description}
+      </p>
+
+      {/* Subtle hover accent line */}
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-accent via-tertiary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl" />
+    </motion.div>
+  )
+}
 
 export default function TechShowcaseSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const pacmanRef = useRef<HTMLDivElement>(null)
-  const matrixVideoRef = useRef<HTMLVideoElement>(null)
-  // Use larger margin to trigger earlier when scrolling into view
-  const isInView = useInView(sectionRef, {
-    once: true,
-    // Trigger earlier so mobile users get the animation before it reaches viewport
-    margin: '600px 0px -200px 0px',
-  })
   const mounted = useMounted()
-  const [isMobile, setIsMobile] = useState(false)
-  const [showTechText, setShowTechText] = useState(false)
-
-  // Detect mobile for performance optimization
-  useEffect(() => {
-    setIsMobile(isMobileDevice() || window.innerWidth < 768)
-  }, [])
-  const [showPacman, setShowPacman] = useState(false)
-  const [countdown, setCountdown] = useState(5)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [gameStarted, setGameStarted] = useState(false)
-  const [hasPlayed, setHasPlayed] = useState(false)
-  const [whiteFadeOut, setWhiteFadeOut] = useState(false)
-  const [hasScrolledToPacman, setHasScrolledToPacman] = useState(false)
-  const [overlayDismissed, setOverlayDismissed] = useState(false)
-  const [matrixText, setMatrixText] = useState('')
-  const [matrixFinished, setMatrixFinished] = useState(false)
-  const [postMatrixMessageVisible, setPostMatrixMessageVisible] = useState(false)
-  const hasStartedAnimationRef = useRef(false)
-  const [animationStarted, setAnimationStarted] = useState(false) // Track if animation sequence has started (for mobile stability)
-  const matrixFullText = 'ENOUGH WITH THE\nFLASHY STUFF'
-  // Show overlay when Pacman should be visible and overlay hasn't been dismissed
-  // Don't require isInView since animation can trigger even if user scrolled past
-  const showOverlay = showPacman && !overlayDismissed
-  const showInlinePacman = showPacman && overlayDismissed
-
-  // Matrix text typing animation - optimized for mobile
-  useEffect(() => {
-    if (showTechText && !showPacman) {
-      setMatrixText('')
-      setMatrixFinished(false)
-      setPostMatrixMessageVisible(false)
-      let currentIndex = 0
-      let timeoutId: NodeJS.Timeout
-
-      const typeText = () => {
-        if (currentIndex < matrixFullText.length) {
-          setMatrixText(matrixFullText.slice(0, currentIndex + 1))
-          currentIndex++
-          const lastChar = matrixFullText[currentIndex - 1]
-          // Faster typing on mobile to reduce energy consumption
-          const baseDelay = isMobile ? 10 : 35
-          const spaceDelay = isMobile ? 5 : 15
-          const delay = lastChar === ' ' ? spaceDelay : baseDelay
-          timeoutId = setTimeout(typeText, delay)
-        } else {
-          setMatrixFinished(true)
-          // Faster reveal of secondary message
-          setTimeout(() => setPostMatrixMessageVisible(true), isMobile ? 150 : 250)
-        }
-      }
-
-      // Start typing immediately (faster on mobile)
-      const typingTimer = setTimeout(
-        () => {
-          typeText()
-        },
-        isMobile ? 50 : 80
-      )
-
-      return () => {
-        clearTimeout(typingTimer)
-        if (timeoutId) clearTimeout(timeoutId)
-      }
-    } else {
-      setMatrixText('')
-      setMatrixFinished(false)
-      setPostMatrixMessageVisible(false)
-    }
-  }, [showTechText, showPacman, matrixFullText, isMobile])
-
-  // Control Matrix video playback
-  useEffect(() => {
-    const video = matrixVideoRef.current
-    if (!video) return
-
-    if (whiteFadeOut && !showPacman) {
-      // Play video when entering Matrix transition
-      video.play().catch(() => {
-        // Autoplay blocked - video will be visible but silent
-      })
-    } else if (showPacman) {
-      // Pause and reset video when transitioning to Pacman
-      video.pause()
-      video.currentTime = 0
-    }
-  }, [whiteFadeOut, showPacman])
-
-  // Check if section is already in view when component mounts (e.g., after HeroAnimation auto-scrolls)
-  // Also use IntersectionObserver as fallback to catch when section becomes visible
-  useEffect(() => {
-    if (!mounted || !sectionRef.current) return
-
-    let textTimer: NodeJS.Timeout | null = null
-    let pacmanTimer: NodeJS.Timeout | null = null
-
-    const startAnimation = () => {
-      // Prevent multiple triggers using ref to avoid stale closure
-      if (hasStartedAnimationRef.current) return
-      hasStartedAnimationRef.current = true
-      setAnimationStarted(true) // Set state for stable rendering (mobile fix)
-
-      setWhiteFadeOut(true)
-
-      // Faster transition - Matrix text appears quickly
-      textTimer = setTimeout(() => {
-        setShowTechText(true)
-      }, 100) // Reduced from 200ms
-
-      // Faster transition to Pacman (Matrix text + message = ~2.5s)
-      pacmanTimer = setTimeout(() => {
-        setShowPacman(true)
-      }, 3500) // Reduced from 5500ms
-    }
-
-    // Check immediately on mount with a small delay to ensure DOM is ready
-    const checkTimer = setTimeout(() => {
-      if (hasStartedAnimationRef.current) return
-      const rect = sectionRef.current?.getBoundingClientRect()
-      if (rect) {
-        const windowHeight = window.innerHeight || document.documentElement.clientHeight
-        // Check if section is visible in viewport (at least partially visible)
-        if (rect.top < windowHeight && rect.bottom > 0) {
-          startAnimation()
-        }
-      }
-    }, 100)
-
-    // Also set up IntersectionObserver as fallback
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasStartedAnimationRef.current) {
-            startAnimation()
-          }
-        })
-      },
-      { threshold: 0.1, rootMargin: '0px' }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
-
-    return () => {
-      clearTimeout(checkTimer)
-      if (textTimer) clearTimeout(textTimer)
-      if (pacmanTimer) clearTimeout(pacmanTimer)
-      observer.disconnect()
-    }
-  }, [mounted])
-
-  // Also trigger when isInView changes (normal scroll behavior)
-  // Note: We use refs for timers to prevent cleanup from clearing them when isInView flickers on mobile
-  const textTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const pacmanTimerRef = useRef<NodeJS.Timeout | null>(null)
-
-  useEffect(() => {
-    if (!mounted || !isInView || hasStartedAnimationRef.current) {
-      return
-    }
-
-    if (isInView) {
-      hasStartedAnimationRef.current = true
-      setAnimationStarted(true) // Set state for stable rendering (mobile fix)
-
-      // Start white fade out immediately when section comes into view
-      setWhiteFadeOut(true)
-
-      // Faster transition - Matrix text appears quickly
-      textTimerRef.current = setTimeout(() => {
-        setShowTechText(true)
-      }, 100) // Reduced from 200ms for quicker transition
-
-      // Faster transition to Pacman - Matrix text finishes in ~2s, message shows for ~0.5s
-      // Quick transition maintains engagement
-      pacmanTimerRef.current = setTimeout(() => setShowPacman(true), 3500) // Reduced from 5500ms
-
-      // Don't clear timers in cleanup - once animation starts, it should complete
-      // The ref check prevents double-triggering anyway
-    }
-  }, [isInView, mounted])
-
-  // Reset overlay dismissal whenever Pacman sequence retriggers
-  useEffect(() => {
-    if (showPacman) {
-      setOverlayDismissed(false)
-      // Close any open HeroAnimation modals when Pacman is about to show
-      // This prevents modals from appearing over Pacman game on mobile
-      window.dispatchEvent(new CustomEvent('closeHeroModals'))
-    }
-  }, [showPacman])
-
-  // Close HeroAnimation modals when white fade starts (mobile safety)
-  useEffect(() => {
-    if (whiteFadeOut) {
-      // Small delay to ensure modals are closed before white fade appears
-      const timer = setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('closeHeroModals'))
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [whiteFadeOut])
-
-  // Auto-scroll to Pacman once game is revealed (only once)
-  // On mobile, skip auto-scroll as it can cause viewport issues and the overlay is fullscreen anyway
-  useEffect(() => {
-    if (!mounted) return
-
-    // Skip auto-scroll for overlay mode - it's fullscreen fixed position
-    // Only scroll for inline mode
-    if (showInlinePacman && !hasScrolledToPacman && pacmanRef.current) {
-      // Small delay to let the overlay-to-inline transition complete
-      const scrollTimer = setTimeout(() => {
-        pacmanRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
-        })
-        setHasScrolledToPacman(true)
-      }, 300)
-      return () => clearTimeout(scrollTimer)
-    }
-  }, [showInlinePacman, hasScrolledToPacman, mounted])
-
-  useEffect(() => {
-    if (!mounted) return
-
-    // Countdown when Pacman shows and game hasn't started yet
-    let countdownInterval: NodeJS.Timeout
-    if (showPacman && countdown > 0 && !gameStarted && !isPlaying) {
-      countdownInterval = setInterval(() => {
-        setCountdown((prev) => (prev > 0 ? prev - 1 : 0))
-      }, 1000)
-    }
-
-    return () => {
-      if (countdownInterval) clearInterval(countdownInterval)
-    }
-  }, [showPacman, countdown, gameStarted, isPlaying, mounted])
-
-  const handlePlayGame = () => {
-    setIsPlaying(true)
-    setGameStarted(true)
-    setCountdown(0) // Hide countdown
-    setHasPlayed(true)
-  }
-
-  // Overlay dismissal removed - users scroll past if not interested
-
-  const renderPacmanExperience = (variant: 'overlay' | 'inline') => {
-    // Responsive dimensions - smaller on mobile, larger on desktop
-    const containerDimensions =
-      variant === 'overlay'
-        ? { width: 'min(96vw, 1000px)', height: 'auto', minHeight: 'min(80vh, 800px)' }
-        : { width: 'min(98vw, 1000px)', height: 'auto', minHeight: 'min(75vh, 750px)' }
-
-    return (
-      <motion.div
-        key={`${variant}-pacman`}
-        ref={pacmanRef}
-        initial={
-          variant === 'overlay'
-            ? { opacity: 0, scale: 0.9, y: 20 }
-            : { opacity: 0, scale: 0.8, y: 30 }
-        }
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full flex flex-col items-center justify-center mx-auto px-2 sm:px-4"
-        style={{
-          maxWidth: containerDimensions.width,
-          width: '100%',
-        }}
-      >
-        <motion.div
-          className="text-center mb-8 md:mb-12 px-4 max-w-4xl mx-auto"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-        >
-          <h2
-            className="text-xl md:text-2xl lg:text-3xl font-black mb-4"
-            style={{
-              fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-              textShadow: `
-                2px 2px 0px #000,
-                -2px -2px 0px #000,
-                2px -2px 0px #000,
-                -2px 2px 0px #000
-              `,
-              imageRendering: 'pixelated',
-              letterSpacing: '2px',
-              color: '#a855f7',
-            }}
-          >
-            Vi kan ta oss an diametralt olika projekt!
-          </h2>
-          <p
-            className="text-sm md:text-base lg:text-lg text-gray-300 mb-2"
-            style={{
-              fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-              textShadow: '1px 1px 0px #000',
-              imageRendering: 'pixelated',
-              letterSpacing: '1px',
-            }}
-          >
-            Varför inte lite härlig retro?
-          </p>
-          <p
-            className="text-xs md:text-sm text-yellow-400"
-            style={{
-              fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-              textShadow: '1px 1px 0px #000',
-              imageRendering: 'pixelated',
-            }}
-          >
-            🏆 Kom på toplistan & vi bjuder på en testsajt gratis! 🏆
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="relative mx-auto w-full"
-          style={{
-            maxWidth: 'min(100%, 900px)',
-          }}
-          animate={{
-            rotate: countdown === 0 && !isPlaying ? [0, -3, 3, -3, 0] : 0,
-          }}
-          transition={{
-            duration: 0.5,
-            ease: 'easeOut',
-          }}
-        >
-          {/* 8-bit border frame - hidden on very small screens */}
-          <div
-            className="absolute inset-0 border-4 sm:border-8 border-black rounded-lg pointer-events-none hidden sm:block"
-            style={{
-              imageRendering: 'pixelated',
-              boxShadow: `
-                2px 2px 0 0 #333,
-                4px 4px 0 0 #666
-              `,
-            }}
-          />
-
-          <div
-            className="relative rounded-lg overflow-hidden w-full flex items-center justify-center p-2 sm:p-4 md:p-6"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.75)',
-              backdropFilter: 'blur(4px)',
-              minHeight: 'min(70vh, 600px)',
-            }}
-          >
-            {/* Game content - canvas has its own semi-transparent background, so no extra overlay needed */}
-            <PacmanGame />
-
-            {/* Play button - centered in the game area */}
-            {!isPlaying && (
-              <motion.div
-                className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-              >
-                <motion.button
-                  onClick={handlePlayGame}
-                  className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold hover:scale-105 transition-transform shadow-lg text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white"
-                  style={{
-                    fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                    textShadow:
-                      '2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000',
-                    imageRendering: 'pixelated',
-                    letterSpacing: '2px',
-                    borderRadius: '0',
-                    boxShadow: '4px 4px 0px #000, -2px -2px 0px #000',
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={countdown > 0 && !hasPlayed}
-                >
-                  🎮 {hasPlayed ? 'SPELA IGEN' : 'SPELA'}
-                </motion.button>
-              </motion.div>
-            )}
-
-            {/* Overlays for countdown and demo ready */}
-            <AnimatePresence>
-              {countdown > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute z-30 bg-black/70 flex items-center justify-center pointer-events-none rounded-lg"
-                  style={{
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: '100%',
-                    height: '100%',
-                    imageRendering: 'pixelated',
-                  }}
-                >
-                  <div className="text-center px-2 sm:px-4 max-w-full">
-                    <h3
-                      className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4"
-                      style={{
-                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow: `
-                          2px 2px 0px #000,
-                          -2px -2px 0px #000,
-                          2px -2px 0px #000,
-                          -2px 2px 0px #000
-                        `,
-                        imageRendering: 'pixelated',
-                        letterSpacing: '2px',
-                      }}
-                    >
-                      Demo startar om {countdown}s
-                    </h3>
-                  </div>
-                </motion.div>
-              )}
-              {countdown === 0 && !isPlaying && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute z-30 flex items-center justify-center pointer-events-auto rounded-lg"
-                  style={{
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'rgba(0, 0, 0, 0.85)',
-                    imageRendering: 'pixelated',
-                    border: '4px double #fff',
-                  }}
-                >
-                  <div className="text-center px-2 sm:px-4 max-w-full">
-                    <h3
-                      className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4"
-                      style={{
-                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow: `
-                          2px 2px 0px #000,
-                          -2px -2px 0px #000,
-                          2px -2px 0px #000,
-                          -2px 2px 0px #000
-                        `,
-                        imageRendering: 'pixelated',
-                        letterSpacing: '2px',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {gameStarted ? 'PAUSAT' : 'DEMO KLAR'}
-                    </h3>
-                    <p
-                      className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-4 sm:mb-6"
-                      style={{
-                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow: '1px 1px 0px #000, -1px -1px 0px #000',
-                        imageRendering: 'pixelated',
-                        letterSpacing: '1px',
-                      }}
-                    >
-                      Vi kan bygga allt från spel till företagslösningar!
-                    </p>
-                    <p
-                      className="text-xs sm:text-sm md:text-base lg:text-lg text-white/80"
-                      style={{
-                        fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                        textShadow: '1px 1px 0px #000',
-                        imageRendering: 'pixelated',
-                        letterSpacing: '0.5px',
-                      }}
-                    >
-                      Tryck på <strong>Spela{hasPlayed ? ' igen' : ''}</strong> för att fortsätta.
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* TECHNICAL column - positioned relative to game container, hidden on mobile */}
-          <div className="hidden lg:block absolute left-0 -translate-x-full -translate-y-1/2 top-1/2 pr-12 xl:pr-24 text-right space-y-3 z-30 whitespace-nowrap">
-            <p
-              className="text-base xl:text-lg font-black mb-3"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#0066CC',
-                textShadow: `
-                  2px 2px 0px #000,
-                  -1px -1px 0px #000,
-                  1px -1px 0px #000,
-                  -1px 1px 0px #000
-                `,
-                imageRendering: 'pixelated',
-                letterSpacing: '2px',
-              }}
-            >
-              TEKNISKT
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Datadriven
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Funktionell
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Interaktiv
-            </p>
-          </div>
-
-          {/* CREATIVE column - positioned relative to game container, hidden on mobile */}
-          <div className="hidden lg:block absolute right-0 translate-x-full -translate-y-1/2 top-1/2 pl-8 xl:pl-16 space-y-3 z-30 whitespace-nowrap">
-            <p
-              className="text-base xl:text-lg font-black mb-3"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#FF0000',
-                textShadow: `
-                  2px 2px 0px #000,
-                  -1px -1px 0px #000,
-                  1px -1px 0px #000,
-                  -1px 1px 0px #000
-                `,
-                imageRendering: 'pixelated',
-                letterSpacing: '2px',
-              }}
-            >
-              KREATIVT
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Vacker
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Animerad
-            </p>
-            <p
-              className="text-xs xl:text-sm font-bold"
-              style={{
-                fontFamily: 'var(--font-pixel)',
-                color: '#000',
-                textShadow: '1px 1px 0px #fff, -1px -1px 0px #fff',
-                imageRendering: 'pixelated',
-              }}
-            >
-              • Engagerande
-            </p>
-          </div>
-        </motion.div>
-      </motion.div>
-    )
-  }
-
-  if (!mounted) {
-    return (
-      <section
-        className="relative min-h-screen overflow-hidden"
-        style={{
-          backgroundColor: '#0a0a0a',
-        }}
-      >
-        {/* Simple loading placeholder for SSR */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
-          <div className="text-white text-center">Loading...</div>
-        </div>
-      </section>
-    )
-  }
+  const { isLight } = useTheme()
+  const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
 
   return (
-    <motion.section
+    <section
       ref={sectionRef}
-      className="relative min-h-screen overflow-hidden"
-      initial={{ backgroundColor: '#ffffff' }}
-      animate={{ backgroundColor: '#0a0a0a' }}
-      style={{
-        // 8-bit Nintendo style dark background - full viewport coverage
-        backgroundColor: '#0a0a0a',
-      }}
+      className={`py-32 md:py-48 relative overflow-hidden transition-colors duration-500 ${
+        isLight
+          ? 'bg-gradient-to-br from-gray-50 via-sky-50 to-amber-50'
+          : 'bg-gradient-to-b from-gray-950 via-black to-gray-950'
+      }`}
     >
-      {/* Matrix video background - replaces white overlay for portal effect */}
-      {/* Creates immersive transition from explosion to Pac-Man game */}
-      {/* Much higher z-index (1000) to be above HeroAnimation's white overlay (z-index 100) and modals (z-index 60) */}
-      {whiteFadeOut && (
+      {/* Decorative background */}
+      {isLight ? (
         <>
-          {/* Matrix video background */}
-          <motion.div
-            className="fixed inset-0 pointer-events-none overflow-hidden"
-            style={{ zIndex: 1000 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showPacman ? 0 : 1 }}
-            transition={{
-              duration: showPacman ? 1.5 : 0.8,
-              ease: [0.25, 0.1, 0.25, 1],
-            }}
-          >
-            <video
-              ref={matrixVideoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-            >
-              <source src="/videos/matrix_code.mp4" type="video/mp4" />
-            </video>
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/40" />
-          </motion.div>
+          <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-20 left-10 w-80 h-80 bg-gradient-to-tr from-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+        </>
+      ) : (
+        <>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-tertiary/5 rounded-full blur-3xl pointer-events-none" />
         </>
       )}
 
-      {/* 8-bit Nintendo style background pattern */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* Pixelated grid pattern for 8-bit feel */}
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '8px 8px',
-            imageRendering: 'pixelated',
-          }}
-        />
-        {/* Subtle 8-bit scanline effect */}
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px)',
-            imageRendering: 'pixelated',
-          }}
-        />
-      </div>
-
-      {/* Matrix text - EXACTLY centered in viewport */}
-      {/* Use animationStarted instead of isInView for mobile stability - isInView can flicker on mobile during scroll */}
-      <AnimatePresence>
-        {animationStarted && showTechText && !showPacman && (
-          <>
-            {/* Matrix text container - exactly centered */}
-            {/* Much higher z-index (1001) to ensure it's above our white overlay (z-index 1000) */}
-            <motion.div
-              className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-              style={{ zIndex: 1001 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <motion.h2
-                className="text-3xl md:text-5xl lg:text-6xl font-bold whitespace-pre-line text-center"
-                style={{
-                  color: '#FFFFFF',
-                  // Authentic NES 8-bit text shadow - thick black outline
-                  textShadow: `
-                    3px 3px 0px #000000,
-                    -3px -3px 0px #000000,
-                    3px -3px 0px #000000,
-                    -3px 3px 0px #000000,
-                    0px 3px 0px #000000,
-                    3px 0px 0px #000000,
-                    -3px 0px 0px #000000,
-                    0px -3px 0px #000000,
-                    2px 2px 0px #000000,
-                    -2px -2px 0px #000000,
-                    2px -2px 0px #000000,
-                    -2px 2px 0px #000000
-                  `,
-                  fontFamily: "var(--font-pixel), 'Press Start 2P', 'Courier New', monospace",
-                  letterSpacing: '6px',
-                  lineHeight: '1.2',
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase',
-                  // Force pixelated rendering
-                  imageRendering: 'pixelated' as const,
-                  // Disable font smoothing for pixelated look
-                  WebkitFontSmoothing: 'none',
-                  MozOsxFontSmoothing: 'none',
-                  textRendering: 'optimizeSpeed',
-                  // Additional pixelated styling
-                  fontFeatureSettings: 'normal',
-                  fontVariantLigatures: 'none',
-                  fontKerning: 'none',
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                {matrixText}
-                {matrixText.length < matrixFullText.length && (
-                  <span
-                    className="animate-pulse"
-                    style={{
-                      color: '#FFFFFF',
-                      textShadow:
-                        '3px 3px 0px #000000, -3px -3px 0px #000000, 3px -3px 0px #000000, -3px 3px 0px #000000',
-                      fontFamily: "var(--font-pixel), 'Press Start 2P', monospace",
-                    }}
-                  >
-                    |
-                  </span>
-                )}
-              </motion.h2>
-            </motion.div>
-
-            {/* Secondary message - positioned below center */}
-            {/* Much higher z-index (1001) to ensure it's above our white overlay (z-index 1000) */}
-            {matrixFinished && postMatrixMessageVisible && (
-              <motion.div
-                className="fixed inset-0 flex items-center justify-center pointer-events-none px-4"
-                style={{ zIndex: 1001 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <motion.p
-                  className="text-2xl md:text-4xl font-semibold tracking-wide text-center"
-                  style={{
-                    marginTop: '200px',
-                    color: '#00ff00', // Matrix green color
-                    textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
-                  }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                >
-                  Så skapar vi animationer som betyder något
-                </motion.p>
-              </motion.div>
-            )}
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Pacman Overlay Modal - shows on top of everything when Matrix video is done */}
-      {/* Smooth fade from Matrix video into Pacman game */}
-      <AnimatePresence>
-        {showOverlay && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
-            style={{ zIndex: 9999 }}
-            initial={{ opacity: 0, scale: 1.02 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
+        {/* Section header */}
+        <motion.div
+          className="text-center mb-16 md:mb-24"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <motion.p
+            className={`text-sm uppercase tracking-widest font-semibold mb-4 ${
+              isLight ? 'text-accent' : 'text-accent'
+            }`}
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            {/* 8-bit background with desaturation - centered */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-                backgroundRepeat: 'no-repeat',
-                filter: 'saturate(0.3) contrast(1.1)',
-              }}
+            Teknik & Verktyg
+          </motion.p>
+
+          <h2
+            className={`text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 ${
+              isLight ? 'text-gray-900' : 'text-white'
+            }`}
+          >
+            Byggt med{' '}
+            <span className="bg-gradient-to-r from-accent to-tertiary bg-clip-text text-transparent">
+              framtidens teknik
+            </span>
+          </h2>
+
+          <p
+            className={`text-lg md:text-xl max-w-2xl mx-auto ${
+              isLight ? 'text-gray-500' : 'text-gray-400'
+            }`}
+          >
+            Vi använder de bästa verktygen och ramverken för att bygga snabba,
+            skalbara och vackra webbplatser.
+          </p>
+        </motion.div>
+
+        {/* Tech stack grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {techStack.map((tech, index) => (
+            <TechCard
+              key={tech.name}
+              tech={tech}
+              index={index}
+              isLight={isLight}
             />
-            {/* Dark overlay for better contrast with game */}
-            <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+          ))}
+        </div>
 
-            {/* Pacman game in overlay - centered */}
-            <div className="relative z-10 w-full flex items-center justify-center">
-              {renderPacmanExperience('overlay')}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 8-bit background for inline mode with desaturation */}
-      {showInlinePacman && (
-        <div
-          className="absolute inset-0 z-0 pointer-events-none"
-          style={{
-            backgroundImage: 'url("/images/backgrounds/8-bit.webp")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'saturate(0.3) contrast(1.1)',
-          }}
-        />
-      )}
-
-      {/* Content - only show when section is in view */}
-      {/* Centered container for inline Pacman */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full p-2 sm:p-4 md:p-8 pt-20 sm:pt-28 md:pt-32">
-        {/* Dark overlay when inline Pacman is visible for better contrast */}
-        {showInlinePacman && <div className="absolute inset-0 bg-black/50 pointer-events-none" />}
-        <AnimatePresence mode="wait">
-          {showInlinePacman && (
-            <div className="w-full flex items-center justify-center">
-              {renderPacmanExperience('inline')}
-            </div>
-          )}
-        </AnimatePresence>
+        {/* Bottom tagline */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className={`text-center mt-16 text-sm ${
+            isLight ? 'text-gray-400' : 'text-gray-500'
+          }`}
+        >
+          ...och mycket mer. Varje projekt får den stack som passar bäst.
+        </motion.p>
       </div>
-    </motion.section>
+    </section>
   )
 }

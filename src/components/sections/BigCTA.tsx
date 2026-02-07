@@ -6,28 +6,28 @@ import { siteConfig } from '@/config/siteConfig'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 // Dynamic imports to avoid SSR issues
 const Keyboard3DBackground = dynamic(() => import('@/components/effects/Keyboard3DBackground'), {
   ssr: false,
 })
 
-const MatrixContactForm = dynamic(() => import('@/components/ui/MatrixContactForm'), { ssr: false })
-
 /**
  * BigCTA Component - Interactive Keyboard Contact Section
  *
  * Features:
- * - Interactive 3D keyboard - click keys to type
- * - Matrix-style message display
+ * - Interactive 3D keyboard background
+ * - Clean professional contact form
  * - Send message via email
- * - Option to use real keyboard (animates 3D keyboard)
- * - Clickable retro phone to call
+ * - Clickable phone to call
  */
 export default function BigCTA() {
   const sectionRef = useRef(null)
   const { isLight } = useTheme()
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
 
   // Fetch content from CMS - enables live updates from /admin
   const { getValue } = useContentSection('bigcta')
@@ -35,6 +35,26 @@ export default function BigCTA() {
   // Get content from CMS with fallbacks
   const phoneImage = getValue('B3', '/images/contact_phone.webp')
   const phoneHref = `tel:${siteConfig.contact.phone.replace(/[^\d+]/g, '')}`
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSending(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      if (res.ok) {
+        setSent(true)
+        setFormData({ name: '', email: '', message: '' })
+      }
+    } catch {
+      // Silently handle errors
+    } finally {
+      setSending(false)
+    }
+  }
 
   return (
     <section
@@ -124,7 +144,7 @@ export default function BigCTA() {
               isLight ? 'text-gray-500' : 'text-white/50'
             }`}
           >
-            Skriv på 3D-tangentbordet eller aktivera ditt eget för att skriva snabbare.
+            Berätta om ditt projekt så återkommer vi med en plan.
           </motion.p>
         </motion.div>
       </div>
@@ -140,8 +160,8 @@ export default function BigCTA() {
         <div
           className={`absolute inset-0 pointer-events-none z-10 ${
             isLight
-              ? 'bg-gradient-to-t from-[#fef9e7]/90 via-transparent to-sky-100/60'
-              : 'bg-gradient-to-t from-black/90 via-transparent to-black/70'
+              ? 'bg-gradient-to-t from-[#fef9e7]/90 via-[#fef9e7]/40 to-sky-100/60'
+              : 'bg-gradient-to-t from-black/90 via-black/40 to-black/70'
           }`}
         />
         <div
@@ -171,24 +191,112 @@ export default function BigCTA() {
               alt="Smartphone som visar Sajtstudios kontaktformulär"
               width={240}
               height={300}
-              className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(0,102,255,0.5)]"
+              className="drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(0,102,255,0.3)]"
               style={{ width: 'auto', height: 'auto' }}
               loading="lazy"
             />
             {/* Hover tooltip */}
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-accent/90 px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="text-white text-sm font-mono whitespace-nowrap">📞 Ring oss!</span>
-            </div>
-            {/* Pulsing ring effect */}
-            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-accent/50 rounded-full animate-ping" />
+              <span className="text-white text-sm whitespace-nowrap">Ring oss</span>
             </div>
           </motion.div>
         </a>
 
-        {/* Matrix Contact Form - single instance (responsive position) */}
+        {/* Professional Contact Form */}
         <div className="absolute z-20 left-4 right-4 bottom-4 md:left-auto md:right-16 md:top-1/2 md:-translate-y-1/2 md:bottom-auto flex flex-col gap-4">
-          <MatrixContactForm email={siteConfig.contact.email} />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className={`w-full md:w-[400px] rounded-2xl p-6 md:p-8 backdrop-blur-xl border shadow-2xl ${
+              isLight
+                ? 'bg-white/80 border-gray-200/80 shadow-gray-200/50'
+                : 'bg-gray-900/80 border-white/10 shadow-black/50'
+            }`}
+          >
+            {sent ? (
+              <div className="text-center py-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center"
+                >
+                  <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+                <h3 className={`text-xl font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                  Tack för ditt meddelande!
+                </h3>
+                <p className={`text-sm ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+                  Vi återkommer inom 24 timmar.
+                </p>
+                <button
+                  onClick={() => setSent(false)}
+                  className="mt-4 text-accent hover:underline text-sm"
+                >
+                  Skicka ett till meddelande
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <h3 className={`text-lg font-bold mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                  Skicka ett meddelande
+                </h3>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Ditt namn"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 ${
+                      isLight
+                        ? 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                        : 'bg-white/5 border-white/10 text-white placeholder-gray-500'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Din e-post"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 ${
+                      isLight
+                        ? 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                        : 'bg-white/5 border-white/10 text-white placeholder-gray-500'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <textarea
+                    placeholder="Berätta om ditt projekt..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    required
+                    rows={4}
+                    className={`w-full px-4 py-3 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none ${
+                      isLight
+                        ? 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                        : 'bg-white/5 border-white/10 text-white placeholder-gray-500'
+                    }`}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="w-full py-3 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sending ? 'Skickar...' : 'Skicka meddelande'}
+                </button>
+              </form>
+            )}
+          </motion.div>
 
           {/* Mobile phone call button */}
           <motion.a
@@ -197,7 +305,7 @@ export default function BigCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center gap-3 w-full py-4 bg-gradient-to-r from-accent to-blue-600 rounded-lg font-bold text-white shadow-lg shadow-accent/30 md:hidden"
+            className="flex items-center justify-center gap-3 w-full py-4 bg-accent rounded-lg font-bold text-white shadow-lg md:hidden"
           >
             <Image
               src={phoneImage}
@@ -247,7 +355,7 @@ export default function BigCTA() {
             >
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span className="font-mono text-sm">{siteConfig.contact.email}</span>
+            <span className="text-sm">{siteConfig.contact.email}</span>
           </motion.a>
 
           {/* Divider */}
@@ -272,7 +380,7 @@ export default function BigCTA() {
             >
               <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
-            <span className="font-mono text-sm">{siteConfig.contact.phone}</span>
+            <span className="text-sm">{siteConfig.contact.phone}</span>
           </motion.a>
 
           {/* Divider */}

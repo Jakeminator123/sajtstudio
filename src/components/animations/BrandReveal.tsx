@@ -66,9 +66,9 @@ export default function BrandReveal({
     >
       {/* Background glow - subtle, not scroll-dependent */}
       <motion.span
-        className="absolute inset-0 blur-2xl opacity-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-rose-500/30 -z-10"
+        className="absolute inset-0 blur-3xl opacity-0 bg-gradient-to-r from-blue-500/20 via-purple-500/15 to-rose-500/20 -z-10"
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={isInView ? { opacity: 0.6, scale: 1.2 } : {}}
+        animate={isInView ? { opacity: 0.4, scale: 1.1 } : {}}
         transition={{ duration: 1.5, ease: 'easeOut' }}
       />
 
@@ -123,7 +123,7 @@ export default function BrandReveal({
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                   }}
                   transition={{
-                    duration: 6,
+                    duration: 8,
                     repeat: Infinity,
                     ease: 'linear',
                   }}

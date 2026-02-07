@@ -27,7 +27,7 @@ const defaultContent: HeroContent = {
   ctaText: 'Starta projekt',
   ctaSecondary: 'BYGG DIN SAJT NU!',
   bgImage: '/images/hero/hero-background.webp',
-  bgVideo: '/videos/background.mp4',
+  bgVideo: '',
 }
 
 // Magnetic button component that follows mouse
@@ -451,7 +451,7 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
     return () => window.removeEventListener('resize', updateSize)
   }, [])
 
-  const particles = useMemo(() => Array.from({ length: 15 }), [])
+  const particles = useMemo(() => Array.from({ length: 8 }), [])
   const baseX = useMemo(() => {
     if (windowSize.width === 0) return 0
     return mousePosition.x * (windowSize.width / 2) + windowSize.width / 2
@@ -466,7 +466,7 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
       {particles.map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 bg-accent rounded-full blur-sm"
+          className="absolute w-1 h-1 bg-accent/60 rounded-full blur-sm"
           style={{
             left: baseX,
             top: baseY,
@@ -474,8 +474,8 @@ function CursorTrail({ mousePosition }: { mousePosition: { x: number; y: number 
           animate={{
             x: mousePosition.x * (i * 8),
             y: mousePosition.y * (i * 8),
-            opacity: [0, 0.6 - i * 0.03, 0],
-            scale: [0, 1.5 - i * 0.05, 0],
+            opacity: [0, 0.3 - i * 0.03, 0],
+            scale: [0, 1.2 - i * 0.05, 0],
           }}
           transition={{
             duration: 1.5,
@@ -704,7 +704,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
 
   // Generate stable rain drops positions (deterministic for hydration)
   const rainDrops = useMemo(() => {
-    return Array.from({ length: 50 }, (_, i) => {
+    return Array.from({ length: 25 }, (_, i) => {
       // Use index as seed for consistent positioning
       const seed = i * 0.618033988749895 // Golden ratio for better distribution
       return {
@@ -769,8 +769,8 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       {/* Floating geometric shapes */}
       {allowHeavyEffects && (
         <div className="absolute inset-0 pointer-events-none z-[2]">
-          {Array.from({ length: 6 }).map((_, i) => {
-            const size = 100 + (i % 3) * 50
+          {Array.from({ length: 4 }).map((_, i) => {
+            const size = 80 + (i % 3) * 40
             const left = (i * 137.5) % 100
             const top = (i * 1.618 * 100) % 100
             const delay = i * 0.5
@@ -779,7 +779,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
             return (
               <motion.div
                 key={i}
-                className="absolute border border-white/10"
+                className="absolute border border-white/5 rounded-lg"
                 style={{
                   width: size,
                   height: size,
@@ -790,7 +790,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
                   y: [0, -30, 0],
                   x: [0, 20, 0],
                   rotate: [0, 90, 0],
-                  opacity: [0.1, 0.2, 0.1],
+                  opacity: [0.03, 0.08, 0.03],
                 }}
                 transition={{
                   duration,
@@ -827,7 +827,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       {mounted && (
         <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
           {/* Background video - delayed to prioritize LCP - LOWEST LAYER */}
-          {!shouldReduceMotion && enableBackgroundVideo && (
+          {!shouldReduceMotion && enableBackgroundVideo && content.bgVideo && (
             <div className="absolute inset-0 opacity-50 z-0">
               <video
                 ref={videoRef}
@@ -952,7 +952,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
               {rainDrops.map((drop, i) => (
                 <div
                   key={i}
-                  className="absolute w-[1px] h-[20px] bg-white/40"
+                  className="absolute w-[1px] h-[20px] bg-white/20"
                   style={{
                     left: `${drop.left}%`,
                     top: '-20px',
@@ -1278,69 +1278,39 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
             }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            {/* Primary CTA: Website evaluation - Blue with cool animations */}
+            {/* Primary CTA: Website evaluation */}
             <MagneticButton
               href="https://sajtmaskin.vercel.app?mode=audit"
               external={true}
-              className="px-10 py-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg rounded-lg hover:from-blue-500 hover:via-cyan-500 hover:to-blue-600 transition-all duration-500 shadow-[0_0_30px_rgba(0,102,255,0.5)] hover:shadow-[0_0_50px_rgba(0,102,255,0.8)] relative overflow-hidden group border border-white/20"
+              className="px-10 py-5 bg-accent text-white font-bold text-lg rounded-lg hover:bg-accent-hover transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-accent/20 relative overflow-hidden group border border-white/10"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
             >
-              {/* Animated gradient overlay */}
+              {/* Subtle shimmer on hover */}
               {!shouldReduceMotion && (
                 <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent"
                   animate={{
                     x: ['-200%', '200%'],
                   }}
                   transition={{
-                    duration: 2,
+                    duration: 3,
                     repeat: Infinity,
                     ease: 'linear',
                   }}
                 />
               )}
-              {/* Pulsing glow ring */}
-              {!shouldReduceMotion && (
-                <motion.span
-                  className="absolute inset-0 rounded-lg border-2 border-cyan-400/50"
-                  animate={{
-                    opacity: [0.3, 0.8, 0.3],
-                    scale: [1, 1.02, 1],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
-              )}
-              {/* Electric spark effect */}
-              {!shouldReduceMotion && (
-                <motion.span
-                  className="absolute top-0 left-1/2 w-1 h-full bg-gradient-to-b from-transparent via-cyan-300 to-transparent opacity-60"
-                  animate={{
-                    x: ['-100px', '100px'],
-                    opacity: [0, 0.8, 0],
-                  }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    repeatDelay: 0.5,
-                  }}
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-3 font-black tracking-wide">
+              <span className="relative z-10 flex items-center gap-3 font-bold tracking-wide">
                 Utvärdera din sajt
                 <motion.svg
                   className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  animate={{ x: [0, 5, 0] }}
+                  animate={shouldReduceMotion ? {} : { x: [0, 4, 0] }}
                   transition={{
-                    duration: 1.2,
+                    duration: 1.5,
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}
@@ -1348,7 +1318,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     d="M17 8l4 4m0 0l-4 4m4-4H3"
                   />
                 </motion.svg>
@@ -1359,62 +1329,21 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
             <MagneticButton
               href="https://sajtmaskin.vercel.app"
               external={true}
-              className="px-10 py-5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-500 text-white font-black text-lg uppercase tracking-wider rounded-lg hover:from-orange-500 hover:via-red-500 hover:to-rose-600 transition-all duration-500 shadow-[0_0_30px_rgba(255,0,51,0.5)] hover:shadow-[0_0_50px_rgba(255,0,51,0.8)] relative overflow-hidden group border border-white/20"
+              className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white font-bold text-lg rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden group border border-white/20"
               shouldReduceMotion={shouldReduceMotion}
               mousePosition={mousePosition}
               onHoverChange={setIsHoveringButton}
             >
-              {/* Fire/heat wave effect */}
-              {!shouldReduceMotion && (
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-t from-orange-600/40 via-transparent to-transparent"
-                  animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    repeat: Infinity,
-                  }}
-                />
-              )}
-              {/* Shimmer effect */}
-              {!shouldReduceMotion && (
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                  animate={{
-                    x: ['-200%', '200%'],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatDelay: 1,
-                  }}
-                />
-              )}
               <span className="relative z-10 flex items-center gap-3">
                 {content.ctaSecondary}
-                <motion.svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  animate={{
-                    x: [0, 3, 0],
-                    y: [0, -3, 0],
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                   />
-                </motion.svg>
+                </svg>
               </span>
             </MagneticButton>
           </motion.div>

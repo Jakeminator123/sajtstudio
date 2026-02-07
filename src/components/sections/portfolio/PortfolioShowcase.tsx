@@ -4,29 +4,51 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useState, useRef } from 'react'
 
-// Showcase data för framtida projekt
+// Showcase data for real client projects
 const showcaseProjects = [
   {
-    id: 'showcase1',
-    title: 'E-commerce Platform',
-    client: 'Fashion Brand',
+    id: 'prometheus',
+    title: 'Prometheus Poker',
+    client: 'Prometheus Team',
     year: '2024',
-    image: '/images/portfolio/showcase_1.webp',
-    description: 'Modern e-handelsplattform med AI-driven personalisering',
-    technologies: ['Next.js', 'TypeScript', 'Tailwind', 'Stripe'],
-    features: ['AI Recommendations', 'Real-time Analytics', 'Mobile First'],
-    url: '#',
+    image: '/images/portfolio/showcase_prometheus.webp',
+    description: 'AI-driven pokeranalysplattform med preflop/postflop-verktyg, battle mode och power ranking',
+    technologies: ['React', 'Node.js', 'AI/ML', 'WebSocket'],
+    features: ['AI-driven analys', 'Realtidsberäkningar', 'Power Ranking'],
+    url: 'https://prometheuspoker.com',
   },
   {
-    id: 'showcase2',
-    title: 'SaaS Dashboard',
-    client: 'Tech Startup',
+    id: 'dg97',
+    title: 'DG97 Kontorshotell',
+    client: 'DG97',
     year: '2024',
-    image: '/images/portfolio/showcase_2.webp',
-    description: 'Skalbar SaaS-lösning med avancerad datavisualisering',
-    technologies: ['React', 'Node.js', 'MongoDB', 'D3.js'],
-    features: ['Real-time Data', 'Custom Charts', 'Team Collaboration'],
-    url: '#',
+    image: '/images/portfolio/showcase_dg97.webp',
+    description: 'Modern webbplats för kontorshotell i Vasastan, Stockholm med bokningssystem',
+    technologies: ['WordPress', 'PHP', 'Responsive Design', 'SEO'],
+    features: ['Online-bokning', 'Virtuell visning', 'Bloggplattform'],
+    url: 'https://www.dg97.se',
+  },
+  {
+    id: 'pynn',
+    title: 'PYNN AI',
+    client: 'PYNN',
+    year: '2025',
+    image: '/images/portfolio/pynn_hero.webp',
+    description: 'White-label AI-plattform för investerare, inkubatorer och acceleratorer i innovationsekosystemet',
+    technologies: ['Next.js', 'TypeScript', 'AI/ML', 'PostgreSQL'],
+    features: ['AI-analys', 'Dealflow Management', 'Global Marketplace'],
+    url: 'https://pynn.ai',
+  },
+  {
+    id: 'raymond',
+    title: 'Raymond Media',
+    client: 'Raymond Media AB',
+    year: '2024',
+    image: '/images/portfolio/raymond_hero.webp',
+    description: 'Datadriven plattform för ringlistor och adressregister med avancerad filtrering',
+    technologies: ['WordPress', 'PHP', 'MySQL', 'SEO'],
+    features: ['Adressfiltrering', 'Leadgenerering', 'E-postlistor'],
+    url: 'https://raymondmedia.se',
   },
 ]
 

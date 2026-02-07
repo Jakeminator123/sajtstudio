@@ -84,7 +84,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)'],
         handwriting: ['var(--font-handwriting)', 'cursive'],
-        pixel: ['var(--font-pixel)', 'monospace'],
+        // pixel font removed - using sans for all text
         mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'monospace'],
       },
       fontSize: {

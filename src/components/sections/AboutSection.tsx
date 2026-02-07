@@ -5,6 +5,7 @@
 import BrandReveal from '@/components/animations/BrandReveal'
 import { useMounted } from '@/hooks/useMounted'
 import { useContentSection } from '@/hooks/useContent'
+import { useTheme } from '@/hooks/useTheme'
 import {
   MotionValue,
   motion,
@@ -203,6 +204,7 @@ function GlowingOrb({
 export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const mounted = useMounted()
+  const { isLight } = useTheme()
   const { getValue } = useContentSection('about')
   const aboutTitle = getValue('T5', 'Vi är Sajtstudio')
   const { scrollYProgress } = useScroll({
@@ -243,65 +245,92 @@ export default function AboutSection() {
   return (
     <section
       ref={sectionRef}
-      className="section-spacing-md bg-gradient-to-b from-black via-gray-950 to-black text-white relative overflow-hidden min-h-screen flex items-center"
+      className={`section-spacing-md relative overflow-hidden min-h-screen flex items-center transition-colors duration-500 ${
+        isLight
+          ? 'bg-gradient-to-b from-amber-50 via-sky-50 to-rose-50 text-gray-900'
+          : 'bg-gradient-to-b from-black via-gray-950 to-black text-white'
+      }`}
     >
       {/* Animated background layers */}
       <div className="absolute inset-0 z-0">
         {/* Base gradient */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-black via-gray-950 to-black"
+          className={`absolute inset-0 ${
+            isLight
+              ? 'bg-gradient-to-br from-amber-50 via-sky-50 to-rose-50'
+              : 'bg-gradient-to-br from-black via-gray-950 to-black'
+          }`}
           style={mounted ? { y: backgroundY } : { y: 0 }}
           suppressHydrationWarning
         />
 
         {/* Accent gradient overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-tertiary/10"
+          className={`absolute inset-0 ${
+            isLight
+              ? 'bg-gradient-to-br from-blue-200/20 via-transparent to-rose-200/20'
+              : 'bg-gradient-to-br from-accent/10 via-transparent to-tertiary/10'
+          }`}
           style={{ opacity: mounted ? accentGradientOpacity : 0.3 }}
           suppressHydrationWarning
         />
 
-        {/* Animated grid pattern */}
-        <motion.div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px',
-            opacity: mounted ? gridOpacity : 0.03,
-          }}
-          suppressHydrationWarning
-        />
+        {/* Light mode decorative elements */}
+        {isLight && (
+          <>
+            <div className="absolute top-10 right-20 w-80 h-80 bg-gradient-to-bl from-blue-200/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-10 left-20 w-72 h-72 bg-gradient-to-tr from-amber-200/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+          </>
+        )}
 
-        {/* Floating particles */}
-        {particles.map((particle) => (
-          <FloatingParticle
-            key={particle.id}
-            particle={particle}
-            scrollYProgress={scrollYProgress}
-            mounted={mounted}
+        {/* Animated grid pattern - only dark mode */}
+        {!isLight && (
+          <motion.div
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 255, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '80px 80px',
+              opacity: mounted ? gridOpacity : 0.03,
+            }}
+            suppressHydrationWarning
           />
-        ))}
+        )}
 
-        {/* Glowing orbs */}
-        <GlowingOrb
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
-          scrollYProgress={scrollYProgress}
-          mounted={mounted}
-          animateX={[0, 50, 0]}
-          animateY={[0, 30, 0]}
-          duration={8}
-        />
-        <GlowingOrb
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-tertiary/10 rounded-full blur-3xl"
-          scrollYProgress={scrollYProgress}
-          mounted={mounted}
-          animateX={[0, -50, 0]}
-          animateY={[0, -30, 0]}
-          duration={10}
-        />
+        {/* Floating particles - only dark mode */}
+        {!isLight &&
+          particles.map((particle) => (
+            <FloatingParticle
+              key={particle.id}
+              particle={particle}
+              scrollYProgress={scrollYProgress}
+              mounted={mounted}
+            />
+          ))}
+
+        {/* Glowing orbs - only dark mode */}
+        {!isLight && (
+          <>
+            <GlowingOrb
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
+              scrollYProgress={scrollYProgress}
+              mounted={mounted}
+              animateX={[0, 50, 0]}
+              animateY={[0, 30, 0]}
+              duration={8}
+            />
+            <GlowingOrb
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-tertiary/10 rounded-full blur-3xl"
+              scrollYProgress={scrollYProgress}
+              mounted={mounted}
+              animateX={[0, -50, 0]}
+              animateY={[0, -30, 0]}
+              duration={10}
+            />
+          </>
+        )}
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
@@ -326,7 +355,7 @@ export default function AboutSection() {
           <div className="max-w-5xl mx-auto space-y-12">
             {/* Tagline - sharper, cleaner - NO scroll-dependent animation for better mobile perf */}
             <motion.p
-              className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight text-white"
+              className={`text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light leading-tight ${isLight ? 'text-gray-800' : 'text-white'}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
@@ -346,7 +375,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ delay: 0.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-              className="text-lg md:text-xl lg:text-2xl text-white leading-relaxed max-w-4xl mx-auto font-medium"
+              className={`text-lg md:text-xl lg:text-2xl leading-relaxed max-w-4xl mx-auto font-medium ${isLight ? 'text-gray-700' : 'text-white'}`}
               style={{
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
@@ -362,7 +391,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ delay: 0.6, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-              className="text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto space-y-6"
+              className={`text-base md:text-lg leading-relaxed max-w-4xl mx-auto space-y-6 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}
             >
               <p>
                 Genom att kombinera{' '}
@@ -372,11 +401,11 @@ export default function AboutSection() {
                 kunder på riktigt.
               </p>
 
-              <p className="text-white font-medium mt-4">
+              <p className={`font-medium mt-4 ${isLight ? 'text-gray-800' : 'text-white'}`}>
                 Vi erbjuder två sätt att få din hemsida:
               </p>
 
-              <div className="space-y-3 text-gray-300 mt-3">
+              <div className={`space-y-3 mt-3 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                 <p>
                   <span className="text-accent font-semibold">AI-generering:</span> Vår plattform
                   SajtMaskin låter dig skapa professionella webbplatser på minuter. Beskriv vad du
@@ -393,11 +422,11 @@ export default function AboutSection() {
                 </p>
               </div>
 
-              <p className="text-white font-medium mt-6">
+              <p className={`font-medium mt-6 ${isLight ? 'text-gray-800' : 'text-white'}`}>
                 Vi utgår alltid från ditt företag och dina kunder:
               </p>
 
-              <ul className="space-y-2 text-gray-300 mt-2">
+              <ul className={`space-y-2 mt-2 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}>
                 <li className="flex items-center gap-3">
                   <span className="text-accent">•</span>
                   vilken känsla ni vill förmedla
@@ -412,7 +441,7 @@ export default function AboutSection() {
                 </li>
               </ul>
 
-              <p className="text-white/80 italic mt-4">
+              <p className={`italic mt-4 ${isLight ? 'text-gray-500' : 'text-white/80'}`}>
                 Resten löser vi med AI, struktur, design och teknik.
               </p>
             </motion.div>
@@ -423,7 +452,7 @@ export default function AboutSection() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 1.2, duration: 0.6 }}
-              className="text-lg text-gray-400 text-center pt-8"
+              className={`text-lg text-center pt-8 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}
             >
               Lite ärlig statistik från en nystartad studio:
             </motion.p>
@@ -477,9 +506,14 @@ export default function AboutSection() {
                   }}
                   className="group relative"
                 >
-                  {/* Modern glassmorphism card - sharper, more defined */}
-                  <div className="relative bg-white/8 backdrop-blur-xl border border-white/20 rounded-2xl p-8 md:p-12 overflow-hidden group-hover:bg-white/12 group-hover:border-accent/70 group-hover:shadow-lg group-hover:shadow-accent/20 transition-all duration-500">
-                    {/* Gradient border glow on hover */}
+                  {/* Modern glassmorphism card */}
+                  <div className={`relative backdrop-blur-xl rounded-2xl p-8 md:p-12 overflow-hidden transition-all duration-500 ${
+                    isLight
+                      ? 'bg-white/70 border border-gray-200 group-hover:bg-white/90 group-hover:border-blue-300 group-hover:shadow-lg group-hover:shadow-blue-100/50'
+                      : 'bg-white/8 border border-white/20 group-hover:bg-white/12 group-hover:border-accent/70 group-hover:shadow-lg group-hover:shadow-accent/20'
+                  }`}>
+                    {/* Gradient border glow on hover - dark mode only */}
+                    {!isLight && (
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div
                         className="absolute inset-0 rounded-2xl"
@@ -492,6 +526,7 @@ export default function AboutSection() {
                       />
                       <div className="absolute inset-[1px] bg-black/50 backdrop-blur-xl rounded-2xl" />
                     </div>
+                    )}
 
                     {/* Subtle glow effect - reduced for sharper look */}
                     <motion.div
@@ -562,7 +597,7 @@ export default function AboutSection() {
                         <AnimatedNumber value={stat.number} />
                       </motion.div>
                       <motion.div
-                        className="text-sm md:text-base lg:text-lg text-gray-300 uppercase tracking-widest font-semibold mb-3"
+                        className={`text-sm md:text-base lg:text-lg uppercase tracking-widest font-semibold mb-3 ${isLight ? 'text-gray-600' : 'text-gray-300'}`}
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
@@ -572,7 +607,7 @@ export default function AboutSection() {
                       </motion.div>
                       {/* Sublabel - the honest description */}
                       <motion.p
-                        className="text-xs md:text-sm text-gray-500 italic normal-case tracking-normal font-normal"
+                        className={`text-xs md:text-sm italic normal-case tracking-normal font-normal ${isLight ? 'text-gray-400' : 'text-gray-500'}`}
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
@@ -611,8 +646,8 @@ export default function AboutSection() {
         </motion.div>
       </div>
 
-      {/* Ambient glow effect - lightweight CSS-based replacement for heavy SVG blob */}
-      {mounted && (
+      {/* Ambient glow effect - dark mode only */}
+      {mounted && !isLight && (
         <motion.div
           className="absolute inset-0 pointer-events-none z-[5] overflow-hidden"
           initial={{ opacity: 0 }}
@@ -667,8 +702,8 @@ export default function AboutSection() {
         </motion.div>
       )}
 
-      {/* Floor/ceiling transition to next section */}
-      <motion.div
+      {/* Floor/ceiling transition to next section - dark mode only */}
+      {!isLight && <motion.div
         className="absolute bottom-0 left-0 right-0 h-64 pointer-events-none z-[90] overflow-hidden"
         style={
           mounted
@@ -709,7 +744,7 @@ export default function AboutSection() {
           }
           suppressHydrationWarning
         />
-      </motion.div>
+      </motion.div>}
     </section>
   )
 }

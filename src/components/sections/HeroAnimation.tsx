@@ -522,17 +522,19 @@ export default function HeroAnimation() {
 
   // Design and Functionality text animations removed for cleaner explosion
 
+  // Primary portfolio images - hero views of client projects
   const portfolioImages = [
-    '/images/portfolio/task_01k90mfa25f2etneptc7kekm99_1762031914_img_0.webp',
-    '/images/portfolio/task_01k9fec0n8ej5rv3m6x8rnfsfn_1762528837_img_1.webp',
-    '/images/portfolio/assets_task_01k816mxkwe908h5pg7v3yxtq9_1760977226_img_0.webp',
-    '/images/portfolio/task_01k9akk4rjfcr83xkf3b7r0rdr_1762366467_img_1.webp',
+    '/images/portfolio/prometheus_hero.webp',
+    '/images/portfolio/dg97_hero.webp',
+    '/images/portfolio/pynn_hero.webp',
+    '/images/portfolio/raymond_hero.webp',
   ]
+  // Secondary portfolio images - detail views of client projects
   const secondaryPortfolioImages = [
-    '/images/portfolio/assets_task_01k05sqa0wedsbvfk5c0773fz5_1752541456_img_0.webp',
-    '/images/portfolio/assets_task_01k1c880wqft0s0bcr3p77v2me_1753831780_img_0.webp',
-    '/images/portfolio/assets_task_01k80qdg0ze1rskjzfpj7r1za3_1760961264_img_0.webp',
-    '/images/portfolio/task_01k9et3f60e4782n74d3pkapg7_1762507579_img_0.webp',
+    '/images/portfolio/prometheus_preflop.webp',
+    '/images/portfolio/dg97_rooms.webp',
+    '/images/portfolio/pynn_dashboard.webp',
+    '/images/portfolio/raymond_services.webp',
   ]
 
   // New side images that appear beside the video - reuse existing portfolio images

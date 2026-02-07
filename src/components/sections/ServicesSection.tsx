@@ -1,6 +1,5 @@
 'use client'
 
-import SmokeEffect from '@/components/animations/SmokeEffect'
 import WordReveal from '@/components/animations/WordReveal'
 import ServiceCard from '@/components/ui/ServiceCard'
 import ServiceModal from '@/components/ui/ServiceModal'
@@ -312,7 +311,6 @@ export default function ServicesSection() {
         />
       </div>
 
-      <SmokeEffect count={6} speed={20} opacity={0.15} />
       <div className="absolute inset-0 z-10 pointer-events-none">
         {particleIndexes.map(
           (i: number): ReactNode => (

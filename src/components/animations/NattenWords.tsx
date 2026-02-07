@@ -70,10 +70,10 @@ export default function NattenWords({
               ease: [0.25, 0.1, 0.25, 1],
             }}
             whileHover={{
-              scale: 1.2,
-              y: -10,
+              scale: 1.1,
+              y: -6,
               color: '#0066FF',
-              transition: { duration: 0.2 },
+              transition: { duration: 0.2, type: 'spring', stiffness: 400 },
             }}
             style={{
               display: 'inline-block',

@@ -12,7 +12,7 @@ import {
   getWebSiteSchema,
 } from '@/lib/structuredData'
 import type { Metadata } from 'next'
-import { Dancing_Script, Inter, Press_Start_2P } from 'next/font/google'
+import { Dancing_Script, Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 
@@ -30,12 +30,6 @@ const dancingScript = Dancing_Script({
   display: 'swap', // Optimize font loading
 })
 
-const pressStart2P = Press_Start_2P({
-  subsets: ['latin'],
-  variable: '--font-pixel',
-  weight: '400',
-  display: 'swap', // Optimize font loading
-})
 
 export const metadata: Metadata = {
   title: {
@@ -150,7 +144,7 @@ export default function RootLayout({
   return (
     <html
       lang="sv"
-      className={`${inter.variable} ${dancingScript.variable} ${pressStart2P.variable} overflow-x-hidden w-full dark`}
+      className={`${inter.variable} ${dancingScript.variable} overflow-x-hidden w-full dark`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

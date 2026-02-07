@@ -1,35 +1,40 @@
 'use client'
 
-import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useMemo, useRef } from 'react'
 import WordReveal from '@/components/animations/WordReveal'
-import SmokeEffect from '@/components/animations/SmokeEffect'
 import { designTokens } from '@/config/designTokens'
 import { useContentSection } from '@/hooks/useContent'
 import { useTheme } from '@/hooks/useTheme'
 
 const defaultTestimonials = [
   {
-    quote: 'De har lyft vår verksamhet med 50-100% på bara sex månader. Helt otrolig investering.',
+    quote: 'Sajtstudio har lyft vår digitala närvaro rejält. Professionellt, snabbt och med en förståelse för vad vi faktiskt behöver.',
     author: 'Joakim Hallsten',
-    company: 'Raymond Media',
-    role: 'VD',
-    highlight: '50-100% tillväxt',
+    company: 'raymondmedia.se',
+    role: 'VD, Raymond Media AB',
+    highlight: 'Lyft vår närvaro',
   },
   {
-    quote: 'My sister site just runs flawless. Zero downtime, zero headaches.',
-    author: 'PYNN AI',
+    quote: 'Our platform runs flawlessly. They delivered a scalable, AI-ready architecture that just works.',
+    author: 'PYNN Team',
     company: 'pynn.ai',
-    role: 'AI Startup',
+    role: 'AI Innovation Platform',
     highlight: 'Felfri drift',
   },
   {
-    quote: 'Cutting edge data knowledge. They understand what modern tech can do.',
+    quote: 'Cutting edge tech combined with real poker knowledge. They built exactly what we envisioned.',
     author: 'Prometheus Team',
-    company: 'promethius.com',
-    role: 'Tech Company',
+    company: 'prometheuspoker.com',
+    role: 'AI Poker Analytics',
     highlight: 'Framkant',
+  },
+  {
+    quote: 'En modern sajt som speglar kvaliteten i vår verksamhet. Resultatet överträffade förväntningarna.',
+    author: 'DG97',
+    company: 'dg97.se',
+    role: 'Kontorshotell, Stockholm',
+    highlight: 'Överträffade förväntningarna',
   },
 ]
 
@@ -64,6 +69,13 @@ export default function TestimonialsSection() {
         role: defaultTestimonials[2].role,
         highlight: defaultTestimonials[2].highlight,
       },
+      {
+        quote: defaultTestimonials[3].quote,
+        author: defaultTestimonials[3].author,
+        company: defaultTestimonials[3].company,
+        role: defaultTestimonials[3].role,
+        highlight: defaultTestimonials[3].highlight,
+      },
     ],
     [getValue]
   )
@@ -92,17 +104,11 @@ export default function TestimonialsSection() {
     >
       {/* Background layers */}
       <div className="absolute inset-0 min-h-full">
-        {/* GIF background only - hidden in light mode */}
+        {/* Subtle gradient background - hidden in light mode */}
         {!isLight && (
-          <Image
-            src="/images/animations/hero-animation.gif"
-            alt=""
-            fill
-            className="object-cover"
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-tertiary/10"
             style={{ opacity: 0.15 }}
-            sizes="100vw"
-            loading="lazy"
-            unoptimized
           />
         )}
 
@@ -124,9 +130,6 @@ export default function TestimonialsSection() {
         )}
       </div>
 
-      {/* Smoke effect */}
-      <SmokeEffect count={3} speed={30} opacity={0.08} />
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Section header */}
         <motion.div
@@ -142,11 +145,13 @@ export default function TestimonialsSection() {
           <h2 className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-none tracking-tight">
             <WordReveal
               text="Vad Våra Kunder Säger"
-              className="bg-gradient-to-r from-white to-tertiary bg-clip-text text-transparent"
+              className={`bg-gradient-to-r bg-clip-text text-transparent ${
+                isLight ? 'from-gray-800 to-blue-600' : 'from-white to-tertiary'
+              }`}
             />
           </h2>
           <motion.p
-            className="text-2xl md:text-3xl text-white/80 max-w-3xl mx-auto font-medium"
+            className={`text-2xl md:text-3xl max-w-3xl mx-auto font-medium ${isLight ? 'text-gray-600' : 'text-white/80'}`}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -157,7 +162,7 @@ export default function TestimonialsSection() {
         </motion.div>
 
         {/* Testimonials grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
@@ -169,7 +174,11 @@ export default function TestimonialsSection() {
                 duration: Number(designTokens.animation.duration.slow.replace('s', '')),
                 ease: designTokens.animation.framerEasing.smooth,
               }}
-              className="group relative bg-white/5 backdrop-blur-md p-8 hover:bg-white/10 transition-all duration-500 border border-white/10 hover:border-accent/50"
+              className={`group relative backdrop-blur-md p-8 transition-all duration-500 ${
+                isLight
+                  ? 'bg-white/70 border border-gray-200 hover:bg-white/90 hover:border-blue-300 hover:shadow-lg'
+                  : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-accent/50'
+              }`}
             >
               {/* Highlight badge */}
               <motion.div
@@ -177,7 +186,9 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.2 }}
-                className="inline-block px-4 py-2 mb-6 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-accent to-tertiary text-white rounded-full shadow-[0_0_30px_rgba(0,102,255,0.4)]"
+                className={`inline-block px-4 py-2 mb-6 text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-accent to-tertiary text-white rounded-full ${
+                  isLight ? 'shadow-md' : 'shadow-[0_0_30px_rgba(0,102,255,0.4)]'
+                }`}
               >
                 {testimonial.highlight}
               </motion.div>
@@ -188,7 +199,7 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.3 }}
-                className="text-white/80 text-lg md:text-xl leading-relaxed mb-6 italic"
+                className={`text-lg md:text-xl leading-relaxed mb-6 italic ${isLight ? 'text-gray-700' : 'text-white/80'}`}
               >
                 &ldquo;{testimonial.quote}&rdquo;
               </motion.p>
@@ -199,10 +210,10 @@ export default function TestimonialsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 + 0.4 }}
-                className="border-t border-white/20 pt-6"
+                className={`border-t pt-6 ${isLight ? 'border-gray-200' : 'border-white/20'}`}
               >
-                <div className="font-bold text-white text-lg">{testimonial.author}</div>
-                <div className="text-sm text-white/60">
+                <div className={`font-bold text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>{testimonial.author}</div>
+                <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/60'}`}>
                   {testimonial.role}, {testimonial.company}
                 </div>
               </motion.div>
