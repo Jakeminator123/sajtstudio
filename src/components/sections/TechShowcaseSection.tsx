@@ -1,5 +1,6 @@
 'use client'
 
+import PacmanGame from '@/components/games/PacmanGame'
 import { useTheme } from '@/hooks/useTheme'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
@@ -190,6 +191,19 @@ export default function TechShowcaseSection() {
           {techStack.map((tech, index) => (
             <TechCard key={tech.name} tech={tech} index={index} isLight={isLight} />
           ))}
+        </div>
+
+        {/* Tech vs design demo */}
+        <div className="mt-16 md:mt-24 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <h3 className={`text-2xl md:text-3xl font-black mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              Tech möter design
+            </h3>
+            <p className={`text-base md:text-lg leading-relaxed ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+              En liten spelbar Pacman-demo som visar hur vi kombinerar teknik, interaktion och designkänsla.
+            </p>
+          </div>
+          <PacmanGame isLight={isLight} />
         </div>
 
         {/* Bottom tagline */}

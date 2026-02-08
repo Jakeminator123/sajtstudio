@@ -510,6 +510,8 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [enableBackgroundVideo, setEnableBackgroundVideo] = useState(false)
+  const [enableIdleEffects, setEnableIdleEffects] = useState(false)
+  const [isHeroInView, setIsHeroInView] = useState(true)
 
   // Set mounted on client to avoid hydration mismatch - use RAF to satisfy linter
   useEffect(() => {
@@ -530,12 +532,46 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
 
   // Check for reduced motion preference and mobile device
   const shouldReduceMotion = useMemo(() => prefersReducedMotion(), [])
-  const allowHeavyEffects = mounted && !shouldReduceMotion && !isMobile
+  const allowHeavyEffects =
+    mounted && enableIdleEffects && isHeroInView && !shouldReduceMotion && !isMobile
+  const shouldTrackMouse =
+    !shouldReduceMotion && !isMobile && (allowHeavyEffects || isHoveringButton)
+
+  // Defer heavy visual effects until after initial paint
+  useEffect(() => {
+    if (!mounted || shouldReduceMotion || isMobile) return
+    if (typeof window === 'undefined') return
+
+    const timeoutId = window.setTimeout(() => {
+      setEnableIdleEffects(true)
+    }, 2000)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [mounted, shouldReduceMotion, isMobile])
+
+  // Pause heavy effects when hero is out of view
+  useEffect(() => {
+    if (!mounted) return
+    const el = sectionRef.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry) setIsHeroInView(entry.isIntersecting)
+      },
+      { rootMargin: '200px 0px', threshold: 0.01 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [mounted])
 
   // Delay background video to avoid stealing bandwidth/CPU from LCP.
   // Keeps the design (poster + animated overlays) while improving Lighthouse.
   useEffect(() => {
-    if (shouldReduceMotion || isMobile) return
+    if (!allowHeavyEffects) return
     if (typeof window === 'undefined') return
 
     type NetworkInformation = { saveData?: boolean; effectiveType?: string }
@@ -548,7 +584,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
 
     const t = window.setTimeout(() => setEnableBackgroundVideo(true), 2500)
     return () => window.clearTimeout(t)
-  }, [shouldReduceMotion, isMobile])
+  }, [allowHeavyEffects])
 
   // Desktop hero timing: start the hero text sequence a bit earlier on larger screens.
   // This is mount-based (not scroll-triggered), so we scale delays deterministically.
@@ -564,9 +600,6 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
     return () => mq.removeEventListener?.('change', onChange)
   }, [])
 
-  // Removed useEffect - mounted is now true immediately for LCP optimization
-  // Hero section renders immediately so LCP image can load right away
-
   // Track mouse position for 3D tilt and cursor effects with throttling
   const mousePositionRef = useRef({ x: 0, y: 0 })
   const rafIdRef = useRef<number | null>(null)
@@ -575,7 +608,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const pendingUpdateRef = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
-    if (shouldReduceMotion || isMobile) return
+    if (!shouldTrackMouse) return
 
     const handleMouseMove = (e: MouseEvent) => {
       // Prevent multiple simultaneous updates
@@ -657,7 +690,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       isUpdatingRef.current = false
       pendingUpdateRef.current = null
     }
-  }, [shouldReduceMotion, isMobile])
+  }, [shouldTrackMouse])
 
   // Scroll-based parallax - using window scroll for better compatibility
   const { scrollYProgress } = useScroll({
@@ -677,6 +710,9 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 100])
   const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
   const imageY1 = useTransform(scrollYProgress, [0, 0.5], [0, -30])
+  const backgroundParallaxY = allowHeavyEffects ? y : 0
+  const backgroundImageY = allowHeavyEffects ? imageY1 : 0
+  const showBackgroundVideo = allowHeavyEffects && enableBackgroundVideo && Boolean(content.bgVideo)
 
   // Trigger text animations early and make them more dynamic on scroll
   const headingX = useTransform(sectionScrollProgress, [0, 0.18], [0, -320])
@@ -716,12 +752,18 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
   }, [])
 
   // 3D tilt transform based on mouse position - minimal effect
-  const rotateX = useMemo(() => mousePosition.y * 0.5, [mousePosition.y])
-  const rotateY = useMemo(() => mousePosition.x * 0.5, [mousePosition.x])
+  const rotateX = useMemo(
+    () => (allowHeavyEffects ? mousePosition.y * 0.5 : 0),
+    [allowHeavyEffects, mousePosition.y]
+  )
+  const rotateY = useMemo(
+    () => (allowHeavyEffects ? mousePosition.x * 0.5 : 0),
+    [allowHeavyEffects, mousePosition.x]
+  )
 
   // Setup background video playback rate
   useEffect(() => {
-    if (!videoRef.current || shouldReduceMotion) return
+    if (!videoRef.current || shouldReduceMotion || !enableBackgroundVideo) return
 
     const video = videoRef.current
 
@@ -750,7 +792,7 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
     }
-  }, [shouldReduceMotion])
+  }, [shouldReduceMotion, enableBackgroundVideo])
 
   return (
     <motion.section
@@ -760,9 +802,9 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
       }`}
       style={{
         position: 'relative',
-        transform: shouldReduceMotion
-          ? undefined
-          : `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+        transform: allowHeavyEffects
+          ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+          : undefined,
         transformStyle: 'preserve-3d',
       }}
     >
@@ -822,106 +864,116 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
 
       {/* Cursor trail particles - optimized version */}
       {allowHeavyEffects && !isHoveringButton && <CursorTrail mousePosition={mousePosition} />}
-      {/* Dynamic background with image overlays - only render on client */}
-      {/* Fixed positioning with z-[1] - video at bottom, image on top */}
-      {mounted && (
-        <motion.div className="absolute inset-0 z-[1] pointer-events-none" style={{ y }}>
-          {/* Background video - delayed to prioritize LCP - LOWEST LAYER */}
-          {!shouldReduceMotion && enableBackgroundVideo && content.bgVideo && (
-            <div className="absolute inset-0 opacity-50 z-0">
-              <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="none"
-                poster="/images/hero/hero-background.webp"
-                className="w-full h-full object-cover"
-                style={{ filter: 'brightness(0.8) contrast(0.9)' }}
-              >
-                <source src={content.bgVideo} type="video/mp4" />
-              </video>
-              {/* Fade overlay for smoother blend */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
-            </div>
-          )}
+      {/* Base background image (SSR for fast LCP) */}
+      <motion.div
+        className="absolute inset-0 z-[1] pointer-events-none"
+        style={{ y: backgroundParallaxY }}
+      >
+        {/* Background video - delayed to prioritize LCP - LOWEST LAYER */}
+        {showBackgroundVideo && (
+          <div className="absolute inset-0 opacity-50 z-0">
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="none"
+              poster="/images/hero/hero-background.webp"
+              className="w-full h-full object-cover"
+              style={{ filter: 'brightness(0.8) contrast(0.9)' }}
+            >
+              <source src={content.bgVideo} type="video/mp4" />
+            </video>
+            {/* Fade overlay for smoother blend */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/20" />
+          </div>
+        )}
 
-          {/* Main background pattern - hero-background.webp - ABOVE VIDEO */}
+        {/* Main background pattern - hero-background.webp - ABOVE VIDEO */}
+        <motion.div
+          className="absolute inset-0 z-[1]"
+          animate={
+            allowHeavyEffects
+              ? {
+                  opacity: [0.9, 1, 0.9],
+                  scale: [1, 1.01, 1],
+                }
+              : undefined
+          }
+          transition={
+            allowHeavyEffects
+              ? {
+                  opacity: {
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  },
+                  scale: {
+                    duration: 10,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  },
+                }
+              : undefined
+          }
+          style={{ y: backgroundImageY, height: '100vh', width: '100%' }}
+        >
           <motion.div
-            className="absolute inset-0 z-[1]"
-            initial={{ opacity: 0, scale: 1.05 }}
+            className="relative w-full h-full"
+            style={{
+              height: '100vh',
+              width: '100%',
+              filter: isLight
+                ? 'brightness(1.1) contrast(1) saturate(1.1)'
+                : 'brightness(0.9) contrast(1)',
+            }}
             animate={
-              shouldReduceMotion
-                ? { opacity: 1, scale: 1 }
-                : {
-                    opacity: [0.9, 1, 0.9],
-                    scale: [1, 1.01, 1],
-                  }
+              allowHeavyEffects
+                ? isLight
+                  ? {
+                      filter: [
+                        'brightness(1.1) contrast(1) saturate(1.1)',
+                        'brightness(1.15) contrast(1.05) saturate(1.15)',
+                        'brightness(1.1) contrast(1) saturate(1.1)',
+                      ],
+                    }
+                  : {
+                      filter: [
+                        'brightness(0.9) contrast(1)',
+                        'brightness(1) contrast(1.05)',
+                        'brightness(0.9) contrast(1)',
+                      ],
+                    }
+                : undefined
             }
             transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                    opacity: {
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    },
-                    scale: {
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    },
-                    initial: { duration: 2, ease: 'easeOut' },
+              allowHeavyEffects
+                ? {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
                   }
+                : undefined
             }
-            style={{ y: imageY1, height: '100vh', width: '100%' }}
           >
-            <motion.div
-              className="relative w-full h-full"
-              style={{ height: '100vh', width: '100%' }}
-              animate={
-                shouldReduceMotion
-                  ? {}
-                  : isLight
-                    ? {
-                        filter: [
-                          'brightness(1.1) contrast(1) saturate(1.1)',
-                          'brightness(1.15) contrast(1.05) saturate(1.15)',
-                          'brightness(1.1) contrast(1) saturate(1.1)',
-                        ],
-                      }
-                    : {
-                        filter: [
-                          'brightness(0.9) contrast(1)',
-                          'brightness(1) contrast(1.05)',
-                          'brightness(0.9) contrast(1)',
-                        ],
-                      }
+            <Image
+              src={
+                isLight
+                  ? '/images/backgrounds/city-background-sunny.webp'
+                  : '/images/hero/hero-background.webp'
               }
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            >
-              <Image
-                src={
-                  isLight
-                    ? '/images/backgrounds/city-background-sunny.webp'
-                    : '/images/hero/hero-background.webp'
-                }
-                alt="Stadsbild i skymning - Sajtstudio hero bakgrund"
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1920px"
-                className="object-cover"
-                loading="eager"
-                priority
-                fetchPriority="high"
-              />
-            </motion.div>
-            {/* Subtle glow effect */}
+              alt="Stadsbild i skymning - Sajtstudio hero bakgrund"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1920px"
+              className="object-cover"
+              loading="eager"
+              priority
+              fetchPriority="high"
+            />
+          </motion.div>
+          {/* Subtle glow effect */}
+          {allowHeavyEffects && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-tertiary/8"
               animate={{
@@ -933,61 +985,53 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
                 ease: 'easeInOut',
               }}
             />
-            {/* Lightning flash effect - random intervals (dark mode only) */}
-            {allowHeavyEffects && !isLight && <LightningFlash />}
-          </motion.div>
-
-          {/* Elegant overlay with gradient - adapts to theme */}
-          <div
-            className={`absolute inset-0 ${
-              isLight
-                ? 'bg-gradient-to-b from-[#fef9e7]/30 via-transparent to-[#fff5e6]/40'
-                : 'bg-gradient-to-b from-black/40 via-black/30 to-black/40'
-            }`}
-          />
-
-          {/* Rain effect - only in dark mode */}
-          {allowHeavyEffects && !isLight && (
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
-              {rainDrops.map((drop, i) => (
-                <div
-                  key={i}
-                  className="absolute w-[1px] h-[20px] bg-white/20"
-                  style={{
-                    left: `${drop.left}%`,
-                    top: '-20px',
-                    animation: `rain ${drop.duration}s linear infinite`,
-                    animationDelay: `${drop.delay}s`,
-                  }}
-                />
-              ))}
-            </div>
           )}
-
-          {/* Window flash effect - only in light mode */}
-          {allowHeavyEffects && isLight && <WindowFlash />}
-
-          {/* Flying birds - only in light mode */}
-          {allowHeavyEffects && isLight && (
-            <>
-              <FlyingBird delay={0} startY={15} />
-              <FlyingBird delay={5} startY={25} />
-              <FlyingBird delay={10} startY={20} />
-            </>
-          )}
+          {/* Lightning flash effect - random intervals (dark mode only) */}
+          {allowHeavyEffects && !isLight && <LightningFlash />}
         </motion.div>
-      )}
 
-      {/* Static fallback for SSR */}
-      {!mounted && (
-        <div className="absolute inset-0 z-[1] bg-black">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/15 via-transparent to-tertiary/15" />
-        </div>
-      )}
+        {/* Elegant overlay with gradient - adapts to theme */}
+        <div
+          className={`absolute inset-0 ${
+            isLight
+              ? 'bg-gradient-to-b from-[#fef9e7]/30 via-transparent to-[#fff5e6]/40'
+              : 'bg-gradient-to-b from-black/40 via-black/30 to-black/40'
+          }`}
+        />
 
-      {/* Animated background patterns - Subtle and elegant - only on client */}
-      {mounted && (
+        {/* Rain effect - only in dark mode */}
+        {allowHeavyEffects && !isLight && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-[5]">
+            {rainDrops.map((drop, i) => (
+              <div
+                key={i}
+                className="absolute w-[1px] h-[20px] bg-white/20"
+                style={{
+                  left: `${drop.left}%`,
+                  top: '-20px',
+                  animation: `rain ${drop.duration}s linear infinite`,
+                  animationDelay: `${drop.delay}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Window flash effect - only in light mode */}
+        {allowHeavyEffects && isLight && <WindowFlash />}
+
+        {/* Flying birds - only in light mode */}
+        {allowHeavyEffects && isLight && (
+          <>
+            <FlyingBird delay={0} startY={15} />
+            <FlyingBird delay={5} startY={25} />
+            <FlyingBird delay={10} startY={20} />
+          </>
+        )}
+      </motion.div>
+
+      {/* Animated background patterns - Subtle and elegant */}
+      {allowHeavyEffects && (
         <motion.div
           className="absolute inset-0 z-[1]"
           initial={{ opacity: 0 }}
@@ -997,23 +1041,15 @@ export default function HeroSection({ content: propContent }: { content?: HeroCo
           {/* Single subtle radial gradient */}
           <motion.div
             className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,102,255,0.15),transparent_70%)]"
-            animate={
-              shouldReduceMotion
-                ? { scale: 1, opacity: 0.125 }
-                : {
-                    scale: [1, 1.05, 1],
-                    opacity: [0.1, 0.15, 0.1],
-                  }
-            }
-            transition={
-              shouldReduceMotion
-                ? {}
-                : {
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }
-            }
+            animate={{
+              scale: [1, 1.05, 1],
+              opacity: [0.1, 0.15, 0.1],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
           />
         </motion.div>
       )}
