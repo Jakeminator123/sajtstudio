@@ -114,6 +114,13 @@ export default function HeroAnimation() {
   const isMobile = useMobileDetection()
 
   const reduceFx = shouldReduceMotion || isMobile
+  const clientLogoFilter = useMemo(
+    () =>
+      isLight
+        ? 'grayscale(1) contrast(1.05) brightness(1) saturate(0.9) drop-shadow(0 12px 24px rgba(59,130,246,0.18))'
+        : 'grayscale(1) contrast(1.2) brightness(1.15) saturate(0.8) drop-shadow(0 12px 28px rgba(0,102,255,0.35))',
+    [isLight]
+  )
 
   // Lock scrolling during explosion animation - user cannot interact
   useEffect(() => {
@@ -536,9 +543,9 @@ export default function HeroAnimation() {
       label: 'Prometheus Poker',
     },
     {
-      src: '/images/portfolio/dg97_hero.webp',
+      src: '/images/portfolio/pynn_hero.webp',
       type: 'project',
-      label: 'DG97',
+      label: 'Pynn',
     },
     {
       src: '/images/RaymondMedia.webp',
@@ -546,17 +553,17 @@ export default function HeroAnimation() {
       label: 'Raymond Media',
     },
     {
-      src: '/images/portfolio/pynn_hero.webp',
+      src: '/images/portfolio/portfolio_1.webp',
       type: 'project',
-      label: 'Pynn',
+      label: 'Portfolio 1',
     },
   ]
   // Secondary portfolio images - detail views of client projects
   const secondaryPortfolioImages: PortfolioImage[] = [
     {
-      src: '/images/portfolio/prometheus_preflop.webp',
+      src: '/images/portfolio/portfolio_2.webp',
       type: 'project',
-      label: 'Prometheus Poker',
+      label: 'Portfolio 2',
     },
     {
       src: '/images/BilenochJag.webp',
@@ -566,12 +573,12 @@ export default function HeroAnimation() {
     {
       src: '/images/portfolio/pynn_dashboard.webp',
       type: 'project',
-      label: 'Pynn',
+      label: 'Pynn Dashboard',
     },
     {
-      src: '/images/portfolio/raymond_services.webp',
+      src: '/images/portfolio/portfolio_3.webp',
       type: 'project',
-      label: 'Raymond Media',
+      label: 'Portfolio 3',
     },
   ]
 
@@ -1521,9 +1528,6 @@ export default function HeroAnimation() {
     const isClient = image.type === 'client'
     const label = image.label ?? `Portfolio exempel ${index + 1}`
     const imageAlt = isClient ? `Kund: ${label}` : label
-    const clientFilter = isLight
-      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
-      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
     const transforms = transformsArray[index]
 
     if (!transforms) {
@@ -1643,7 +1647,7 @@ export default function HeroAnimation() {
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                 className="object-contain transition-transform duration-500 group-hover:scale-105"
-                style={{ filter: clientFilter }}
+                style={{ filter: clientLogoFilter }}
                 loading="eager"
               />
             </div>
@@ -2070,9 +2074,6 @@ export default function HeroAnimation() {
                     const isClient = image.type === 'client'
                     const label = image.label ?? `Portfolio exempel ${index + 1}`
                     const imageAlt = isClient ? `Kund: ${label}` : label
-                    const clientFilter = isLight
-                      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
-                      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
                     return (
                       <motion.div
                         key={image.src}
@@ -2146,7 +2147,7 @@ export default function HeroAnimation() {
                                 fill
                                 sizes="150px"
                                 className="object-contain"
-                                style={{ filter: clientFilter }}
+                                style={{ filter: clientLogoFilter }}
                                 loading="eager"
                               />
                             </div>
@@ -2284,9 +2285,6 @@ export default function HeroAnimation() {
                     const isClient = image.type === 'client'
                     const label = image.label ?? `Portfolio exempel ${index + 1}`
                     const imageAlt = isClient ? `Kund: ${label}` : label
-                    const clientFilter = isLight
-                      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
-                      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
                     return (
                       <motion.div
                         key={image.src}
@@ -2360,7 +2358,7 @@ export default function HeroAnimation() {
                                 fill
                                 sizes="150px"
                                 className="object-contain"
-                                style={{ filter: clientFilter }}
+                                style={{ filter: clientLogoFilter }}
                                 loading="eager"
                               />
                             </div>
