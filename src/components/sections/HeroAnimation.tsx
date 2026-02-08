@@ -43,6 +43,12 @@ type DebrisSnapshot = {
   z: number
 }
 
+type PortfolioImage = {
+  src: string
+  type?: 'project' | 'client'
+  label?: string
+}
+
 export default function HeroAnimation() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const mediaContainerRef = useRef<HTMLDivElement>(null)
@@ -523,18 +529,50 @@ export default function HeroAnimation() {
   // Design and Functionality text animations removed for cleaner explosion
 
   // Primary portfolio images - hero views of client projects
-  const portfolioImages = [
-    '/images/portfolio/prometheus_hero.webp',
-    '/images/portfolio/dg97_hero.webp',
-    '/images/portfolio/pynn_hero.webp',
-    '/images/portfolio/raymond_hero.webp',
+  const portfolioImages: PortfolioImage[] = [
+    {
+      src: '/images/PrometheusPoker.webp',
+      type: 'client',
+      label: 'Prometheus Poker',
+    },
+    {
+      src: '/images/portfolio/dg97_hero.webp',
+      type: 'project',
+      label: 'DG97',
+    },
+    {
+      src: '/images/RaymondMedia.webp',
+      type: 'client',
+      label: 'Raymond Media',
+    },
+    {
+      src: '/images/portfolio/pynn_hero.webp',
+      type: 'project',
+      label: 'Pynn',
+    },
   ]
   // Secondary portfolio images - detail views of client projects
-  const secondaryPortfolioImages = [
-    '/images/portfolio/prometheus_preflop.webp',
-    '/images/portfolio/dg97_rooms.webp',
-    '/images/portfolio/pynn_dashboard.webp',
-    '/images/portfolio/raymond_services.webp',
+  const secondaryPortfolioImages: PortfolioImage[] = [
+    {
+      src: '/images/portfolio/prometheus_preflop.webp',
+      type: 'project',
+      label: 'Prometheus Poker',
+    },
+    {
+      src: '/images/BilenochJag.webp',
+      type: 'client',
+      label: 'DG97',
+    },
+    {
+      src: '/images/portfolio/pynn_dashboard.webp',
+      type: 'project',
+      label: 'Pynn',
+    },
+    {
+      src: '/images/portfolio/raymond_services.webp',
+      type: 'project',
+      label: 'Raymond Media',
+    },
   ]
 
   // New side images that appear beside the video - reuse existing portfolio images
@@ -1471,7 +1509,7 @@ export default function HeroAnimation() {
   }, [sideImageTransforms])
 
   const renderPortfolioCard = (
-    src: string,
+    image: PortfolioImage,
     index: number,
     inView: boolean,
     keyPrefix: string,
@@ -1480,6 +1518,12 @@ export default function HeroAnimation() {
     burntFilter: MotionValue<string>,
     clipPath: MotionValue<string>
   ) => {
+    const isClient = image.type === 'client'
+    const label = image.label ?? `Portfolio exempel ${index + 1}`
+    const imageAlt = isClient ? `Kund: ${label}` : label
+    const clientFilter = isLight
+      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
+      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
     const transforms = transformsArray[index]
 
     if (!transforms) {
@@ -1488,7 +1532,7 @@ export default function HeroAnimation() {
 
     return (
       <motion.div
-        key={`${keyPrefix}-${src}`}
+        key={`${keyPrefix}-${image.src}`}
         style={
           mounted
             ? {
@@ -1582,16 +1626,63 @@ export default function HeroAnimation() {
           y: -8,
           zIndex: 40,
         }}
-        className="relative aspect-square overflow-hidden rounded-lg border border-accent/20 group cursor-pointer max-w-full w-full"
+        className={`relative aspect-square overflow-hidden rounded-lg border border-accent/20 group cursor-pointer max-w-full w-full ${
+          isClient
+            ? isLight
+              ? 'bg-white/85 border-blue-200/60 shadow-lg shadow-blue-100/40'
+              : 'bg-white/5 border-white/15 shadow-[0_0_30px_rgba(0,102,255,0.15)]'
+            : ''
+        }`}
       >
-        <Image
-          src={src}
-          alt={`Portfolio exempel ${index + 1}`}
-          fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="eager"
-        />
+        {isClient ? (
+          <div className="absolute inset-0 p-6">
+            <div className="relative w-full h-full">
+              <Image
+                src={image.src}
+                alt={imageAlt}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                className="object-contain transition-transform duration-500 group-hover:scale-105"
+                style={{ filter: clientFilter }}
+                loading="eager"
+              />
+            </div>
+          </div>
+        ) : (
+          <Image
+            src={image.src}
+            alt={imageAlt}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="eager"
+          />
+        )}
+
+        {isClient && (
+          <>
+            <div
+              className={`absolute inset-0 ${
+                isLight
+                  ? 'bg-gradient-to-br from-white/70 via-white/30 to-sky-100/50'
+                  : 'bg-gradient-to-br from-white/10 via-white/5 to-accent/20'
+              }`}
+            />
+            {!shouldReduceMotion && (
+              <motion.div
+                className="absolute inset-0 opacity-40"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent)',
+                  backgroundSize: '200% 200%',
+                  mixBlendMode: 'screen',
+                }}
+                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              />
+            )}
+          </>
+        )}
 
         <motion.div
           className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
@@ -1815,9 +1906,9 @@ export default function HeroAnimation() {
             }
             suppressHydrationWarning
           >
-            {portfolioImages.map((src, index) =>
+            {portfolioImages.map((image, index) =>
               renderPortfolioCard(
-                src,
+                image,
                 index,
                 imagesInView,
                 'primary',
@@ -1973,12 +2064,18 @@ export default function HeroAnimation() {
               <div className="flex items-center gap-4">
                 {/* Left side images */}
                 <div className="flex flex-col gap-4">
-                  {sideImages.slice(0, 2).map((src, index) => {
+                  {sideImages.slice(0, 2).map((image, index) => {
                     const transforms = sideImageTransforms[index]
                     const sideSnapshot = sideDebrisPositions
+                    const isClient = image.type === 'client'
+                    const label = image.label ?? `Portfolio exempel ${index + 1}`
+                    const imageAlt = isClient ? `Kund: ${label}` : label
+                    const clientFilter = isLight
+                      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
+                      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
                     return (
                       <motion.div
-                        key={src}
+                        key={image.src}
                         style={
                           mounted
                             ? {
@@ -2032,16 +2129,62 @@ export default function HeroAnimation() {
                               }
                         }
                         suppressHydrationWarning
-                        className="relative aspect-square overflow-hidden rounded-lg border border-accent/20"
+                        className={`relative aspect-square overflow-hidden rounded-lg border border-accent/20 ${
+                          isClient
+                            ? isLight
+                              ? 'bg-white/85 border-blue-200/60'
+                              : 'bg-white/5 border-white/15'
+                            : ''
+                        }`}
                       >
-                        <Image
-                          src={src}
-                          alt={`Side portfolio ${index + 1}`}
-                          fill
-                          sizes="150px"
-                          className="object-cover"
-                          loading="eager"
-                        />
+                        {isClient ? (
+                          <div className="absolute inset-0 p-4">
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={image.src}
+                                alt={imageAlt}
+                                fill
+                                sizes="150px"
+                                className="object-contain"
+                                style={{ filter: clientFilter }}
+                                loading="eager"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <Image
+                            src={image.src}
+                            alt={imageAlt}
+                            fill
+                            sizes="150px"
+                            className="object-cover"
+                            loading="eager"
+                          />
+                        )}
+                        {isClient && (
+                          <>
+                            <div
+                              className={`absolute inset-0 ${
+                                isLight
+                                  ? 'bg-gradient-to-br from-white/70 via-white/30 to-sky-100/50'
+                                  : 'bg-gradient-to-br from-white/10 via-white/5 to-accent/20'
+                              }`}
+                            />
+                            {!shouldReduceMotion && (
+                              <motion.div
+                                className="absolute inset-0 opacity-35"
+                                style={{
+                                  backgroundImage:
+                                    'linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent)',
+                                  backgroundSize: '200% 200%',
+                                  mixBlendMode: 'screen',
+                                }}
+                                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                              />
+                            )}
+                          </>
+                        )}
                       </motion.div>
                     )
                   })}
@@ -2134,13 +2277,19 @@ export default function HeroAnimation() {
 
                 {/* Right side images */}
                 <div className="flex flex-col gap-4">
-                  {sideImages.slice(2, 4).map((src, localIndex) => {
+                  {sideImages.slice(2, 4).map((image, localIndex) => {
                     const index = localIndex + 2 // Map to transforms array index (2 or 3)
                     const transforms = sideImageTransforms[index]
                     const sideSnapshot = sideDebrisPositions
+                    const isClient = image.type === 'client'
+                    const label = image.label ?? `Portfolio exempel ${index + 1}`
+                    const imageAlt = isClient ? `Kund: ${label}` : label
+                    const clientFilter = isLight
+                      ? 'grayscale(1) contrast(1.05) brightness(0.98) saturate(0.9)'
+                      : 'grayscale(1) contrast(1.15) brightness(1.1) saturate(0.85)'
                     return (
                       <motion.div
-                        key={src}
+                        key={image.src}
                         style={
                           mounted
                             ? {
@@ -2194,16 +2343,62 @@ export default function HeroAnimation() {
                               }
                         }
                         suppressHydrationWarning
-                        className="relative aspect-square overflow-hidden rounded-lg border border-accent/20"
+                        className={`relative aspect-square overflow-hidden rounded-lg border border-accent/20 ${
+                          isClient
+                            ? isLight
+                              ? 'bg-white/85 border-blue-200/60'
+                              : 'bg-white/5 border-white/15'
+                            : ''
+                        }`}
                       >
-                        <Image
-                          src={src}
-                          alt={`Side portfolio ${index + 1}`}
-                          fill
-                          sizes="150px"
-                          className="object-cover"
-                          loading="eager"
-                        />
+                        {isClient ? (
+                          <div className="absolute inset-0 p-4">
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={image.src}
+                                alt={imageAlt}
+                                fill
+                                sizes="150px"
+                                className="object-contain"
+                                style={{ filter: clientFilter }}
+                                loading="eager"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <Image
+                            src={image.src}
+                            alt={imageAlt}
+                            fill
+                            sizes="150px"
+                            className="object-cover"
+                            loading="eager"
+                          />
+                        )}
+                        {isClient && (
+                          <>
+                            <div
+                              className={`absolute inset-0 ${
+                                isLight
+                                  ? 'bg-gradient-to-br from-white/70 via-white/30 to-sky-100/50'
+                                  : 'bg-gradient-to-br from-white/10 via-white/5 to-accent/20'
+                              }`}
+                            />
+                            {!shouldReduceMotion && (
+                              <motion.div
+                                className="absolute inset-0 opacity-35"
+                                style={{
+                                  backgroundImage:
+                                    'linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent)',
+                                  backgroundSize: '200% 200%',
+                                  mixBlendMode: 'screen',
+                                }}
+                                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                              />
+                            )}
+                          </>
+                        )}
                       </motion.div>
                     )
                   })}
@@ -2241,9 +2436,9 @@ export default function HeroAnimation() {
             }
             suppressHydrationWarning
           >
-            {secondaryPortfolioImages.map((src, index) =>
+            {secondaryPortfolioImages.map((image, index) =>
               renderPortfolioCard(
-                src,
+                image,
                 index,
                 secondaryImagesInView,
                 'secondary',
