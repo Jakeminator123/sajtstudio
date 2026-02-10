@@ -440,21 +440,22 @@ const defaultProtectedEmbeds: Array<{ slug: string; title: string; target_url: s
 
 function getSeedPasswordForProtectedEmbed(slug: string): string | null {
   // Keep env names explicit so we don't accidentally expose them client-side.
+  const sharedPassword = process.env.PW?.trim() || null
   if (slug === 'juice-factory') {
     return (
       process.env.JUICE_FACTORY_PASSWORD?.trim() ||
       process.env.JUICE_FACTORY_EMBED_PASSWORD?.trim() ||
-      null
+      sharedPassword
     )
   }
   if (slug === 'robotics-care') {
     return (
       process.env.ROBOTICS_CARE_PASSWORD?.trim() ||
       process.env.ROBOTICS_CARE_EMBED_PASSWORD?.trim() ||
-      null
+      sharedPassword
     )
   }
-  return null
+  return sharedPassword
 }
 
 export function seedDefaultProtectedEmbeds(): number {
@@ -467,20 +468,30 @@ export function seedDefaultProtectedEmbeds(): number {
     INSERT OR IGNORE INTO protected_embeds (slug, title, target_url, password_salt, password_hash)
     VALUES (?, ?, ?, ?, ?)
   `)
+  const upsertStmt = previewDb.prepare(`
+    INSERT INTO protected_embeds (slug, title, target_url, password_salt, password_hash)
+    VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(slug) DO UPDATE SET
+      title = excluded.title,
+      target_url = excluded.target_url,
+      password_salt = excluded.password_salt,
+      password_hash = excluded.password_hash
+  `)
 
   let insertedCount = 0
 
   const transaction = previewDb.transaction(() => {
     for (const embed of defaultProtectedEmbeds) {
-      if (existingSlugs.has(embed.slug)) continue
-
       const envPassword = getSeedPasswordForProtectedEmbed(embed.slug)
+      if (!envPassword && existingSlugs.has(embed.slug)) continue
+
       const password = envPassword || crypto.randomBytes(18).toString('base64url')
       const salt = createPasswordSalt()
       const passwordHash = hashPassword(password, salt)
 
       try {
-        const result = insertStmt.run(embed.slug, embed.title, embed.target_url, salt, passwordHash)
+        const stmt = envPassword ? upsertStmt : insertStmt
+        const result = stmt.run(embed.slug, embed.title, embed.target_url, salt, passwordHash)
         if (result.changes > 0) {
           insertedCount++
           if (!envPassword) {

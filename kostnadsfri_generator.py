@@ -12,6 +12,8 @@ SETUP:
        export KOSTNADSFRI_PASSWORD_SEED="your-secret-seed-here"
        export KOSTNADSFRI_API_KEY="your-api-key-here"
        export SAJTMASKIN_BASE_URL="https://sajtmaskin.vercel.app"  (optional)
+  3. Optional fixed password (overrides seed unless --password is provided):
+       export PW="your-fixed-password"
 
 USAGE:
   # Generate a link for a company (password auto-generated):
@@ -46,6 +48,8 @@ HOW THE PASSWORD WORKS:
   Algorithm: HMAC-SHA256(seed, slug) -> first 12 hex chars -> base54 encoding -> 8 chars
   Character set: abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789
   (no ambiguous chars: no l, i, I, o, O, 0, 1)
+
+  If PW is set, the password is fixed for all slugs unless --password is provided.
 """
 
 import argparse
@@ -61,6 +65,7 @@ from typing import Optional
 
 DEFAULT_BASE_URL = "https://sajtmaskin.vercel.app"
 PASSWORD_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
+FIXED_PASSWORD_ENV = "PW"
 
 
 # ── Slug generation (mirrors generateSlug in index.ts) ─────────────
@@ -91,6 +96,15 @@ def generate_password(slug: str, seed: Optional[str] = None) -> str:
     digest = hmac.new(key.encode(), slug.encode(), hashlib.sha256).hexdigest()
     # Take first 12 hex chars -> convert to readable password
     return _hex_to_readable_password(digest[:12])
+
+
+def get_fixed_password() -> Optional[str]:
+    """Return a fixed password from env if set, otherwise None."""
+    value = os.environ.get(FIXED_PASSWORD_ENV)
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
 
 
 def _hex_to_readable_password(hex_str: str) -> str:
@@ -154,6 +168,16 @@ def create_page_via_api(
     return data["page"]
 
 
+BUSINESS_SUFFIXES = {"ab", "hb", "kb", "ek", "ef"}
+
+def _slug_to_display(slug: str) -> str:
+    """Convert slug back to display name: 'ikea-ab' -> 'Ikea AB'"""
+    return " ".join(
+        w.upper() if w in BUSINESS_SUFFIXES else w.capitalize()
+        for w in slug.split("-")
+    )
+
+
 # ── Output formatting ──────────────────────────────────────────────
 
 def print_result(company_name: str, slug: str, password: str, url: str):
@@ -190,9 +214,20 @@ def main():
 
     base_url = os.environ.get("SAJTMASKIN_BASE_URL", DEFAULT_BASE_URL)
     seed = args.seed or os.environ.get("KOSTNADSFRI_PASSWORD_SEED") or os.environ.get("KOSTNADSFRI_API_KEY") or "default-seed"
+    fixed_password = get_fixed_password()
+    explicit_password = args.password.strip() if args.password else None
+
+    def resolve_password(slug: str) -> str:
+        if explicit_password:
+            return explicit_password
+        if fixed_password:
+            return fixed_password
+        return generate_password(slug, seed)
 
     # Verify mode — prove the algorithm works with examples
     if args.verify:
+        if fixed_password:
+            print("  NOTE: PW is set; verification uses the deterministic seed instead.\n")
         print("\n  PASSWORD VERIFICATION")
         print("  " + "=" * 55)
         print(f"  Seed: {seed[:8]}...{seed[-4:]}" if len(seed) > 12 else f"  Seed: {seed}")
@@ -218,28 +253,6 @@ def main():
         print("  or use --dry-run with a company name.\n")
         return
 
-    # Interactive mode — type company names and get instant results
-    if args.interactive:
-        print("\n  INTERACTIVE MODE (Ctrl+C to exit)")
-        print("  " + "-" * 40)
-        print(f"  Seed: {seed[:8]}..." if len(seed) > 8 else f"  Seed: {seed}")
-        print()
-        try:
-            while True:
-                name = input("  Company name: ").strip()
-                if not name:
-                    continue
-                slug = generate_slug(name)
-                pwd = generate_password(slug, seed)
-                url = f"{base_url}/kostnadsfri/{slug}"
-                print(f"    Slug:     {slug}")
-                print(f"    Password: {pwd}")
-                print(f"    URL:      {url}")
-                print()
-        except (KeyboardInterrupt, EOFError):
-            print("\n  Done.\n")
-        return
-
     # Batch mode
     if args.batch:
         with open(args.batch, newline="", encoding="utf-8") as f:
@@ -249,7 +262,7 @@ def main():
                 if not name:
                     continue
                 slug = generate_slug(name)
-                pwd = args.password or generate_password(slug, seed)
+                pwd = resolve_password(slug)
 
                 if args.dry_run:
                     url = f"{base_url}/kostnadsfri/{slug}"
@@ -270,13 +283,54 @@ def main():
                         print(f"  ERROR for {name}: {e}", file=sys.stderr)
         return
 
-    # Single mode
+    # No arguments at all -> interactive mode
+    if not args.company_name and not args.batch and not args.verify:
+        args.interactive = True
+
+    # Interactive mode — type company names and get instant results
+    if args.interactive:
+        if not fixed_password and seed == "default-seed":
+            seed = input("  KOSTNADSFRI_PASSWORD_SEED not set.\n  Enter seed: ").strip()
+            if not seed:
+                print("  No seed provided. Exiting.", file=sys.stderr)
+                sys.exit(1)
+        print(f"\n  INTERACTIVE MODE (Ctrl+C to exit)")
+        print("  " + "-" * 40)
+        if fixed_password:
+            print("  Fixed password: PW (env)")
+        else:
+            print(f"  Seed: {seed[:8]}..." if len(seed) > 8 else f"  Seed: {seed}")
+        print(f"  Type a company name or slug to get the password.\n")
+        try:
+            while True:
+                name = input("  Company name or slug: ").strip()
+                if not name:
+                    continue
+                # If it looks like a slug already (lowercase, hyphens), use directly
+                if name == name.lower() and " " not in name:
+                    slug = name
+                    display_name = _slug_to_display(slug)
+                else:
+                    slug = generate_slug(name)
+                    display_name = name
+                pwd = resolve_password(slug)
+                url = f"{base_url}/kostnadsfri/{slug}"
+                print(f"    Company:  {display_name}")
+                print(f"    Slug:     {slug}")
+                print(f"    Password: {pwd}")
+                print(f"    URL:      {url}")
+                print()
+        except (KeyboardInterrupt, EOFError):
+            print("\n  Done.\n")
+        return
+
+    # Single mode requires company_name
     if not args.company_name:
         parser.print_help()
         sys.exit(1)
 
     slug = generate_slug(args.company_name)
-    pwd = args.password or generate_password(slug, seed)
+    pwd = resolve_password(slug)
 
     if args.dry_run:
         url = f"{base_url}/kostnadsfri/{slug}"
