@@ -208,6 +208,12 @@ const defaultPreviews: NewPreview[] = [
     company_name: 'SajtStudio',
     domain: 'sajtstudio.se',
   },
+  {
+    slug: 'roboticscare',
+    target_url: 'https://v0-roboticscare-website-design.vercel.app',
+    company_name: 'RoboticsCare',
+    domain: 'roboticscare.se',
+  },
 ]
 
 /**
