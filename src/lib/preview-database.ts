@@ -384,9 +384,7 @@ function hexToReadablePassword(hex: string): string {
 
 function getDeterministicPasswordForSlug(slug: string): string | null {
   const seed =
-    process.env.KOSTNADSFRI_PASSWORD_SEED?.trim() ||
-    process.env.KOSTNADSFRI_API_KEY?.trim() ||
-    null
+    process.env.KOSTNADSFRI_PASSWORD_SEED?.trim() || process.env.KOSTNADSFRI_API_KEY?.trim() || null
 
   if (!seed) return null
   const digest = crypto.createHmac('sha256', seed).update(slug).digest('hex')
