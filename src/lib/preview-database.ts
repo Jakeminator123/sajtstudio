@@ -208,12 +208,6 @@ const defaultPreviews: NewPreview[] = [
     company_name: 'SajtStudio',
     domain: 'sajtstudio.se',
   },
-  {
-    slug: 'roboticscare',
-    target_url: 'https://v0-roboticscare-website-design.vercel.app',
-    company_name: 'RoboticsCare',
-    domain: 'roboticscare.se',
-  },
 ]
 
 /**
@@ -437,6 +431,11 @@ const defaultProtectedEmbeds: Array<{ slug: string; title: string; target_url: s
     title: 'Juice Factory',
     target_url: 'https://v0-juice-factory-website.vercel.app',
   },
+  {
+    slug: 'robotics-care',
+    title: 'RoboticsCare',
+    target_url: 'https://v0-roboticscare-website-design.vercel.app',
+  },
 ]
 
 function getSeedPasswordForProtectedEmbed(slug: string): string | null {
@@ -445,6 +444,13 @@ function getSeedPasswordForProtectedEmbed(slug: string): string | null {
     return (
       process.env.JUICE_FACTORY_PASSWORD?.trim() ||
       process.env.JUICE_FACTORY_EMBED_PASSWORD?.trim() ||
+      null
+    )
+  }
+  if (slug === 'robotics-care') {
+    return (
+      process.env.ROBOTICS_CARE_PASSWORD?.trim() ||
+      process.env.ROBOTICS_CARE_EMBED_PASSWORD?.trim() ||
       null
     )
   }
