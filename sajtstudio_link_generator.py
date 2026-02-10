@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-KOSTNADSFRI LINK GENERATOR
-===========================
+SAJTSTUDIO LINK GENERATOR
+=========================
 
-Generates password-protected company pages for the kostnadsfri flow.
+Generates passwords and links that work for both:
+- SajtMaskin kostnadsfri pages (/kostnadsfri/<slug>)
+- Sajtstudio protected embed pages (/<slug>)
 Uses the same deterministic password algorithm as the Node.js backend.
 
 SETUP:
@@ -12,21 +14,22 @@ SETUP:
        export KOSTNADSFRI_PASSWORD_SEED="your-secret-seed-here"
        export KOSTNADSFRI_API_KEY="your-api-key-here"
        export SAJTMASKIN_BASE_URL="https://sajtmaskin.vercel.app"  (optional)
+       export SAJTSTUDIO_BASE_URL="https://www.sajtstudio.se"  (optional)
   3. Optional fixed password (overrides seed unless --password is provided):
        export PW="your-fixed-password"
 
 USAGE:
   # Generate a link for a company (password auto-generated):
-  python kostnadsfri_generator.py "IKEA AB" --industry retail --website https://ikea.se
+  python sajtstudio_link_generator.py "IKEA AB" --industry retail --website https://ikea.se
 
   # Generate with explicit password:
-  python kostnadsfri_generator.py "IKEA AB" --password mittlosenord123
+  python sajtstudio_link_generator.py "IKEA AB" --password mittlosenord123
 
   # Just preview slug + password without creating (dry-run):
-  python kostnadsfri_generator.py "IKEA AB" --dry-run
+  python sajtstudio_link_generator.py "IKEA AB" --dry-run
 
   # Batch create from a CSV file:
-  python kostnadsfri_generator.py --batch companies.csv
+  python sajtstudio_link_generator.py --batch companies.csv
 
   CSV format (first row is header):
     companyName,industry,website,contactEmail,contactName
@@ -38,7 +41,8 @@ OUTPUT:
     Company:  IKEA AB
     Slug:     ikea-ab
     Password: kR7mXp2q
-    URL:      https://sajtmaskin.vercel.app/kostnadsfri/ikea-ab
+    SajtMaskin URL: https://sajtmaskin.vercel.app/kostnadsfri/ikea-ab
+    Sajtstudio URL: https://www.sajtstudio.se/ikea-ab
 
 HOW THE PASSWORD WORKS:
   The password is deterministic: same slug + same seed = same password.
@@ -64,6 +68,7 @@ from typing import Optional
 # ── Configuration ──────────────────────────────────────────────────
 
 DEFAULT_BASE_URL = "https://sajtmaskin.vercel.app"
+DEFAULT_SAJTSTUDIO_BASE_URL = "https://www.sajtstudio.se"
 PASSWORD_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 FIXED_PASSWORD_ENV = "PW"
 
@@ -132,7 +137,7 @@ def create_page_via_api(
     """Create a kostnadsfri page via the API."""
     import requests
 
-    base_url = os.environ.get("SAJTMASKIN_BASE_URL", DEFAULT_BASE_URL)
+    base_url = os.environ.get("SAJTMASKIN_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
     api_key = os.environ.get("KOSTNADSFRI_API_KEY")
 
     if not api_key:
@@ -180,12 +185,20 @@ def _slug_to_display(slug: str) -> str:
 
 # ── Output formatting ──────────────────────────────────────────────
 
-def print_result(company_name: str, slug: str, password: str, url: str):
+def print_result(
+    company_name: str,
+    slug: str,
+    password: str,
+    sajtmaskin_url: str,
+    sajtstudio_url: Optional[str] = None,
+):
     """Print a nicely formatted result."""
     print(f"\n  Company:  {company_name}")
     print(f"  Slug:     {slug}")
     print(f"  Password: {password}")
-    print(f"  URL:      {url}")
+    print(f"  SajtMaskin URL: {sajtmaskin_url}")
+    if sajtstudio_url:
+        print(f"  Sajtstudio URL: {sajtstudio_url}")
     print()
 
 
@@ -193,9 +206,9 @@ def print_result(company_name: str, slug: str, password: str, url: str):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate kostnadsfri company pages for SajtMaskin",
+        description="Generate SajtMaskin + Sajtstudio links and passwords",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Example: python kostnadsfri_generator.py \"IKEA AB\" --industry retail",
+        epilog="Example: python sajtstudio_link_generator.py \"IKEA AB\" --industry retail",
     )
     parser.add_argument("company_name", nargs="?", help="Company name (e.g. 'IKEA AB')")
     parser.add_argument("--industry", help="Industry ID (cafe, restaurant, retail, tech, consulting, health, creative, education, ecommerce, realestate, other)")
@@ -212,7 +225,10 @@ def main():
 
     args = parser.parse_args()
 
-    base_url = os.environ.get("SAJTMASKIN_BASE_URL", DEFAULT_BASE_URL)
+    base_url = os.environ.get("SAJTMASKIN_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
+    studio_base_url = os.environ.get("SAJTSTUDIO_BASE_URL", DEFAULT_SAJTSTUDIO_BASE_URL).rstrip(
+        "/"
+    )
     seed = args.seed or os.environ.get("KOSTNADSFRI_PASSWORD_SEED") or os.environ.get("KOSTNADSFRI_API_KEY") or "default-seed"
     fixed_password = get_fixed_password()
     explicit_password = args.password.strip() if args.password else None
@@ -243,12 +259,9 @@ def main():
         for name in test_companies:
             slug = generate_slug(name)
             pwd = generate_password(slug, seed)
-            url = f"{base_url}/kostnadsfri/{slug}"
-            print(f"  {name}")
-            print(f"    Slug:     {slug}")
-            print(f"    Password: {pwd}")
-            print(f"    URL:      {url}")
-            print()
+            sajtmaskin_url = f"{base_url}/kostnadsfri/{slug}"
+            sajtstudio_url = f"{studio_base_url}/{slug}"
+            print_result(name, slug, pwd, sajtmaskin_url, sajtstudio_url)
         print("  To verify these match Node.js, run in the project root:")
         print('  node -e "import(\'./src/lib/kostnadsfri/index.ts\')"')
         print("  or use --dry-run with a company name.\n")
@@ -266,8 +279,9 @@ def main():
                 pwd = resolve_password(slug)
 
                 if args.dry_run:
-                    url = f"{base_url}/kostnadsfri/{slug}"
-                    print_result(name, slug, pwd, url)
+                    sajtmaskin_url = f"{base_url}/kostnadsfri/{slug}"
+                    sajtstudio_url = f"{studio_base_url}/{slug}"
+                    print_result(name, slug, pwd, sajtmaskin_url, sajtstudio_url)
                 else:
                     try:
                         page = create_page_via_api(
@@ -279,7 +293,8 @@ def main():
                             password=pwd,
                             expires_in_days=args.expires,
                         )
-                        print_result(name, page["slug"], page["password"], page["url"])
+                        sajtstudio_url = f"{studio_base_url}/{page['slug']}"
+                        print_result(name, page["slug"], page["password"], page["url"], sajtstudio_url)
                     except Exception as e:
                         print(f"  ERROR for {name}: {e}", file=sys.stderr)
         return
@@ -315,11 +330,13 @@ def main():
                     slug = generate_slug(name)
                     display_name = name
                 pwd = resolve_password(slug)
-                url = f"{base_url}/kostnadsfri/{slug}"
+                sajtmaskin_url = f"{base_url}/kostnadsfri/{slug}"
+                sajtstudio_url = f"{studio_base_url}/{slug}"
                 print(f"    Company:  {display_name}")
                 print(f"    Slug:     {slug}")
                 print(f"    Password: {pwd}")
-                print(f"    URL:      {url}")
+                print(f"    SajtMaskin URL: {sajtmaskin_url}")
+                print(f"    Sajtstudio URL: {sajtstudio_url}")
                 print()
         except (KeyboardInterrupt, EOFError):
             print("\n  Done.\n")
@@ -334,8 +351,9 @@ def main():
     pwd = resolve_password(slug)
 
     if args.dry_run:
-        url = f"{base_url}/kostnadsfri/{slug}"
-        print_result(args.company_name, slug, pwd, url)
+        sajtmaskin_url = f"{base_url}/kostnadsfri/{slug}"
+        sajtstudio_url = f"{studio_base_url}/{slug}"
+        print_result(args.company_name, slug, pwd, sajtmaskin_url, sajtstudio_url)
         return
 
     try:
@@ -348,7 +366,8 @@ def main():
             password=pwd,
             expires_in_days=args.expires,
         )
-        print_result(args.company_name, page["slug"], page["password"], page["url"])
+        sajtstudio_url = f"{studio_base_url}/{page['slug']}"
+        print_result(args.company_name, page["slug"], page["password"], page["url"], sajtstudio_url)
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
