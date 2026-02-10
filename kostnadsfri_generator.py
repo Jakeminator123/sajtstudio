@@ -216,11 +216,12 @@ def main():
     seed = args.seed or os.environ.get("KOSTNADSFRI_PASSWORD_SEED") or os.environ.get("KOSTNADSFRI_API_KEY") or "default-seed"
     fixed_password = get_fixed_password()
     explicit_password = args.password.strip() if args.password else None
+    force_deterministic = args.seed is not None
 
     def resolve_password(slug: str) -> str:
         if explicit_password:
             return explicit_password
-        if fixed_password:
+        if fixed_password and not force_deterministic:
             return fixed_password
         return generate_password(slug, seed)
 
@@ -296,7 +297,7 @@ def main():
                 sys.exit(1)
         print(f"\n  INTERACTIVE MODE (Ctrl+C to exit)")
         print("  " + "-" * 40)
-        if fixed_password:
+        if fixed_password and not force_deterministic:
             print("  Fixed password: PW (env)")
         else:
             print(f"  Seed: {seed[:8]}..." if len(seed) > 8 else f"  Seed: {seed}")

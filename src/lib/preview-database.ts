@@ -336,6 +336,10 @@ export function getPreviewStats(): {
 // PROTECTED EMBEDS (nice slug + external URL + password)
 // ============================================================================
 
+const PASSWORD_CHARS = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
+const DETERMINISTIC_HEX_LENGTH = 12
+const DETERMINISTIC_PASSWORD_LENGTH = 8
+
 function createPasswordSalt(): string {
   return crypto.randomBytes(16).toString('hex')
 }
@@ -354,6 +358,39 @@ function timingSafeEqualHex(aHex: string, bHex: string): boolean {
   } catch {
     return false
   }
+}
+
+function timingSafeEqualString(a: string, b: string): boolean {
+  try {
+    const aBuf = Buffer.from(a)
+    const bBuf = Buffer.from(b)
+    if (aBuf.length !== bBuf.length) return false
+    return crypto.timingSafeEqual(aBuf, bBuf)
+  } catch {
+    return false
+  }
+}
+
+function hexToReadablePassword(hex: string): string {
+  let num = parseInt(hex, 16)
+  const base = PASSWORD_CHARS.length
+  let result = ''
+  for (let i = 0; i < DETERMINISTIC_PASSWORD_LENGTH; i += 1) {
+    result += PASSWORD_CHARS[num % base]
+    num = Math.floor(num / base)
+  }
+  return result
+}
+
+function getDeterministicPasswordForSlug(slug: string): string | null {
+  const seed =
+    process.env.KOSTNADSFRI_PASSWORD_SEED?.trim() ||
+    process.env.KOSTNADSFRI_API_KEY?.trim() ||
+    null
+
+  if (!seed) return null
+  const digest = crypto.createHmac('sha256', seed).update(slug).digest('hex')
+  return hexToReadablePassword(digest.slice(0, DETERMINISTIC_HEX_LENGTH))
 }
 
 export function getProtectedEmbedBySlug(slug: string): ProtectedEmbed | null {
@@ -415,13 +452,26 @@ export function setProtectedEmbedPassword(slug: string, password: string): boole
 }
 
 export function verifyProtectedEmbedPassword(slug: string, password: string): boolean {
+  const trimmed = password.trim()
+  if (!trimmed) return false
+
+  const sharedPassword = process.env.PW?.trim()
+  if (sharedPassword && timingSafeEqualString(trimmed, sharedPassword)) {
+    return true
+  }
+
+  const deterministicPassword = getDeterministicPasswordForSlug(slug)
+  if (deterministicPassword && timingSafeEqualString(trimmed, deterministicPassword)) {
+    return true
+  }
+
   const stmt = previewDb.prepare(
     'SELECT password_salt as salt, password_hash as hash FROM protected_embeds WHERE slug = ?'
   )
   const row = stmt.get(slug) as { salt: string; hash: string } | undefined
   if (!row?.salt || !row?.hash) return false
 
-  const candidate = hashPassword(password, row.salt)
+  const candidate = hashPassword(trimmed, row.salt)
   return timingSafeEqualHex(candidate, row.hash)
 }
 
@@ -441,21 +491,16 @@ const defaultProtectedEmbeds: Array<{ slug: string; title: string; target_url: s
 function getSeedPasswordForProtectedEmbed(slug: string): string | null {
   // Keep env names explicit so we don't accidentally expose them client-side.
   const sharedPassword = process.env.PW?.trim() || null
+  const deterministicPassword = getDeterministicPasswordForSlug(slug)
   if (slug === 'juice-factory') {
     return (
       process.env.JUICE_FACTORY_PASSWORD?.trim() ||
       process.env.JUICE_FACTORY_EMBED_PASSWORD?.trim() ||
-      sharedPassword
+      sharedPassword ||
+      deterministicPassword
     )
   }
-  if (slug === 'robotics-care') {
-    return (
-      process.env.ROBOTICS_CARE_PASSWORD?.trim() ||
-      process.env.ROBOTICS_CARE_EMBED_PASSWORD?.trim() ||
-      sharedPassword
-    )
-  }
-  return sharedPassword
+  return sharedPassword || deterministicPassword
 }
 
 export function seedDefaultProtectedEmbeds(): number {
