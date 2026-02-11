@@ -2,37 +2,38 @@
  * Preview Page - Dynamic Demo Site Embedding
  * ==========================================
  *
- * This catch-all route displays AI-generated demo sites in a branded Sajtstudio wrapper.
+ * This catch-all route handles two types of slugs:
  *
- * ## URL Structure:
- * - /demo-xyz           → Displays https://demo-xyz.vusercontent.net
- * - /demo-xyz/page      → Displays https://demo-xyz.vusercontent.net/page
+ * 1. PROTECTED EMBEDS (checked first)
+ *    - Slug in protected_embeds table → password gate + iframe to target_url
+ *    - Works regardless of SLUGS env var
  *
- * ## How it works:
- * 1. Validates the slug exists in the SQLite database (previews.db)
- * 2. Builds the direct URL to vusercontent.net
- * 3. Renders PreviewWrapper with iframe embedding
+ * 2. PREVIEWS (when SLUGS=y)
+ *    - /demo-xyz → Displays https://demo-xyz.vusercontent.net
+ *    - /demo-xyz/page → Displays https://demo-xyz.vusercontent.net/page
  *
  * ## Security:
- * - Only slugs in the database are allowed (prevents abuse)
  * - Reserved routes are blocked (api, admin, etc.)
  * - Slug format is validated (alphanumeric + dashes/underscores only)
- * - Feature can be disabled via SLUGS=false env var
- *
- * ## Key Discovery (2024-12-20):
- * vusercontent.net does NOT set X-Frame-Options, so we can embed directly
- * without proxying! This solved the "black iframe" problem.
  *
  * @author Sajtstudio
- * @see PreviewWrapper - The component that renders the iframe
- * @see preview-database.ts - SQLite database for valid slugs
  */
 
+import { cookies, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { getPreviewBySlug, updateLastAccessed } from '@/lib/preview-database'
-import PreviewWrapper from '@/components/preview/PreviewWrapper'
 import fs from 'fs'
 import path from 'path'
+
+import EmbedPasswordGate from '@/components/preview/EmbedPasswordGate'
+import PreviewWrapper from '@/components/preview/PreviewWrapper'
+import { getEmbedCookieName, verifyEmbedSessionToken } from '@/lib/embed-auth'
+import {
+  getPreviewBySlug,
+  getProtectedEmbedBySlug,
+  logEmbedVisit,
+  updateLastAccessed,
+  updateProtectedEmbedLastAccessed,
+} from '@/lib/preview-database'
 
 // ============================================================================
 // CONFIGURATION
@@ -99,6 +100,21 @@ function isReservedRoute(slug: string): boolean {
   return RESERVED_ROUTES.includes(slug.toLowerCase() as (typeof RESERVED_ROUTES)[number])
 }
 
+function toQueryString(searchParams: Record<string, string | string[] | undefined> | undefined) {
+  if (!searchParams) return ''
+  const usp = new URLSearchParams()
+  for (const [k, v] of Object.entries(searchParams)) {
+    if (v === undefined) continue
+    if (Array.isArray(v)) {
+      for (const item of v) usp.append(k, item)
+    } else {
+      usp.set(k, v)
+    }
+  }
+  const qs = usp.toString()
+  return qs ? `?${qs}` : ''
+}
+
 /**
  * Try to find a preview screenshot in public/previews/
  * Returns the path if found, null otherwise.
@@ -124,17 +140,13 @@ function findPreviewImage(slug: string): string | null {
 
 interface PageProps {
   params: Promise<{ slug: string; path?: string[] }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function PreviewPage({ params }: PageProps) {
+export default async function PreviewPage({ params, searchParams }: PageProps) {
   const { slug, path: pathSegments } = await params
 
   // ---- VALIDATION ----
-
-  // Feature must be enabled
-  if (!slugsEnabled) {
-    notFound()
-  }
 
   // Slug must exist and be a string
   if (!slug || typeof slug !== 'string' || slug.trim() === '') {
@@ -151,48 +163,91 @@ export default async function PreviewPage({ params }: PageProps) {
     notFound()
   }
 
-  // Slug must exist in database
+  // ---- PROTECTED EMBED (checked first) ----
+
+  const embed = getProtectedEmbedBySlug(slug)
+  if (embed) {
+    const cookieStore = await cookies()
+    const authCookie = cookieStore.get(getEmbedCookieName(slug))
+    const isAuthed = authCookie ? verifyEmbedSessionToken(authCookie.value, slug) : false
+
+    if (!isAuthed) {
+      return <EmbedPasswordGate slug={slug} title={embed.title || slug} />
+    }
+
+    const resolvedSearchParams = searchParams ? await searchParams : undefined
+    const pathString = pathSegments?.length ? `/${pathSegments.map(encodeURIComponent).join('/')}` : ''
+    const query = toQueryString(resolvedSearchParams)
+    const sourceUrl = `${embed.target_url}${pathString}${query}`
+
+    try {
+      updateProtectedEmbedLastAccessed(slug)
+      const headersList = await headers()
+      const ip =
+        headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+        headersList.get('x-real-ip') ||
+        headersList.get('cf-connecting-ip') ||
+        'unknown'
+      const userAgent = headersList.get('user-agent') || undefined
+      const referer = headersList.get('referer') || undefined
+      logEmbedVisit({
+        slug,
+        ip_address: ip,
+        user_agent: userAgent,
+        referer: referer,
+        path: pathString || '/',
+        query_string: query || undefined,
+      })
+    } catch {
+      // Ignore
+    }
+
+    return (
+      <PreviewWrapper
+        proxyUrl={sourceUrl}
+        sourceUrl={sourceUrl}
+        previewImageSrc={null}
+        preview={{
+          slug,
+          company_name: embed.title || slug,
+          domain: new URL(embed.target_url).host,
+        }}
+      />
+    )
+  }
+
+  // ---- PREVIEW (requires SLUGS=y) ----
+
+  if (!slugsEnabled) {
+    notFound()
+  }
+
   const preview = getPreviewBySlug(slug)
   if (!preview) {
     notFound()
   }
 
-  // ---- UPDATE STATS ----
-
-  // Track last access time (fire and forget, don't fail on error)
   try {
     updateLastAccessed(slug)
   } catch {
-    // Silently ignore - stats are not critical
+    // Ignore
   }
 
-  // ---- BUILD URLs ----
-
-  // Build path string from segments
   const pathString = pathSegments?.length ? `/${pathSegments.join('/')}` : ''
-
-  // Determine the source URL:
-  // 1. If target_url exists, use it directly (for non-vusercontent sites like Vercel apps)
-  // 2. Otherwise, build URL from source_slug or slug + vusercontent.net
   let sourceUrl: string
   if (preview.target_url) {
-    // Direct URL to external site (e.g., Vercel app)
     sourceUrl = `${preview.target_url}${pathString}`
   } else {
-    // Use source_slug if available (allows nice URLs like /bostadsservice-ab)
     const vusercontentSlug = preview.source_slug || slug
     sourceUrl = `https://${vusercontentSlug}${VUSERCONTENT_DOMAIN}${pathString}`
   }
 
-  // Find optional screenshot for fallback
   const previewImageSrc =
     findPreviewImage(slug) || (preview.source_slug ? findPreviewImage(preview.source_slug) : null)
 
-  // ---- RENDER ----
-
   return (
     <PreviewWrapper
-      proxyUrl={sourceUrl} // Legacy prop, now equals sourceUrl
+      proxyUrl={sourceUrl}
       sourceUrl={sourceUrl}
       previewImageSrc={previewImageSrc}
       preview={{
@@ -211,21 +266,26 @@ export default async function PreviewPage({ params }: PageProps) {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
 
-  // Default metadata for invalid states
-  if (!slugsEnabled || !slug) {
+  if (!slug) {
+    return { title: 'Inte hittad | Sajtstudio', robots: { index: false, follow: false } }
+  }
+
+  const embed = getProtectedEmbedBySlug(slug)
+  if (embed) {
     return {
-      title: 'Inte hittad | Sajtstudio',
+      title: embed.title ? `${embed.title} | Sajtstudio` : `Preview | Sajtstudio`,
+      description: 'Skyddad förhandsgranskning',
       robots: { index: false, follow: false },
     }
   }
 
-  const preview = getPreviewBySlug(slug)
+  if (!slugsEnabled) {
+    return { title: 'Inte hittad | Sajtstudio', robots: { index: false, follow: false } }
+  }
 
+  const preview = getPreviewBySlug(slug)
   if (!preview) {
-    return {
-      title: 'Inte hittad | Sajtstudio',
-      robots: { index: false, follow: false },
-    }
+    return { title: 'Inte hittad | Sajtstudio', robots: { index: false, follow: false } }
   }
 
   return {
@@ -235,10 +295,6 @@ export async function generateMetadata({ params }: PageProps) {
     description: preview.domain
       ? `Förhandsgranskning av webbplats för ${preview.domain}`
       : 'Förhandsgranskning av webbplats skapad av Sajtstudio',
-    // Don't index preview pages
-    robots: {
-      index: false,
-      follow: false,
-    },
+    robots: { index: false, follow: false },
   }
 }

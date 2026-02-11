@@ -336,6 +336,20 @@ export function getPreviewStats(): {
 // PROTECTED EMBEDS (nice slug + external URL + password)
 // ============================================================================
 
+/** Generate URL-safe slug from company name (matches sajtstudio_link_generator.py) */
+export function generateSlugFromCompanyName(companyName: string): string {
+  let slug = companyName.toLowerCase().trim()
+  slug = slug
+    .replace(/å/g, 'a')
+    .replace(/ä/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/é/g, 'e')
+    .replace(/ü/g, 'u')
+  slug = slug.replace(/[^a-z0-9]+/g, '-')
+  slug = slug.replace(/-+/g, '-').replace(/^-|-$/g, '')
+  return slug
+}
+
 const PASSWORD_CHARS = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const DETERMINISTIC_HEX_LENGTH = 12
 const DETERMINISTIC_PASSWORD_LENGTH = 8
@@ -382,7 +396,13 @@ function hexToReadablePassword(hex: string): string {
   return result
 }
 
-function getDeterministicPasswordForSlug(slug: string): string | null {
+/**
+ * Generate deterministic password for a slug.
+ * Same slug + same KOSTNADSFRI_PASSWORD_SEED = same password.
+ * Used by protected embeds and kostnadsfri pages.
+ * Returns null if seed is not configured.
+ */
+export function getDeterministicPasswordForSlug(slug: string): string | null {
   const seed =
     process.env.KOSTNADSFRI_PASSWORD_SEED?.trim() || process.env.KOSTNADSFRI_API_KEY?.trim() || null
 

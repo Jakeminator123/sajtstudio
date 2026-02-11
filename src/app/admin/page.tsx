@@ -128,6 +128,17 @@ export default function AdminPage() {
   const [embedStats, setEmbedStats] = useState<EmbedVisitStats | null>(null)
   const [protectedEmbeds, setProtectedEmbeds] = useState<ProtectedEmbed[]>([])
   const [embedsLoading, setEmbedsLoading] = useState(false)
+  const [passwordSlugInput, setPasswordSlugInput] = useState('')
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [addEmbedCompanyName, setAddEmbedCompanyName] = useState('')
+  const [addEmbedSlug, setAddEmbedSlug] = useState('')
+  const [addEmbedTargetUrl, setAddEmbedTargetUrl] = useState('')
+  const [addEmbedStatus, setAddEmbedStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
+  const [addEmbedMessage, setAddEmbedMessage] = useState('')
+  const [syncingSlug, setSyncingSlug] = useState<string | null>(null)
+  const [syncMessage, setSyncMessage] = useState<{ slug: string; text: string; ok: boolean } | null>(null)
 
   // Login handler with env-based credentials
   const handleLogin = (e: FormEvent) => {
@@ -250,6 +261,117 @@ export default function AdminPage() {
       console.error('Failed to load embed visits')
     }
     setEmbedsLoading(false)
+  }
+
+  const handleAddEmbed = async () => {
+    const targetUrl = addEmbedTargetUrl.trim()
+    const companyName = addEmbedCompanyName.trim()
+    const slugInput = addEmbedSlug.trim().toLowerCase()
+
+    if (!targetUrl) {
+      setAddEmbedStatus('error')
+      setAddEmbedMessage('Ange en target URL')
+      return
+    }
+    if (!companyName && !slugInput) {
+      setAddEmbedStatus('error')
+      setAddEmbedMessage('Ange antingen företagsnamn eller slug')
+      return
+    }
+
+    setAddEmbedStatus('saving')
+    setAddEmbedMessage('')
+    try {
+      const body: { targetUrl: string; companyName?: string; slug?: string } = { targetUrl }
+      if (slugInput) body.slug = slugInput
+      if (companyName) body.companyName = companyName
+
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      const apiKey = process.env.NEXT_PUBLIC_DB_API_KEY?.trim()
+      if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
+
+      const response = await fetch('/api/protected-embeds', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      })
+      const data = await response.json().catch(() => ({}))
+
+      if (response.ok && data.success) {
+        setAddEmbedStatus('success')
+        setAddEmbedMessage(
+          `Tillagd! URL: ${data.url || `/${data.embed?.slug}`} | Lösenord: ${data.password || '(genererat)'}`
+        )
+        setAddEmbedCompanyName('')
+        setAddEmbedSlug('')
+        setAddEmbedTargetUrl('')
+        loadEmbedVisits()
+      } else {
+        setAddEmbedStatus('error')
+        setAddEmbedMessage(data.error || data.hint || 'Kunde inte lägga till')
+      }
+    } catch {
+      setAddEmbedStatus('error')
+      setAddEmbedMessage('Nätverksfel')
+    }
+  }
+
+  const handleSyncToProduction = async (slug: string) => {
+    setSyncingSlug(slug)
+    setSyncMessage(null)
+    try {
+      const response = await fetch('/api/sync-embed-to-production', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      })
+      const data = await response.json().catch(() => {})
+
+      if (response.ok && data.success) {
+        setSyncMessage({
+          slug,
+          text: data.message || `Synkad till produktion: ${data.url || `/${slug}`}`,
+          ok: true,
+        })
+      } else {
+        setSyncMessage({
+          slug,
+          text: data.error || data.hint || 'Kunde inte synka',
+          ok: false,
+        })
+      }
+    } catch {
+      setSyncMessage({
+        slug,
+        text: 'Nätverksfel vid synk',
+        ok: false,
+      })
+    }
+    setSyncingSlug(null)
+  }
+
+  const handleGeneratePassword = async () => {
+    const slug = passwordSlugInput.trim().toLowerCase()
+    if (!slug) {
+      setPasswordError('Ange ett slug')
+      setGeneratedPassword(null)
+      return
+    }
+    setPasswordLoading(true)
+    setPasswordError(null)
+    setGeneratedPassword(null)
+    try {
+      const response = await fetch(`/api/password-generator?slug=${encodeURIComponent(slug)}`)
+      const data = await response.json().catch(() => ({}))
+      if (response.ok && data.success) {
+        setGeneratedPassword(data.password)
+      } else {
+        setPasswordError(data.error || data.hint || 'Kunde inte generera lösenord')
+      }
+    } catch {
+      setPasswordError('Nätverksfel')
+    }
+    setPasswordLoading(false)
   }
 
   const handleDeleteAudit = async (id: string) => {
@@ -883,6 +1005,111 @@ export default function AdminPage() {
               </button>
             </div>
 
+            {/* Add new embed */}
+            <div className="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+              <h3 className="text-lg font-semibold text-white mb-2">➕ Lägg till ny embed</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Lägg till en skyddad iframe-sida. Ange företagsnamn (t.ex. Mensskydd AB) eller slug
+                (t.ex. mensskydd-ab) samt URL där innehållet hämtas från (t.ex. www.mansskydd.se).
+              </p>
+              <div className="flex flex-wrap gap-4 items-end">
+                <div>
+                  <label className="block text-gray-400 text-xs mb-1">Företagsnamn (valfritt)</label>
+                  <input
+                    type="text"
+                    value={addEmbedCompanyName}
+                    onChange={(e) => setAddEmbedCompanyName(e.target.value)}
+                    placeholder="Mensskydd AB"
+                    className="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 min-w-[180px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-xs mb-1">Slug (valfritt)</label>
+                  <input
+                    type="text"
+                    value={addEmbedSlug}
+                    onChange={(e) => setAddEmbedSlug(e.target.value.toLowerCase())}
+                    placeholder="mensskydd-ab"
+                    className="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 min-w-[180px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-xs mb-1">Target URL (nödvändigt)</label>
+                  <input
+                    type="text"
+                    value={addEmbedTargetUrl}
+                    onChange={(e) => setAddEmbedTargetUrl(e.target.value)}
+                    placeholder="www.mansskydd.se"
+                    className="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 min-w-[220px]"
+                  />
+                </div>
+                <button
+                  onClick={handleAddEmbed}
+                  disabled={addEmbedStatus === 'saving'}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  {addEmbedStatus === 'saving' ? 'Lägger till...' : 'Lägg till'}
+                </button>
+              </div>
+              {addEmbedMessage && (
+                <p
+                  className={`mt-3 text-sm ${
+                    addEmbedStatus === 'success' ? 'text-green-400' : 'text-amber-400'
+                  }`}
+                >
+                  {addEmbedMessage}
+                </p>
+              )}
+            </div>
+
+            {/* Password generator */}
+            <div className="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+              <h3 className="text-lg font-semibold text-white mb-2">🔑 Lösenordsgenerator</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Deterministic lösenord för embeds och kostnadsfri-sidor. Samma slug + seed = samma
+                lösenord. Kräver KOSTNADSFRI_PASSWORD_SEED eller KOSTNADSFRI_API_KEY.
+              </p>
+              <div className="flex flex-wrap gap-2 items-center">
+                <input
+                  type="text"
+                  value={passwordSlugInput}
+                  onChange={(e) => {
+                    setPasswordSlugInput(e.target.value)
+                    setPasswordError(null)
+                    setGeneratedPassword(null)
+                  }}
+                  placeholder="t.ex. juice-factory eller ikea-ab"
+                  className="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[200px]"
+                />
+                <button
+                  onClick={handleGeneratePassword}
+                  disabled={passwordLoading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  {passwordLoading ? 'Genererar...' : 'Generera lösenord'}
+                </button>
+              </div>
+              {generatedPassword && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-gray-400">Lösenord:</span>
+                  <code className="bg-gray-800 px-3 py-1 rounded text-green-400 font-mono text-lg">
+                    {generatedPassword}
+                  </code>
+                  <button
+                    onClick={() => {
+                      void navigator.clipboard.writeText(generatedPassword)
+                    }}
+                    className="text-blue-400 hover:text-blue-300 text-sm"
+                  >
+                    Kopiera
+                  </button>
+                </div>
+              )}
+              {passwordError && (
+                <p className="mt-3 text-amber-400 text-sm">{passwordError}</p>
+              )}
+            </div>
+
             {/* Stats */}
             {embedStats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -919,7 +1146,18 @@ export default function AdminPage() {
                         className="bg-gray-700/50 rounded-lg p-4 border border-gray-600"
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-blue-400 font-mono">/{embed.slug}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPasswordSlugInput(embed.slug)
+                              setPasswordError(null)
+                              setGeneratedPassword(null)
+                            }}
+                            className="text-blue-400 font-mono hover:text-blue-300 hover:underline"
+                            title="Använd i lösenordsgeneratorn"
+                          >
+                            /{embed.slug}
+                          </button>
                           <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
                             {visitCount} besök
                           </span>
@@ -929,6 +1167,26 @@ export default function AdminPage() {
                         <p className="text-gray-500 text-xs mt-2">
                           Senast: {new Date(embed.last_accessed).toLocaleString('sv-SE')}
                         </p>
+                        <div className="mt-3 pt-3 border-t border-gray-600">
+                          <button
+                            type="button"
+                            onClick={() => handleSyncToProduction(embed.slug)}
+                            disabled={syncingSlug === embed.slug}
+                            className="text-xs px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-400 rounded transition-colors disabled:opacity-50"
+                            title="Skicka till produktionsdatabasen"
+                          >
+                            {syncingSlug === embed.slug ? 'Synkar...' : '⬆ Skicka till produktion'}
+                          </button>
+                          {syncMessage?.slug === embed.slug && (
+                            <p
+                              className={`mt-1 text-xs ${
+                                syncMessage.ok ? 'text-green-400' : 'text-amber-400'
+                              }`}
+                            >
+                              {syncMessage.text}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )
                   })}
