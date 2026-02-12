@@ -30,14 +30,45 @@ function cleanupDid() {
 }
 
 /**
+ * Known app routes where the D-ID chatbot SHOULD load.
+ * Any path not matching these (or /) is treated as a slug/preview page where D-ID is disabled,
+ * since preview iframes conflict with the chatbot overlay.
+ */
+const APP_ROUTES = [
+  '/admin',
+  '/kontakt',
+  '/contact',
+  '/portfolio',
+  '/sajtgranskning',
+  '/utvardera',
+  '/sajtmaskin',
+  '/engine',
+  '/generated',
+]
+
+function isSlugPreviewPage(pathname: string): boolean {
+  // Homepage is not a preview page
+  if (pathname === '/') return false
+  // Known app routes are not preview pages
+  if (APP_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'))) {
+    return false
+  }
+  // Next.js internals and API routes are not preview pages
+  if (pathname.startsWith('/_next') || pathname.startsWith('/api')) return false
+  // Everything else is a slug/preview/embed page
+  return true
+}
+
+/**
  * D-ID chatbot loader (route-aware).
  *
- * Why: preview pages (/demo-*) often show a black iframe due to JS/CORS proxy limits.
- * We don't want the chatbot competing for bandwidth/CPU there.
+ * Why: preview/embed pages (e.g. /demo-*, /manssakrad, /skv) show iframes that
+ * conflict with the D-ID chatbot overlay (z-index fights, bandwidth, CPU).
+ * The chatbot is disabled on all slug/preview/embed pages.
  */
 export default function DidChatbotLoader() {
   const pathname = usePathname() || ''
-  const isPreviewPage = pathname.startsWith('/demo-')
+  const isPreviewPage = isSlugPreviewPage(pathname)
 
   const isProd = process.env.NODE_ENV === 'production'
   const didChatbotFlag = parseEnvBool(process.env.NEXT_PUBLIC_ENABLE_DID_CHATBOT)

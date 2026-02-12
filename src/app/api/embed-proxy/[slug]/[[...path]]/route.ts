@@ -28,6 +28,19 @@ function isBinaryContent(contentType: string, path: string): boolean {
   )
 }
 
+/** File extensions that should never be served as text/html */
+const NON_HTML_EXTENSIONS =
+  /\.(js|mjs|css|json|map|xml|txt|svg|woff2?|ttf|otf|eot|png|jpe?g|gif|webp|avif|ico|mp4|webm|pdf)$/i
+
+/**
+ * Detect MIME type mismatch: upstream returned text/html for a static asset.
+ * This happens when a SPA serves its index.html as fallback for unknown paths,
+ * typically because static files live at the domain root while target_url includes a sub-path.
+ */
+function hasMimeTypeMismatch(contentType: string, path: string): boolean {
+  return contentType.includes('text/html') && NON_HTML_EXTENSIONS.test(path)
+}
+
 /** Rewrite relative URLs in HTML so they route through the proxy */
 function rewriteHtmlUrls(html: string, proxyBase: string): string {
   let result = html
@@ -98,11 +111,12 @@ async function resolveRequest(
   }
 
   const baseTarget = embed.target_url.replace(/\/$/, '')
+  const targetOrigin = new URL(baseTarget).origin
   const pathStr = path?.length ? `/${path.map((p) => decodeURIComponent(p)).join('/')}` : '/'
   const query = request.nextUrl.searchParams.toString()
   const targetUrl = query ? `${baseTarget}${pathStr}?${query}` : `${baseTarget}${pathStr}`
 
-  return { slug, pathStr, baseTarget, targetUrl }
+  return { slug, pathStr, baseTarget, targetOrigin, targetUrl }
 }
 
 // ============================================================================
@@ -116,15 +130,17 @@ export async function GET(
   try {
     const resolved = await resolveRequest(request, params)
     if ('error' in resolved) return resolved.error
-    const { slug, pathStr, baseTarget, targetUrl } = resolved
+    const { slug, pathStr, baseTarget, targetOrigin, targetUrl } = resolved
+
+    const fetchHeaders = {
+      'User-Agent': request.headers.get('user-agent') || 'Mozilla/5.0',
+      Accept: request.headers.get('accept') || '*/*',
+      'Accept-Language': request.headers.get('accept-language') || 'sv-SE,sv;q=0.9',
+      Referer: baseTarget + '/',
+    }
 
     const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': request.headers.get('user-agent') || 'Mozilla/5.0',
-        Accept: request.headers.get('accept') || '*/*',
-        'Accept-Language': request.headers.get('accept-language') || 'sv-SE,sv;q=0.9',
-        Referer: baseTarget + '/',
-      },
+      headers: fetchHeaders,
       signal: AbortSignal.timeout(30000),
     })
 
@@ -132,6 +148,51 @@ export async function GET(
       return new NextResponse(`Upstream error: ${response.status}`, {
         status: response.status,
       })
+    }
+
+    // Detect MIME mismatch: SPA returned HTML for a static asset (JS/CSS/etc).
+    // This happens when static files are served from the domain root but target_url
+    // includes a sub-path (e.g. target_url="/app" but files live at origin "/static/...").
+    // Retry from the domain root (origin + path) without the target_url sub-path.
+    const upstreamCt = response.headers.get('content-type') || ''
+    const rootUrl = targetOrigin !== baseTarget ? new URL(pathStr, targetOrigin).toString() : null
+
+    if (rootUrl && hasMimeTypeMismatch(upstreamCt, pathStr)) {
+      const query = request.nextUrl.searchParams.toString()
+      const retryUrl = query ? `${rootUrl}?${query}` : rootUrl
+      console.warn('[embed-proxy] MIME mismatch detected, retrying from origin root', {
+        slug,
+        path: pathStr,
+        targetUrl,
+        upstreamContentType: upstreamCt,
+        retryUrl,
+      })
+      try {
+        const retryResponse = await fetch(retryUrl, {
+          headers: fetchHeaders,
+          signal: AbortSignal.timeout(15000),
+        })
+        if (retryResponse.ok) {
+          const retryCt = retryResponse.headers.get('content-type') || ''
+          // Only use retry if it fixed the MIME mismatch
+          if (!hasMimeTypeMismatch(retryCt, pathStr)) {
+            console.info('[embed-proxy] MIME mismatch fixed by origin-root retry', {
+              slug,
+              path: pathStr,
+              retryUrl,
+              retryContentType: retryCt,
+            })
+            return buildProxyResponse(retryResponse, slug, pathStr)
+          }
+        }
+      } catch {
+        console.warn('[embed-proxy] Origin-root retry failed', {
+          slug,
+          path: pathStr,
+          retryUrl,
+        })
+        // Fall through to original response
+      }
     }
 
     return buildProxyResponse(response, slug, pathStr)
