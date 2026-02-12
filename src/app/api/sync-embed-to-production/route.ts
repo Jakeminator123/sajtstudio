@@ -7,10 +7,19 @@ export const dynamic = 'force-dynamic'
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
 
+/**
+ * API key for admin auth. Accepts either variable so you can set just
+ * NEXT_PUBLIC_DB_API_KEY (client + server) or both to the same value.
+ * Client sends NEXT_PUBLIC_DB_API_KEY; server validates against either.
+ */
+function getAdminApiKey(): string {
+  return process.env.DB_API_KEY?.trim() || process.env.NEXT_PUBLIC_DB_API_KEY?.trim() || ''
+}
+
 /** Same auth as protected-embeds: require API key in production. */
 function isAuthorized(request: NextRequest): boolean {
   if (process.env.NODE_ENV === 'development') return true
-  const apiKey = process.env.DB_API_KEY?.trim()
+  const apiKey = getAdminApiKey()
   if (!apiKey) return false
   const auth = request.headers.get('Authorization')
   return auth === `Bearer ${apiKey}`
@@ -24,8 +33,8 @@ function isAuthorized(request: NextRequest): boolean {
  *
  * Requires:
  * - NEXT_PUBLIC_PRODUCTION_URL or similar (production base URL)
- * - DB_API_KEY (sent to production for auth)
- * - Authorization: Bearer <DB_API_KEY> (or in dev, no auth required)
+ * - DB_API_KEY or NEXT_PUBLIC_DB_API_KEY (for auth + outgoing call to production)
+ * - Authorization: Bearer <key> (client sends NEXT_PUBLIC_DB_API_KEY)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -38,12 +47,12 @@ export async function POST(request: NextRequest) {
       process.env.PRODUCTION_URL?.trim() ||
       'https://www.sajtstudio.se'
 
-    const apiKey = process.env.DB_API_KEY?.trim()
+    const apiKey = getAdminApiKey()
     if (!apiKey) {
       return NextResponse.json(
         {
-          error: 'DB_API_KEY not configured',
-          hint: 'Set DB_API_KEY in .env.local to sync to production',
+          error: 'API key not configured',
+          hint: 'Set DB_API_KEY or NEXT_PUBLIC_DB_API_KEY for admin auth and production sync',
         },
         { status: 503 }
       )
@@ -63,10 +72,7 @@ export async function POST(request: NextRequest) {
 
     const embed = getProtectedEmbedBySlug(slug)
     if (!embed) {
-      return NextResponse.json(
-        { error: 'Embed not found', slug },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Embed not found', slug }, { status: 404 })
     }
 
     const targetUrl = `${productionUrl.replace(/\/$/, '')}/api/protected-embeds`
@@ -105,9 +111,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Sync to production error:', error)
-    return NextResponse.json(
-      { error: 'Sync failed', detail: String(error) },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Sync failed', detail: String(error) }, { status: 500 })
   }
 }
