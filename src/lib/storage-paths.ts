@@ -8,12 +8,25 @@ import path from 'path'
  * placed in /tmp and are ephemeral (recreated each cold start). This is fine for
  * caching/CMS defaults but NOT for persistent user data.
  *
- * On Render: mount a persistent disk and set DATA_DIR=/var/data.
+ * On Render: /tmp is writable but ephemeral. For persistent data, mount a disk
+ * at e.g. /var/data and set DATA_DIR=/var/data. If DATA_DIR is set but not
+ * accessible (no disk mounted), we fall back to /tmp so the app can run.
  *
  * Locally: defaults to <repo>/data to preserve existing structure.
  */
 
 const isVercel = !!process.env.VERCEL
+const isRender = process.env.RENDER === 'true'
+
+function getTmpDataDir(): string {
+  const tmpDir = path.join('/tmp', 'sajtstudio-data')
+  try {
+    fs.mkdirSync(tmpDir, { recursive: true })
+  } catch {
+    // /tmp should be writable on Vercel and Render
+  }
+  return tmpDir
+}
 
 export function getDataDir(): string {
   const envDir = process.env.DATA_DIR?.trim()
@@ -33,20 +46,24 @@ export function getDataDir(): string {
       fs.mkdirSync(envDir, { recursive: true })
       return envDir
     } catch (error) {
+      // On Render/Vercel without working DATA_DIR: use /tmp (writable, ephemeral)
+      if (isRender || isVercel) {
+        const tmpDir = getTmpDataDir()
+        console.warn(
+          `⚠️  Could not access DATA_DIR=${envDir}, falling back to ${tmpDir} (ephemeral). ` +
+            `On Render: add a persistent disk at ${envDir} for durable storage.`,
+          error
+        )
+        return tmpDir
+      }
       const defaultDir = path.join(process.cwd(), 'data')
       console.warn(`⚠️  Could not access DATA_DIR=${envDir}, falling back to ${defaultDir}`, error)
     }
   }
 
-  // On Vercel, the regular filesystem is read-only — use /tmp for ephemeral SQLite
-  if (isVercel) {
-    const tmpDir = path.join('/tmp', 'sajtstudio-data')
-    try {
-      fs.mkdirSync(tmpDir, { recursive: true })
-    } catch {
-      // /tmp should always be writable on Vercel
-    }
-    return tmpDir
+  // On Vercel and Render, the project dir is read-only — use /tmp (ephemeral)
+  if (isVercel || isRender) {
+    return getTmpDataDir()
   }
 
   return path.join(process.cwd(), 'data')

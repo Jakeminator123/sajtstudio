@@ -12,11 +12,11 @@ export const dynamic = 'force-dynamic'
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
 
-/** In production, require API key for sync. In development, allow without for local admin. */
+/** In production, require API key. In development, allow without key for local admin. */
 function isAuthorized(request: NextRequest): boolean {
   if (process.env.NODE_ENV === 'development') return true
   const apiKey = process.env.DB_API_KEY?.trim()
-  if (!apiKey) return true
+  if (!apiKey) return false
   const auth = request.headers.get('Authorization')
   return auth === `Bearer ${apiKey}`
 }

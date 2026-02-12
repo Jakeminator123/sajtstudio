@@ -233,7 +233,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
     // Ignore
   }
 
-  const pathString = pathSegments?.length ? `/${pathSegments.join('/')}` : ''
+  const pathString = pathSegments?.length ? `/${pathSegments.map(encodeURIComponent).join('/')}` : ''
   let sourceUrl: string
   if (preview.target_url) {
     sourceUrl = `${preview.target_url}${pathString}`

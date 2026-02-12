@@ -7,6 +7,15 @@ export const dynamic = 'force-dynamic'
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
 
+/** Same auth as protected-embeds: require API key in production. */
+function isAuthorized(request: NextRequest): boolean {
+  if (process.env.NODE_ENV === 'development') return true
+  const apiKey = process.env.DB_API_KEY?.trim()
+  if (!apiKey) return false
+  const auth = request.headers.get('Authorization')
+  return auth === `Bearer ${apiKey}`
+}
+
 /**
  * POST /api/sync-embed-to-production
  *
@@ -16,9 +25,14 @@ const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
  * Requires:
  * - NEXT_PUBLIC_PRODUCTION_URL or similar (production base URL)
  * - DB_API_KEY (sent to production for auth)
+ * - Authorization: Bearer <DB_API_KEY> (or in dev, no auth required)
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const productionUrl =
       process.env.NEXT_PUBLIC_PRODUCTION_URL?.trim() ||
       process.env.PRODUCTION_URL?.trim() ||

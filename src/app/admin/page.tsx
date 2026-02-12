@@ -320,9 +320,13 @@ export default function AdminPage() {
     setSyncingSlug(slug)
     setSyncMessage(null)
     try {
+      const headers: HeadersInit = { 'Content-Type': 'application/json' }
+      const apiKey = process.env.NEXT_PUBLIC_DB_API_KEY?.trim()
+      if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
+
       const response = await fetch('/api/sync-embed-to-production', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ slug }),
       })
       const data = await response.json().catch(() => {})
