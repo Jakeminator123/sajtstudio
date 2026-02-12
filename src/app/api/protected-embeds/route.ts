@@ -12,10 +12,19 @@ export const dynamic = 'force-dynamic'
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
 
+/**
+ * API key for admin auth. Accepts either variable so you can set just
+ * NEXT_PUBLIC_DB_API_KEY (client + server) or both to the same value.
+ * Client sends NEXT_PUBLIC_DB_API_KEY; server validates against either.
+ */
+function getAdminApiKey(): string {
+  return process.env.DB_API_KEY?.trim() || process.env.NEXT_PUBLIC_DB_API_KEY?.trim() || ''
+}
+
 /** In production, require API key. In development, allow without key for local admin. */
 function isAuthorized(request: NextRequest): boolean {
   if (process.env.NODE_ENV === 'development') return true
-  const apiKey = process.env.DB_API_KEY?.trim()
+  const apiKey = getAdminApiKey()
   if (!apiKey) return false
   const auth = request.headers.get('Authorization')
   return auth === `Bearer ${apiKey}`
