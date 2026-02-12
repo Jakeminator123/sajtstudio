@@ -101,10 +101,11 @@ export default function PreviewWrapper({
     if (mode !== 'iframe' || typeof window === 'undefined') return
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from the same origin as sourceUrl
+      // Accept from target origin or our own (when using proxy, iframe is same-origin)
       try {
         const sourceOrigin = new URL(sourceUrl).origin
-        if (event.origin !== sourceOrigin) return
+        const ourOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+        if (event.origin !== sourceOrigin && event.origin !== ourOrigin) return
 
         // Handle navigation requests
         if (event.data?.type === 'navigate' && event.data?.url) {
@@ -172,27 +173,27 @@ export default function PreviewWrapper({
         initial={shouldAnimateChrome ? { y: -60, opacity: 0 } : { opacity: 1 }}
         animate={shouldAnimateChrome ? { y: 0, opacity: 1 } : { opacity: 1 }}
         transition={shouldAnimateChrome ? { duration: 0.4, ease: 'easeOut' } : { duration: 0 }}
-        className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-b border-gray-800/50 shadow-lg z-20"
+        className="flex items-center justify-between px-3 sm:px-4 py-2 bg-gray-950/95 border-b border-gray-800/60 shadow-md z-20"
       >
         {/* Logo and branding */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-8 h-8 overflow-hidden rounded-lg bg-gradient-to-br from-accent/20 to-tertiary/20 p-0.5">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="relative w-7 h-7 overflow-hidden rounded-md bg-gradient-to-br from-accent/20 to-tertiary/20 p-0.5">
             <Image
               src="/logo.svg"
               alt="Sajtstudio"
-              width={28}
-              height={28}
+              width={24}
+              height={24}
               className="object-contain"
             />
           </div>
-          <span className="text-lg font-bold text-white group-hover:text-accent transition-colors">
+          <span className="text-base font-semibold text-white group-hover:text-accent transition-colors">
             Sajtstudio
           </span>
         </Link>
 
         {/* Preview info badge (desktop only) */}
         {preview.company_name && (
-          <div className="hidden md:flex items-center gap-2 text-sm text-gray-400">
+          <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400">
             <span className="px-2 py-1 rounded bg-gray-800/50 border border-gray-700/50">
               Preview: {preview.company_name}
             </span>
@@ -206,7 +207,7 @@ export default function PreviewWrapper({
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-all"
+            className="flex items-center gap-2 px-2.5 py-1.5 text-xs sm:text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md border border-gray-700/50 hover:border-gray-600 transition-all"
             title="Öppna originalsidan i nytt fönster"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,28 +226,12 @@ export default function PreviewWrapper({
             <button
               type="button"
               onClick={handleToggleMode}
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-all"
+              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-md border border-gray-700/50 hover:border-gray-600 transition-all"
               title={mode === 'image' ? 'Visa interaktiv preview' : 'Visa skärmbild'}
             >
               {mode === 'image' ? 'Interaktiv' : 'Skärmbild'}
             </button>
           )}
-
-          {/* Back button */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            <span className="hidden sm:inline">Tillbaka</span>
-          </Link>
         </div>
       </motion.header>
 
@@ -283,7 +268,7 @@ export default function PreviewWrapper({
         {/* Iframe - direct embedding (no proxy) - only render on client to avoid hydration mismatch */}
         {isMounted && mode === 'iframe' && (
           <iframe
-            src={sourceUrl}
+            src={proxyUrl}
             className="w-full h-full border-0"
             title={`Preview: ${displayName}`}
             onLoad={handleIframeLoad}
@@ -305,18 +290,18 @@ export default function PreviewWrapper({
         transition={
           shouldAnimateChrome ? { duration: 0.4, ease: 'easeOut', delay: 0.2 } : { duration: 0 }
         }
-        className="flex flex-col items-center gap-3 px-4 py-4 bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 border-t border-gray-800/50 z-20"
+        className="flex flex-col items-center gap-2 px-3 py-2.5 bg-gray-950/95 border-t border-gray-800/60 z-20"
       >
-        <p className="text-gray-400 text-sm text-center">
-          <span className="hidden sm:inline">Gillar du vad du ser? </span>
+        <p className="text-gray-400 text-xs sm:text-sm text-center">
+          <span className="hidden md:inline">Gillar du vad du ser? </span>
           <span className="text-white font-medium">Vi kan bygga något liknande för dig.</span>
         </p>
 
-        <div className="flex items-center justify-center gap-3 flex-wrap">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           {/* Back to homepage */}
           <Link
             href="/"
-            className="px-5 py-2.5 text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600 hover:border-gray-500 rounded-lg transition-all flex items-center gap-2"
+            className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600 hover:border-gray-500 rounded-md transition-all flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -332,7 +317,7 @@ export default function PreviewWrapper({
           {/* Download site button - links to contact page */}
           <Link
             href="/kontakt"
-            className="px-5 py-2.5 text-sm font-semibold text-white bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-gray-500 rounded-lg transition-all flex items-center gap-2"
+            className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-gray-500 rounded-md transition-all flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -349,7 +334,7 @@ export default function PreviewWrapper({
           <button
             type="button"
             onClick={openModal}
-            className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-accent to-tertiary hover:from-accent/90 hover:to-tertiary/90 rounded-lg shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
+            className="px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-accent to-tertiary hover:from-accent/90 hover:to-tertiary/90 rounded-md shadow-md shadow-accent/20 hover:shadow-accent/30 transition-all"
           >
             Bygg din egen sajt
           </button>

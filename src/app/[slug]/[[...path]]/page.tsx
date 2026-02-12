@@ -179,6 +179,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
     const pathString = pathSegments?.length ? `/${pathSegments.map(encodeURIComponent).join('/')}` : ''
     const query = toQueryString(resolvedSearchParams)
     const sourceUrl = `${embed.target_url}${pathString}${query}`
+    const proxyUrl = `/api/embed-proxy/${slug}${pathString}${query}`
 
     try {
       updateProtectedEmbedLastAccessed(slug)
@@ -204,7 +205,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
 
     return (
       <PreviewWrapper
-        proxyUrl={sourceUrl}
+        proxyUrl={proxyUrl}
         sourceUrl={sourceUrl}
         previewImageSrc={null}
         preview={{

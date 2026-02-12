@@ -45,8 +45,8 @@ export async function POST(
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: SESSION_MAX_AGE_SECONDS,
-      // Only send cookie to the protected slug.
-      path: `/${slug}`,
+      // path: "/" so cookie is sent to /api/embed-proxy/[slug] as well as /[slug]
+      path: '/',
     })
 
     return response
