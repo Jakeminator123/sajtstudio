@@ -48,7 +48,7 @@ interface Preview {
 interface PreviewWrapperProps {
   /** Direct URL to external site (vusercontent.net) */
   sourceUrl: string
-  /** Legacy: kept for backwards compatibility, now equals sourceUrl */
+  /** URL to load in iframe. For protected embeds: /api/embed-proxy/[slug]. For previews: same as sourceUrl. */
   proxyUrl: string
   /** Optional: path to a screenshot fallback image */
   previewImageSrc?: string | null
@@ -71,6 +71,7 @@ const SLOW_LOADING_THRESHOLD_MS = 5000
 
 export default function PreviewWrapper({
   sourceUrl,
+  proxyUrl,
   previewImageSrc,
   preview,
 }: PreviewWrapperProps) {
